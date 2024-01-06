@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block head %}
+<style>
+    .rows-sky {
+        margin: 0;
+        padding: 0;
+        /* height: 100vh; */
+        background-color: white;
+        background-image: linear-gradient(skyblue, white, lightblue, skyblue, white);
+        background-size: cover;
+        /* Cover the entire background */
+        /* overflow: hidden; */
+    }
+
+    .frame-circle {
+        width: 300px;
+        height: 300px;
+        clip-path: circle(50%);
+    }
+
+    .rainbow-text {
+        background-image: linear-gradient(to left, violet, indigo, red, green, blue, orange, yellow);
+        -webkit-background-clip: text;
+        color: transparent;
+        /* font-size: 40px; */
+        font-weight: bold;
+        font-family: fantasy;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-grid-row">
+    <div class="rows-sky">
+        <div class="container-flex">
+            <div class="">
+                <img class="frame-circle" src="{% static 'UzoTammy.jpg' %}" alt="">
+            </div>
+        </div>
+    </div>
+
+    <div class="rows-white mt-3">
+        <div class="row">
+            <div class="col text-center">
+                <h4 class="my-name">Uzo Tammy Nwokoro</h4>
+                <h5 style="font-family: fantasy;">Ardent, committed and result oriented. Never relenting until problem
+                    is resolved.</h5>
+                <h6 class="rainbow-text">Unfortunately, I can be inflexible, tend to be a perfectionist
+                    and experience burnout. But I work on them daily.
+                </h6>
+            </div>
+        </div>
+        <div class="row mt-3 text-center left-border-line" style="background-color: rgba(200, 200, 200, 0.2);">
+            <div class="col">
+                <p class="first-letter">Resume</p>
+                <ul>
+                    <li><a class="hover" href="{% url 'resume' %}">View</a></li>
+                    <li><a class="hover" href="">Download</a></li>
+                </ul>
+            </div>
+            <div class="col">
+                <p class="first-letter">Portfolio</p>
+                <ul>
+                    <li><a class="hover" href="{% url 'portfolio-scush' %}">Scush</a></li>
+                    <li><a class="hover" href="{% url 'portfolio-finuel' %}">Finuel</a></li>
+                </ul>
+            </div>
+            <div class="col">
+                <p class="first-letter"><a class="hover" href="{% url 'about-me' %}">About Me</a></p>
+
+            </div>
+        </div>
+    </div>
+    <div class="rows-black"></div>
+</div>
+{% endblock %}

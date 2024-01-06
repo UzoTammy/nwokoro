@@ -1,0 +1,82 @@
+{% extends 'core/base.html' %}
+
+{% block head %}
+<style>
+    .box {
+        display: inline-block;
+        height: 10px;
+        width: 20px;
+        background-color: red;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<nav class="nav nav-dark m-2" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Resume</li>
+    </ol>
+</nav>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-2 bg-dark"></div>
+        <div class="col-8">
+            <h2>Uzo Tammy Nwokoro</h2>
+            <hr class="bg-danger">
+            <h5>
+                Chemical Engineer, Project Manager, Backend Developer, Business Manager and Entrepreneur
+            </h5>
+            <hr>
+            <p>
+                I have traversed many career paths and worked with over 12 years of experience in business conceptualization
+                and operations, though haven studied hard to graduate as an engineer, I only had a one year experience. Currently
+                I have been able to concentrate on IT career which is my principal passion. I am deeply committed to providing solutions
+                to problems, working in an organised manner to deliver solution when fully supported. 
+
+            </p>
+            <hr>
+                <h6> <div class="box"></div>  Chemical Engineering from Federal University of Technology, Nigeria - 1998 to 2002</h6>
+            
+            <hr>
+            <p>
+                During this period, I developed problem solving skill, leadership capability and team collaboration.
+                I led the department in my final year and also headed the project team of fifteen to deliver a pilot
+                plant design project. Engineering in itself is all about problem solving, data analysis, iterative 
+                and recursive approach to tackle problems.
+            </p>
+            <hr>
+            <h6> <div class="box"></div> Project Management experience with Shell Nigera Gas - 2003</h6>
+            <hr>
+            <p>
+                One year experience with Shell exposed me to organisation, deadlines, task completion, team work arranged
+                reporting. I was able to help set up meeting, supervise project at site, write safety report,  
+            </p>
+            <hr>
+            <h6> <div class="box"></div> Business Operations experience from a distribution company - 2004 to 2008</h6>
+            <hr>
+            <p>
+                I was hired to first computerize the company, upon completion, I had to switch to operating
+                and managing the business. I was able to learn negotiation, sales, customer relations and extend my 
+                skill in working with computers
+            </p>
+            <hr>
+            <h6> <div class="box"></div> Business Setup, development and operation - 2009 to 2022</h6>
+            <hr>
+            <p>
+                I was able to conceptualize and establish a business, operate and develop it. 
+            </p>
+            <hr>
+            <h6> <div class="box"></div> Completed a career course on Project Management - 2023</h6>
+            <hr>
+            <h6>Focused on sharpening my skill on backend developement</h6>
+            <hr>
+            <p>
+                balajjsjj shhghshd 
+            </p>
+        </div>
+        <div class="col-2 bg-dark"></div>
+    </div>
+</div>
+
+{% endblock %}

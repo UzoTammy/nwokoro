@@ -1,0 +1,175 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .fantasy-font {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+    }
+
+    .pretty-font {
+        background-image: linear-gradient(to left, rgb(180, 130, 238), indigo, red, green, blue, orange, yellow);
+        -webkit-background-clip: text;
+        color: transparent;
+        /* font-size: 40px; */
+        font-weight: bold;
+        /* font-family: fantasy; */
+        font-size: 100px;
+        @media  screen and (max-width: 768px) {
+            font-size: 80px;
+        }
+    }
+    .greybox {
+        background-color: gray;
+        
+    }
+    .plainbox {
+        background-color: whitesmoke;
+    }
+</style>
+
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-sm-8">
+            <h3 class="text-center pretty-font">Scush Web App</h3>
+            <p class="text-center">
+                <a href="https://www.scush.com.ng" target="_blank"><i class="fa"></i>Visit the website</a></p>
+            <p class="first-letter text-muted">
+                Scush, a customized SaaS app, that streamlines administrative functions within a company, focusing on three core areas: Stock, 
+                Customers, and Human Resources—aptly reflected in its name, SCusH. Launched in June 2022, this dynamic website has improved 
+                operational efficiency. From processing payroll and tracking key performance indicators to documenting policies and automating,
+                Scush has significantly reduced workloads and minimized chaos and conflict in the workplace. Moreover, its 
+                capabilities extend to financial analytics, offering insightful analysis of Profit and Loss statements and balance sheets 
+                from accounting software. This feature is pivotal in informing critical business decisions. 
+                Scush has not only automated but also transformed administrative processes, proving to be an invaluable asset for Ozone F & L
+                (The owner of the site).
+            </p>
+            <hr>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-sm-4 greybox">
+            <p class="text-center text-white">The Index page and Dashboard of Scush</p>
+            <img class="text-center mb-1" width="100%" height="45%" src="{% static 'scush/indexpage.png' %}" alt="">
+            <img class="text-center" width="100%" height="45%" src="{% static 'scush/dashboard.png' %}" alt="">
+        </div>
+        <div class="col-sm-8 plainbox">
+            <section>
+            <h4 class="first-letter">Technologies</h4>
+            <ol>
+                <li><b>Programming Language:</b> Python programming language and Javascript</li>
+                <li><b>Database:</b> Sqlite for developement and Postgres for production on heroku</li>
+                <li><b>Backend:</b> Django framework technology</li>
+                <li><b>Frontend:</b> Bootstrap CDN, HTML, and CSS</li>
+                <li><b>Storing Media Files:</b> Hosted on amazon S3 storage</li>
+                <li><b>Serving Static Files:</b> Whitenoise</li>
+                <li><b>Email Server:</b> Google gmail</li>
+                <li><b>Message Broker:</b> RabbitMq a heroku add-on</li>
+                <li><b>Domain Source:</b> Namecheap</li>
+                <li><b>Deployment:</b> Deployed on Heroku platform</li>
+                <li><b>Collaboration:</b> Git and GitHub</li>
+                <li><b>Icons:</b> Fontawesome</li>
+            </ol>
+            </section>
+            <hr>
+            <section>
+            <h4 class="first-letter">Main Features</h4>
+                <ol>
+                    <li><b>Sending Mails:</b> Able to send mails automatically upon updating or creating records</li>
+                    <li><b>Creating PDF:</b> Produce a PDF document as a hard copy</li>
+                    <li><b>Able to carryout scheduled tasks:</b> Send notification, mails and execute tasks</li>
+                    <li><b>Present plots and graphs:</b> A pictorial presentation to aid understanding and analysis of data</li>
+                </ol>
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mt-3">
+
+    <div class="row">
+        <div class="card mb-3" style="max-width: 100vw;">
+            <div class="row no-gutters">
+              <div class="col-md-4">
+                <img width="100%" src="{% static 'scush/loginpage.png' %}" alt="...">
+              </div>
+              <div class="col-md-8">
+                <div class="card-body">
+                  <h5 class="card-title">The Login Page</h5>
+                  <p class="card-text">The site requires user authentication before it can used. The django authentication Backend
+                    is adopted for this project which has kept it safe and secure since June 2022. The project is assigned an administrator
+                    who is a superuser and have all previledges including registration of users. No user can self-register and users can
+                    be activated and deactivated at the descretion of the site's administrator.
+                    Also, based on the user's permission, not all pages can be accessed by a logged in user. 
+                  </p>
+                  <p class="card-text"><small class="text-muted"></small></p>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+     
+    <div class="row">
+        <div class="card mb-3" style="max-width: 100vw;">
+            <div class="row no-gutters">
+              <div class="col-md-4">
+                <img width="100%" src="{% static 'scush/homepage.png' %}" alt="...">
+              </div>
+              <div class="col-md-8">
+                <div class="card-body">
+                  <h5 class="card-title">The Home Page</h5>
+                  <p class="card-text">This is the starting page for an authenticated user. The menu will be available to navigate
+                    the user to the desired aspect of the site. For unauthorized access, the site will not load the page.  
+                    The menu is arranged according to the sections of the site
+                  </p>
+                  <ul>
+                    <li>>> Staff</li>
+                    <li>>> Stock</li>
+                    <li>>> Application</li>
+                    <li>>> and others</li>
+                  </ul>
+                  <p class="card-text"><small class="text-muted"></small></p>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+    
+    
+</div>
+
+<div class="container">
+    <h4>Sights of the site and its by-products</h4>
+    <div class="row">
+        <div class="col-sm-4 mb-2">
+            <img width="100%" height="80%" src="{% static 'scush/emailpandl.png' %}" alt="">
+            <p>email as sent by scush</p>
+        </div>
+        <div class="col-sm-4 mb-2">
+            <img width="100%" height="80%" src="{% static 'scush/monthlysales.png' %}" alt="">
+            <p>Monthly sales Revenue plotted with matplot</p>
+        </div>
+        
+        <div class="col-sm-4 mb-2">
+            <img width="100%" src="{% static 'scush/emailbalancesheet.png' %}" alt="">
+        </div>
+        
+        <div class="col-sm-4 mb-2">
+            <img width="100%" src="{% static 'scush/pdfpayroll.png' %}" alt="">
+        </div>
+        <div class="col-sm-4 mb-2">
+            <img width="100%" src="{% static 'scush/stock.png' %}" alt="">
+        </div>
+        <div class="col-sm-4 mb-2">
+            <img width="100%" src="{% static 'scush/payrollpage.png' %}" alt="">
+        </div>
+    </div>
+</div>
+
+<div class="row m-3">
+    <div class="col-8">
+        <a class="btn btn-outline-dark float-right" href="{% url 'index' %}"> << Main Page</a>
+    </div>
+</div>
+{% endblock %}
