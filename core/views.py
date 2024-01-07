@@ -15,7 +15,7 @@ class ResumeView(TemplateView):
 
 
 class PortfolioScushView(TemplateView):
-    template_name = 'core/portfolio/scush.html'
+    template_name = 'core/portfolio/scushproject.html'
 
 class PortfolioFinuelView(TemplateView):
     template_name = 'core/portfolio/finuel.html'
