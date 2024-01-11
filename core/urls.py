@@ -7,6 +7,6 @@ urlpatterns = [
     path('resume-view/', ResumeView.as_view(), name='resume'),
     path('portfolio-scush/', PortfolioScushView.as_view(), name='portfolio-scush'),
     path('portfolio-finuel/', PortfolioFinuelView.as_view(), name='portfolio-finuel'),
-    path('texting-it', TextingView.as_view(), name='texting-it'),
+    path('texting-it/', TextingView.as_view(), name='texting-it'),
     
 ]

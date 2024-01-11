@@ -160,4 +160,4 @@ cython_debug/
 #.idea/
 
 nwokoro.py
-texting.html
+core/templates/core/texting.html

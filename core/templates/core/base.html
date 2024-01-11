@@ -11,7 +11,7 @@
     <style>
         .container-grid-row {
             display: grid;
-            grid-template-rows: 2fr 1.5fr .5fr;
+            grid-template-rows: 2fr 1fr;
             gap: 1px;
             height: 100vh;
         }
@@ -27,7 +27,7 @@
         .rows-black {
             background-color: rgba(0, 0, 0, 1);
             padding: 10px;
-            margin: 5px;
+            margin: 0px;
             align-self: stretch;
         }
         .container-flex {
@@ -55,7 +55,10 @@
             font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
             font-style: italic;
             color: red;
+            
         }
+
+        
         .hover:hover {
             color: limegreen;
             content: 'dropdown';
@@ -67,10 +70,12 @@
         }
         a {
             text-decoration: none;
+            color: grey;
         }
+
         .left-border-line {
             border-left: 2px solid red;
-
+            padding-left: 10px;
         }
 
     </style>
