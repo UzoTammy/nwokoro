@@ -34,10 +34,7 @@
         border-radius: 50%;
         background-color: linear-gradient(to left, red, blue, green);
         margin-top: 10px;
-    }
-
-    .intro-font {
-        font-family: 'Courier New', Courier, monospace;
+        
     }
 </style>
 {% endblock %}
@@ -46,18 +43,14 @@
 <div class="container-grid-row">
     <div class="rows-white mt-3">
         <div class="row">
-            <div class="col-sm-6 text-left">
+            <div class="col-sm-6 text-center">
                 <h4 class="" style="font-size: 50px;">Uzo Tammy Nwokoro</h4>
-                <h5 class="text-muted first-letter intro-font">
-                    I am a Web Developer currently training for Cybersecurity.
-                </h5>
-                <h5 class="text-muted first-letter intro-font">
-                    I have more than a decade experience
-                    in Business Development and Operations.
-                </h5> 
-                <h5 class="text-muted first-letter intro-font">
-                    I studied Chemical Engineering as first degree and 
-                    recently completed a Google career certificate course in Project Management.
+                <h5 class="text-muted first-letter" style="font-family: 'Courier New', Courier, monospace;">
+                    I am now a Web Developer residing in Canada and have developed two live web apps. 
+                    All along, I have been involved in project execution, business 
+                    development and operations. I studied Chemical Engineering as first degree and 
+                    recently took Google career certificate course in Project Management. I am a father
+                    of four.          
                 </h5>
                 <h6 class="rainbow-text">
                     
@@ -71,14 +64,33 @@
             <div class="col-sm-2">
                 <div class="left-border-line">
                     <p class="first-letter"><a href="{% url 'about-me' %}">About me</a></p>
-                    <p class="first-letter"><a href="{% url 'number-to-word' %}">Portfolio</a></p>
+                    <p class="first-letter"><a href="">Portfolio</a></p>
                     <p class="first-letter"><a href="">Download CV</a></p>
                 </div>
                 
             </div>
             
         </div>
-        
+        <!-- <div class="row mt-3 text-center left-border-line" style="background-color: rgba(200, 200, 200, 0.2);">
+            <div class="col">
+                <p class="first-letter">Resume</p>
+                <ul>
+                    <li><a class="hover" href="{% url 'resume' %}">View</a></li>
+                    <li><a class="hover" href="">Download</a></li>
+                </ul>
+            </div>
+            <div class="col">
+                <p class="first-letter">Portfolio</p>
+                <ul>
+                    <li><a class="hover" href="{% url 'portfolio-scush' %}">Scush</a></li>
+                    <li><a class="hover" href="{% url 'portfolio-finuel' %}">Finuel</a></li>
+                </ul>
+            </div>
+            <div class="col">
+                <p class="first-letter"><a class="hover" href="{% url 'about-me' %}">About Me</a></p>
+
+            </div>
+        </div> -->
     </div>
     <div class="rows-black"></div>
 </div>
