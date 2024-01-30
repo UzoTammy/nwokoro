@@ -27,7 +27,7 @@ class TextingView(TemplateView):
     template_name = 'core/texting.html'
 
 class NumberToWordView(TemplateView):
-    template_name = 'core/portfolio/miniprojects/numtoword.html'
+    template_name = 'core/portfolio/tinyprojects/numtoword.html'
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
