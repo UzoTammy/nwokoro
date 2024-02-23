@@ -6,11 +6,10 @@ dataset = {'1': 'One', '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 
         }
 
 def figure_word(figure):
-
     figure = str(int(figure))
 
     if int(figure) >= 1e15:
-        raise OverflowError("limit exceeded")
+        raise OverflowError("Limit exceeded")
         
     if int(figure) <= 20:
         return dataset[figure]
