@@ -45,13 +45,17 @@
 <div class="container mt-3">
     <div class="row">
         <div class="col-sm-6">
-            <h1 class="text-center rainbow-text">Covert Number to Word</h1>
+            <h1 class="text-center rainbow-text">Convert Number to Word</h1>
         
-            <div class="text-muted first-letter text-center">
-                <p style="font-size: large;">
-                    Limit is 999 Trillion
-                </p>
+            <div>
+                <ul class="text-muted first-letter">
+                    Limits: 
+                    <li class="ml-2">- Not more than 999 Trillion</li>
+                    <li class="ml-2">- Whole numbers only</li>  
+                    <li class="ml-2">- Negative number unneccessary </li>
+                </ul>
             </div>
+            
         </div>
         <div class="col-sm-6 mt-5">
             <form class=" text-white">
@@ -67,8 +71,8 @@
                                 <input style="float:right" 
                                 type="submit" 
                                 name="submit" 
-                                value="Submit" 
-                                class="btn btn-primary" 
+                                value="Convert" 
+                                class="btn btn-dark" 
                                 id="submit-id-submit" />
                             </div>
                         </div>
@@ -76,9 +80,7 @@
                 </div>
                 
             </form>
-            
         </div>
-
     </div>
     <div class="row mt-5">
         <div class="col">
@@ -88,16 +90,40 @@
                 {{word}}</h5>
         </div>
     </div>
-    <div class="row mt-3">
-        <div class="col-sm-4">
-            <ul class="list-group">
-                <li class="list-group-item">Realized thie project with about 60 lines of code</li>
-                <li class="list-group-item">Recursion as a concept played very important role</li>
-                <li class="list-group-item">Fully tested edge cases and enforced boundaries</li>
-            </ul>
+    
+    <div class="row bg-dark text-white mt-3">
+        <div class="col">
+            <h1 class="text-center">Project Design</h1>
+            <div class="row mt-3 mb-3">
+                <div class="col-sm-12">
+                    <ul class="list-group">
+                        <li class="list-group-item">- Implemented this project with about 60 lines of code</li>
+                        <li class="list-group-item">- Recursion and memoization concepts adopted</li>
+                        <li class="list-group-item">- Fully tested edge cases and enforced boundaries</li>
+                    </ul>
+                </div>
+            </div>
+            <p>This project is implemented by the application of two very useful concepts:</p>
+                <ul>
+                    <li>Recursion - A divide and conquer strategy that solves a problem by solving a smaller instance 
+                       of it until a base case is reached. Keeping the code DRY (Don't Repeat Yourself)
+                    </li>
+                    <li>Memoization - An optimization technique that is a space-time tradeoff. A techique that invest
+                        in computer memory for speed.
+                    </li>
+                </ul>
+            
+            <h4>The design process</h4>
+            <p>A python dictionary is used to map 1 through 20 as keys and their corresponding word form one through twenty as values.
+                Since two cannot be derived from one unlike twenty one that can be derived from twenty and one. 
+            </p>
+            <p>
+                Numbers beyond twenty is derivable from previous numbers (making 21 an instance of 20 and 1) which is quite suited for 
+                recursion technique. However, round numbers like 100, 1,000, 1,000,000 and etc gets a mix of new word and a previous number.
+            </p>
         </div>
     </div>
-    
+
 </div>
 
 <script>
