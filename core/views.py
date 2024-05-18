@@ -50,3 +50,6 @@ class NumberToWordView(TemplateView):
             
         context['form'] = form
         return context
+    
+class DatabaseLearningView(TemplateView):
+    template_name = 'core/portfolio/tinyprojects/databaselearning.html'

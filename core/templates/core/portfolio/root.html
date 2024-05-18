@@ -1,9 +1,17 @@
 {% extends 'core/base.html' %}
+{% block head %}
+<style>
+  .back-color {
+    background-color: black;
+    color: white;
+  }
+</style>
 
+{% endblock head %}
 {% block content %}
-<div class="container-fluid mt-3">
-    <div class="row">
-        <div class="col-sm-4">
+<div class="container mt-3">
+    <div class="row align-items-center justify-content-center vh-100">
+        <div class="col-sm-4 back-color">
             <div class="list-group">
                 <a href="{% url 'number-to-word' %}" class="list-group-item list-group-item-action flex-column align-items-start">
                   <div class="d-flex w-100 justify-content-between">
@@ -19,6 +27,22 @@
                 
               </div>
         </div>
+
+        <div class="col-sm-4 back-color">
+          <div class="list-group">
+              <a href="{% url 'database-learning' %}" class="list-group-item list-group-item-action flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+                  <h5 class="mb-1">Database Learning Structure</h5>
+                  <small>Jan 2024</small>
+                </div>
+                <p class="mb-1">Learning is a vital aspect of life and optimizing learning strategy becomes very 
+                  important and can significantly make a valid difference. This is a mini project to demonstrate it. 
+                </p>
+                <small class="text-danger">Link to database learning strategy</small>
+              </a>
+              
+            </div>
+      </div>
     </div>
     
 </div>
