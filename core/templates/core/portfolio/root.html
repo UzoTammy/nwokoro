@@ -10,33 +10,31 @@
 {% endblock head %}
 {% block content %}
 <div class="container mt-3">
-    <div class="row align-items-center justify-content-center vh-100">
-        <div class="col-sm-4 back-color">
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 mx-lg-n5 justify-content-center">
+        <div class="col py-3 px-lg-3 border bg-dark">
             <div class="list-group">
                 <a href="{% url 'number-to-word' %}" class="list-group-item list-group-item-action flex-column align-items-start">
                   <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">Convert numbers to words</h5>
                     <small>Dec 2023</small>
                   </div>
-                  <p class="mb-1">This is a mini project aimed at exploring the power of recursion concept to
-                    increase productivity. Also, the project adopted memoization for speed and memory conservation.
-                    <!-- I did not have to use the cache decorator of the functool module. -->
-                  </p>
+                  <p class="mb-1">Convert numbers in figures to words. </p>
                   <small class="text-danger">Limit is 999 Trillion.</small>
                 </a>
                 
               </div>
         </div>
 
-        <div class="col-sm-4 back-color">
+        <div class="col py-3 px-lg-3 border bg-dark">
           <div class="list-group">
               <a href="{% url 'database-learning' %}" class="list-group-item list-group-item-action flex-column align-items-start">
                 <div class="d-flex w-100 justify-content-between">
-                  <h5 class="mb-1">Database Learning Structure</h5>
+                  <h5 class="mb-1">Learn SQL with POSTGRES</h5>
                   <small>Jan 2024</small>
                 </div>
-                <p class="mb-1">Learning is a vital aspect of life and optimizing learning strategy becomes very 
-                  important and can significantly make a valid difference. This is a mini project to demonstrate it. 
+                <p class="mb-1">Learn SQL fast and effectively with PostgreSQL. 
+                  
                 </p>
                 <small class="text-danger">Link to database learning strategy</small>
               </a>
