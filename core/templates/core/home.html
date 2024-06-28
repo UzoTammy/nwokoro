@@ -1,0 +1,256 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block head %}
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+  }
+
+  .navbar {
+    margin-bottom: 30px;
+  }
+
+  .header {
+    background: url('{% static "background.jpeg" %}') no-repeat center center;
+    background-size: cover;
+    color: white;
+    text-align: center;
+    padding: 100px 0;
+  }
+
+  .header h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+  }
+
+  .header p {
+    font-size: 1.25rem;
+  }
+
+  .text-gold {
+    color: rgb(255, 180, 40);
+  }
+
+  .content {
+    padding: 30px 0;
+  }
+
+  .content h2 {
+    margin-bottom: 30px;
+    font-weight: 700;
+  }
+
+  .footer {
+    background: #333;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+  }
+
+  .profile-picture {
+    text-align: left;
+    margin-bottom: 30px;
+  }
+
+  .profile-picture img {
+    border-radius: 100% 80% 60% 40%;
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .my-name {
+    font-size: xx-large;
+    font-weight: 700;
+    font-family: cursive;
+  }
+
+  .horizontal-list {
+    list-style-type: none;
+    padding-left: 0;
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .horizontal-list li::before {
+    display: inline-block;
+    width: 1.5rem; /* Adjust to match the bullet size */
+    height: 1.5rem; /* Adjust to match the bullet size */
+    line-height: 1.5rem; /* Align the bullet vertically */
+    text-align: center;
+    border-radius: 50%;
+    margin-right: 0.1rem; /* Space between bullet and text */
+  }
+  .check-list {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  .check-list li {
+      display: flex;
+      align-items: center;
+      font-size: 1.0rem; /* Adjust icon size */
+      margin-bottom: 0.5rem; /* Space between list items */
+  }
+  .check-list li::before {
+      content: '\f058'; /* Unicode for Font Awesome check mark */
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 700;
+      color: #515a555d; /* Check mark color */
+      margin-right: 0.2rem; /* Space between check mark and text */
+  }
+</style>
+{% endblock %}
+
+{% block content%}
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <img class="rounded-circle" src="{% static 'logo.png' %}" width="50" height="30" alt="">
+  <a class="navbar-brand" href="#"></a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
+    aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">About</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false">
+          Portfolio
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="#">Scush - Django Web app</a>
+          <a class="dropdown-item" href="#">Finuel - Django Web app</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">Problemtosolution</a>
+          <a class="dropdown-item" href="#">- Flask Web app</a>
+          <a class="dropdown-item" href="#">PostgreSQL</a>
+        </div>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Concepts</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false">
+          Tools
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="#">Git & Github</a>
+          <a class="dropdown-item" href="#">Docker</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">Bash Scripting</a>
+          <!-- <a class="dropdown-item" href="#"></a> -->
+          <!-- <a class="dropdown-item" href="#">PostgreSQL</a> -->
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Profile Picture -->
+<div class="container ">
+  <div class="row">
+    <div class="col-sm-4 profile-picture">
+      <img src="{% static 'tammy.jpeg' %}" alt="Profile Picture">
+      <div class="my-name">Uzo Tammy Nwokoro
+      </div>
+      <ul class="horizontal-list">
+        <ul class="p-0">
+          <li><i class="fa fa-check-circle text-success fa-sm"></i> Project Manager</li>
+          <li><i class="fa fa-check-circle text-success fa-sm"></i> Chemical Engineer</li>  
+        </ul>
+        <ul>
+          <li><i class="fa fa-check-circle text-success fa-sm"></i> Web Developer</li>
+          <li><i class="fa fa-check-circle text-success fa-sm"></i> Business Manager</li>
+        </ul>
+        
+      </ul>
+    </div>
+    <div class="col justify-content-center">
+      <div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="{% static 'lab.jpg' %}" class="d-block" alt="...">
+          </div>
+          <div class="carousel-item">
+            <img src="{% static 'dog.jpeg' %}" class="d-block" alt="...">
+          </div>
+          <div class="carousel-item">
+            <img src="{% static 'puppies.jpeg' %}" class="d-block" alt="...">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-2">
+      <div class="left-border-line">
+        <p class="first-letter">Problem Solver</p>
+        <p class="first-letter">Analytical</p>
+        <p class="first-letter">Committed</p>
+        <p class="first-letter">Team Player</p>
+        <p class="first-letter">Always Learning</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="header mt-3">
+  <div class="container">
+    <h1 class="text-gold">Welcome to My Personal Website</h1>
+    <p class="text-gold">Your one-stop destination for all things about me!</p>
+  </div>
+</header>
+
+
+<!-- Content -->
+<div class="container content">
+  <div class="row">
+    <div class="col-md-4">
+      <h2>About Me</h2>
+      <p>I never quit until mission is accomplished. Always analysing the process for continuous improvement,
+        excited to learn new skills and performes better when working with a team and determined to resolve issues. 
+      </p>
+      <a href="{% url 'new-aboutme' %}">click to read more</a>
+    </div>
+    <div class="col-md-4">
+      <h2>What I do</h2>
+      <ul class="check-list text-info">
+        <li>Database Administration</li>
+        <li>Website Design</li>
+        <li>Data Protection</li>
+        <li>Cloud Services</li>
+        <li>Business Operations & Developement</li>
+      </ul>
+    </div>
+    <div class="col-md-4">
+      <h2>Contact</h2>
+      <i class="fa fa-envelope text-secondary"></i> <a class="" href="mailto:contact@uzonwokoro.com"> contact@uzonwokoro.com</a>
+      <div class="container">
+        <ul class="horizontal-list">
+            <li><i class="fab fa-linkedin text-primary"></i> LinkedIn</li>
+            <li><i class="fab fa-tiktok"></i> TikTok</li>
+            <li><i class="fab fa-twitter text-primary"></i> Twitter</li>
+            <li><i class="fab fa-youtube text-danger"></i> YouTube</li>
+            <li><i class="fab fa-facebook text-primary"></i> Facebook</li>
+        </ul>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <p>&copy; 2024 My Personal Website. All rights reserved.</p>
+  </div>
+</footer>
+
+
+{% endblock content%}

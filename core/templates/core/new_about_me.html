@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Education & Experience</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Lucida" Grande, sans-serif;
+    }
+    .navbar {
+      margin-bottom: 30px;
+    }
+    .header {
+      background: url('{% static "background.jpeg" %}') no-repeat center center;
+      background-size: cover;
+      color: white;
+      text-align: center;
+      padding: 100px 0;
+    }
+    .header h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+    }
+    .header p {
+      font-size: 1.25rem;
+    }
+    .content {
+      padding: 30px 0;
+    }
+    .content h2 {
+      margin-bottom: 30px;
+      font-weight: 700;
+    }
+    .experience, .education {
+      margin-bottom: 30px;
+    }
+    .footer {
+      background: #333;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+    }
+    .profile-picture {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .profile-picture img {
+      border-radius: 50%;
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">My Story</a>
+    <button class="navbar-toggler" 
+    type="button" data-toggle="collapse" 
+    data-target="#navbarNav" aria-controls="navbarNav" 
+    aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Education</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Experience</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header class="header mb-3">
+    <div class="container">
+      <h1>Welcome to My Story</h1>
+      <p>Explore my educational background and professional experience</p>
+    </div>
+  </header>
+
+  <!-- Profile Picture -->
+  <div class="container profile-picture">
+    <img src="{% static 'dog.jpeg' %}" alt="Profile Picture">
+  </div>
+
+  <!-- Content -->
+  <div class="container content">
+    <div class="education">
+      <h2>Education</h2>
+      <div class="row">
+        <div class="col-md-4">
+          <h3>Bachelor of Science in Engineering</h3>
+          <p>XYZ University, 2010-2014</p>
+          <p>Graduated with honors, majoring in Mechanical Engineering.</p>
+        </div>
+        <div class="col-md-4">
+          <h3>Master of Science in Engineering</h3>
+          <p>ABC University, 2015-2017</p>
+          <p>Specialized in Industrial Engineering and Management.</p>
+        </div>
+        <div class="col-md-4">
+          <h3>Project Management Certification</h3>
+          <p>DEF Institute, 2018</p>
+          <p>Certified Project Manager with practical experience in managing large projects.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="experience">
+      <h2>Professional Experience</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <h3>Business Operations Manager</h3>
+          <p>GHI Corp, 2014-2020</p>
+          <p>Managed operations for a leading firm, overseeing projects and ensuring efficiency.</p>
+        </div>
+        <div class="col-md-6">
+          <h3>Technical Consultant</h3>
+          <p>JKL Solutions, 2020-Present</p>
+          <p>Provided technical consultancy services to improve business processes and systems.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2024 My Personal Website. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
