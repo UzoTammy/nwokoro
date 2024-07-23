@@ -1,0 +1,120 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block head %}
+<style>
+    .block {
+        width: 100%;
+        height: 100%;
+        background-color: rgb(252, 252, 251);
+        position: relative;
+        top: 0;
+        left: 0;
+    }
+
+
+    .pretty-font {
+        background-image: linear-gradient(to left, rgb(180, 130, 238), indigo, red, green, blue, orange, yellow);
+        -webkit-background-clip: text;
+        color: transparent;
+        /* font-size: 40px; */
+        font-weight: bold;
+        /* font-family: fantasy; */
+        font-size: 150px;
+
+        @media screen and (max-width: 768px) {
+            font-size: 100px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'portfolio-root' %}">Portfolio</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Number to word</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-sm-6">
+            <form action="" method="post">
+                {% csrf_token %}
+                <fieldset>
+                    <legend>User Profile <span class="float-right">
+                        <a href="{% url 'profile-list' 'all' %}">
+                            <i class="fa fa-tv"></i>
+                        </a></span>
+                    </legend>
+                    <hr>
+                    {{ form|crispy }}
+                </fieldset>
+                <div class="">
+                    <button class="btn btn-outline-dark rounded-pill" type="submit">{% if view.kwargs %} Submit {% else %} Continue {% endif %}</button>
+                </div>
+            </form>
+            
+        </div>
+        <div class="col-sm-6">
+            <!-- my_template.html -->
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <p>Form not submitted as errors found:</p>
+                <ul>
+                    {% for field in form %}
+                    {% if field.errors %}
+                    <li>{{ field.label }}:
+                        <ul>
+                            {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if form.non_field_errors %}
+                    <li>Non-field errors:
+                        <ul>
+                            {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+
+            </div>
+            {% else %}
+            
+            {% if profile %}
+            <div class="alert alert-success">
+                <h3>Profile Information</h3>
+                <hr>
+                <p>Fullname: {{profile.first_name}} {% if profile.middle_name != '__NA__' %} {{profile.middle_name }} {% endif %} {{profile.last_name}}</p>
+                <p>Date Of Birth: {{profile.date_of_birth}} ({{profile.age}} years && {{profile.age_status}})</p>
+                <p>Email: {{profile.email}} | Gender: {{profile.gender}}</p>
+    
+            </div>
+            <div class="">
+                <form action="">
+                <button class="btn btn-outline-dark btn-sm rounded-pill float-right" type="submit" name="action" value="clear">Clear</button>
+                <button class="btn btn-outline-dark btn-sm rounded-pill" type="submit" name="action" value="new">Submit</button>
+                </form>
+                
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

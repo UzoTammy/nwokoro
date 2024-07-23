@@ -1,0 +1,71 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row">
+        <div class="col">
+            <h3>Profile List</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name <a class="text-muted" href="?page={{page_obj.number}}&ordering=name"><i class="fa fa-arrow-down fa-sm"></i></a></th>
+                        <th>Email</th>
+                        <th>Date Of Birth</th>
+                        <th>Age & Status <a class="text-muted" href="?page={{page_obj.number}}&ordering=age"><i class="fa fa-arrow-down fa-sm"></i></a></th>
+                        <th>Gender <a class="text-muted" href="?page={{page_obj.number}}&ordering=gender"><i class="fa fa-arrow-down fa-sm"></i></a></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in object_list %}
+                    <tr>
+                        <td>{{student.pk}}</td>
+                        <td><a href="{% url 'profile-update' student.pk %}">{{student}}</a></td>
+                        <td>{{student.email}}</td>
+                        <td>{{student.date_of_birth}}</td>
+                        <td>{{student.age}} & {{student.age_status}}</td>
+                        <td>{{student.gender}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if is_paginated %}
+            <div class="row p-1">
+                <div class="col">
+                    {% if page_obj.number != 1 %}
+                        <a class="btn btn-outline-dark btn-sm" href="?page=1&ordering={{ordering}}">First</a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                    <a class="btn btn-outline-dark btn-sm" href="?page={{page_obj.next_page_number}}&ordering={{ordering}}"><i class="fa fa-forward"></i></a>
+                    {% endif %}
+                </div>
+                <div class="col">
+                    <p class="text-center">Page {{page_obj.number}} of {{page_obj.paginator.num_pages}}
+                        <span><a class="btn btn-outline-dark btn-sm" href="">
+                            <i class="fa fa-eject"></i>
+                        </a></span>
+                        <span><form action=""><input type="text" name="goto" value="" onchange="submit()"></form></span>
+                    </p>
+                    
+                </div>
+                <div class="col">
+                    {% if page_obj.number != page_obj.paginator.num_pages %}
+                    <a class="btn btn-outline-dark btn-sm float-right ml-1" href="?page=last&ordering={{ordering}}">Last</a>
+                    {% endif %}
+                    {% if page_obj.has_previous %}
+                    <a class="btn btn-outline-dark btn-sm float-right" href="?page={{page_obj.previous_page_number}}&ordering={{ordering}}">
+                        <i class="fa fa-backward"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <h3>Total: {{paginator.count}}</h3>
+            <div class="mt-3">
+                <a class="btn btn-outline-dark btn-sm rounded-pill" href="{% url 'tinyproject-profile' %}">back to profile</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

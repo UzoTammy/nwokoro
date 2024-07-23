@@ -15,7 +15,6 @@ import os
 from dotenv import load_dotenv
 import django_on_heroku
 
-
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -70,6 +69,24 @@ TEMPLATES = [
         'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+
+    {
+        'BACKEND': 'django_jinja.backend.Jinja2', #'django.template.backends.jinja2.jinja2',
+        'NAME': 'jinja2',
+        'DIRS': [], #[os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            # 'environment': 'nwokoro.jinja2.Environment',
+            'match_extension': '.html',  # Tell Jinja2 to render .html files
+            'newstyle_gettext': True,
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',

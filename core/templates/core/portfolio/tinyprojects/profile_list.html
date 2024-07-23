@@ -1,0 +1,37 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row">
+        <div class="col">
+            <h3>Profile List</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Date Of Birth</th>
+                        <th>Age & Status</th>
+                        <th>Gender</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in page_obj.object_list %}
+                    <tr>
+                        <td>{{student}}</td>
+                        <td>{{student.email}}</td>
+                        <td>{{student.date_of_birth}}</td>
+                        <td>{{student.age}} & {{student.age_status}}</td>
+                        <td>{{student.gender}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p>Number of Students: {{page_obj.object_list}}</p>
+            <div class="mt-3">
+                <a class="btn btn-outline-dark btn-sm rounded-pill" href="{% url 'tinyproject-profile' %}">back to profile</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

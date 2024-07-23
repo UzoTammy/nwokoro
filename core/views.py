@@ -1,17 +1,42 @@
+from collections.abc import Sequence
+import json
+import datetime
 from typing import Any
-from datetime import datetime
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
 
-from django.http import HttpRequest
+from django.db.models.query import QuerySet
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.http.response import HttpResponse as HttpResponse
-from django.views.generic.base import TemplateView
-
-from .forms import NumberInputForm
+from django.views.generic.base import View, TemplateView
+from django.views.generic.list import ListView
+from django.views.generic.edit import UpdateView
+from .forms import NumberInputForm, ProfileForm, UpdateProfileForm
 from .tinyproject.numtoword import figure_word
+from .models import StudentProfile
 
+
+def read_profile():
+    with open('./profile.json', 'r') as rf:
+        content = json.load(rf)
+    return content
+
+
+
+class PracticeView(View):
+    custom_value = None
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        # Print statements to debug
+        print("Setup kwargs before popping custom_value:", kwargs)
+        self.custom_value = kwargs.pop('custom_value', 'Default Value')
+        print("Setup kwargs after popping custom_value:", kwargs)
+
+    def get(self, request, *args, **kwargs):
+        # Print statements to debug
+        print("GET kwargs:", kwargs)
+        object_id = kwargs.get('id')
+        return HttpResponse(f'Custom value: {self.custom_value}, Object ID: {object_id}, Remaining kwargs: {kwargs}')
 
 # Create your views here.
 class MainView(TemplateView):
@@ -19,8 +44,11 @@ class MainView(TemplateView):
 
 
 class AboutMe(TemplateView):
-    template_name = 'core/aboutme.html'
+    template_engine = 'django'
 
+    def get_template_names(self) -> list[str]:
+
+        return ['core/new_about_mex.html', 'core/aboutme.html']
 
 class ResumeView(TemplateView):
     template_name = 'core/resume.html'
@@ -63,9 +91,115 @@ class DatabaseLearningView(TemplateView):
 
 class AutomaticEmailView(TemplateView):
     template_name = 'core/portfolio/tinyprojects/auto_email.html'
-
+    
 class NewHomeView(TemplateView):
     template_name = 'core/home.html'
 
 class NewAboutMeView(TemplateView):
     template_name = 'core/new_about_me.html'
+
+class ProfileView(View):
+    
+    def get(self, request, **kwargs):
+        form = ProfileForm()
+        
+        if request.GET.get('action') == 'clear':
+            # this is to clear content of json file
+            with open('./profile.json', 'r+') as wf:
+                wf.truncate(0)
+                json.dump({}, wf)
+                profile = {}
+        elif request.GET.get('action') == 'new':
+            # this is to save to database
+            data = read_profile()
+            
+            student = StudentProfile(
+                first_name = data['first_name'],
+                last_name = data['last_name'],
+                middle_name = data['middle_name'],
+                gender = data['gender'],
+                date_of_birth = datetime.datetime.strptime(data['date_of_birth'], '%d-%b-%Y'),
+                email = data['email'],
+                age = data['age'],
+                age_status = data['age_status']
+            )
+            student.save()
+            profile = {}
+            return redirect(reverse('profile-list', kwargs={'filter_by': 'All'}))
+        else:
+            profile = read_profile()
+        context = {
+            'form': form,
+            'profile': profile
+        }
+
+        return render(request, 'core/portfolio/tinyprojects/profile.html', context)
+    
+    def post(self, request, **kwargs):
+        form = ProfileForm(request.POST)
+        
+        if form.is_valid():
+            with open('./profile.json', 'w') as wf:
+                json.dump(form.cleaned_data, wf, indent=2)
+            return redirect('tinyproject-profile')
+        context = {
+            'form': form,
+        }
+        return render(request, 'core/portfolio/tinyprojects/profile.html', context)
+    
+    
+class StudentProfileView(ListView):
+    model = StudentProfile
+    # paginate_orphans = 1
+
+    def get_queryset(self) -> QuerySet[Any]:
+        if self.kwargs.get('filter_by') == 'Male':
+            qs = StudentProfile.objects.filter(gender='Male')
+        elif self.kwargs.get('filter_by') == 'Female':   
+            qs = StudentProfile.objects.filter(gender='Female')
+        else:
+            qs = StudentProfile.objects.all()
+        return qs.order_by(self.get_ordering())
+    
+    
+    def get_ordering(self) -> Sequence[str]:
+        ordering = self.request.GET.get('ordering', '-pk')
+        if ordering == 'name':
+            ordering = 'last_name'
+        return ordering
+    
+    def get_paginate_by(self, queryset):
+        # Custom logic to determine paginate_by based on the size of the queryset
+        queryset_size = queryset.count()
+        if queryset_size < 50:
+            paginate_by = 2  # If less than 50 items, show 5 per page
+        elif queryset_size < 200:
+            paginate_by = 20  # If less than 200 items, show 10 per page
+        else:
+            paginate_by = 30  # If 200 or more items, show 20 per page
+        return paginate_by
+    
+    
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context['ordering'] = self.get_ordering()
+        return context
+    
+class StudentProfileUpdateView(UpdateView):
+    model = StudentProfile
+    form_class = UpdateProfileForm
+    success_url = '/portfolio/miniproject/All/?page=1'
+    template_name = 'core/portfolio/tinyprojects/profile.html'
+
+    def form_valid(self, form) -> HttpResponse:
+        form.instance.age = form.cleaned_data['age'] 
+        form.instance.age_status = form.cleaned_data['age_status']
+        form.instance.middle_name = form.cleaned_data['middle_name']
+        form.save()
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context['profile'] = {}
+        
+        return context
