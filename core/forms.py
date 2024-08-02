@@ -117,4 +117,12 @@ class UpdateProfileForm(forms.ModelForm):
         if first_name and len(first_name) < 3:
             raise forms.ValidationError('Name must be at least 3 characters long')
         return first_name
-        
+
+
+
+class MyForm(forms.Form):
+    name = forms.CharField(max_length=20)
+    email = forms.EmailField(max_length=35)
+
+
+MyFormSet = forms.formset_factory(MyForm, extra=3)

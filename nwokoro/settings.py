@@ -78,23 +78,6 @@ TEMPLATES = [
         },
     },
 
-    {
-        'BACKEND': 'django_jinja.backend.Jinja2', #'django.template.backends.jinja2.jinja2',
-        'NAME': 'jinja2',
-        'DIRS': [], #[os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            # 'environment': 'nwokoro.jinja2.Environment',
-            'match_extension': '.html',  # Tell Jinja2 to render .html files
-            'newstyle_gettext': True,
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
 ]
 
 WSGI_APPLICATION = 'nwokoro.wsgi.application'

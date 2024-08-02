@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (MainView, AboutMe, ResumeView, PortfolioScushView, PortfolioFinuelView,
                      TextingView, NumberToWordView, PortfolioRootView, DatabaseLearningView,
                      AutomaticEmailView, NewHomeView, NewAboutMeView, ProfileView, StudentProfileView, StudentProfileUpdateView,
-                    #  PracticeView
+                     PracticeView
                      )
 
 urlpatterns = [
@@ -28,5 +28,5 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    # path('tutorial/<int:id>/', PracticeView.as_view(), name='tutorials'),
+    path('tutorial/', PracticeView.as_view(), name='tutorials'),
 ]

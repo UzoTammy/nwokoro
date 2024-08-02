@@ -10,7 +10,7 @@ from django.http.response import HttpResponse as HttpResponse
 from django.views.generic.base import View, TemplateView
 from django.views.generic.list import ListView
 from django.views.generic.edit import UpdateView
-from .forms import NumberInputForm, ProfileForm, UpdateProfileForm
+from .forms import NumberInputForm, ProfileForm, UpdateProfileForm, MyFormSet
 from .tinyproject.numtoword import figure_word
 from .models import StudentProfile
 
@@ -23,21 +23,24 @@ def read_profile():
 
 
 class PracticeView(View):
-    custom_value = None
-
+    
     def setup(self, request, *args, **kwargs):
+
         super().setup(request, *args, **kwargs)
-        # Print statements to debug
-        print("Setup kwargs before popping custom_value:", kwargs)
-        self.custom_value = kwargs.pop('custom_value', 'Default Value')
-        print("Setup kwargs after popping custom_value:", kwargs)
 
     def get(self, request, *args, **kwargs):
-        # Print statements to debug
-        print("GET kwargs:", kwargs)
-        object_id = kwargs.get('id')
-        return HttpResponse(f'Custom value: {self.custom_value}, Object ID: {object_id}, Remaining kwargs: {kwargs}')
-
+        formset = MyFormSet()
+        return render(request, 'core/tutorial.html', {'formset': formset})
+    
+    def post(self, request, *args, **kwargs):
+        formset = MyFormSet(request.POST)
+        if formset.is_valid():
+            for form in formset:
+                print(f"Name: {form.cleaned_data['name']} & Email: {form.cleaned_data['email']}")
+            return redirect('index')
+        
+        return render(request, 'core/tutorial.html', {'formset': formset})
+        
 # Create your views here.
 class MainView(TemplateView):
     template_name = 'core/homepage.html'

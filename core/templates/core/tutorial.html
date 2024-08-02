@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 
@@ -6,10 +7,17 @@
     <div class="row">
         <div class="col">
             <h1>Tutorials</h1>
-            <p>{{var}}</p>
+                <form action="" method="post">{% csrf_token %}
+                    {{ formset.management_form }}
+                    <fieldset>
+                        {{formset|crispy}}
+                    </fieldset>
+                    <div class="">
+                        <button class="btn btn-outline-dark" type="submit">Submit</button>
+                    </div>
+                </form>          
         </div>
     </div>
-    
 </div>
 
 {% endblock %}
