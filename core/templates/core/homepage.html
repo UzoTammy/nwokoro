@@ -3,6 +3,7 @@
 
 {% block head %}
 <style>
+    
     .rows-sky {
         margin: 0;
         padding: 0;
@@ -28,8 +29,13 @@
         margin-top: 10px;
     }
 
-    .intro-font {
+    .intro-box {
         font-family: 'Courier New', Courier, monospace;
+        background-color: #000000;
+        color: white;
+        border-color: rgb(240, 237, 232);
+        border-radius: 10% 25%;
+        /* border-radius: 50% 20% / 10% 40%; */
     }
     .bg-grey {
         background-color: grey;
@@ -41,67 +47,40 @@
 <div class="container-grid-row">
     <div class="rows-white mt-3">
         <div class="row">
-            <div class="col-sm-6 text-left">
-                <h4 class="" style="font-size: 50px;">Uzo Tammy Nwokoro</h4>
-                <h5 class="text-muted first-letter intro-font">
-                    I am an Engineering graduate with over ten years of business operations experience at a
-                    sales and distribution company, where I refined my technical and business management skills.
+            <div class="col-sm-6 intro-box text-right">
+                <h4 class="text-center mt-3" style="font-size: 50px;">Uzo Tammy Nwokoro</h4>
+                <h5 class="first-letter ">
+                    I graduated as an engineer and have had over a decade experience in business operation,
+                    sales and distribution.
                 </h5>
-                <h5 class="text-muted first-letter intro-font">
-                    My passion for programming has broadened my coding skills and enhanced my problem-solving abilities,
-                    driving innovation across technical and operational domains.
+                <h5 class="first-letter">
+                    Currently, I am pursuing a career in IT; backend development, cloud
+                    technology and cybersecurity.
                 </h5>
-                <h5 class="text-muted first-letter intro-font">
-                    Further solidifying my capabilities,
-                    I obtained a project management certificate, improving my organizational skills and ensuring
-                    the efficient and successful completion of projects.
+                <h5 class="first-letter">
+                    Hire me and add value to your business. 
                 </h5>
-                <h5 class="text-muted first-letter intro-font">
-                    My background in engineering and project
-                    management, combined with my proficiency in web development and extensive business experience,
-                    uniquely qualifies me to excel in any business environment.
-                </h5>
-
-                <h6 class="rainbow-text">
-
-                </h6>
+                <img width="300" class="rounded-circle shadow" src="{% static 'tammy.jpeg' %}" alt="">
             </div>
 
-            <div class="col-sm-4">
-                <div class="text-center">
-                    <img width="300" class="rounded-pill" src="{% static 'tammy.jpeg' %}" alt="">
-                </div>  
-            </div>
-
-            <div class="col-sm-2">
+            <div class="col-sm-3 float-right">
                 <div class="left-border-line">
                   <p class="first-letter">Problem Solver</p>
                   <p class="first-letter">Analytical</p>
                   <p class="first-letter">Committed</p>
                   <p class="first-letter">Team Player</p>
                   <p class="first-letter">Always Learning</p>
-                </div>
-                <ul class="list-group list-group-flush border-bottom border-danger">
-                    <li class="list-group-item bg-secondary text-white">Portfolio</li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="https://www.scush.com.ng" target="_blank"><i class="fa fa-globe"></i></a>
-                        SCusH
-                        <a href="{% url 'portfolio-scush' %}"><i class="fa fa-book"></i></a>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="https://www.finuel.org" target="_blank"><i class="fa fa-globe"></i></a>
-                        Finuel
-                        <a href=""><i class="fa fa-book"></i></a>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="https://www.scush.com.ng" target="_blank"><i class="fa fa-globe"></i></a>
-                        Blog
-                        <a href=""><i class="fa fa-book"></i></a>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a class="btn btn-outline-dark btn-sm rounded-pill float-right" href="{% url 'portfolio-root' %}">Tiny works</a></li>
-                    
-                </ul>     
+                </div> 
+            </div>
+
+            <div class="col-sm-3 intro-box">
+                <h3 class="mt-3">Portfolio</h3>
+                <ul class="list-group">
+                    <li class="list-group-item"><a href="">SCusH</a>: A custom web application for a business</li>
+                    <li class="list-group-item"><a href="">Finuel</a>: Financial management application for non-profit organisation</li>
+                    <li class="list-group-item"><a href="">ProblemToSolution</a>: A coding blog</li>
+                    <li class="list-group-item"><a href="">Tiny Projects</a>: Projects that involves the application of advanced concepts</li>
+                </ul>
             </div>
         </div>
     </div>

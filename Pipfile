@@ -11,6 +11,8 @@ django-storages = "*"
 django-on-heroku = "*"
 python-dotenv = "*"
 crispy-bootstrap4 = "*"
+sphinx = "*"
+furo = "*"
 
 [dev-packages]
 
