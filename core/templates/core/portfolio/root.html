@@ -5,28 +5,30 @@
     background-color: black;
     color: white;
   }
+
+  
 </style>
 
 {% endblock head %}
 {% block content %}
 <div class="container mt-3">
 
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 mx-lg-n5 justify-content-center">
-        <div class="col py-3 px-lg-3 border bg-dark">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mx-lg-n5">
+        <div class="col py-3 px-lg-3 whitebox">
             <div class="list-group">
                 <a href="{% url 'number-to-word' %}" class="list-group-item list-group-item-action flex-column align-items-start">
                   <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">Convert numbers to words</h5>
+                    <h5 class="mb-1">Convert figure to word</h5>
                     <small>Dec 2023</small>
                   </div>
-                  <p class="mb-1">Convert numbers in figures to words. </p>
-                  <small class="text-danger">Limit is 999 Trillion.</small>
+                  <p class="mb-1">Converts figure to word using recursion and memoization</p>
+                  <small class="text-danger">Limit of upto 999 Trillion.</small>
                 </a>
                 
               </div>
         </div>
 
-        <div class="col py-3 px-lg-3 border bg-dark">
+        <div class="col py-3 px-lg-3 whitebox">
           <div class="list-group">
               <a href="{% url 'database-learning' %}" class="list-group-item list-group-item-action flex-column align-items-start">
                 <div class="d-flex w-100 justify-content-between">
@@ -42,11 +44,11 @@
             </div>
         </div>
 
-        <div class="col py-3 px-lg-3 border bg-dark">
+        <div class="col py-3 px-lg-3 whitebox">
           <div class="list-group">
               <a href="{% url 'auto-email' %}" class="list-group-item list-group-item-action flex-column align-items-start">
                 <div class="d-flex w-100 justify-content-between">
-                  <h5 class="mb-1">Automate Email sending report</h5>
+                  <h5 class="mb-1">Automate Email sending</h5>
                   <small>May 2024</small>
                 </div>
                 <p class="mb-1">Automating a regular task can be a very productive thing to do.
@@ -58,17 +60,31 @@
             </div>
         </div>
 
-        <div class="col py-3 px-lg-3 border bg-dark">
+        <div class="col py-3 px-lg-3 whitebox">
           <div class="list-group">
               <a href="{% url 'tinyproject-profile' %}" class="list-group-item list-group-item-action flex-column align-items-start">
                 <div class="d-flex w-100 justify-content-between">
-                  <h5 class="mb-1">Filling form and Data transfer</h5>
+                  <h5 class="mb-1">Capture and transfer data to server</h5>
                   <small>July 2024</small>
                 </div>
-                <p class="mb-1">
-                  user friendly form fill
-                </p>
+                <p class="mb-1">Making data capturing user friendly and convenient</p>
                 <small class="text-danger">Expertise on django form api</small>
+              </a>
+              
+            </div>
+        </div>
+
+        <div class="col py-3 px-lg-3 whitebox">
+          <div class="list-group">
+              <a href="{% url 'canada-tax-home' %}" class="list-group-item list-group-item-action flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+                  <h5 class="mb-1">Canada Personal Income <br> Tax Calculator</h5>
+                  <small>August 2024</small>
+                </div>
+                <p class="mb-1">
+                  Tax estimate and 
+                </p>
+                <small class="text-danger">dfafds</small>
               </a>
               
             </div>

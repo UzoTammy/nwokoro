@@ -11,7 +11,7 @@ from django.views.generic.base import View, TemplateView
 from django.views.generic.list import ListView
 from django.views.generic.edit import UpdateView
 from .forms import NumberInputForm, ProfileForm, UpdateProfileForm, MyFormSet
-from .tinyproject.numtoword import figure_word
+from .tinyproject.numtoword import convert
 from .models import StudentProfile
 
 
@@ -56,7 +56,7 @@ class AboutMe(TemplateView):
 class ResumeView(TemplateView):
     template_name = 'core/resume.html'
 
-class PortfolioRootView(TemplateView):
+class TinyProjectView(TemplateView):
     template_name = 'core/portfolio/root.html'
 
 class PortfolioScushView(TemplateView):
@@ -82,7 +82,7 @@ class NumberToWordView(TemplateView):
             figure = self.request.GET['enter_number'].replace(',', '')
             context['figure'] = figure
             try:
-                context['word'] = figure_word(figure)
+                context['word'] = convert(figure)
             except OverflowError as err:
                 context['word'] = f'{err}: only number less than or equal to 999 Trillion allowed'
             
@@ -149,7 +149,9 @@ class ProfileView(View):
             'form': form,
         }
         return render(request, 'core/portfolio/tinyprojects/profile.html', context)
-    
+
+class TinyProjectTaxCanadaView(TemplateView):
+    template_name = 'core/portfolio/tinyprojects/tax_canada_home.html'   
     
 class StudentProfileView(ListView):
     model = StudentProfile

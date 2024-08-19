@@ -5,6 +5,9 @@
 
 {% block head %}
 <style>
+    body {
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    }
     .block {
         width: 100%;
         height: 100%;
@@ -36,7 +39,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'portfolio-root' %}">Portfolio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'tinyproject-home' %}">Portfolio</a></li>
           <li class="breadcrumb-item active" aria-current="page">Number to word</li>
         </ol>
     </nav>
@@ -45,19 +48,18 @@
 <div class="container mt-3">
     <div class="row">
         <div class="col-sm-6">
-            <h1 class="text-center rainbow-text">Convert Number to Word</h1>
-        
+            <h1 class="text-center rainbow-text">Converts Figure to Word</h1>
+            <h6 class="text-center">Based on Recursion and Memoization</h6>
             <div>
                 <ul class="text-muted first-letter">
-                    Limits: 
-                    <li class="ml-2">- Not more than 999 Trillion</li>
-                    <li class="ml-2">- Whole numbers only</li>  
-                    <li class="ml-2">- Negative number unneccessary </li>
+                    Boundaries: 
+                    <li class="ml-3">- Not more than 999 Trillion</li>
+                    <li class="ml-3">- Whole numbers only</li>  
+                    <li class="ml-3">- Negative number unneccessary </li>
                 </ul>
             </div>
-            
         </div>
-        <div class="col-sm-6 mt-5">
+        <div class="col-sm-4 mt-5">
             <form class=" text-white">
                 <div class="row bg-dark p-2">
                     <div class="col">
@@ -78,32 +80,25 @@
                         </div>
                     </div>
                 </div>
-                
             </form>
         </div>
     </div>
-    <div class="row mt-5">
-        <div class="col">
-            
+    <div class="row mt-3">
+        <div class="col-sm-8">
             <h5 class="text-center pretty-font" style="font-size: x-large;">
                 <span class="text-muted">{{figure|floatformat:'g'}}</span><br>
-                {{word}}</h5>
+                {{word}}
+            </h5>
+            {% if view.request.GET %}
+            <div class="btn btn-outline-dark btn-sm float-right"><a href="{% url 'number-to-word' %}">Reset</a></div>
+            {% endif %}
         </div>
     </div>
     
-    <div class="row bg-dark text-white mt-3">
+    <div class="row mt-3">
         <div class="col">
-            <h1 class="text-center">Project Design</h1>
-            <div class="row mt-3 mb-3">
-                <div class="col-sm-12">
-                    <ul class="list-group">
-                        <li class="list-group-item">- Implemented this project with about 60 lines of code</li>
-                        <li class="list-group-item">- Recursion and memoization concepts adopted</li>
-                        <li class="list-group-item">- Fully tested edge cases and enforced boundaries</li>
-                    </ul>
-                </div>
-            </div>
-            <p>This project is implemented by the application of two very useful concepts:</p>
+            <h3 class="">Overview</h3>
+            <p>This project is implemented by the application of two very useful productivity concepts:</p>
                 <ul>
                     <li>Recursion - A divide and conquer strategy that solves a problem by solving a smaller instance 
                        of it until a base case is reached. Keeping the code DRY (Don't Repeat Yourself)
@@ -113,14 +108,23 @@
                     </li>
                 </ul>
             
-            <h4>The design process</h4>
-            <p>A python dictionary is used to map 1 through 20 as keys and their corresponding word form one through twenty as values.
-                Since two cannot be derived from one unlike twenty one that can be derived from twenty and one. 
+            <h3>The Development Process</h3>
+            <p>I identified that numbers have three patterns as follows:</p>
+            <ul>
+                <li>Unique numbers: Numbers whose word form are unique that cannot be derived</li>
+                <li>Derived numbers: Numbers whose word form are derived e.g 21 from 20 and 1</li>
+                <li>Mixed numbers: Combination of unique and derived numbers (like 100 derived from 1 and hundred as unique)</li>
+            </ul>
+            <p>Mapping unique numbers in a python dictionary that is 1 through 20 {'1': 'One', '2': 'Two',.....,'20': 'Twenty'},
+                becomes the base to form higher (derived) numbers upto a point where numbers becomes mixed. The mixed numbers are separated
+                into unique and derived numbers and treated accordingly.
             </p>
             <p>
-                Numbers beyond twenty is derivable from previous numbers (making 21 an instance of 20 and 1) which is quite suited for 
-                recursion technique. However, round numbers like 100, 1,000, 1,000,000 and etc gets a mix of new word and a previous number.
+                Numbers beyond twenty are derivable from previous numbers (making 21 an instance of 20 and 1) which is quite suited for 
+                recursion technique. However, mixed numbers like 100, 1,000, 1,000,000 and etc gets a mix of unique (where they are mapped)
+                and derived numbers.
             </p>
+            <a class="float-right btn btn-outline-dark mb-3" href="https://doc.uzonwokoro.com/numbers.html">Documentation</a>
         </div>
     </div>
 
