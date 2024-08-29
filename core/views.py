@@ -12,6 +12,7 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import UpdateView
 from .forms import NumberInputForm, ProfileForm, UpdateProfileForm, MyFormSet
 from .tinyproject.numtoword import convert
+from .tinyproject.taxes import CanadaIncomeTaxCalculator as TaxCalc
 from .models import StudentProfile
 
 
@@ -151,7 +152,27 @@ class ProfileView(View):
         return render(request, 'core/portfolio/tinyprojects/profile.html', context)
 
 class TinyProjectTaxCanadaView(TemplateView):
-    template_name = 'core/portfolio/tinyprojects/tax_canada_home.html'   
+    template_name = 'core/portfolio/tinyprojects/tax_canada_home.html'  
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        if self.request.GET:
+            income = float(self.request.GET.get('income'))
+            stack = list()
+            income_tax = TaxCalc()
+            for i in range(1, 10):
+                federal_tax = income_tax.federal_tax_calculator(income * i)
+                prov_tax = income_tax.ns_tax_calculator(income * i)
+                stack.append({"I": f'x{i}', 
+                            'income': income * i, 
+                            'fed_tax': federal_tax, 'fed_rate': federal_tax/(income * i),
+                            'prov_tax': prov_tax, 'prov_rate': prov_tax/(income*i),
+                            'tax': federal_tax + prov_tax,
+                            'rate': 100*(federal_tax + prov_tax)/(income * i),
+                            'net_income': income * i - federal_tax - prov_tax
+                            })
+            context['stack'] = stack
+        return context
     
 class StudentProfileView(ListView):
     model = StudentProfile

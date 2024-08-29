@@ -1,11 +1,58 @@
 {% extends 'core/base.html' %}
 
+
 {% block content %}
-<div class="container">
+<div class="container mt-3">
     <div class="row">
         <div class="col">
             <h3>Canada Tax</h3>
+            <hr>
+        </div>
+
+        <form action="" method="get">
+            <div class="form-group">
+                <label for="">Base Income</label>
+                <input class="form-control" type="number" name="income">
+            </div>
+            
+            <input class="btn btn-outline-dark mb-2" type="submit" value="Submit">
+        </form>
+    </div>
+    {% if stack %}
+    <div class="row">
+        <div class="col">
+            <table class="table">
+                <thead class="text-right">
+                    <tr>
+                        <th>Index</th>
+                        <th>Income</th>
+                        <th>Federal Tax</th>
+                        <th>Rate</th>
+                        <th>Prov. Tax</th>
+                        <th>Rate</th>
+                        <th>Total Tax</th>
+                        <th>Avg. Rate (%) <i class="fa fa-information"></i></th>
+                        <th>Net Income</th>
+                    </tr>
+                </thead>
+                <tbody class="text-right">
+                    {% for data in stack %}
+                    <tr>
+                        <td>{{data.I}}</td>
+                        <td>{{data.income|floatformat:'2g'}}</td>
+                        <td>{{data.fed_tax|floatformat:'2g'}}</td>
+                        <td>{{data.fed_rate|floatformat:2}}</td>
+                        <td>{{data.prov_tax|floatformat:'2g'}}</td>
+                        <td>{{data.prov_rate|floatformat:2}}</td>
+                        <td>{{data.tax|floatformat:'2g'}}</td>
+                        <td>{{data.rate|floatformat:2}}</td>
+                        <td>{{data.net_income|floatformat:'2g'}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+    {% endif %}
 </div>
 {% endblock %}
