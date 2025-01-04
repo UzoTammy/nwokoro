@@ -163,6 +163,7 @@ LOGIN_REDIRECT_URL = 'chore-home'
 
 # Celery Configuration Options
 CELERY_BROKER_URL = os.getenv('CLOUDAMQP_URL', 'amqp://guest:guest@127.0.0.1:5672/')
+CELERY_RESULT_BACKEND = 'rpc://'  # Use RPC backend with RabbitMQ
 CELERY_TIMEZONE = "America/Halifax"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
