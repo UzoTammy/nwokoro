@@ -162,7 +162,7 @@ AUTH_USER_MODEL = 'account.User'
 LOGIN_REDIRECT_URL = 'chore-home'
 
 # Celery Configuration Options
-CELERY_BROKER_URL = 'amqp://guest:guest@127.0.0.1:5672/' if DEBUG else ''
+CELERY_BROKER_URL = os.getenv('CLOUDAMQP_URL', 'amqp://guest:guest@127.0.0.1:5672/')
 CELERY_TIMEZONE = "America/Halifax"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
