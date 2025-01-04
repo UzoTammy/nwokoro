@@ -45,3 +45,8 @@ def task_dishwash(work_id, worker_id, duration):
     assign_work.source = 'scheduled'
     assign_work.save()
     # send email
+
+
+@shared_task
+def add(a, b):
+    return a + b
