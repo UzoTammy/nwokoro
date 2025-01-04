@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-8">
+            <h3>Chores Helper</h3>
+            <hr>
+            <h4>Register</h4>
+            <p>
+                To use the app, you must register to obtain a profile which will enable you
+                to be assigned a job so you can earn points
+            </p>
+            <p>Click on register and fill out the registration form and submit. If successful,
+                You will have a profile that is accessible with your private password and email address. 
+                You username is unique to you.
+            </p>
+            <h4>Sign In or Login</h4>
+            <p>When you sign in with your credentials, you will have access to  
+            </p>
+            <ul>
+                <li>View available jobs</li>
+                <li>Look at job register: A list of jobs routinely assigned to a user</li>
+                <li>See assigned jobs and initiate jobs yourself</li>
+                
+            </ul>
+            <h4>Job Register</h4>
+            <p>
+                These are already existing jobs that are usually done routinely. Jobs are scheduled from
+                the job register.
+            </p>
+            <h4>Jobs</h4>
+            <p>
+                Jobs are a list of things that need to be done to earn points
+            </p>
+            <a class="btn btn-outline-dark float-right mr-3" href="{% url 'chore-home' %}">Back</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

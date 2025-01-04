@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block head %}
+<style>
+    input::placeholder {
+        font-style: italic;
+        color: gray; /* Optional: Change the color of the placeholder text */
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container mt-3">
+    
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-6">
+            <form class="mt-3" action="" method="post">
+                {% csrf_token %}
+                <legend>Initiated Job approve form </legend>
+                <hr>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Job <span class="float-right">{{object.name}}</span></li>
+                    <li class="list-group-item">Owned by <span class="float-right">{{object.worker}}</span></li> 
+                    <li class="list-group-item bg-light"><span class="text-info">Job Description:</span> {{object.description}}</li>       
+                </ul>
+                <hr>
+                <fieldset class="form-group">
+                    {{ form|crispy }}
+                </fieldset>            
+                <div class="m-2">
+                    <button class="btn btn-outline-dark" type="submit">Approve</button>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'chore-home' %}">Disapprove</a>
+                </div>
+            </form>
+        </div>
+        
+    </div>
+    
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block head %}
+<style>
+    input::placeholder {
+        font-style: italic;
+        color: gray; /* Optional: Change the color of the placeholder text */
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-sm-6">
+            <form class="mt-3" action="" method="post">
+                {% csrf_token %}
+                <legend>Job Creation Form</legend>
+                <hr>
+                <fieldset>
+                    {{ form|crispy }}
+                </fieldset>    
+                                    
+                <div class="m-2">
+                    <button class="btn btn-outline-dark" type="submit">Submit</button>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'chore-home' %}">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showElements() {
+        if (document.getElementById('id_kind').value === 'regular') {
+            document.getElementById('div_id_user').hidden = false;
+            document.getElementById('div_id_duration').hidden = false;
+        } else {
+            document.getElementById('div_id_user').hidden = true;
+            document.getElementById('div_id_duration').hidden = true;
+        
+        }
+    }
+</script>
+{% endblock %}

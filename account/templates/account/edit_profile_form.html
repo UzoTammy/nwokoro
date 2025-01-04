@@ -1,0 +1,25 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-sm-6">
+            <h3>Edit Profile</h3>
+            <hr>
+            <form action="" method="post">
+                {% csrf_token %}
+                {{form|crispy}}
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-outline-dark">Submit </button>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'profile' user.pk %}">Back</a>
+                    <!-- <p class="mb-3"><small>If you already have an account, <a href="{% url 'login' %}">sign in</a></small></p> -->
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

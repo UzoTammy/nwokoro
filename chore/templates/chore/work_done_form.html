@@ -1,0 +1,66 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block head %}
+<style>
+    input::placeholder {
+        font-style: italic;
+        color: gray; /* Optional: Change the color of the placeholder text */
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container mt-3">
+    
+    <div class="row justify-content-center">
+        <div class="col-sm-6">
+            <form class="mt-3" action="" method="post">
+                {% csrf_token %}
+                <legend>Job done form</legend>
+                <hr>
+                <h4 class="text-danger">Take Note !!</h4>
+                <ol>
+                    <li class="ml-2">
+                        Do not submit what you are about or intend to do. 
+                        Make sure you have done the work. 
+                    </li>
+                    <li class="ml-2">
+                        Any job not done at all but filled out 
+                       will result in point deduction and job withdrawal.
+                    </li>
+                    <li class="ml-2">Only jobs done satisfactorily will earn you points</li>
+                    <li class="ml-2">You only get one chance to repeat a job.</li>
+                    <li class="ml-2">Your work will be cancelled and reassigned should you lack the commitment to deliver the job</li>
+                    <li class="ml-2">Cancelled Jobs cannot be reassigned to the same person</li>
+                </ol>
+                
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Job done <span class="float-right">{{object.work}}</span></li>
+                    <li class="list-group-item">Points earnable <span class="float-right">{{object.work.point}}</span></li>
+                    <li class="list-group-item">Bonus Points <span class="float-right">{{bonus_point}}</span></li>
+                    <li class="list-group-item">State <span class="float-right">{{object.state}}</span></li>
+                    <li class="list-group-item">Source <span class="float-right">{{object.source}}</span></li>
+                    
+                    <li class="list-group-item">Time left 
+                        <span class="float-right">
+                            {% if expired %}
+                        <span class="text-danger">job is expired</span>
+                            {% else %}{{object.end_time|timeuntil}}{% endif %}
+                        </span>
+                    </li>
+
+                </ul>
+                       
+                {{ form|crispy }}
+                                    
+                <div class="m-2">
+                    <button class="btn btn-outline-dark" type="submit">Submit</button>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'chore-home' %}">Back</a>
+                </div>
+            </form>
+        </div>
+        
+    </div>
+    
+</div>
+{% endblock %}

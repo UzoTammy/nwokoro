@@ -1,0 +1,33 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-8">
+            <h3 class="mt-3">Details of a concluded Job</h3>
+            <hr>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">ID <span class="float-right">{{object.pk}}</span></li>
+                <li class="list-group-item">Job <span class="float-right">{{object.work}}</span></li>
+                <li class="list-group-item">Assigned to <span class="float-right">{{object.worker}}</span></li>
+                <li class="list-group-item">Base Point <span class="float-right">{{object.base_point}}</span></li>
+                <li class="list-group-item">Bonus Point <span class="float-right">{{object.bonus_point}}</span></li>
+                <li class="list-group-item">Total Point <span class="float-right">{{object.points}}</span></li>
+                <li class="list-group-item">Schedule <span class="float-right">{{object.scheduled_time}}</span></li>
+                <li class="list-group-item">End Time <span class="float-right">{{object.end_time}}</span></li>
+                <li class="list-group-item">Time Given <span class="float-right">{{object.end_time|timeuntil:object.scheduled_time}}</span></li>
+                <li class="list-group-item">Finish Time <span class="float-right">{{object.finished_time}}</span></li>
+                <li class="list-group-item">Time Taken <span class="float-right">{{object.finished_time|timeuntil:object.scheduled_time}}</span></li>
+            </ul>
+                        
+            <div class="row mt-3">
+                <div class="col">
+                    <a class="btn btn-outline-dark mr-2 float-right" href="{% url 'concluded-job' %}">Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

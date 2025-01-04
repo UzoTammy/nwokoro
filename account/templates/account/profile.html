@@ -1,0 +1,75 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-8">
+            <div class="card text-center">
+                <div class="card-header">
+                  
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col">
+                        <div class="bg-secondary text-white rounded-pill">
+                            <span class="">Effectiveness <br> {{effectiveness}}</span>
+                        </div>
+                        <p class="text-muted mt-2">Ratio of Jobs completed to Jobs assigned</p>
+                    </div>
+                    <div class="col">
+                        <h5 class="card-title">{{user}}'s Profile</h5>
+                        <p class="card-text text-monospace text-success"> 
+                        {{base_points|add:bonus_points|floatformat:'-3g'}} Points
+                        </p>
+                        <p><sup class="text-monospace text-muted">(10,000pts=$10.00)</sup></p>
+                        <a href="{% url 'password_reset' %}" class="btn btn-outline-dark">Change password</a>
+                    </div>
+                    <div class="col">
+                        <div class="bg-secondary text-white rounded-pill">
+                            <span id="rating"></span>
+                        </div>
+                        <p class="text-muted mt-2">The average of how well Jobs are done</p>
+                    </div>
+                  </div>  
+                  
+                </div>
+                <div class="card-footer text-muted">
+                  last job done {{last_work|timesince }} ago <span class="float-right"><a href="{% url 'edit-profile' user.pk %}"><i class="fa fa-edit"></i></a> Edit profile</span>
+                </div>
+            </div>
+            <ul class="list-group list-group-flush mt-2">
+                <li class="list-group-item">Email <span class="float-right">{{user.email}}</span></li>
+                <li class="list-group-item">Date joined 
+                    <span class="float-right">{{user.date_joined}} (since {{user.date_joined|timesince}})</span>
+                </li>
+                <li class="list-group-item">Type of account 
+                    <span class="float-right">{% if user.is_staff %} Moderator {% else %} Subscriber {% endif %}</span>
+                </li>
+                <li class="list-group-item text-monospace">Base Points <span class="bg-secondary float-right rounded-circle text-white p-1">{{base_points|floatformat:'-3g'}}</span></li>
+                <li class="list-group-item text-monospace">Bonus Points <span class="bg-secondary float-right rounded-circle text-white p-1">{{bonus_points|floatformat:'-3g'}}</span></li>
+                <li class="list-group-item text-monospace">Number of jobs completed <span class="bg-secondary float-right rounded-circle text-white p-1">{{jobs_completed|floatformat:'-3g'}}</span></li>
+                <li class="list-group-item text-monospace">Number of jobs cancelled <span class="bg-secondary float-right rounded-circle text-white p-1">{{jobs_cancelled|floatformat:'-3g'}}</span></li>
+            </ul>
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-outline-dark float-right" href="{% url 'chore-home' %}">Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    function numberOfStars(rating) {
+        str = ''
+        star = `<i class="fa fa-star fa-sm"></i>`
+        for (let i=1; i<=rating; i++) {
+            str += star
+        }
+        document.getElementById('rating').innerHTML = `Rating <br> ${str}`
+    }
+    
+</script>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-6">
+            <h3>Login Page</h3>
+            <hr>
+            <form action="" method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <div class="">
+                    <button class="btn btn-outline-dark" type="submit">Login</button>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'chore-home' %}">Back</a>
+                </div>
+            </form>
+            <small class="text-muted">If you don't have an account, <a href="{% url 'sign-up' %}">register here</a></small>
+        </div>
+    </div>
+</div>
+{% endblock %}

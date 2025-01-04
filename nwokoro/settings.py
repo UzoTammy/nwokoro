@@ -45,9 +45,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'account.apps.AccountConfig',
     'core.apps.CoreConfig',
+    'chore.apps.ChoreConfig',
+
     "crispy_forms",
     "crispy_bootstrap4",
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -118,11 +122,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Halifax' #'UTC'
 
-USE_I18N = True
+USE_I18N = True # internationalization
 
-USE_TZ = True
+USE_TZ = True 
 
 
 # Static files (CSS, JavaScript, Images)
@@ -149,3 +153,19 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 django_on_heroku.settings(locals(), staticfiles=False)
+AUTH_USER_MODEL = 'account.User'
+LOGIN_REDIRECT_URL = 'chore-home'
+
+# Celery Configuration Options
+CELERY_BROKER_URL = 'amqp://guest:guest@127.0.0.1:5672/' if DEBUG else ''
+CELERY_TIMEZONE = "America/Halifax"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'uzo.tammy@gmail.com'  # Your Gmail address
+EMAIL_HOST_PASSWORD = 'yuaxpzmtwgkegril'     # Your Gmail password or app-specific password

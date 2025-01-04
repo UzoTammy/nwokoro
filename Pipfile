@@ -13,6 +13,8 @@ python-dotenv = "*"
 crispy-bootstrap4 = "*"
 sphinx = "*"
 furo = "*"
+celery = "*"
+django-celery-beat = "*"
 
 [dev-packages]
 

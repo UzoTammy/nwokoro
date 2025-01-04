@@ -30,9 +30,9 @@
 
     .intro-box {
         font-family: 'Courier New', Courier, monospace;
-        background-color: #000000;
-        color: white;
-        border-color: rgb(240, 237, 232);
+        /* background-color: #000000; */
+        /* color: white; */
+        border-color: rgb(27, 26, 25);
         border-radius: 10% 25%;
         /* border-radius: 50% 20% / 10% 40%; */
     }
@@ -47,20 +47,30 @@
 <div class="container-grid-row">
     <div class="rows-white mt-3 m-2">
         <div class="row">
-            <div class="col-sm-6 intro-box text-right">
-                <h4 class="text-center mt-3" style="font-size: 50px;">Uzo Tammy Nwokoro</h4>
-                <h5 class="first-letter ">
-                    I graduated as an engineer and have had over a decade experience in business operation,
-                    sales and distribution.
-                </h5>
-                <h5 class="first-letter">
-                    Currently, I am pursuing a career in IT; backend development, cloud
-                    technology and cybersecurity.
-                </h5>
-                <h5 class="first-letter">
-                    Hire me and add value to your business.
-                </h5>
-                <img width="200" class="rounded-circle shadow" src="{% static 'tammy.jpeg' %}" alt="">
+            <div class="col-sm-6 intro-box">
+                <div class="card mb-3">
+                    <h4 class="text-center mt-3" style="font-size: 40px;">Uzo Tammy Nwokoro</h4>
+                    <div class="row no-gutters">
+                      <div class="col-md-4 d-flex ">
+                        <img width="100%" class="thumbnail" src="{% static 'tammy.jpeg' %}" alt="">
+                      </div>
+                      <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="first-letter">
+                                I graduated as an engineer and have had over a decade experience in business operation,
+                                sales and distribution.
+                            </h5>
+                            <h5 class="first-letter">
+                                Currently, I am pursuing a career in IT; backend development, cloud
+                                technology and cybersecurity.
+                            </h5>
+                            <h5 class="first-letter">
+                                Hire me and add value to your business.
+                            </h5>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
             </div>
 
             <div class="col-sm-3 float-right">
@@ -71,7 +81,7 @@
                     <p class="first-letter">Team Player</p>
                     <p class="first-letter">Always Learning</p>
                 </div>
-                <div class="rounded-pill bg-dark text-white mb-3">
+                <div class="rounded-pill mb-3">
                     <ul class="list-group">
                         <li class="list-group-item list-group-item-primary">
                             On-going Courses 
@@ -94,7 +104,7 @@
                     <li class="list-group-item"><a href="">SCusH</a>: A custom web application for a business</li>
                     <li class="list-group-item"><a href="">Finuel</a>: Financial management application for non-profit
                         organisation</li>
-                    <li class="list-group-item"><a href="">ProblemToSolution</a>: A coding blog</li>
+                    <li class="list-group-item"><a href="{% url 'chore-home' %}">Chores</a>: Get Teens and Kids to earn money working at home </li>
                     <li class="list-group-item"><a href="{% url 'tinyproject-home' %}">Hands-on Projects</a>: Projects
                         that emphasizes specific concept(s)</li>
                 </ul>

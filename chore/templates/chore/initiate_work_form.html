@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block head %}
+<style>
+    input::placeholder {
+        font-style: italic;
+        color: gray; /* Optional: Change the color of the placeholder text */
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container mt-3">
+    
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-6">
+            <form class="mt-3" action="" method="post">
+                {% csrf_token %}
+                <legend>Job initiate form </legend>
+                <hr>
+                
+                <fieldset class="form-group">
+                    {{ form|crispy }}
+                    <a href="">see sample descriptions ...</a>
+                </fieldset>            
+                <div class="m-2">
+                    <button class="btn btn-outline-dark" type="submit">Submit</button>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'chore-home' %}">Back</a>
+                </div>
+            </form>
+        </div>
+        
+    </div>
+    
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-6">
+
+            
+            <h3>Logout Page</h3>
+            <hr>
+            <p>You have successfully logged out !!!</p>
+            <a class="btn btn-outline-dark" href="{% url 'index' %}">Close</a>
+            <a class="btn btn-outline-dark btn-md float-right" href="{% url 'login' %}">Log back in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

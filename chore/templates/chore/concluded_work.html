@@ -1,0 +1,102 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col">
+            <h3 class="mt-3">
+                {% if request.GET %} Discarded {% else %} Successfully Finished {% endif %} Jobs
+                <span class="btn btn-outline-dark float-right">
+                    {% if request.GET %}
+                    <a href="."><i class="fa fa-check text-successful"></i></a>
+                    {% else %} 
+                    <a href="?state"><i class="fa fa-times text-danger"></i></a> 
+                    {% endif %}
+                </span>
+            </h3>
+            <hr>
+            {% if not object_list %}
+            <h4 class="ml-3">No concluded jobs yet</h4>
+            {% else %}
+            <h6 class="text-muted font-italic">Jobs that 
+                {% if request.GET %} are either withdrawn, expired or cancelled {% else %}earned points {% endif %}</h6>
+            <hr>
+            <table class="table table-sm" id="myTable">
+                <input id="tableFilter" class="form-control mb-3" type="text" placeholder="Filter the table...">
+                <thead>
+                    <th>Job</th>
+                    <th>Assigned to</th>
+                    {% if not request.GET %}
+                    <th class="text-center">Base Point</th>
+                    <th class="text-center">Bonus Point</th>
+                    {% endif %}
+                    <th>Scheduled For</th>
+                    <th>To End At</th>
+                    <th>{% if request.GET %} Discard {% else %} Finish {% endif %} Time</th>
+                </thead>
+                <tbody>
+                    {% for object in object_list %}
+                    <tr>
+                        <td><a href="{% url 'concluded-detail' object.pk %}">{{object.work}}</a></td>
+                        <td>{{object.worker}}</td>
+                        {% if not request.GET %}
+                        <td class="text-center">{{object.base_point}}</td>
+                        <td class="text-center">{{object.bonus_point}}</td>
+                        {% endif %}
+                        <td>{{object.scheduled_time}}</td>
+                        <td>{{object.end_time}}</td>
+                        <td>{{object.finished_time}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% if not request.GET %}
+                <tfoot>
+                    <tr>
+                      <th colspan="2">Total</th>
+                      <th class="text-center" id="totalBasePoint">0</th>
+                      <th class="text-center" id="totalBonusPoint">0</th>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+            {% endif %}
+            <div class="row mt-3">
+                <div class="col">
+                    <a class="btn btn-outline-dark mr-2 float-right" href="{% url 'assign-work-list' %}">Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Calculate totals for numeric columns
+    function calculateTotals() {
+        const rows = document.querySelectorAll('#myTable tbody tr');
+        let totalBasePoint = 0;
+        let totalBonusPoint = 0;
+
+        rows.forEach(row => {
+            if (row.style.display !== 'none') { // Include only visible rows
+                const base = parseInt(row.cells[2].textContent) || 0;
+                const bonus = parseInt(row.cells[3].textContent) || 0;
+
+                totalBasePoint += base;
+                totalBonusPoint += bonus;
+            }
+        });
+
+        // Update footer totals
+        document.getElementById('totalBasePoint').textContent = totalBasePoint.toLocaleString();
+        document.getElementById('totalBonusPoint').textContent = totalBonusPoint.toLocaleString();
+    }
+</script>
+
+{% include 'core/include_table_filter.html' %}
+
+{% endblock %}

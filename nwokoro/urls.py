@@ -21,6 +21,8 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('account.urls')),
     path('', include('core.urls')),
+    path('chores/', include('chore.urls')),
 ] +  static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

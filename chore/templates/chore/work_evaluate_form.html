@@ -1,0 +1,108 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block head %}
+<style>
+    input::placeholder {
+        font-style: italic;
+        color: gray; /* Optional: Change the color of the placeholder text */
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col">
+            <form id="taskWeightForm" class="mt-3" action="" method="post">
+                {% csrf_token %}
+                <legend>Job done form</legend>
+                <hr>
+                <table id="myTable" class="table">
+                    <input id="tableFilter" class="form-control mb-3" type="text" placeholder="Filter the table...">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Factor</th>
+                            <th>Score</th>
+                            <th>Weight</th>
+                            <th>Weighted Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for factor in factors %}
+                        <tr>
+                            <td>{{factor.note}}</td>
+                            <td>{{factor.name}}</td>
+                            <td>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="{{factor.name}}" id="{{factor.name}}1" value="1"
+                                    oninput="CalculateScore(1, `{{factor.weight}}`, `{{factor.name}}Result`)">
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="{{factor.name}}" id="{{factor.name}}2" value="2" 
+                                    oninput="CalculateScore(2, `{{factor.weight}}`, `{{factor.name}}Result`)">
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="{{factor.name}}" id="{{factor.name}}3" value="3"
+                                    oninput="CalculateScore(3, `{{factor.weight}}`, `{{factor.name}}Result`)">
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="{{factor.name}}" id="{{factor.name}}4" value="4"
+                                    oninput="CalculateScore(4, `{{factor.weight}}`, `{{factor.name}}Result`)">
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="{{factor.name}}" id="{{factor.name}}5" value="5"
+                                    oninput="CalculateScore(5, `{{factor.weight}}`, `{{factor.name}}Result`)">
+                                  </div>
+                            </td>
+                            <td>{{factor.weight}}</td>
+                            <td id="{{factor.name}}Result">0</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="2">Total</th>
+                            <th></th>
+                            <th></th>
+                            <th id="wsTotal">0</th>
+                        </tr>
+                    </tfoot>
+                </table>              
+                <div class="m-2">
+                    <button class="btn btn-outline-dark" type="submit">Submit</button>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'chore-home' %}">Back</a>
+                </div>
+            </form>
+        </div>
+        
+    </div>
+    
+</div>
+
+<script>
+    // Calculate totals for numeric columns
+    function Totals() {
+        const rows = document.querySelectorAll('#myTable tbody tr');
+        let weightTotal = 0;
+
+        rows.forEach(row => {
+            if (row.style.display !== 'none') { // Include only visible rows
+                const score = parseInt(row.cells[5].textContent) || 0;
+                console.log(score)
+                weightTotal += score;
+            }
+        });
+
+        // Update footer totals
+        document.getElementById('wsTotal').textContent = weightTotal.toLocaleString();
+    }
+    
+    function CalculateScore(score, weight, demo) {
+
+        document.getElementById(demo).innerHTML = weight * score
+        
+        Totals()
+    };
+</script>
+{% endblock %}

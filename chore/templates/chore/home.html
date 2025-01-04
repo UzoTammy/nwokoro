@@ -1,0 +1,96 @@
+{% extends 'core/base.html' %}
+{% block head %}
+<style>
+    body {
+        background-color: black;
+        color: white;
+    }
+    .modal {
+        color: black;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row align-items-center justify-content-center vh-100">
+        <div class="col">
+            {% if user.is_authenticated %}
+            <h3>"Your Choices Shape Your Future!"
+                <a class="btn btn-outline-success float-right mr-1" href="{% url 'profile' user.pk %}"><i class="fa fa-user"></i></a>
+                {% if not user.is_staff %}
+                <a class="btn btn-outline-success float-right mr-1" href="{% url 'initiate-work' %}">Initiate</a>
+                {% endif %}
+                <a class="btn btn-outline-success float-right mr-1" href="{% url 'work-list' %}">Job List</a>
+                <a class="btn btn-outline-success float-right mr-1" href="{% url 'job-register-list' %}">Job Register</a>
+                
+            </h3>
+            <p>Hello {{user.username}},</p>
+            <p style="font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif">
+                What you do today is all up to you! You can choose to do things that make you smarter, stronger, or more
+                skilled, or you can spend time on things that feel fun but don’t help you grow.
+
+                Here’s the thing: the people who are happiest and most successful in life didn’t get there by
+                chance—they worked hard for it! They learned, practiced, and pushed themselves to be their best.
+
+                Now is the perfect time to start. Think about the future you want and take small steps today to prepare
+                for it. The world is full of opportunities, but it’s also very competitive. The earlier you begin, the
+                farther ahead you’ll get.
+
+                So why wait? Train yourself to be amazing—because your future self will thank you!
+            </p>
+            {% if initiatedjobs %}
+            <div class="row">
+                <div class="col">
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Owner</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in initiatedjobs %}
+                            <tr>
+                                <td>{% if user.is_staff %}
+                                    <a 
+                                    href="{% url 'initiate-work-detail' job.pk %}"
+                                    >{{job.name}}</a>
+                                    {% else %} {{job.name}} {% endif %}
+                                </td>
+                                <td>{{job.worker}}</td>
+                                <td>{{job.description|truncatewords:"30"}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            <p> <span class="text-success">List of assigned jobs,</span> <a href="{% url 'assign-work-list' %}">see them</a> 
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-light">Logout</button>
+                {% if user.is_staff %}
+                <a class="btn btn-outline-light" href="{% url 'chore-setup' %}">Setup</a>
+                {% endif %}
+            </form>
+            {% else %}
+            <h1>Welcome to Chores</h1>
+            <h4 class="ml-3">An App that rewards effort and commitment at home.</h4>
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-primary btn-sm ml-5 mt-3" href="{% url 'login' %}">Sign In</a>
+                    <a class="btn btn-primary btn-sm ml-5 mt-3" href="{% url 'sign-up' %}">Register</a>
+                    <a class="btn btn-primary btn-sm ml-5 mt-3" href="{% url 'index' %}">Back</a>
+                    <a class="btn btn-primary btn-sm ml-5 mt-3" href="{% url 'chore-help' %}">Help</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+  
+{% endblock %}
