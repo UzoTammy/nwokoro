@@ -50,10 +50,12 @@ class WorkCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         if form.cleaned_data['kind'] == 'regular':
             response = super().form_valid(form)
-            JobRegister.objects.create(work=form.instance,
-                                       assigned_to=form.cleaned_data['user'],
-                                       duration=form.cleaned_data['duration'])
-        return response
+            JobRegister.objects.create(
+                work=form.instance,
+                assigned_to=form.cleaned_data['user'],
+                duration=form.cleaned_data['duration'])
+            return response
+        return super().form_valid(form)
 
 class WorkEvaluateView(LoginRequiredMixin, TemplateView):
     template_name = 'chore/work_evaluate_form.html'
