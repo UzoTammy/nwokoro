@@ -31,7 +31,7 @@ SECRET_KEY=os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.getenv('DEBUG_VALUE') == 'True' else False
 
-ALLOWED_HOSTS = ['www.uzonwokoro.com', 'uzonwokoro.com', 'nwokoro-56674c01f9d6.herokuapp.com', 'localhost:8000', '127.0.0.1:8000']
+ALLOWED_HOSTS = ['https://*.uzonwokoro.com', 'https://uzonwokoro.com', 'nwokoro-56674c01f9d6.herokuapp.com', 'localhost:8000', '127.0.0.1:8000']
 
 TEMPLATE_DEBUG = True
 
