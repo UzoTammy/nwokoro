@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-6">
+            <h3>OOPS !!!!</h3>
+            <hr>
+            <h6>{{msg}}</h6>
+            <p>{{error_message}}</p>
+            <a class="btn btn-outline-dark" href="{% url 'chore-home' %}">Close</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

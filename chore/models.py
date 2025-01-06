@@ -106,3 +106,6 @@ class BonusPoint(models.Model):
         #     if BonusPoint.objects.filter(active=True).exclude(pk=self.pk).exists():
         #         raise ValidationError("Only one record can have 'active=True' at a time.")
         super().save(*args, **kwargs)
+
+
+

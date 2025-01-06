@@ -7,52 +7,68 @@
         <div class="col-sm-8">
             <div class="card text-center">
                 <div class="card-header">
-                  
+                    <small class="text-info text-monospace">You can redeem when you have upto 10K points</small>
                 </div>
                 <div class="card-body">
-                  <div class="row">
-                    <div class="col">
-                        <div class="bg-secondary text-white rounded-pill">
-                            <span class="">Effectiveness <br> {{effectiveness}}</span>
+                    <div class="row">
+                        <div class="col">
+                            <div class="bg-secondary text-white rounded-pill">
+                                <span class="">Effectiveness <br> {{effectiveness}}</span>
+                            </div>
+                            <p class="text-muted mt-2">Ratio of Jobs completed to Jobs assigned</p>
                         </div>
-                        <p class="text-muted mt-2">Ratio of Jobs completed to Jobs assigned</p>
-                    </div>
-                    <div class="col">
-                        <h5 class="card-title">{{user}}'s Profile</h5>
-                        <p class="card-text text-monospace text-success"> 
-                        {{base_points|add:bonus_points|floatformat:'-3g'}} Points
-                        </p>
-                        <p><sup class="text-monospace text-muted">(10,000pts=$10.00)</sup></p>
-                        <a href="{% url 'password_reset' %}" class="btn btn-outline-dark">Change password</a>
-                    </div>
-                    <div class="col">
-                        <div class="bg-secondary text-white rounded-pill">
-                            <span id="rating"></span>
+                        <div class="col">
+                            <h5 class="card-title">{{user}}'s Profile</h5>
+                            <p class="card-text text-monospace text-success">
+                                {{user.points|floatformat:'g'}} Points
+                            </p>
+                            <p><sup class="text-monospace text-muted">({{points_to_ten_dollars|floatformat:'g'}}pts=$10.00)</sup></p>
+                            <a href="{% url 'password_reset' %}" class="btn btn-outline-dark">Change password</a>
                         </div>
-                        <p class="text-muted mt-2">The average of how well Jobs are done</p>
+                        <div class="col">
+                            <div class="bg-secondary text-white rounded-pill">
+                                <span id="rating"></span>
+                            </div>
+                            <p class="text-muted mt-2">The average of how well Jobs are done</p>
+                        </div>
                     </div>
-                  </div>  
-                  
+
                 </div>
                 <div class="card-footer text-muted">
-                  last job done {{last_work|timesince }} ago <span class="float-right"><a href="{% url 'edit-profile' user.pk %}"><i class="fa fa-edit"></i></a> Edit profile</span>
+                    last job done {{last_work|timesince }} ago <span class="float-right"><a
+                            href="{% url 'edit-profile' user.pk %}"><i class="fa fa-edit"></i></a> Edit profile</span>
                 </div>
             </div>
             <ul class="list-group list-group-flush mt-2">
                 <li class="list-group-item">Email <span class="float-right">{{user.email}}</span></li>
-                <li class="list-group-item">Date joined 
+                <li class="list-group-item">Date joined
                     <span class="float-right">{{user.date_joined}} (since {{user.date_joined|timesince}})</span>
                 </li>
-                <li class="list-group-item">Type of account 
+                <li class="list-group-item">Type of account
                     <span class="float-right">{% if user.is_staff %} Moderator {% else %} Subscriber {% endif %}</span>
                 </li>
-                <li class="list-group-item text-monospace">Base Points <span class="bg-secondary float-right rounded-circle text-white p-1">{{base_points|floatformat:'-3g'}}</span></li>
-                <li class="list-group-item text-monospace">Bonus Points <span class="bg-secondary float-right rounded-circle text-white p-1">{{bonus_points|floatformat:'-3g'}}</span></li>
-                <li class="list-group-item text-monospace">Number of jobs completed <span class="bg-secondary float-right rounded-circle text-white p-1">{{jobs_completed|floatformat:'-3g'}}</span></li>
-                <li class="list-group-item text-monospace">Number of jobs cancelled <span class="bg-secondary float-right rounded-circle text-white p-1">{{jobs_cancelled|floatformat:'-3g'}}</span></li>
+                <li class="list-group-item text-monospace">Base Points <span
+                        class="bg-secondary float-right rounded-circle text-white p-1">{{base_points|floatformat:'-3g'}}</span>
+                </li>
+                <li class="list-group-item text-monospace">Bonus Points <span
+                        class="bg-secondary float-right rounded-circle text-white p-1">{{bonus_points|floatformat:'-3g'}}</span>
+                </li>
+                <li class="list-group-item text-monospace">Number of jobs completed <span
+                        class="bg-secondary float-right rounded-circle text-white p-1">{{jobs_completed|floatformat:'-3g'}}</span>
+                </li>
+                <li class="list-group-item text-monospace">Number of jobs cancelled <span
+                        class="bg-secondary float-right rounded-circle text-white p-1">{{jobs_cancelled|floatformat:'-3g'}}</span>
+                </li>
             </ul>
             <div class="row">
                 <div class="col">
+                    <!-- Button trigger modal -->
+                    {% if not user.points >=  points_to_ten_dollars %}
+                    <button type="button" class="btn btn-outline-dark" data-toggle="modal" data-target="#exampleModal">
+                        Redeem Points
+                    </button>
+                    
+                    {% endif %}
                     <a class="btn btn-outline-dark float-right" href="{% url 'chore-home' %}">Back</a>
                 </div>
             </div>
@@ -60,16 +76,75 @@
     </div>
 </div>
 
-<script>
+
+<!-- Modal -->
+<div class="modal fade" 
+    data-backdrop="static" 
+    id="exampleModal" 
+    tabindex="-1" 
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Redeem Points</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Accummulated Points: <span class="float-right">{{points.current|floatformat:'g'}} Pts</span>
+                        </li>
+                        <li class="list-group-item">Current Date & Time: <span class="float-right">{% now 'd-M-Y \@ P'%}</span></li>
+                        <li class="list-group-item">
+                            <div class="form-group">
+                                <label for="exampleFormControlSelect1">Redeemable Points</label>
+                                <select onchange="getResult()" class="form-control" id="redeemPoints" name="redeemPoints">
+                                    <option value="0">-----</option>
+                                    {% for point in points.options %}
+                                        <option value="{{point|first}}">{{point|first|floatformat:'g'}} for ${{point|last}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </li>
+                        <li class="list-group-item">Points Balance: <span id="pointsBalance" class="float-right">{{points.current}} Pts</span></li>
     
+                        <li class="list-group-item">
+                            <label for="">Reason</label>
+                            <input name="reason" class="form-control" type="text" placeholder="to buy snickers">
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-outline-dark">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script>
+
     function numberOfStars(rating) {
         str = ''
         star = `<i class="fa fa-star fa-sm"></i>`
-        for (let i=1; i<=rating; i++) {
+        for (let i = 1; i <= rating; i++) {
             str += star
         }
         document.getElementById('rating').innerHTML = `Rating <br> ${str}`
     }
-    
+
+    function getResult() {
+        let redeemPoints = document.getElementById('redeemPoints').value
+        currentPoints = `{{points.current}}`
+        pointBalance = currentPoints - redeemPoints
+        document.getElementById('pointsBalance').innerHTML = `${pointBalance.toLocaleString()} Pts`;
+    }
+
 </script>
 {% endblock %}

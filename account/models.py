@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class CustomAccountManager(BaseUserManager):
@@ -33,7 +34,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_of_birth = models.DateField()
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
     last_login = models.DateTimeField(verbose_name='last login', auto_now=True)
-    # is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -42,12 +42,58 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = CustomAccountManager()
     
     def __str__(self):
-        return self.username
-
+        return f"{self.username}: {self.points} points"
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'date_of_birth']
-    
-    def redeem_point(self, point):
-        pass
-        # take points away from accummulated points
-        # convert to money and remove from total points
+
+    def deposit(self, points, description=None):
+        """
+        Deposit points to the user's account and create a transaction record.
+        """
+        if points <= 0:
+            raise ValidationError("Deposit amount must be greater than zero.")
+        self.points += points
+        self.save()
+
+        # Create a transaction record
+        Transaction.objects.create(user=self, transaction_type="Deposit", amount=points,
+                                   description=description or 'Points deposited to account')
+
+
+    def withdraw(self, points, description=None):
+        """
+        Withdraw points in multiples of 10,000 and create a transaction record.
+        """
+        if points <= 0:
+            raise ValidationError("Withdrawal points must be greater than zero.")
+        if points % 10000 != 0:
+            raise ValidationError("Withdrawal points must be in multiples of 10,000.")
+        if points > self.points:
+            raise ValidationError("Insufficient points for withdrawal.")
+
+        self.points -= points
+        self.save()
+
+        # Create a transaction record
+        Transaction.objects.create(
+            user=self,
+            transaction_type="Withdrawal",
+            amount=-points,
+            description=description or 'Points withdrawn from account')
+
+
+class Transaction(models.Model):
+    TRANSACTION_TYPES = (
+        ("Deposit", "Deposit"),
+        ("Withdrawal", "Withdrawal"),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="transactions")
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
+    amount = models.IntegerField()  # Can be positive (Deposit) or negative (Withdrawal)
+    description = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.transaction_type}: {self.amount} points on {self.timestamp}"

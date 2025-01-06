@@ -135,6 +135,7 @@ class AssignWorkView(LoginRequiredMixin, ListView):
             # check if bonus point is added to this job
             base_point = assigned_work.work.point
             bonus_point_obj = BonusPoint.objects.filter(active=True)
+
             if bonus_point_obj.exists():
                 bonus_point = 0
                 for point in bonus_point_obj:
@@ -154,7 +155,8 @@ class AssignWorkView(LoginRequiredMixin, ListView):
                 end_time=end_time, finished_time=finished_time,
                 state=state, rating=rating, reason=reason
             )
-            assigned_work.assigned.points += fw.points()
+            # assigned_work.assigned.points += fw.points()
+            assigned_work.assigned.deposit(fw.points(), f'Reward for {fw.work.name} done')
             
         elif request.POST['supervisorRadios'] == 'repeat':
             assigned_work.state = 'repeat'

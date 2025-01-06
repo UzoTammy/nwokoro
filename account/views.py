@@ -1,4 +1,5 @@
-from django.shortcuts import render
+import os
+from django.shortcuts import render, redirect
 from django.views.generic import CreateView, DetailView, UpdateView
 from .forms import SignUpForm, EditProfileForm, PasswordResetForm
 from .models import User
@@ -9,6 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from chore.models import FinishedWork
 from django.db.models import Sum, Avg
 from django.utils.formats import number_format
+from django.core.exceptions import ValidationError
 
 class SignUpView(CreateView):
     model = User
@@ -56,7 +58,22 @@ class ProfileView(LoginRequiredMixin, DetailView):
 
         finished_work = FinishedWork.objects.filter(worker=self.kwargs['pk']).filter(state='cancel')
         context['jobs_cancelled'] = finished_work.count() if finished_work.exists() else 0
+        points_to_ten_dollars = int(float(os.getenv('POINTS_TO_TEN_DOLLARS', '10000')))
+        current_points = self.request.user.points
+        options = [(p*points_to_ten_dollars, p*10) for p in range(1, divmod(current_points, points_to_ten_dollars)[0]+1)]
+        context['points'] = {'current': current_points, 'to_ten_dollars': points_to_ten_dollars, 'options': options}
         return context
+    
+    def post(self, request, *args, **kwargs):
+        redeemable_points = int(request.POST['redeemPoints'])
+
+        try:
+            request.user.withdraw(redeemable_points, description=request.POST['reason'])
+        except ValidationError as ve:
+            return render(request, 'account/error.html', {'error_message': ve.message,
+                                                          'msg':f'Request to redeem points failed. You have {request.user.points} Pts only'})
+
+        return redirect('profile', pk=kwargs['pk'])
     
 class EditProfileView(LoginRequiredMixin, UpdateView):
     model = User
