@@ -2,7 +2,7 @@ from django.utils import timezone
 from celery import shared_task
 from .models import Work, AssignWork, FinishedWork
 from account.models import User
-
+from .emails import Email
 
 @shared_task
 def delist_expired_job():
@@ -46,7 +46,6 @@ def task_dishwash(work_id, worker_id, duration):
     assign_work.save()
     # send email
 
-
 @shared_task
-def add(a, b):
-    return a + b
+def send_me_mail():
+    Email.email_admin()
