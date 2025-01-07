@@ -1,13 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .list-group {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .styled-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .styled-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 5px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .styled-list li:last-child {
+      border-bottom: none;
+    }
+        .list-group-item {
+            font-weight: normal;
+            color: #555;
+        }
+
+        .item-value {
+            text-align: right;
+            color: #007bff;
+        }
+    </style>
     <title>Admin email</title>
 </head>
+
 <body>
-    <h3>Hello Admin,</h3>
-    <p>Chores have {{workers}} workers and {{moderators}} moderators.</p>
-    <p>Thanks,<br>Chores Team</p>
+    <div class="list-group">
+        <h3>Hello Moderator,</h3>
+        <p>Chores summary report</p>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #ddd;">
+              <td style="font-weight: bold; color: #555; padding: 15px 10px;">Jobs Executed</td>
+              <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{jobs_executed}}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #ddd;">
+              <td style="font-weight: bold; color: #555; padding: 15px 10px;">Jobs Cancelled</td>
+              <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{jobs_cancelled}}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #ddd;">
+              <td style="font-weight: bold; color: #555; padding: 15px 10px;">Points Accrued</td>
+              <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{points}}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #ddd;">
+              <td style="font-weight: bold; color: #555; padding: 15px 10px;">Points Redeemed</td>
+              <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{points_redeemed}}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #ddd;">
+              <td style="font-weight: bold; color: #555; padding: 15px 10px;">Base Points</td>
+              <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{base_points}}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td style="font-weight: bold; color: #555; padding: 15px 10px;">Bonus Points</td>
+                <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{bonus_points}}</td>
+              </tr>
+          </table>
+        <p>Thanks,<br>Chores Team</p>
+    </div>
 </body>
+
 </html>

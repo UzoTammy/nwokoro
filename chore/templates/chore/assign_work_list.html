@@ -25,9 +25,16 @@
                 <tbody>
                     {% for object in object_list %}
                     <tr>
-                        <td><a href="{% url 'work-done' object.pk %}">{{object.work}}</a></td>
+                        
+                        <td>
+                          {% if object.is_expired %}
+                          {{object.work}}
+                          {% else %}
+                          <a href="{% url 'work-done' object.pk %}">{{object.work}}</a>
+                          {% endif %}
+                        </td>
                         <td>{{object.schedule}}</td>
-                        <td>{{object.assigned}}</td>
+                        <td>{{object.assigned.username}}</td>
                         {% if object.is_expired %}
                         <td class="font-italic text-danger">expired</td>
                         {% else %}
@@ -66,7 +73,7 @@
                             {% endif %}
                         </td>
                         <td>{{object.schedule}}</td>
-                        <td>{{object.assigned}}</td>
+                        <td>{{object.assigned.username}}</td>
                         {% if object.is_expired %}
                         <td class="font-italic text-danger">expired</td>
                         {% else %}

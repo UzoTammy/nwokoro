@@ -1,9 +1,11 @@
 from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.utils import timezone
+from django.db.models.aggregates import Sum
 from django.views.generic import (TemplateView, CreateView, DetailView, ListView, UpdateView)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Work, AssignWork, JobRegister, FinishedWork, InitiateWork, BonusPoint
+from account.models import User, Transaction
 from .forms import (AddWorkForm, EarnPointForm, JobRegisterForm, DelegateWorkForm, InitiateWorkForm,
                     InitiateWorkApproveForm, BonusPointForm)
 from django.contrib import messages
@@ -32,6 +34,14 @@ class ChoreHome(TemplateView):
         context = super().get_context_data(*args, **kwargs)
         context['works'] = Work.objects.all()
         context['initiatedjobs'] = InitiateWork.objects.filter(approved=False)
+        return context
+
+class ChoreDashboard(LoginRequiredMixin, TemplateView):
+    template_name = 'chore/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(Email.DATA)
         return context
 
 class ChoreSetupView(LoginRequiredMixin, TemplateView):

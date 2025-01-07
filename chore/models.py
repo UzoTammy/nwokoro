@@ -27,7 +27,7 @@ class AssignWork(models.Model):
     end_time = models.DateTimeField(default=timezone.now)
     source = models.CharField(max_length=20, default='delegated') # delegated, scheduled, initiated
     # status = models.BooleanField(default=True) # active is True, Done/Cancelled is False
-    state = models.CharField(max_length=10, default='active') # active, done & cancel
+    state = models.CharField(max_length=10, default='active') # active, repeat, done & cancel
 
     def is_expired(self):
         if self.end_time > timezone.now():
@@ -42,7 +42,7 @@ class FinishedWork(models.Model):
     scheduled_time = models.DateTimeField()
     end_time = models.DateTimeField()
     finished_time = models.DateTimeField()
-    state = models.CharField(max_length=10) #done, 
+    state = models.CharField(max_length=10) #done, cancel
     reason = models.CharField(max_length=20) #expired, not committed, 
     rating = models.FloatField(default=0.7)
 

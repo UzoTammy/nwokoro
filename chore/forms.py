@@ -6,6 +6,11 @@ from account.models import User
 from django_celery_beat.models import PeriodicTask, IntervalSchedule
 
 
+class CustomDelegateAssignChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return obj.username  # Replace `name` with the desired field to display
+
+
 class AddWorkForm(forms.ModelForm):
     kind = forms.CharField(widget=forms.Select(
         choices=[('regular', 'Regular'), ('occasional', 'Occasional'), ('one-time', 'One-time')],
@@ -54,8 +59,13 @@ class EarnPointForm(forms.ModelForm):
     class Meta:
         model = AssignWork
         fields = []
-
+    
 class DelegateWorkForm(forms.ModelForm):
+    assigned = CustomDelegateAssignChoiceField(
+        queryset=User.objects.filter(is_staff=False),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+    
     end_time = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type': "datetime-local", 'class': 'form-control'}))
     class Meta:
         model = AssignWork

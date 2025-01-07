@@ -2,20 +2,27 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.urls import reverse
-from account.models import User
+from account.models import Transaction
+from .models import FinishedWork
+from django.db.models.aggregates import Sum
+
 
 class Email:
-
+    DATA = {
+            'jobs_executed': FinishedWork.objects.filter(state='done').count(),
+            'jobs_cancelled': FinishedWork.objects.filter(state='cancel').count(),
+            'points': Transaction.objects.filter(amount__gt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
+            'points_redeemed': Transaction.objects.filter(amount__lt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
+            'base_points': FinishedWork.objects.none().aggregate(Sum('base_point'))['base_point__sum'] or 0,
+            'bonus_points': FinishedWork.objects.none().aggregate(Sum('bonus_point'))['bonus_point__sum'] or 0
+        }
     def email_admin():
         subject = "Routine email to admin on chores"
         from_email = "no-reply@chores.com"
         to_email = ["nwokorouzo77@gmail.com"]
 
         # Load the HTML content
-        html_content = render_to_string('chore/mails/admin.html', {
-            'workers': User.objects.filter(is_staff=False).count(),
-            'moderators': User.objects.filter(is_staff=True).count()
-            })
+        html_content = render_to_string('chore/mails/admin.html', Email.DATA)
         # Create the email message
         msg = EmailMultiAlternatives(subject, "plain text", from_email, to_email)
         msg.attach_alternative(html_content, "text/html")

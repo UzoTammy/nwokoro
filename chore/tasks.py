@@ -6,7 +6,7 @@ from .emails import Email
 
 @shared_task
 def delist_expired_job():
-    assigned_works = AssignWork.objects.filter(state='active')
+    assigned_works = AssignWork.objects.filter(state__in=['active', 'repeat'])
     for assigned_work in assigned_works:
         if assigned_work.is_expired():
             assigned_work.state='cancel'
@@ -21,9 +21,15 @@ def delist_expired_job():
                 end_time=assigned_work.end_time,
                 finished_time=timezone.now(),
                 state='cancel',
-                reason='expired'
+                reason='expired',
+                rating=0
             )
-            
+
+
+@shared_task
+def schedule_job():
+    """1. go to the job register"""
+       
 @shared_task
 def task_dishwash(work_id, worker_id, duration):
     
@@ -49,3 +55,4 @@ def task_dishwash(work_id, worker_id, duration):
 @shared_task
 def send_me_mail():
     Email.email_admin()
+
