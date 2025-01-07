@@ -78,6 +78,28 @@
                 <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{bonus_points}}</td>
               </tr>
           </table>
+          <hr>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <th>Username</th>
+                    <th>Balance Pts</th>
+                    <th>Jobs Done</th>
+                    <th>Redeem Pts</th>
+                </tr>
+
+            </thead>
+            <tbody>
+                {% for worker in workers %}
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{worker.username}}</td>
+                    <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{worker.points}}</td>
+                    <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{worker.jobs}}</td>
+                    <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{worker.redeem}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
         <p>Thanks,<br>Chores Team</p>
     </div>
 </body>

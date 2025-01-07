@@ -5,6 +5,7 @@ from django.urls import reverse
 from account.models import Transaction
 from .models import FinishedWork
 from django.db.models.aggregates import Sum
+from account.models import User
 
 
 class Email:
@@ -16,13 +17,22 @@ class Email:
             'base_points': FinishedWork.objects.none().aggregate(Sum('base_point'))['base_point__sum'] or 0,
             'bonus_points': FinishedWork.objects.none().aggregate(Sum('bonus_point'))['bonus_point__sum'] or 0
         }
-    def email_admin():
+    workers = User.objects.filter(is_staff=False)
+    
+    WORKERS = {'workers': [{
+            'username': worker.username,
+            'points': worker.points,
+            'jobs': worker.transactions.filter(amount__gt=0).count(),
+            'redeem': worker.transactions.aggregate(Sum('amount'))['amount__sum'] or 0,
+        } for worker in workers ]} 
+    
+    def email_dashboard():
         subject = "Routine email to admin on chores"
         from_email = "no-reply@chores.com"
         to_email = ["nwokorouzo77@gmail.com"]
 
         # Load the HTML content
-        html_content = render_to_string('chore/mails/admin.html', Email.DATA)
+        html_content = render_to_string('chore/mails/dashboard.html', Email.DATA.update(Email.WORKERS))
         # Create the email message
         msg = EmailMultiAlternatives(subject, "plain text", from_email, to_email)
         msg.attach_alternative(html_content, "text/html")

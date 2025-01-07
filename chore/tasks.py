@@ -1,11 +1,12 @@
 from django.utils import timezone
 from celery import shared_task
-from .models import Work, AssignWork, FinishedWork
-from account.models import User
+from .models import AssignWork, FinishedWork
 from .emails import Email
+
 
 @shared_task
 def delist_expired_job():
+    "Remove expired jobs from job list after 3 hours"
     assigned_works = AssignWork.objects.filter(state__in=['active', 'repeat'])
     for assigned_work in assigned_works:
         if assigned_work.is_expired():
@@ -25,34 +26,12 @@ def delist_expired_job():
                 rating=0
             )
 
+@shared_task
+def send_me_mail():
+    Email.email_dashboard()
 
 @shared_task
 def schedule_job():
     """1. go to the job register"""
-       
-@shared_task
-def task_dishwash(work_id, worker_id, duration):
-    
-    work = Work.objects.get(pk=work_id)
-
-    # Delist latest assigned work whose time is exhausted
-    listed_works = AssignWork.objects.filter(work=work).filter(state='active')
-    if listed_works.exists():
-        latest = listed_works.latest('schedule')
-        # 
-        if latest.end_time <= timezone.now():
-            latest.state = 'cancel'
-            latest.save()
-
-    worker = User.objects.get(pk=worker_id)
-    assign_work = AssignWork(work=work, assigned=worker)
-    assign_work.schedule = timezone.now()
-    assign_work.end_time = assign_work.schedule + timezone.timedelta(hours=duration)
-    assign_work.source = 'scheduled'
-    assign_work.save()
-    # send email
-
-@shared_task
-def send_me_mail():
-    Email.email_admin()
+ 
 

@@ -20,6 +20,31 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Balance Pts</th>
+                                <th>Jobs Done</th>
+                                <th>Redeem Pts</th>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                            {% for worker in workers %}
+                            <tr>
+                                <td>{{worker.username}}</td>
+                                <td>{{worker.points}}</td>
+                                <td>{{worker.jobs}}</td>
+                                <td>{{worker.redeem}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
                 <div class="col mt-3">
                     <a class="btn btn-outline-dark float-right" href="{% url 'chore-home' %}">Back</a>
                 </div>
