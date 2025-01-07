@@ -42,7 +42,6 @@ class ChoreDashboard(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(Email.DATA)
-        context.update(Email.WORKERS)
         return context
 
 class ChoreSetupView(LoginRequiredMixin, TemplateView):
