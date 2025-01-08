@@ -16,13 +16,13 @@ class Email:
             'jobs_cancelled': FinishedWork.objects.filter(state='cancel').count(),
             'points': Transaction.objects.filter(amount__gt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
             'points_redeemed': Transaction.objects.filter(amount__lt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
-            'base_points': FinishedWork.objects.none().aggregate(Sum('base_point'))['base_point__sum'] or 0,
-            'bonus_points': FinishedWork.objects.none().aggregate(Sum('bonus_point'))['bonus_point__sum'] or 0,
+            'base_points': FinishedWork.objects.aggregate(Sum('base_point'))['base_point__sum'] or 0,
+            'bonus_points': FinishedWork.objects.aggregate(Sum('bonus_point'))['bonus_point__sum'] or 0,
             'workers': [{
             'username': worker.username,
             'points': worker.points,
             'jobs': worker.transactions.filter(amount__gt=0).count(),
-            'redeem': worker.transactions.aggregate(Sum('amount'))['amount__sum'] or 0,
+            'redeem': worker.transactions.filter(amount__lt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
                 } for worker in workers
             ],
 

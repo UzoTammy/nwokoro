@@ -12,10 +12,10 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between align-items-center">Jobs Executed <span class="badge-success badge-pill">{{jobs_executed}}</span></li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">Jobs Cancelled <span class="badge-success badge-pill">{{jobs_cancelled}}</span></li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">Points Accrued <span class="badge-success badge-pill">{{points}}</span></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">Points Accrued <span class="badge-success badge-pill">{{points|floatformat:'g'}}</span></li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">Points Redeemed <span class="badge-success badge-pill">{{points_redeemed}}</span></li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">Base Points <span class="badge-success badge-pill">{{base_points}}</span></li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">Bonus Points <span class="badge-success badge-pill">{{bonus_points}}</span></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">Base Points <span class="badge-success badge-pill">{{base_points|floatformat:'g'}}</span></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">Bonus Points <span class="badge-success badge-pill">{{bonus_points|floatformat:'g'}}</span></li>
                       </ul>
                 </div>
             </div>
@@ -35,9 +35,9 @@
                             {% for worker in workers %}
                             <tr>
                                 <td>{{worker.username}}</td>
-                                <td>{{worker.points}}</td>
+                                <td>{{worker.points|floatformat:'g'}}</td>
                                 <td>{{worker.jobs}}</td>
-                                <td>{{worker.redeem}}</td>
+                                <td>{{worker.redeem|floatformat:'g'}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
