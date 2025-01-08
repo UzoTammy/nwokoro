@@ -16,7 +16,7 @@ class AddWorkForm(forms.ModelForm):
         choices=[('regular', 'Regular'), ('occasional', 'Occasional'), ('one-time', 'One-time')],
         attrs={'onchange': 'showElements()'}))
     
-    user = forms.ModelChoiceField(
+    user = CustomDelegateAssignChoiceField(
         queryset=User.objects.filter(is_staff=False),
         widget=forms.Select(attrs={'class': 'form-control'}),
         required=False,

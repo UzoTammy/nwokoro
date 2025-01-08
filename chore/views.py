@@ -118,8 +118,11 @@ class WorkListView(LoginRequiredMixin, ListView):
     model = Work
     ordering = 'name'
 
-class WorkDetailView(LoginRequiredMixin, DetailView):
+class WorkDetailView(LoginRequiredMixin, UpdateView):
     model = Work
+    form_class = AddWorkForm
+    success_url = reverse_lazy('work-list')
+
 
 class AssignWorkView(LoginRequiredMixin, ListView):
     queryset = AssignWork.objects.filter(state='active')|AssignWork.objects.filter(state='repeat')

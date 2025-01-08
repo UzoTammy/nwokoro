@@ -25,7 +25,7 @@
                 <tbody>
                     {% for object in object_list %}
                     <tr>
-                        <td><a href="{% url 'chore-home' %}">{{object.name}}</a></td>
+                        <td><a href="{% url 'work-detail' object.pk %}">{{object.name}}</a></td>
                         <td>{{object.point}} <a href="{% url 'work-evaluate' %}"><i class="fa fa-edit"></i></a></td>
                         <td><a href="#" data-toggle="tooltip" title="{{object.description}}">{{object.description|truncatewords:7}}</a></td>
                     </tr>
