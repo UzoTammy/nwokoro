@@ -10,7 +10,6 @@ from account.models import User
 
 class Email:
 
-
     workers = User.objects.filter(is_staff=False)
     DATA = {
             'jobs_executed': FinishedWork.objects.filter(state='done').count(),
@@ -26,7 +25,7 @@ class Email:
             'redeem': worker.transactions.aggregate(Sum('amount'))['amount__sum'] or 0,
                 } for worker in workers
             ],
-            
+
         }
     
      

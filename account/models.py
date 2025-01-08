@@ -32,12 +32,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=True)
     email = models.EmailField(verbose_name='email', max_length=50, unique=True)
     date_of_birth = models.DateField()
+    points = models.IntegerField(default=0)
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
     last_login = models.DateTimeField(verbose_name='last login', auto_now=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    points = models.IntegerField(default=0)
+    
     
     objects = CustomAccountManager()
     
