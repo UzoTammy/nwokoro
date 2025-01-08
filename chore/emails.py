@@ -26,6 +26,7 @@ class Email:
             'redeem': worker.transactions.aggregate(Sum('amount'))['amount__sum'] or 0,
                 } for worker in workers
             ],
+            
         }
     
      

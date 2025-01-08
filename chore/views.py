@@ -14,9 +14,9 @@ from .emails import Email
 
 FACTORS = [
 
-    { "note": "requires creativity", "name": "Complexity", "weight": 10 },
-    { "note": "deadline needed", "name": "Urgency", "weight": 10 },
-    { "note": "critical for satisfaction", "name": "Importance", "weight": 15 },
+    {"note": "requires creativity", "name": "Complexity", "weight": 10 },
+    {"note": "deadline needed", "name": "Urgency", "weight": 10 },
+    {"note": "critical for satisfaction", "name": "Importance", "weight": 15 },
     {"note": "will take several hours", "name": "Time Required", "weight": 10 },
     {"note": "requires specific tools and data", "name": "Resources Needed", "weight": 5 },
     {"note": "relies on inputs from one other person", "name": "Dependencies", "weight": 5 },
@@ -123,7 +123,6 @@ class WorkDetailView(LoginRequiredMixin, UpdateView):
     form_class = AddWorkForm
     success_url = reverse_lazy('work-list')
 
-
 class AssignWorkView(LoginRequiredMixin, ListView):
     queryset = AssignWork.objects.filter(state='active')|AssignWork.objects.filter(state='repeat')
     template_name = 'chore/assign_work_list.html'
@@ -136,7 +135,8 @@ class AssignWorkView(LoginRequiredMixin, ListView):
     def post(self, request, *args, **kwargs):
         assigned_work = AssignWork.objects.get(pk=request.POST['pk'])
         worker = assigned_work.assigned
-        work = assigned_work.work.name
+        work_obj = assigned_work.work
+        work = work_obj
         scheduled_time = assigned_work.schedule
         end_time = assigned_work.end_time
         finished_time = timezone.now()
@@ -169,7 +169,7 @@ class AssignWorkView(LoginRequiredMixin, ListView):
                 state=state, rating=rating, reason=reason
             )
             # assigned_work.assigned.points += fw.points()
-            assigned_work.assigned.deposit(fw.points(), f'Reward for {fw.work.name} done')
+            assigned_work.assigned.deposit(fw.points(), f'Reward for {fw.work_obj.name} done')
             
         elif request.POST['supervisorRadios'] == 'repeat':
             assigned_work.state = 'repeat'

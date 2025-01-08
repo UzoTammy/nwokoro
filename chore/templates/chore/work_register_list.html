@@ -21,7 +21,7 @@
                     <tr>
                         <td><a href="{% url 'job-register-update' object.pk %}">{{object.work}}</a></td>
                         <td class="text-center">{{object.duration}}</td>
-                        <td>{{object.assigned_to}}</td>
+                        <td>{{object.assigned_to.username}}</td>
                         <td>{{object.work.point}}</td>
                     </tr>
                     {% endfor %}
