@@ -100,7 +100,7 @@ class WorkDoneView(LoginRequiredMixin, UpdateView):
         bonus_point = 0
         if bonus_point_obj.exists():
             for p in bonus_point_obj:
-                bonus_point += p.bonus_value * self.get_object().work.base_point if p.bonus_value <= 1.0 else p.bonus_value
+                bonus_point += p.bonus_value * self.get_object().work.point if p.bonus_value <= 1.0 else p.bonus_value
         context['bonus_point'] = bonus_point #int(0.2 * self.get_object().work.point)
         return context
 
