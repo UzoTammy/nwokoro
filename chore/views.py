@@ -135,7 +135,7 @@ class AssignWorkView(LoginRequiredMixin, ListView):
     def post(self, request, *args, **kwargs):
         assigned_work = AssignWork.objects.get(pk=request.POST['pk'])
         worker = assigned_work.assigned
-        work_obj = assigned_work.work
+        work = assigned_work.work
         # work = work_obj
         scheduled_time = assigned_work.schedule
         end_time = assigned_work.end_time
@@ -163,13 +163,13 @@ class AssignWorkView(LoginRequiredMixin, ListView):
             
             # Create the finished work
             fw=FinishedWork.objects.create(
-                worker=worker, work=work_obj, base_point=base_point, 
+                worker=worker, work=work, base_point=base_point, 
                 bonus_point=bonus_point, scheduled_time=scheduled_time,
                 end_time=end_time, finished_time=finished_time,
                 state=state, rating=rating, reason=reason
             )
             # assigned_work.assigned.points += fw.points()
-            assigned_work.assigned.deposit(fw.points(), f'Reward for {fw.work_obj.name} done')
+            assigned_work.assigned.deposit(fw.points(), f'Reward for {fw.work.name} done')
             
         elif request.POST['supervisorRadios'] == 'repeat':
             assigned_work.state = 'repeat'

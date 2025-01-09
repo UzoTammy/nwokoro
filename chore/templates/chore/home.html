@@ -63,7 +63,7 @@
                                     >{{job.name}}</a>
                                     {% else %} {{job.name}} {% endif %}
                                 </td>
-                                <td>{{job.worker}}</td>
+                                <td>{{job.worker.username}}</td>
                                 <td>{{job.description|truncatewords:"30"}}</td>
                             </tr>
                             {% endfor %}

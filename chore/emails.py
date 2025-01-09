@@ -6,27 +6,47 @@ from account.models import Transaction
 from .models import FinishedWork
 from django.db.models.aggregates import Sum
 from account.models import User
-
+from django.db.models.functions import TruncWeek
 
 class Email:
 
     workers = User.objects.filter(is_staff=False)
-    DATA = {
-            'jobs_executed': FinishedWork.objects.filter(state='done').count(),
-            'jobs_cancelled': FinishedWork.objects.filter(state='cancel').count(),
-            'points': Transaction.objects.filter(amount__gt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
-            'points_redeemed': Transaction.objects.filter(amount__lt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
-            'base_points': FinishedWork.objects.aggregate(Sum('base_point'))['base_point__sum'] or 0,
-            'bonus_points': FinishedWork.objects.aggregate(Sum('bonus_point'))['bonus_point__sum'] or 0,
-            'workers': [{
-            'username': worker.username,
-            'points': worker.points,
-            'jobs': worker.transactions.filter(amount__gt=0).count(),
-            'redeem': worker.transactions.filter(amount__lt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
-                } for worker in workers
-            ],
+    workers_pk = workers.values_list('pk', flat=True)
 
-        }
+    weekly_performance = [(
+        FinishedWork.objects.filter(worker__pk=pk).annotate(week=TruncWeek('finished_time'))  # Replace 'date_field' with your model's date/datetime field
+        .values('week')
+        .annotate(
+            base_point=Sum('base_point'),
+            bonus_point=Sum('bonus_point')
+        )  # Replace 'some_numeric_field' with the field to sum up
+        .order_by('week').last()  # Optional: order by week
+    ) for pk in workers_pk]
+    # Attach a user to each weekly performance
+    
+    if any(weekly_performance):
+        wp = []
+        for p in zip(workers_pk, weekly_performance):
+            p[1]['worker'] = User.objects.get(pk=p[0]).username
+            wp.append(p[1])
+        weekly_performance = wp  
+
+    DATA = {
+        'jobs_executed': FinishedWork.objects.filter(state='done').count(),
+        'jobs_cancelled': FinishedWork.objects.filter(state='cancel').count(),
+        'points': Transaction.objects.filter(amount__gt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
+        'points_redeemed': Transaction.objects.filter(amount__lt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
+        'base_points': FinishedWork.objects.aggregate(Sum('base_point'))['base_point__sum'] or 0,
+        'bonus_points': FinishedWork.objects.aggregate(Sum('bonus_point'))['bonus_point__sum'] or 0,
+        'workers': [{
+        'username': worker.username,
+        'points': worker.points,
+        'jobs': worker.transactions.filter(amount__gt=0).count(),
+        'redeem': worker.transactions.filter(amount__lt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
+            } for worker in workers
+        ],
+        'weekly_performance': weekly_performance
+    }
     
      
     def email_dashboard():

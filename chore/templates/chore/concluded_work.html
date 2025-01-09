@@ -31,15 +31,15 @@
                     <th class="text-center">Base Point</th>
                     <th class="text-center">Bonus Point</th>
                     {% endif %}
-                    <th>Scheduled For</th>
-                    <th>To End At</th>
+                    <th>Scheduled Time</th>
+                    <th>End Time</th>
                     <th>{% if request.GET %} Discard {% else %} Finish {% endif %} Time</th>
                 </thead>
                 <tbody>
                     {% for object in object_list %}
                     <tr>
                         <td><a href="{% url 'concluded-detail' object.pk %}">{{object.work}}</a></td>
-                        <td>{{object.worker}}</td>
+                        <td>{{object.worker.username}}</td>
                         {% if not request.GET %}
                         <td class="text-center">{{object.base_point}}</td>
                         <td class="text-center">{{object.bonus_point}}</td>
