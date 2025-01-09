@@ -41,7 +41,12 @@ class ChoreDashboard(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update(Email.DATA)
+        
+        workers = User.objects.filter(is_staff=False)
+        finished_works = FinishedWork.objects.all()
+        transactions = Transaction.objects.all()
+
+        context.update(Email.get_context(workers, finished_works, transactions))
         return context
 
 class ChoreSetupView(LoginRequiredMixin, TemplateView):
@@ -189,8 +194,7 @@ class AssignWorkView(LoginRequiredMixin, ListView):
                 state=state, rating=0.0, reason=reason
             )
         assigned_work.save()
-
-        return redirect('assign-work-list')
+        return super().get(request, *args, **kwargs) #redirect('assign-work-list')
 
 class JobRegisterListView(LoginRequiredMixin, ListView):
     model = JobRegister

@@ -9,25 +9,24 @@
             <h3 class="text-center">Dashboard</h3>
             <div class="row">
                 <div class="col">
+                    <h5><i class="fa fa-layer-group text-primary"></i> General</h5>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">Jobs Executed <span class="badge-success badge-pill">{{jobs_executed}}</span></li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">Jobs Cancelled <span class="badge-success badge-pill">{{jobs_cancelled}}</span></li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">Points Accrued <span class="badge-success badge-pill">{{points|floatformat:'g'}}</span></li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">Points Redeemed <span class="badge-success badge-pill">{{points_redeemed}}</span></li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">Base Points <span class="badge-success badge-pill">{{base_points|floatformat:'g'}}</span></li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">Bonus Points <span class="badge-success badge-pill">{{bonus_points|floatformat:'g'}}</span></li>
-                      </ul>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">Jobs Executed <span class="badge-pill">{{jobs_executed}}</span></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">Jobs Cancelled <span class="badge-pill">{{jobs_cancelled}}</span></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">Points Accrued <span class="badge-pill">{{points|floatformat:'g'}}</span></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">Points Redeemed <span class="badge-pill">{{points_redeemed}}</span></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">Base Points <span class="badge-pill">{{base_points|floatformat:'g'}}</span></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">Bonus Points <span class="badge-pill">{{bonus_points|floatformat:'g'}}</span></li>
+                    </ul>
+                    <hr>
+                    <h5><i class="fa fa-layer-group text-primary"></i> Individual</h5>
                     <table class="table">
                         <thead>
                             <tr>
                                 <th>Username</th>
-                                <th>Balance Pts</th>
-                                <th>Jobs Done</th>
-                                <th>Redeem Pts</th>
+                                <th class="text-right">Balance Pts</th>
+                                <th class="text-right">Jobs Done</th>
+                                <th class="text-right">Redeem Pts</th>
                             </tr>
 
                         </thead>
@@ -35,36 +34,38 @@
                             {% for worker in workers %}
                             <tr>
                                 <td>{{worker.username}}</td>
-                                <td>{{worker.points|floatformat:'g'}}</td>
-                                <td>{{worker.jobs}}</td>
-                                <td>{{worker.redeem|floatformat:'g'}}</td>
+                                <td class="text-right">{{worker.points|floatformat:'g'}}</td>
+                                <td class="text-right">{{worker.jobs}}</td>
+                                <td class="text-right">{{worker.redeem|floatformat:'g'}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
-                    <div class="row">
-                        <div class="col">
-                            <h3>Weekly Performance: Week</h3>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Week</th>
-                                        <th>Base Point</th>
-                                        <th>Bonus Point</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for performance in weekly_performance %}
-                                    <tr>
-                                        <td>{{performance.worker}}</td>
-                                        <td>{{performance.base_point}}</td>
-                                        <td>{{performance.bonus_point}}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <hr>
+                    <h5>
+                        <i class="fa fa-layer-group text-primary"></i> Weekly Performance: Week 
+                                {% with weekly_performance|last as xx%}
+                                    {{xx.week|date:'W'}}
+                                {% endwith %}
+                    </h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Workers</th>
+                                <th class="text-right">Base Point</th>
+                                <th class="text-right">Bonus Point</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for performance in weekly_performance %}
+                            <tr>
+                                <td>{{performance.worker}}</td>
+                                <td class="text-right">{{performance.base_point}}</td>
+                                <td class="text-right">{{performance.bonus_point}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div class="row">
