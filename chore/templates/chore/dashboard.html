@@ -32,7 +32,7 @@
                         <tbody>
                             {% for worker in workers %}
                             <tr>
-                                <td>{{worker.username}}</td>
+                                <td><a href="{% url 'profile' worker.pk %}">{{worker.username}}</a></td>
                                 <td class="text-right">{{worker.points|floatformat:'g'}}</td>
                                 <td class="text-right">{{worker.jobs}}</td>
                                 <td class="text-right">{{worker.redeem|floatformat:'g'}}</td>
@@ -42,14 +42,13 @@
                     </table>
                     <hr>
                     <h5>
-                        <i class="fa fa-layer-group text-primary"></i> Weekly Performance: Week 
-                                {% with weekly_performance|last as xx%}
-                                    {{xx.week|date:'W'}}
-                                {% endwith %}
+                        <i class="fa fa-layer-group text-primary"></i> 
+                        Last Weekly Performance 
                     </h5>
                     <table class="table">
                         <thead>
                             <tr>
+                                <th>Week</th>
                                 <th>Workers</th>
                                 <th class="text-right">Base Point</th>
                                 <th class="text-right">Bonus Point</th>
@@ -58,13 +57,16 @@
                         <tbody>
                             {% for performance in weekly_performance %}
                             <tr>
+                                <td>{{performance.week|date:'W'}}</td>
                                 <td>{{performance.worker}}</td>
                                 <td class="text-right">{{performance.base_point}}</td>
                                 <td class="text-right">{{performance.bonus_point}}</td>
                             </tr>
                             {% endfor %}
+                            <small class="text-muted">The week start every monday</small>
                         </tbody>
                     </table>
+                                
                 </div>
             </div>
             <div class="row">

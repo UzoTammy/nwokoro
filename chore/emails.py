@@ -42,11 +42,13 @@ class Email:
             'points_redeemed': transactions.filter(amount__lt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
             'base_points': finished_works.aggregate(Sum('base_point'))['base_point__sum'] or 0,
             'bonus_points': finished_works.aggregate(Sum('bonus_point'))['bonus_point__sum'] or 0,
-            'workers': [{
-            'username': worker.username,
-            'points': worker.points,
-            'jobs': worker.transactions.filter(amount__gt=0).count(),
-            'redeem': worker.transactions.filter(amount__lt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
+            'workers': [
+                {
+                    'pk': worker.pk,
+                    'username': worker.username,
+                    'points': worker.points,
+                    'jobs': worker.transactions.filter(amount__gt=0).count(),
+                    'redeem': worker.transactions.filter(amount__lt=0).aggregate(Sum('amount'))['amount__sum'] or 0,
                 } for worker in workers
             ],
             'weekly_performance': weekly_performance

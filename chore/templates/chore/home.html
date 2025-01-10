@@ -25,8 +25,8 @@
                 {% if not user.is_staff %}
                 <a class="btn btn-outline-success float-right mr-1" href="{% url 'initiate-work' %}">Initiate</a>
                 {% endif %}
-                <a class="btn btn-outline-success float-right mr-1" href="{% url 'work-list' %}">Job List</a>
-                <a class="btn btn-outline-success float-right mr-1" href="{% url 'job-register-list' %}">Job Register</a>
+                <a class="btn btn-outline-success float-right mr-1" href="{% url 'work-list' %}"><i class="fa fa-people-carry"></i></a>
+                <a class="btn btn-outline-success float-right mr-1" href="{% url 'job-register-list' %}"><i class="fa fa-address-card"></i></a>
                 
             </h3>
             <p>Hello {{user.username}},</p>
