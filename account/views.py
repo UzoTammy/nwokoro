@@ -2,7 +2,7 @@ import os
 from django.shortcuts import render, redirect
 from django.views.generic import CreateView, DetailView, UpdateView
 from .forms import SignUpForm, EditProfileForm, PasswordResetForm
-from .models import User
+from .models import User, Transaction
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
 from django.urls import reverse_lazy
@@ -43,6 +43,7 @@ class ProfileView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         finished_work_all = FinishedWork.objects.filter(worker=self.kwargs['pk'])
         finished_work = finished_work_all.filter(state='done')
+        current_points = finished_work.first().worker.points
         if finished_work.exists():
             last_work_done = finished_work.latest('finished_time')
             if last_work_done:
@@ -52,6 +53,7 @@ class ProfileView(LoginRequiredMixin, DetailView):
         
         context['base_points'] = finished_work.aggregate(Sum('base_point'))['base_point__sum']
         context['bonus_points'] = finished_work.aggregate(Sum('bonus_point'))['bonus_point__sum']
+        
         if finished_work_all.exists():
             context['effectiveness'] = number_format((finished_work.count() if finished_work.exists() else 0)/finished_work_all.count() * 100, decimal_pos=2) + "%"
             context['rating'] = number_format(finished_work_all.aggregate(Avg('rating'))['rating__avg'] * 10, decimal_pos=0)
@@ -59,9 +61,10 @@ class ProfileView(LoginRequiredMixin, DetailView):
         finished_work = FinishedWork.objects.filter(worker=self.kwargs['pk']).filter(state='cancel')
         context['jobs_cancelled'] = finished_work.count() if finished_work.exists() else 0
         points_to_ten_dollars = int(float(os.getenv('POINTS_TO_TEN_DOLLARS', '10000')))
-        current_points = self.request.user.points
+        
         options = [(p*points_to_ten_dollars, p*10) for p in range(1, divmod(current_points, points_to_ten_dollars)[0]+1)]
         context['points'] = {'current': current_points, 'to_ten_dollars': points_to_ten_dollars, 'options': options}
+        context['transactions'] = Transaction.objects.filter(user__pk=self.kwargs['pk']).order_by('-timestamp')[:10]
         return context
     
     def post(self, request, *args, **kwargs):

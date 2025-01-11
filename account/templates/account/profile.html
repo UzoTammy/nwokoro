@@ -71,6 +71,26 @@
                 </div>
             </div>
         </div>
+        <div class="col-sm-4">
+            <h6 class="mt-3 text-muted font-italic">Recent Transactions</h6>
+            <hr>
+            <ul class="list-group list-group-flush">
+                {% for transaction in transactions %}
+                    <li class="list-group-item 
+                        {% if transaction.amount < 0 %} 
+                            text-danger 
+                        {% else %} 
+                            text-success 
+                        {% endif %}">
+
+                        {{transaction.transaction_type}}: {{transaction.amount}} Pts 
+                        on {{transaction.timestamp|date:'D jS M Y'}}
+                    </li>
+                {% endfor %}
+                
+            </ul>
+            <a class="ml-2 mt-2" href="">View Statement</a>
+        </div>
     </div>
 </div>
 

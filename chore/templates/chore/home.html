@@ -72,7 +72,11 @@
                 </div>
             </div>
             {% endif %}
-            <p> <span class="text-success">List of assigned jobs,</span> <a href="{% url 'assign-work-list' %}">see them</a> 
+            <p> <span class="text-success">List of assigned jobs,</span> <a href="{% url 'assign-work-list' %}">view them</a> 
+            {% if user.is_staff %}
+                <p><a class="" href="">Learning</a> </p>
+                
+            {% endif %} 
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-light">Logout</button>
