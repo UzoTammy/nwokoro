@@ -31,7 +31,21 @@
                     {% endfor %}
                 </tbody>
             </table>
-            
+            {% if is_paginated %}
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item"><a class="page-link" href="?page=1">First</i></a></li>
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{page_obj.previous_page_number}}"><i class="fa fa-backward"></i></a></li>
+                    {% endif %}
+                    <li class="page-item active"><a class="page-link" href="#">{{page_obj.number}}</a></li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{page_obj.next_page_number}}"><i class="fa fa-forward"></i></a></li>
+                    {% endif %}
+                    <li class="page-item"><a class="page-link" href="?page={{page_obj.paginator.num_pages}}">Last</a></li>
+                </ul>
+            </nav>
+            {% endif %}
             <div class="row mb-3">
                 <div class="col">
                     {% if user.is_staff %}

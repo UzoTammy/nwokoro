@@ -114,21 +114,21 @@
       <thead>
         <tr style="border-bottom: 1px solid #ddd;">
           <th>Week</th>
-          <th>Workers</th>
-          <th class="text-right">Base Point</th>
-          <th class="text-right">Bonus Point</th>
+          <th>Worker</th>
+          <th class="text-right">Base Pts</th>
+          <th class="text-right">Bonus Pts</th>
         </tr>
       </thead>
       <tbody>
         {% for performance in weekly_performance %}
         <tr style="border-bottom: 1px solid #ddd;">
-          <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{performance.week|date:'W'}}</td>
+          <td style="color: #007bff; padding: 15px 10px;">{{performance.week|date:'W'}}</td>
           <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{performance.worker}}</td>
           <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{performance.base_point}}</td>
           <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{performance.bonus_point}}</td>
         </tr>
         {% endfor %}
-        <small style="color: #a1a4a6; padding: 15px 10px;">The week start every monday</small>
+        <small style="color: #a1a4a6;">The week start every monday</small>
       </tbody>
     </table>
     <p>Wishing you the best of next week.</p>

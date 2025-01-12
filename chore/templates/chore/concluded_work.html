@@ -6,64 +6,62 @@
     <div class="row justify-content-center align-items-center vh-100">
         <div class="col">
             <h3 class="mt-3">
-                {% if request.GET %} Discarded {% else %} Successfully Finished {% endif %} Jobs
-                <span class="btn btn-outline-dark float-right">
-                    {% if request.GET %}
-                    <a href="."><i class="fa fa-check text-successful"></i></a>
-                    {% else %} 
-                    <a href="?state"><i class="fa fa-times text-danger"></i></a> 
-                    {% endif %}
-                </span>
+                All Jobs
             </h3>
             <hr>
             {% if not object_list %}
             <h4 class="ml-3">No concluded jobs yet</h4>
             {% else %}
-            <h6 class="text-muted font-italic">Jobs that 
-                {% if request.GET %} are either withdrawn, expired or cancelled {% else %}earned points {% endif %}</h6>
+            <h6 class="text-muted font-italic">
+                all concluded jobs
+            </h6>
             <hr>
             <table class="table table-sm" id="myTable">
                 <input id="tableFilter" class="form-control mb-3" type="text" placeholder="Filter the table...">
                 <thead>
                     <th>Job</th>
                     <th>Assigned to</th>
-                    {% if not request.GET %}
+                    
                     <th class="text-center">Base Point</th>
                     <th class="text-center">Bonus Point</th>
-                    {% endif %}
+                    
                     <th>Scheduled Time</th>
                     <th>End Time</th>
-                    <th>{% if request.GET %} Discard {% else %} Finish {% endif %} Time</th>
+                    <th>Finish Time</th>
+                    <th>State</th>
                 </thead>
                 <tbody>
                     {% for object in object_list %}
                     <tr>
                         <td><a href="{% url 'concluded-detail' object.pk %}">{{object.work}}</a></td>
                         <td>{{object.worker.username}}</td>
-                        {% if not request.GET %}
                         <td class="text-center">{{object.base_point}}</td>
                         <td class="text-center">{{object.bonus_point}}</td>
-                        {% endif %}
-                        <td>{{object.scheduled_time}}</td>
-                        <td>{{object.end_time}}</td>
-                        <td>{{object.finished_time}}</td>
+                        <td>{{object.scheduled_time|date:'M d, Y'}}</td>
+                        <td>{{object.end_time|date:'M d, Y'}}</td>
+                        <td>{{object.finished_time|date:'M d, Y'}}</td>
+                        <td>{{object.state}}</td>
                     </tr>
                     {% endfor %}
+
                 </tbody>
-                {% if not request.GET %}
-                <tfoot>
-                    <tr>
-                      <th colspan="2">Total</th>
-                      <th class="text-center" id="totalBasePoint">0</th>
-                      <th class="text-center" id="totalBonusPoint">0</th>
-                      <th></th>
-                      <th></th>
-                      <th></th>
-                      <th></th>
-                    </tr>
-                </tfoot>
-                {% endif %}
+                
             </table>
+            {% if is_paginated %}
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item"><a class="page-link" href="?page=1">First</i></a></li>
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{page_obj.previous_page_number}}"><i class="fa fa-backward"></i></a></li>
+                    {% endif %}
+                    <li class="page-item active"><a class="page-link" href="#">{{page_obj.number}}</a></li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{page_obj.next_page_number}}"><i class="fa fa-forward"></i></a></li>
+                    {% endif %}
+                    <li class="page-item"><a class="page-link" href="?page={{page_obj.paginator.num_pages}}">Last</a></li>
+                </ul>
+            </nav>
+            {% endif %}
             {% endif %}
             <div class="row mt-3">
                 <div class="col">

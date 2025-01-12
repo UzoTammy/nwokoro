@@ -122,7 +122,7 @@ class WorkDoneView(LoginRequiredMixin, UpdateView):
 class WorkListView(LoginRequiredMixin, ListView):
     model = Work
     ordering = 'name'
-    paginate_by = 2
+    paginate_by = 10
 
 class WorkDetailView(LoginRequiredMixin, UpdateView):
     model = Work
@@ -291,11 +291,8 @@ class InitiateWorkApproveView(LoginRequiredMixin, UpdateView):
 class ConcludedWorkListView(LoginRequiredMixin, ListView):
     model = FinishedWork
     template_name = 'chore/concluded_work.html'
-
-    def get_queryset(self):
-        if self.request.GET:
-            return super().get_queryset().filter(state='cancel')
-        return super().get_queryset().filter(state='done')
+    paginate_by = 10
+    ordering = '-scheduled_time'
 
 class ConcludedWorDetailView(LoginRequiredMixin, DetailView):
     model = FinishedWork
