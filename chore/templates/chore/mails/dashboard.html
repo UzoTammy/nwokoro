@@ -2,30 +2,30 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
 
-        .list-group {
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
+    .list-group {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
 
-        .styled-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
+    .styled-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
 
-        .styled-list li {
+    .styled-list li {
       display: flex;
       justify-content: space-between;
       padding: 10px 5px;
@@ -35,73 +35,105 @@
     .styled-list li:last-child {
       border-bottom: none;
     }
-        .list-group-item {
-            font-weight: normal;
-            color: #555;
-        }
 
-        .item-value {
-            text-align: right;
-            color: #007bff;
-        }
-    </style>
-    <title>Admin email</title>
+    .list-group-item {
+      font-weight: normal;
+      color: #555;
+    }
+
+    .item-value {
+      text-align: right;
+      color: #007bff;
+    }
+  </style>
+  <title>Admin email</title>
 </head>
 
 <body>
-    <div class="list-group">
-        <h3>Hello Moderator,</h3>
-        <p>Chores summary report</p>
-        <table style="width: 100%; border-collapse: collapse;">
-            <tr style="border-bottom: 1px solid #ddd;">
-              <td style="font-weight: bold; color: #555; padding: 15px 10px;">Jobs Executed</td>
-              <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{jobs_executed}}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #ddd;">
-              <td style="font-weight: bold; color: #555; padding: 15px 10px;">Jobs Cancelled</td>
-              <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{jobs_cancelled}}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #ddd;">
-              <td style="font-weight: bold; color: #555; padding: 15px 10px;">Points Accrued</td>
-              <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{points}}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #ddd;">
-              <td style="font-weight: bold; color: #555; padding: 15px 10px;">Points Redeemed</td>
-              <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{points_redeemed}}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #ddd;">
-              <td style="font-weight: bold; color: #555; padding: 15px 10px;">Base Points</td>
-              <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{base_points}}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #ddd;">
-                <td style="font-weight: bold; color: #555; padding: 15px 10px;">Bonus Points</td>
-                <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{bonus_points}}</td>
-              </tr>
-          </table>
-          <hr>
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="border-bottom: 1px solid #ddd;">
-                    <th>Username</th>
-                    <th>Balance Pts</th>
-                    <th>Jobs Done</th>
-                    <th>Redeem Pts</th>
-                </tr>
-
-            </thead>
-            <tbody>
-                {% for worker in workers %}
-                <tr style="border-bottom: 1px solid #ddd;">
-                    <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{worker.username}}</td>
-                    <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{worker.points}}</td>
-                    <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{worker.jobs}}</td>
-                    <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{worker.redeem}}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <p>Thanks,<br>Chores Team</p>
-    </div>
+  <div class="list-group">
+    <h3>Hello Family,</h3>
+    <p>
+      It is my duty to report each week's performance. This is to enable you
+      match your performance with your siblings. I hope this transparent and 
+      accurate reporting of your work will aid you prepare better for next week.
+      Below is the report:
+    </p>
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr style="border-bottom: 1px solid #ddd;">
+        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Jobs Executed</td>
+        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{jobs_executed}}</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #ddd;">
+        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Jobs Cancelled</td>
+        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{jobs_cancelled}}</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #ddd;">
+        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Points Accrued</td>
+        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{points}}</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #ddd;">
+        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Points Redeemed</td>
+        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{points_redeemed}}</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #ddd;">
+        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Base Points</td>
+        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{base_points}}</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #ddd;">
+        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Bonus Points</td>
+        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{bonus_points}}</td>
+      </tr>
+    </table>
+    <hr>
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="border-bottom: 1px solid #ddd;">
+          <th>Username</th>
+          <th>Balance Pts</th>
+          <th>Jobs Done</th>
+          <th>Redeem Pts</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for worker in workers %}
+        <tr style="border-bottom: 1px solid #ddd;">
+          <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{worker.username}}</td>
+          <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{worker.points}}</td>
+          <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{worker.jobs}}</td>
+          <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{worker.redeem}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <hr>
+    <h5>
+      <i class="fa fa-layer-group text-primary"></i>
+      Last Weekly Performance
+    </h5>
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="border-bottom: 1px solid #ddd;">
+          <th>Week</th>
+          <th>Workers</th>
+          <th class="text-right">Base Point</th>
+          <th class="text-right">Bonus Point</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for performance in weekly_performance %}
+        <tr style="border-bottom: 1px solid #ddd;">
+          <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{performance.week|date:'W'}}</td>
+          <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{performance.worker}}</td>
+          <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{performance.base_point}}</td>
+          <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{performance.bonus_point}}</td>
+        </tr>
+        {% endfor %}
+        <small style="color: #a1a4a6; padding: 15px 10px;">The week start every monday</small>
+      </tbody>
+    </table>
+    <p>Wishing you the best of next week.</p>
+    <p>Thanks,<br>Chores Team</p>
+  </div>
 </body>
 
 </html>

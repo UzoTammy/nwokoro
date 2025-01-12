@@ -56,18 +56,21 @@ class Email:
     
      
     def email_dashboard():
-        subject = "Routine email to admin on chores"
         from_email = "no-reply@chores.com"
-        to_email = ["nwokorouzo77@gmail.com"]
 
         # Load the HTML content
         workers = User.objects.filter(is_staff=False)
         finished_works = FinishedWork.objects.all()
         transactions = Transaction.objects.all()
 
+        subject = "Weekly chores report"
+        to_email = [ worker.email for worker in User.objects.all() ]
+
         html_content = render_to_string('chore/mails/dashboard.html', Email.get_context(workers, finished_works, transactions))
+        
         # Create the email message
-        msg = EmailMultiAlternatives(subject, "plain text", from_email, to_email)
+        msg = EmailMultiAlternatives(subject, "plain text", from_email, to_email,
+                                     headers={"Reply-To": "nwokorouzo@gmail.com"},)
         msg.attach_alternative(html_content, "text/html")
 
         try:

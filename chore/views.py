@@ -122,6 +122,7 @@ class WorkDoneView(LoginRequiredMixin, UpdateView):
 class WorkListView(LoginRequiredMixin, ListView):
     model = Work
     ordering = 'name'
+    paginate_by = 2
 
 class WorkDetailView(LoginRequiredMixin, UpdateView):
     model = Work
