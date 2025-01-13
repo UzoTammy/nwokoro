@@ -29,7 +29,7 @@ class AddWorkForm(forms.ModelForm):
         fields = ['name', 'point', 'description', 'kind']
 
 class JobRegisterForm(forms.ModelForm):
-    assigned_to = forms.ModelChoiceField(
+    assigned_to = CustomDelegateAssignChoiceField(
         queryset=User.objects.filter(is_staff=False),
         widget=forms.Select(attrs={'class': 'form-control'}),
         # initial=User.objects.first() if User.objects.exists() else '-----',

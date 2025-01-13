@@ -2,113 +2,108 @@
 
 {% block content %}
 <div class="container mt-3">
-    <div class="row justify-content-center align-items-center vh-100">
+  <div class="row justify-content-center align-items-center vh-100">
+    <div class="col">
+      <h3>Job Queue <a href="{% url 'concluded-job' %}" class="btn btn-outline-success float-right">Closed Jobs</a></h3>
+      <hr>
+
+      {% if not object_list %}
+      <h5 class="ml-3 font-italic text-muted">No active or repeat job in queue</h5>
+      <hr>
+      {% else %}
+      <h4 class="font-weight-lighter">Active or Repeat Jobs</h4>
+      <hr>
+      <table class="table">
+        <thead>
+          <th>Jobs</th>
+          <th>Schedule</th>
+          <th>Assigned to</th>
+          <th>Deadline</th>
+          <th>Source</th>
+          <th>State</th>
+        </thead>
+        <tbody>
+          {% for object in object_list %}
+          <tr>
+
+            <td>
+              {% if object.is_expired %}
+              {{object.work}}
+              {% else %}
+              <a href="{% url 'work-done' object.pk %}">{{object.work}}</a>
+              {% endif %}
+            </td>
+            <td>{{object.schedule}}</td>
+            <td>{{object.assigned.username}}</td>
+            {% if object.is_expired %}
+            <td class="font-italic text-danger">expired</td>
+            {% else %}
+            <td>{{object.end_time|timeuntil }}</td>
+            {% endif %}
+            <td>{{object.source}}</td>
+            <td>{{object.state}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+
+      {% if not completed_works %}
+      <h5 class="ml-3 font-italic text-muted">No completed job in queue</h5>
+      {% else %}
+      <h4 class="font-weight-lighter">Completed Jobs</h4>
+      <hr>
+      <table class="table">
+        <thead>
+          <th>Jobs</th>
+          <th>Schedule</th>
+          <th>Assigned to</th>
+          <th>Deadline</th>
+          <th>Source</th>
+          <th>State</th>
+        </thead>
+        <tbody>
+          {% for object in completed_works %}
+          <tr>
+            <td>
+              {% if user.is_staff %}
+              <a href="#" data-toggle="modal" data-target="#supervisorModal{{object.pk}}">{{object.work}}</a>
+              {% else %}
+              {{object.work}}
+              {% endif %}
+            </td>
+            <td>{{object.schedule}}</td>
+            <td>{{object.assigned.username}}</td>
+            {% if object.is_expired %}
+            <td class="font-italic text-danger">expired</td>
+            {% else %}
+            <td>{{object.end_time|timeuntil }}</td>
+            {% endif %}
+            <td>{{object.source}}</td>
+            <td>{{object.state}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+      <div class="row mt-3">
         <div class="col">
-            <h3>Job Queue <a href="{% url 'concluded-job' %}" class="btn btn-outline-success float-right">Closed Jobs</a></h3>
-            <hr>
-
-            {% if not object_list %}
-            <h5 class="ml-3 font-italic text-muted">No active or repeat job in queue</h5>
-            <hr>
-            {% else %}
-            <h4 class="font-weight-lighter">Active or Repeat Jobs</h4>
-            <hr>
-            <table class="table">
-                <thead>
-                    <th>Jobs</th>
-                    <th>Schedule</th>
-                    <th>Assigned to</th>
-                    <th>Deadline</th>
-                    <th>Source</th>
-                    <th>State</th>
-                </thead>
-                <tbody>
-                    {% for object in object_list %}
-                    <tr>
-                        
-                        <td>
-                          {% if object.is_expired %}
-                          {{object.work}}
-                          {% else %}
-                          <a href="{% url 'work-done' object.pk %}">{{object.work}}</a>
-                          {% endif %}
-                        </td>
-                        <td>{{object.schedule}}</td>
-                        <td>{{object.assigned.username}}</td>
-                        {% if object.is_expired %}
-                        <td class="font-italic text-danger">expired</td>
-                        {% else %}
-                        <td>{{object.end_time|timeuntil }}</td>
-                        {% endif %}
-                        <td>{{object.source}}</td>
-                        <td>{{object.state}}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endif %}
-
-            {% if not completed_works %}
-            <h5 class="ml-3 font-italic text-muted">No completed job in queue</h5>
-            {% else %}
-            <h4 class="font-weight-lighter">Completed Jobs</h4>
-            <hr>
-            <table class="table">
-                <thead>
-                    <th>Jobs</th>
-                    <th>Schedule</th>
-                    <th>Assigned to</th>
-                    <th>Deadline</th>
-                    <th>Source</th>
-                    <th>State</th>
-                </thead>
-                <tbody>
-                    {% for object in completed_works %}
-                    <tr>
-                        <td>
-                            {% if user.is_staff %}
-                            <a href="#" data-toggle="modal" data-target="#supervisorModal{{object.pk}}">{{object.work}}</a>
-                            {% else %}
-                            {{object.work}}
-                            {% endif %}
-                        </td>
-                        <td>{{object.schedule}}</td>
-                        <td>{{object.assigned.username}}</td>
-                        {% if object.is_expired %}
-                        <td class="font-italic text-danger">expired</td>
-                        {% else %}
-                        <td>{{object.end_time|timeuntil }}</td>
-                        {% endif %}
-                        <td>{{object.source}}</td>
-                        <td>{{object.state}}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endif %}
-            <div class="row mt-3">
-                <div class="col">
-                    {% if user.is_staff %}
-                    <a class="btn btn-outline-dark ml-3" href="{% url 'delegate-work' %}">Delegate</a>
-                    {% endif %}
-                    <a class="btn btn-outline-dark mr-3 float-right" href="{% url 'chore-home' %}">Back</a>
-                </div>
-            </div>
+          {% if user.is_staff %}
+          <a class="btn btn-outline-dark ml-3" href="{% url 'delegate-work' %}">Delegate</a>
+          {% endif %}
+          <a class="btn btn-outline-dark mr-3 float-right" href="{% url 'chore-home' %}">Back</a>
         </div>
+      </div>
     </div>
+  </div>
 </div>
-  
-  <!-- Modal -->
-   <form action="" method="post">
-    {% csrf_token %}
-    {% for object in completed_works %}
-        <div class="modal fade" 
-        id="supervisorModal{{object.pk}}" 
-        data-backdrop="static" 
-        data-keyboard="false" 
-        tabindex="-1" 
-        aria-labelledby="supervisorModalLabel" 
-        aria-hidden="true">
+
+<!-- Modal -->
+<form id="myForm" action="" method="post">
+  {% csrf_token %}
+  {% for object in completed_works %}
+  <div class="modal fade" id="supervisorModal{{object.pk}}" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="supervisorModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header bg-dark text-white">
@@ -118,51 +113,54 @@
           </button>
         </div>
         <div class="modal-body ml-3">
-            <div class="row">
-                <div class="col">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">The Job<span class="float-right">{{object.work}}</span></li>
-                        <li class="list-group-item">Schedule for<span class="float-right">{{object.schedule}}</span></li>
-                        <li class="list-group-item">Source<span class="float-right">{{object.source}}</span></li>
-                        <li class="list-group-item">State<span class="float-right">{{object.state}}</span></li>
-                        <li class="list-group-item">Time Left<span class="float-right">{{object.end_time|timeuntil}}</span></li>
-                      </ul>
-                </div>
+          <div class="row">
+            <div class="col">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">The Job<span class="float-right">{{object.work}}</span></li>
+                <li class="list-group-item">Schedule for<span class="float-right">{{object.schedule}}</span></li>
+                <li class="list-group-item">Source<span class="float-right">{{object.source}}</span></li>
+                <li class="list-group-item">State<span class="float-right">{{object.state}}</span></li>
+                <li class="list-group-item">Time Left<span class="float-right">{{object.end_time|timeuntil}}</span></li>
+              </ul>
             </div>
-            <div class="form-group" id="ratingDiv">
-              <label for="">Rating</label>
-              <select class="form-control" name="rating">
-                <option value="0.7">Fairly Good</option>
-                <option value="0.8">Good</option>
-                <option value="0.9">Very Good</option>
-                <option value="1.0">Excellent</option>
-              </select>
-            </div>
-            <hr>
-            <div class="form-check">
-                <input oninput="ratingShow()" class="form-check-input" type="radio" name="supervisorRadios" id="supervisorRadio1" value="done" checked>
-                <label class="form-check-label" for="supervisorRadio1">
-                  Done: Job is completed, inspected and it is done satisfactorily.
-                </label>
-            </div>
-            <div class="form-check mt-3">
-                <input oninput="ratingShow()" class="form-check-input" type="radio" name="supervisorRadios" id="supervisorRadio2" value="repeat">
-                <label class="form-check-label" for="supervisorRadio2">
-                  Repeat: Job is not done satisfactorily. Another chance to deliver the job.
-                </label>
-            </div>
-            <div class="form-check mt-3">
-                <input oninput="ratingShow()" class="form-check-input" type="radio" name="supervisorRadios" id="supervisorRadio3" value="cancel">
-                <label class="form-check-label" for="supervisorRadio3">
-                  Cancel: Job is withdrawn
-                </label>
-            </div>
-            <hr>
-            <div id="reasonDiv" class="form-group" hidden="true">
-              <label for="">Reason</label>
-              <input class="form-control" type="text" name="reason" value="not committed">
-            </div>
-            <input type="text" name="pk" value="{{object.pk}}" hidden="true">
+          </div>
+          <div class="form-group" id="ratingDiv">
+            <label for="">Rating</label>
+            <select class="form-control" name="rating">
+              <option value="0.7">Fairly Good</option>
+              <option value="0.8">Good</option>
+              <option value="0.9">Very Good</option>
+              <option value="1.0">Excellent</option>
+            </select>
+          </div>
+          <hr>
+          <div class="form-check">
+            <input oninput="ratingShow()" class="form-check-input" type="radio" name="supervisorRadios"
+              id="supervisorRadio1" value="done" checked>
+            <label class="form-check-label" for="supervisorRadio1">
+              Done: Job is completed, inspected and it is done satisfactorily.
+            </label>
+          </div>
+          <div class="form-check mt-3">
+            <input oninput="ratingShow()" class="form-check-input" type="radio" name="supervisorRadios"
+              id="supervisorRadio2" value="repeat">
+            <label class="form-check-label" for="supervisorRadio2">
+              Repeat: Job is not done satisfactorily. Another chance to deliver the job.
+            </label>
+          </div>
+          <div class="form-check mt-3">
+            <input oninput="ratingShow()" class="form-check-input" type="radio" name="supervisorRadios"
+              id="supervisorRadio3" value="cancel">
+            <label class="form-check-label" for="supervisorRadio3">
+              Cancel: Job is withdrawn
+            </label>
+          </div>
+          <hr>
+          <div id="reasonDiv" class="form-group" hidden="true">
+            <label for="">Reason</label>
+            <input class="form-control" type="text" name="reason" value="not committed">
+          </div>
+          <input type="text" name="pk" value="{{object.pk}}" hidden="true">
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
@@ -170,22 +168,50 @@
         </div>
       </div>
     </div>
-        </div>
-    {% endfor %}
-    </form> 
+  </div>
+  {% endfor %}
+</form>
 
-    <script>
-        function ratingShow() {
-            if (document.getElementById('supervisorRadio1').checked) {
-              document.getElementById('ratingDiv').hidden = false;
-              document.getElementById('reasonDiv').hidden = true;
-            } else if (document.getElementById('supervisorRadio2').checked) {
-              document.getElementById('ratingDiv').hidden = true;
-              document.getElementById('reasonDiv').hidden = true;
-            } else {
-              document.getElementById('ratingDiv').hidden = true;
-              document.getElementById('reasonDiv').hidden = false;
-            }
-        }
-    </script>
+<script>
+  function ratingShow() {
+    if (document.getElementById('supervisorRadio1').checked) {
+      document.getElementById('ratingDiv').hidden = false;
+      document.getElementById('reasonDiv').hidden = true;
+    } else if (document.getElementById('supervisorRadio2').checked) {
+      document.getElementById('ratingDiv').hidden = true;
+      document.getElementById('reasonDiv').hidden = true;
+    } else {
+      document.getElementById('ratingDiv').hidden = true;
+      document.getElementById('reasonDiv').hidden = false;
+    }
+  }
+</script>
+
+<!-- Spinner Modal -->
+<div class="modal" id="loadingSpinner" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-body">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">Processing, please wait...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('myForm'); // Replace with your form's ID
+
+    form.addEventListener('submit', function () {
+      // Show the spinner
+      const spinnerModal = new bootstrap.Modal(document.getElementById('loadingSpinner'));
+      spinnerModal.show();
+    });
+  });
+
+</script>
+
 {% endblock %}
