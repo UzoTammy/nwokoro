@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     'core.apps.CoreConfig',
     'chore.apps.ChoreConfig',
-
+    'achieve.apps.AchieveConfig',
+    
     "crispy_forms",
     "crispy_bootstrap4",
     'django_celery_beat',

@@ -108,3 +108,56 @@ class BonusPointForm(forms.ModelForm):
     class Meta:
         model = BonusPoint
         fields = ['title', 'active', 'bonus_value', 'end_time']
+
+
+class ComboFieldWidget(forms.MultiWidget):
+    def __init__(self, queryset, attrs=None):
+        widgets = [
+            forms.Select(choices=[('', 'Select work or create one below')] + [(obj.id, str(obj)) for obj in queryset]),
+            forms.TextInput(attrs={'placeholder': 'Enter name of work to create'}),
+        ]
+        super().__init__(widgets, attrs)
+
+    def decompress(self, value):
+        if value:
+            return [None, value]  # Assuming custom value
+        return [None, None]
+
+
+class ComboField(forms.MultiValueField):
+    def __init__(self, queryset, *args, **kwargs):
+        fields = [
+            forms.ChoiceField(choices=[('', 'Select an option')] + [(obj.id, str(obj)) for obj in queryset], required=False),
+            forms.CharField(required=False),
+        ]
+        super().__init__(fields, widget=ComboFieldWidget(queryset), *args, **kwargs)
+
+    def compress(self, data_list):
+        if data_list:
+            # If a custom value is provided, use it; otherwise, use the selected value
+            return data_list[1] if data_list[1] else data_list[0]
+        return None
+
+class MyModelForm(forms.ModelForm):
+    title = ComboField(queryset=InitiateWork.objects.all(), required=False)
+
+    class Meta:
+        model = InitiateWork
+        fields = ['title', 'description']
+        widgets = {
+            'description': forms.Textarea(attrs={
+                'placeholder': '''Give details of the job you intend to do.
+
+You can propose points obtainable for this job but note that the details will \
+be the primary consideration in deciding the points.''',
+                'rows': 5,  # Optional: Control the height of the textarea
+                'cols': 40,  # Optional: Control the width of the textarea
+            }),
+        }
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     # Populate the select field with queryset options
+    #     self.fields['name'].widget = forms.Select(choices=[('', 'Select an option')] + [
+    #         (item.name, item.name) for item in InitiateWork.objects.all()
+    #     ])

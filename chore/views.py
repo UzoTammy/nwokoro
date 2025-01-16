@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Work, AssignWork, JobRegister, FinishedWork, InitiateWork, BonusPoint
 from account.models import User, Transaction
 from .forms import (AddWorkForm, EarnPointForm, JobRegisterForm, DelegateWorkForm, InitiateWorkForm,
-                    InitiateWorkApproveForm, BonusPointForm)
+                    InitiateWorkApproveForm, BonusPointForm, MyModelForm)
 from django.contrib import messages
 from .emails import Email
 
@@ -233,7 +233,7 @@ class DelegateWorkCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 class InitiateWorkCreateView(LoginRequiredMixin, CreateView):
-    form_class = InitiateWorkForm
+    form_class = MyModelForm
     model = InitiateWork
     # fields = ['name', 'description']
     success_url = reverse_lazy('chore-home')

@@ -65,7 +65,7 @@ class FinishedWork(models.Model):
      
 class InitiateWork(models.Model):
     worker = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, verbose_name='title')
     description = models.TextField()
     point = models.PositiveIntegerField(default=0)
     approved = models.BooleanField(default=False)

@@ -6,7 +6,7 @@ from .emails import Email
 
 @shared_task
 def delist_expired_job():
-    "Remove expired jobs from job list after 3 hours"
+    "Remove expired jobs from job list after 3 hours if the job is undone (i.e. in active or repeat atate)"
     assigned_works = AssignWork.objects.filter(state__in=['active', 'repeat'])
     for assigned_work in assigned_works:
         if assigned_work.is_expired():

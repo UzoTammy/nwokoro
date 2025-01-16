@@ -24,5 +24,6 @@ urlpatterns = [
     path('accounts/', include('account.urls')),
     path('', include('core.urls')),
     path('chores/', include('chore.urls')),
+    path('achieve/', include('achieve.urls')),
 ] +  static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
