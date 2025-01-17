@@ -10,7 +10,6 @@ class Reward(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     issued_by = models.CharField(max_length=30)
 
-
     def __str__(self):
         return f'Reward: {self.user} {self.point} {self.timestamp}'
     

@@ -53,7 +53,6 @@ class Email:
             ],
             'weekly_performance': weekly_performance
         }
-    
      
     def email_dashboard():
         from_email = "no-reply@chores.com"

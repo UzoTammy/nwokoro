@@ -1,12 +1,12 @@
 import os
 from django.shortcuts import render, redirect
-from django.views.generic import CreateView, DetailView, UpdateView
+from django.views.generic import CreateView, DetailView, UpdateView, TemplateView
 from .forms import SignUpForm, EditProfileForm, PasswordResetForm
 from .models import User, Transaction
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from chore.models import FinishedWork
 from django.db.models import Sum, Avg
 from django.utils.formats import number_format
@@ -35,10 +35,18 @@ class SignUpView(CreateView):
             )
         )
 
-class ProfileView(LoginRequiredMixin, DetailView):
+class ProfileView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = User
     template_name = 'account/profile.html'
 
+    def test_func(self) -> bool | None:
+        if self.request.user == self.get_object() or self.request.user.is_staff:
+            return True
+        return False
+    
+    def handle_no_permission(self):
+        return redirect('forbidden')
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         finished_work_all = FinishedWork.objects.filter(worker=self.kwargs['pk'])
@@ -86,3 +94,5 @@ class EditProfileView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('profile', kwargs={'pk': self.object.pk})  # Redirect to the updated profile
     
+class ForbiddenView(TemplateView):
+    template_name = 'account/403.html'
