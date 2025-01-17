@@ -5,9 +5,11 @@
     <div class="row justify-content-center align-items-center vh-100">
         <div class="col-sm-10">
             <h3>Achiever's Page
+                {% if user.is_staff %}
                 <span class="float-right">
                     <a class="btn btn-outline-success" href="{% url 'achieve-create' %}"><i class="fas fa-hand-holding-medical"></i></a>
                 </span>
+                {% endif %}
             </h3>
             <hr>
             <h5>Dear Achievers,
@@ -32,6 +34,7 @@
                 The Achiever’s Team
 
             </p>
+            <a class="btn btn-outline-dark" href="{% url 'chore-home' %}">Back</a>
         </div>
     </div>
 </div>

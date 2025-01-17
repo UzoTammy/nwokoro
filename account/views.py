@@ -72,17 +72,17 @@ class ProfileView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         
         options = [(p*points_to_ten_dollars, p*10) for p in range(1, divmod(current_points, points_to_ten_dollars)[0]+1)]
         context['points'] = {'current': current_points, 'to_ten_dollars': points_to_ten_dollars, 'options': options}
-        context['transactions'] = Transaction.objects.filter(user__pk=self.kwargs['pk']).order_by('-timestamp')[:10]
+        context['transactions'] = Transaction.objects.filter(user__pk=self.kwargs['pk']).order_by('-timestamp')[:7]
         return context
     
     def post(self, request, *args, **kwargs):
         redeemable_points = int(request.POST['redeemPoints'])
 
         try:
-            request.user.withdraw(redeemable_points, description=request.POST['reason'])
+            self.get_object().withdraw(redeemable_points, description=request.POST['reason'])
         except ValidationError as ve:
             return render(request, 'account/error.html', {'error_message': ve.message,
-                                                          'msg':f'Request to redeem points failed. You have {request.user.points} Pts only'})
+                                                          'msg':f'Request to redeem points failed. You have {self.get_object().points} Pts only'})
 
         return redirect('profile', pk=kwargs['pk'])
     
@@ -93,6 +93,23 @@ class EditProfileView(LoginRequiredMixin, UpdateView):
     
     def get_success_url(self):
         return reverse_lazy('profile', kwargs={'pk': self.object.pk})  # Redirect to the updated profile
+
+class StatementView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = User
+    template_name = 'account/statement.html'
+
+    def test_func(self) -> bool | None:
+        if self.request.user == self.get_object() or self.request.user.is_staff:
+            return True
+        return False
     
+    def handle_no_permission(self):
+        return redirect('forbidden')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['transactions'] = self.get_object().transactions.all().order_by('-timestamp')
+        return context
+
 class ForbiddenView(TemplateView):
     template_name = 'account/403.html'

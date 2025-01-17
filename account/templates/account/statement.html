@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+{% load custom_tag %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col">
+            <h3>Statement for {{user.username}} <small class="float-right font-italic text-muted">Balance: {{user.points|floatformat:'g'}}</small></h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>CR</th>
+                        <th>DR</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{transaction.timestamp}}</td>
+                        <td>{{transaction.description}}</td>
+                        {% if transaction.transaction_type == 'Deposit' %}
+                            <td>{{transaction.amount|floatformat:'g'}}</td>
+                            <td></td>
+                        {% else %}
+                            <td></td>
+                            <td class="text-danger">{{transaction.amount|scalar_value|floatformat:'g'}}</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a class="btn btn-outline-dark" href="{% url 'profile' user.pk %}">Return to profile</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

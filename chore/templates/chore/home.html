@@ -17,17 +17,15 @@
         <div class="col">
             {% if user.is_authenticated %}
             <h3>"Your Choices Shape Your Future!"
+                <a class="btn btn-outline-success float-right mr-1" href="{% url 'achieve-home' %}"><i class="fa fa-trophy"></i></a>
                 {% if user.is_staff %}
                     <a class="btn btn-outline-success float-right mr-1" href="{% url 'chore-dashboard' %}"><i class="fa fa-tachometer-alt"></i></a>
-                    <a class="btn btn-outline-success float-right mr-1" href="{% url 'achieve-home' %}"><i class="fa fa-trophy"></i></a>
+                    <a class="btn btn-outline-success float-right mr-1" href="{% url 'initiate-work' %}"><i class="fab fa-osi" style="color:lime"></i></a>
                 {% else %}
                     <a class="btn btn-outline-success float-right mr-1" href="{% url 'profile' user.pk %}"><i class="fa fa-user"></i></a>
                 {% endif %}    
-                {% if user.is_staff %}
-                <a class="btn btn-outline-success float-right mr-1" href="{% url 'initiate-work' %}"><i class="fab fa-osi" style="color:lime"></i></a>
-                {% endif %}
-                <a class="btn btn-outline-success float-right mr-1" href="{% url 'work-list' %}"><i class="fa fa-people-carry"></i></a>
-                <a class="btn btn-outline-success float-right mr-1" href="{% url 'job-register-list' %}"><i class="fa fa-address-card"></i></a>
+                <!-- <a class="btn btn-outline-success float-right mr-1" href="{% url 'work-list' %}"><i class="fa fa-people-carry"></i></a> -->
+                <!-- <a class="btn btn-outline-success float-right mr-1" href="{% url 'job-register-list' %}"><i class="fa fa-address-card"></i></a> -->
                 
             </h3>
             <p>Hello {{user.username}},</p>

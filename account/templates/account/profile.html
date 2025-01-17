@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load crispy_forms_tags %}
+{% load custom_tag %}
 
 {% block content %}
 <div class="container mt-3">
@@ -48,16 +49,16 @@
                     <span class="float-right">{% if user.is_staff %} Moderator {% else %} Worker {% endif %}</span>
                 </li>
                 <li class="list-group-item text-monospace">Total Base Points <span
-                        class="bg-secondary float-right rounded-circle text-white p-1">{{base_points|floatformat:'-3g'}}</span>
+                        class="bg-secondary float-right rounded-circle text-white p-1">{{base_points|floatformat:'g'}}</span>
                 </li>
                 <li class="list-group-item text-monospace">Total Bonus Points <span
-                        class="bg-secondary float-right rounded-circle text-white p-1">{{bonus_points|floatformat:'-3g'}}</span>
+                        class="bg-secondary float-right rounded-circle text-white p-1">{{bonus_points|floatformat:'g'}}</span>
                 </li>
                 <li class="list-group-item text-monospace">Number of jobs completed <span
-                        class="bg-secondary float-right rounded-circle text-white p-1">{{jobs_completed|floatformat:'-3g'}}</span>
+                        class="bg-secondary float-right rounded-circle text-white p-1">{{jobs_completed|floatformat:'g'}}</span>
                 </li>
                 <li class="list-group-item text-monospace">Number of jobs cancelled <span
-                        class="bg-secondary float-right rounded-circle text-white p-1">{{jobs_cancelled|floatformat:'-3g'}}</span>
+                        class="bg-secondary float-right rounded-circle text-white p-1">{{jobs_cancelled|floatformat:'g'}}</span>
                 </li>
             </ul>
             <div class="row">
@@ -83,13 +84,13 @@
                             text-success 
                         {% endif %}">
 
-                        {{transaction.transaction_type}}: {{transaction.amount}} Pts 
+                        {{transaction.transaction_type}}: {{transaction.amount|scalar_value}} Pts 
                         on {{transaction.timestamp|date:'D jS M Y'}}
                     </li>
                 {% endfor %}
                 
             </ul>
-            <a class="ml-2 mt-2" href="">View Statement</a>
+            <a class="btn btn-outline-dark btn-sm ml-2 mt-2" href="{% url 'account-statement' user.pk %}">View Statement</a>
         </div>
     </div>
 </div>
