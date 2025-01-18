@@ -6,17 +6,29 @@ from account.models import User
 from django_celery_beat.models import PeriodicTask, IntervalSchedule
 
 
-class CustomDelegateAssignChoiceField(forms.ModelChoiceField):
+class ComboFieldWidget(forms.MultiWidget):
+    def __init__(self, queryset, attrs=None):
+        widgets = [
+            forms.Select(choices=[('', 'Select work or create one below')] + [(obj.id, str(obj)) for obj in queryset]),
+            forms.TextInput(attrs={'placeholder': 'Enter name of work to create'}),
+        ]
+        super().__init__(widgets, attrs)
+
+    def decompress(self, value):
+        if value:
+            return [None, value]  # Assuming custom value
+        return [None, None]
+
+class UsernameChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return obj.username  # Replace `name` with the desired field to display
-
 
 class AddWorkForm(forms.ModelForm):
     kind = forms.CharField(widget=forms.Select(
         choices=[('regular', 'Regular'), ('occasional', 'Occasional'), ('one-time', 'One-time')],
         attrs={'onchange': 'showElements()'}))
     
-    user = CustomDelegateAssignChoiceField(
+    user = UsernameChoiceField(
         queryset=User.objects.filter(is_staff=False),
         widget=forms.Select(attrs={'class': 'form-control'}),
         required=False,
@@ -29,7 +41,7 @@ class AddWorkForm(forms.ModelForm):
         fields = ['name', 'point', 'description', 'kind']
 
 class JobRegisterForm(forms.ModelForm):
-    assigned_to = CustomDelegateAssignChoiceField(
+    assigned_to = UsernameChoiceField(
         queryset=User.objects.filter(is_staff=False),
         widget=forms.Select(attrs={'class': 'form-control'}),
         # initial=User.objects.first() if User.objects.exists() else '-----',
@@ -61,7 +73,7 @@ class EarnPointForm(forms.ModelForm):
         fields = []
     
 class DelegateWorkForm(forms.ModelForm):
-    assigned = CustomDelegateAssignChoiceField(
+    assigned = UsernameChoiceField(
         queryset=User.objects.filter(is_staff=False),
         widget=forms.Select(attrs={'class': 'form-control'}),
     )
@@ -109,21 +121,6 @@ class BonusPointForm(forms.ModelForm):
         model = BonusPoint
         fields = ['title', 'active', 'bonus_value', 'end_time']
 
-
-class ComboFieldWidget(forms.MultiWidget):
-    def __init__(self, queryset, attrs=None):
-        widgets = [
-            forms.Select(choices=[('', 'Select work or create one below')] + [(obj.id, str(obj)) for obj in queryset]),
-            forms.TextInput(attrs={'placeholder': 'Enter name of work to create'}),
-        ]
-        super().__init__(widgets, attrs)
-
-    def decompress(self, value):
-        if value:
-            return [None, value]  # Assuming custom value
-        return [None, None]
-
-
 class ComboField(forms.MultiValueField):
     def __init__(self, queryset, *args, **kwargs):
         fields = [
@@ -139,7 +136,7 @@ class ComboField(forms.MultiValueField):
         return None
 
 class MyModelForm(forms.ModelForm):
-    title = ComboField(queryset=InitiateWork.objects.all(), required=False)
+    title = ComboField(queryset=Work.objects.all(), required=False)
 
     class Meta:
         model = InitiateWork

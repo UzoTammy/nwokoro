@@ -2,9 +2,18 @@
 
 {% block content %}
 <div class="container">
-    <div class="row justify-content-center align-items-center vh-100">
+    <div class="jumbotron jumbotron-fluid bg-dark text-white">
+        <div class="container">
+          <h1 class="display-4">Achiever's Page</h1>
+          <p class="lead">This page is for a person who want to be called an Achiever <br>
+          <small class="font-italic text-info ml-2">You do not need to do physical or tangible work to score points in life.
+            You can also score points with character and brain.</p>
+          </small>
+        </div>
+      </div>
+    <div class="row justify-content-center">
         <div class="col-sm-10">
-            <h3>Achiever's Page
+            <h3>Achiever's note
                 {% if user.is_staff %}
                 <span class="float-right">
                     <a class="btn btn-outline-success" href="{% url 'achieve-create' %}"><i class="fas fa-hand-holding-medical"></i></a>

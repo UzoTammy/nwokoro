@@ -51,7 +51,7 @@ class ProfileView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         context = super().get_context_data(**kwargs)
         finished_work_all = FinishedWork.objects.filter(worker=self.kwargs['pk'])
         finished_work = finished_work_all.filter(state='done')
-        current_points = finished_work.first().worker.points
+        current_points = finished_work.first().worker.points if finished_work.exists() else 0
         if finished_work.exists():
             last_work_done = finished_work.latest('finished_time')
             if last_work_done:

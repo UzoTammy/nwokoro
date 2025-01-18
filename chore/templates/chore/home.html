@@ -21,12 +21,8 @@
                 {% if user.is_staff %}
                     <a class="btn btn-outline-success float-right mr-1" href="{% url 'chore-dashboard' %}"><i class="fa fa-tachometer-alt"></i></a>
                     <a class="btn btn-outline-success float-right mr-1" href="{% url 'initiate-work' %}"><i class="fab fa-osi" style="color:lime"></i></a>
-                {% else %}
-                    <a class="btn btn-outline-success float-right mr-1" href="{% url 'profile' user.pk %}"><i class="fa fa-user"></i></a>
-                {% endif %}    
-                <!-- <a class="btn btn-outline-success float-right mr-1" href="{% url 'work-list' %}"><i class="fa fa-people-carry"></i></a> -->
-                <!-- <a class="btn btn-outline-success float-right mr-1" href="{% url 'job-register-list' %}"><i class="fa fa-address-card"></i></a> -->
-                
+                {% endif %}
+                <a class="btn btn-outline-success float-right mr-1" href="{% url 'profile' user.pk %}"><i class="fa fa-user"></i></a>
             </h3>
             <p>Hello {{user.username}},</p>
             <p style="font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif">
@@ -95,6 +91,12 @@
                 </div>
             </div>
             {% endif %}
+
+            {% if user.is_staff %}
+             <a class="btn btn-outline-success float-right mr-1" href="{% url 'work-list' %}"><i class="fa fa-people-carry"></i></a>
+             <a class="btn btn-outline-success float-right mr-1" href="{% url 'job-register-list' %}"><i class="fa fa-address-card"></i></a>
+             <a class="btn btn-outline-success float-right mr-1" href="{% url 'concluded-job' %}"><i class="fa fa-folder"></i></a>
+            {% endif %} 
         </div>
     </div>
 </div>

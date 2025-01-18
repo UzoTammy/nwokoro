@@ -1,11 +1,11 @@
 from django import forms
 from .models import Reward
 from account.models import User
-from chore.forms import CustomDelegateAssignChoiceField
+from chore.forms import UsernameChoiceField
 
 class AchieveCreateForm(forms.ModelForm):
 
-    user = CustomDelegateAssignChoiceField(queryset=User.objects.filter(is_staff=False),
+    user = UsernameChoiceField(queryset=User.objects.filter(is_staff=False),
         widget=forms.Select(attrs={'class': 'form-control'}),
         )
 
