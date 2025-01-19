@@ -3,7 +3,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.contrib import messages
 from django.db.models.aggregates import Sum
-from django.views.generic import (TemplateView, CreateView, DetailView, ListView, UpdateView)
+from django.views.generic import (TemplateView, CreateView)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Reward
 from .forms import AchieveCreateForm

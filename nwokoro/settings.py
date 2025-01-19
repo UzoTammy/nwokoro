@@ -27,6 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECRET_KEY = 'django-insecure-26)67csq^wnje343pis0^5w7sr3j@va-#kmofiuoamoyk&40m6'
 
 SECRET_KEY=os.getenv('SECRET_KEY')
+api_key = os.getenv('EXCHANGE_API_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.getenv('DEBUG_VALUE') == 'True' else False
@@ -54,10 +55,12 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'chore.apps.ChoreConfig',
     'achieve.apps.AchieveConfig',
+    'networth.apps.NetworthConfig',
     
     "crispy_forms",
     "crispy_bootstrap4",
     'django_celery_beat',
+    'djmoney',
 ]
 
 MIDDLEWARE = [
@@ -132,6 +135,8 @@ TIME_ZONE = 'America/Halifax' #'UTC'
 
 USE_I18N = True # internationalization
 
+USE_THOUSAND_SEPARATOR = True
+
 USE_TZ = True 
 
 
@@ -169,6 +174,8 @@ CELERY_TIMEZONE = "America/Halifax"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' if not DEBUG else "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = "EmailFileBased"
@@ -179,3 +186,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')  # Your Gmail address
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')     # Your Gmail password or app-specific password
 DEFAULT_FROM_EMAIL = "noreply@chores.com"
+
+CURRENCIES = ('NGN', 'CAD', 'USD')
+DEFAULT_CURRENCY = 'CAD'
+
