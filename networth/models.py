@@ -19,7 +19,7 @@ class ExchangeRate(models.Model):
 class Investment(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     holder = models.CharField(max_length=30)
-    principal = MoneyField(max_digits=10, decimal_places=2)
+    principal = MoneyField(max_digits=12, decimal_places=2)
     rate = models.FloatField()
     start_date = models.DateField(default=date.today)
     duration = models.PositiveSmallIntegerField()
@@ -46,7 +46,7 @@ class Investment(models.Model):
 class Saving(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     holder = models.CharField(max_length=30)
-    value = MoneyField(max_digits=10, decimal_places=2)
+    value = MoneyField(max_digits=12, decimal_places=2)
     host_country = models.CharField(max_length=30)
     date = models.DateField(default=date.today)
     category = models.CharField(max_length=30, default='TFSA')
