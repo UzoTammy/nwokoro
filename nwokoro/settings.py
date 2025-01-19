@@ -186,6 +186,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')  # Your Gmail address
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')     # Your Gmail password or app-specific password
 DEFAULT_FROM_EMAIL = "noreply@chores.com"
+ADMINS = (('uzonwokoro.com', EMAIL_HOST_USER),)
+
 
 CURRENCIES = ('NGN', 'CAD', 'USD')
 DEFAULT_CURRENCY = 'CAD'

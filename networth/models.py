@@ -15,7 +15,6 @@ class ExchangeRate(models.Model):
     def __str__(self):
         return f"{self.base_currency} to {self.target_currency}: {self.rate}"
 
-
 # Create your models here.
 class Investment(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)

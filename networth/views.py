@@ -15,8 +15,9 @@ from .forms import InvestmentCreateForm, SavingForm
 def convert_to_base(money_list):
     result = list()
     for money in money_list:
-        exchange = ExchangeRate.objects.get(target_currency=money.currency)
-        result.append(Money(money.amount/Decimal(exchange.rate), exchange.base_currency))
+        exchange = ExchangeRate.objects.filter(target_currency=money.currency)
+        if exchange.exists():
+            result.append(Money(money.amount/Decimal(exchange.first().rate), exchange.first().base_currency))
     return sum(result)
     
 
