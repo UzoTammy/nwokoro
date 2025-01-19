@@ -49,6 +49,7 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
 
         context['roi'] = convert_to_base([x.roi() for x in investments])
         context['roi_daily'] = convert_to_base([x.roi_per_day() for x in investments])
+        context['present_roi_total'] = convert_to_base([x.present_roi() for x in investments])
         
         return context
 

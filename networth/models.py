@@ -48,10 +48,13 @@ class Investment(models.Model):
         return (self.principal * Decimal(self.rate/100) ) / Decimal((365))
     
     def roi(self):
-        print(self.principal, self.roi_per_day() * Decimal(self.duration))
         return self.roi_per_day() * Decimal(self.duration)
     
-    
+    def present_roi(self):
+        if self.due_in_days() == 'Matured':
+            return self.roi()
+        return self.roi_per_day() * (self.duration - self.due_in_days())
+
 
 class Saving(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)

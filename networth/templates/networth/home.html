@@ -17,8 +17,8 @@
             <div class="col-sm-4">
               <ul class="list-group list-group-flush">
                 <li class="list-group-item list-group-item-primary">Expected ROI <span class="float-right">{{roi}}</span></li>
-                <li class="list-group-item list-group-item-primary">ROI daily <span class="float-right">{{roi_daily}}</span></li>
-                <li class="list-group-item list-group-item-primary">Due ROI<span class="float-right">{{networth}}</span></li>
+                <li class="list-group-item list-group-item-primary">Daily ROI <span class="float-right">{{roi_daily}}</span></li>
+                <li class="list-group-item list-group-item-primary">Present ROI<span class="float-right">{{present_roi_total}}</span></li>
               </ul>
             </div>
 
@@ -36,20 +36,20 @@
                   <thead>
                     <tr>
                       <th>Holder</th>
-                      <th>Start Date</th>
                       <th>Maturity</th>
                       <th>Due in (days)</th>
                       <th class="text-center">Principal</th>
+                      <th class="text-right">Present ROI</th>
                     </tr>
                   </thead>
                   <tbody>
                     {% for investment in investments %}
                     <tr>
                       <td><a href="{% url 'networth-investment-update' investment.pk %}">{{investment.holder}}</a></td>
-                      <td>{{investment.start_date}}</td>
                       <td>{{investment.maturity}}</td>
                       <td class="text-center">{{investment.due_in_days}}</td>
                       <td class="text-right">{{investment.principal}}</td>
+                      <td class="text-right">{{investment.present_roi}}</td>
                     </tr>
                     {% endfor %}
                   </tbody>
