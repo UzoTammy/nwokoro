@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from djmoney.models.fields import MoneyField
 from account.models import User
@@ -42,6 +43,15 @@ class Investment(models.Model):
         if self.is_matured():
             return 'Matured'
         return days
+    
+    def roi_per_day(self):
+        return (self.principal * Decimal(self.rate/100) ) / Decimal((365))
+    
+    def roi(self):
+        print(self.principal, self.roi_per_day() * Decimal(self.duration))
+        return self.roi_per_day() * Decimal(self.duration)
+    
+    
 
 class Saving(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)

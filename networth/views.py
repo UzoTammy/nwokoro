@@ -27,9 +27,10 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['investments'] = Investment.objects.all().order_by('principal_currency')
+        investments = Investment.objects.all()
+        context['investments'] = investments.order_by('principal_currency')
         context['savings'] = Saving.objects.all().order_by('value_currency')
-        currencies = Investment.objects.values_list('principal_currency', flat=True).distinct().order_by('principal_currency')
+        currencies = investments.values_list('principal_currency', flat=True).distinct().order_by('principal_currency')
         investment_total = list()
         if currencies.exists():
             for currency in currencies:
@@ -45,6 +46,10 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
         context['investment_USD'] = convert_to_base(investment_total)
         context['saving_USD'] = convert_to_base(savings_total)
         context['networth'] = sum((convert_to_base(investment_total), convert_to_base(savings_total)))
+
+        context['roi'] = convert_to_base([x.roi() for x in investments])
+        context['roi_daily'] = convert_to_base([x.roi_per_day() for x in investments])
+        
         return context
 
 

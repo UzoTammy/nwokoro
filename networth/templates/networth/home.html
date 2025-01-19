@@ -11,9 +11,17 @@
                 <li class="list-group-item list-group-item-primary">Investment Total <span class="float-right">{{investment_USD}}</span></li>
                 <li class="list-group-item list-group-item-primary">Saving Total <span class="float-right">{{saving_USD}}</span></li>
                 <li class="list-group-item list-group-item-info">Networth <span class="float-right">{{networth}}</span></li>
-                
               </ul>
             </div>
+
+            <div class="col-sm-4">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item list-group-item-primary">Expected ROI <span class="float-right">{{roi}}</span></li>
+                <li class="list-group-item list-group-item-primary">ROI daily <span class="float-right">{{roi_daily}}</span></li>
+                <li class="list-group-item list-group-item-primary">Due ROI<span class="float-right">{{networth}}</span></li>
+              </ul>
+            </div>
+
           </div>
           
         </div>
@@ -82,7 +90,7 @@
                   <tr>
                     <th>Holder</th>
                     <th>Date</th>
-                    <th>Host Country</th>
+                    <th class="text-center">Host Country</th>
                     <th class="text-center">Value</th>
                   </tr>
                 </thead>
@@ -91,7 +99,7 @@
                   <tr>
                     <td><a href="{% url 'networth-saving-update' saving.pk %}">{{saving.holder}}</a></td>
                     <td>{{saving.date}}</td>
-                    <td>{{saving.host_country}}</td>
+                    <td class="text-center">{{saving.host_country}}</td>
                     <td class="text-right">{{saving.value}}</td>
                   </tr>
                   {% endfor %}
