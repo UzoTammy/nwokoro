@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from djmoney.models.fields import Money
 from .models import Saving, Investment, ExchangeRate
 from .forms import InvestmentCreateForm, SavingForm
-
+from .emails import FinancialReport
 
 def convert_to_base(money_list):
     result = list()
@@ -28,29 +28,33 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         investments = Investment.objects.all()
+        savings = Saving.objects.all()
+        fr = FinancialReport(investments, savings)
+
         context['investments'] = investments.order_by('principal_currency')
-        context['savings'] = Saving.objects.all().order_by('value_currency')
+        context['savings'] = savings.order_by('value_currency')
         currencies = investments.values_list('principal_currency', flat=True).distinct().order_by('principal_currency')
         investment_total = list()
         if currencies.exists():
             for currency in currencies:
-                investment_total.append(Money(Investment.objects.filter(principal_currency=currency).aggregate(Sum('principal'))['principal__sum'], currency))
+                investment_total.append(Money(investments.filter(principal_currency=currency).aggregate(Sum('principal'))['principal__sum'], currency))
         context['investment_total'] = investment_total
 
-        currencies = Saving.objects.values_list('value_currency', flat=True).distinct().order_by('value_currency')
+        currencies = savings.values_list('value_currency', flat=True).distinct().order_by('value_currency')
         savings_total = list()
         if currencies.exists():
             for currency in currencies:
-                savings_total.append(Money(Saving.objects.filter(value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
+                savings_total.append(Money(savings.filter(value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
         context['savings_total'] = savings_total
-        context['investment_USD'] = convert_to_base(investment_total)
-        context['saving_USD'] = convert_to_base(savings_total)
-        context['networth'] = sum((convert_to_base(investment_total), convert_to_base(savings_total)))
+        context['investment_USD'] = fr.get_investment_total #convert_to_base(investment_total)
+        context['saving_USD'] =  fr.get_saving_total #convert_to_base(savings_total)
+        context['networth'] = fr.getNetworth() #sum((convert_to_base(investment_total), convert_to_base(savings_total)))
 
-        context['roi'] = convert_to_base([x.roi() for x in investments])
-        context['roi_daily'] = convert_to_base([x.roi_per_day() for x in investments])
-        context['present_roi_total'] = convert_to_base([x.present_roi() for x in investments])
-        
+        context['roi'] = fr.get_roi()
+        context['roi_daily'] = fr.get_daily_roi()
+        context['present_roi_total'] = fr.get_present_roi()
+
+        fr.send_email()
         return context
 
 

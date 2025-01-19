@@ -44,16 +44,16 @@ class Investment(models.Model):
             return 'Matured'
         return days
     
-    def roi_per_day(self):
+    def daily_roi(self):
         return (self.principal * Decimal(self.rate/100) ) / Decimal((365))
     
     def roi(self):
-        return self.roi_per_day() * Decimal(self.duration)
+        return self.daily_roi() * Decimal(self.duration)
     
     def present_roi(self):
         if self.due_in_days() == 'Matured':
             return self.roi()
-        return self.roi_per_day() * (self.duration - self.due_in_days())
+        return self.daily_roi() * (self.duration - self.due_in_days())
 
 
 class Saving(models.Model):
