@@ -20,14 +20,14 @@ urlpatterns = [
 urlpatterns += [
     path('tinyproject/', TinyProjectView.as_view(), name='tinyproject-home'),
     path('portfolio/miniproject/number-to-word/', NumberToWordView.as_view(), name='number-to-word'),
-    path('portfolio/miniproject/database-learning/', DatabaseLearningView.as_view(), name='database-learning'),
-    path('portfolio/miniproject/auto-email/', AutomaticEmailView.as_view(), name='auto-email'),
-    path('portfolio/tinyproject/profile/', ProfileView.as_view(), name='tinyproject-profile'),
-    path('portfolio/miniproject/<str:filter_by>/', StudentProfileView.as_view(), name='profile-list'),
-    path('portfolio/miniproject/<int:pk>/update/', StudentProfileUpdateView.as_view(), name='profile-update'),
-    path('tinyproject/canada-tax', TinyProjectTaxCanadaView.as_view(), name='canada-tax-home'),
+    # path('portfolio/miniproject/database-learning/', DatabaseLearningView.as_view(), name='database-learning'),
+    # path('portfolio/miniproject/auto-email/', AutomaticEmailView.as_view(), name='auto-email'),
+    # path('portfolio/tinyproject/profile/', ProfileView.as_view(), name='tinyproject-profile'),
+    # path('portfolio/miniproject/<str:filter_by>/', StudentProfileView.as_view(), name='profile-list'),
+    # path('portfolio/miniproject/<int:pk>/update/', StudentProfileUpdateView.as_view(), name='profile-update'),
+    # path('tinyproject/canada-tax', TinyProjectTaxCanadaView.as_view(), name='canada-tax-home'),
 ]
 
 urlpatterns += [
-    path('tutorial/', PracticeView.as_view(), name='tutorials'),
+    # path('tutorial/', PracticeView.as_view(), name='tutorials'),
 ]

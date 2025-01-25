@@ -75,6 +75,7 @@
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-light">Logout</button>
+                <a class="btn btn-outline-light" href="{% url 'chore-help' %}">Help</a>
                 {% if user.is_staff %}
                 <a class="btn btn-outline-light" href="{% url 'chore-setup' %}">Setup</a>
                 {% endif %}
@@ -84,10 +85,9 @@
             <h4 class="ml-3">An App that rewards effort and commitment at home.</h4>
             <div class="row">
                 <div class="col">
-                    <a class="btn btn-primary btn-sm ml-5 mt-3" href="{% url 'login' %}">Sign In</a>
-                    <a class="btn btn-primary btn-sm ml-5 mt-3" href="{% url 'sign-up' %}">Register</a>
-                    <a class="btn btn-primary btn-sm ml-5 mt-3" href="{% url 'index' %}">Back</a>
-                    <a class="btn btn-primary btn-sm ml-5 mt-3" href="{% url 'chore-help' %}">Help</a>
+                    <a class="btn btn-outline-light ml-5 mt-3" href="{% url 'login' %}">Sign In</a>
+                    <a class="btn btn-outline-light ml-5 mt-3" href="{% url 'chore-registration-message' %}">Register</a>
+                    <a class="btn btn-outline-light ml-5 mt-3" href="{% url 'index' %}">Back</a>
                 </div>
             </div>
             {% endif %}

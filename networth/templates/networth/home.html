@@ -37,7 +37,7 @@
                     <tr>
                       <th>Holder</th>
                       <th>Maturity</th>
-                      <th>Due in (days)</th>
+                      <th>Due in</th>
                       <th class="text-center">Principal</th>
                       <th class="text-right">Present ROI</th>
                     </tr>
@@ -45,9 +45,9 @@
                   <tbody>
                     {% for investment in investments %}
                     <tr>
-                      <td><a href="{% url 'networth-investment-update' investment.pk %}">{{investment.holder}}</a></td>
+                      <td><a href="{% url 'networth-investment-detail' investment.pk %}">{{investment.holder}}</a></td>
                       <td>{{investment.maturity}}</td>
-                      <td class="text-center">{{investment.due_in_days}}</td>
+                      <td class="text-center">{% if investment.due_in_days > 0 %} {{investment.due_in_days}} day(s) {% else %} Matured {% endif %}</td>
                       <td class="text-right">{{investment.principal}}</td>
                       <td class="text-right">{{investment.present_roi}}</td>
                     </tr>

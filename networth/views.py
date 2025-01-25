@@ -5,12 +5,13 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.contrib import messages
 from django.db.models.aggregates import Sum
-from django.views.generic import (TemplateView, CreateView, UpdateView)
+from django.views.generic import (TemplateView, CreateView, DetailView, UpdateView, FormView)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from djmoney.models.fields import Money
 from .models import Saving, Investment, ExchangeRate
-from .forms import InvestmentCreateForm, SavingForm
+from .forms import InvestmentCreateForm, SavingForm, InvestmentRolloverForm
 from .emails import FinancialReport
+
 
 def convert_to_base(money_list):
     result = list()
@@ -27,7 +28,7 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        investments = Investment.objects.all()
+        investments = Investment.objects.filter(is_active=True)
         savings = Saving.objects.all()
         fr = FinancialReport(investments, savings)
 
@@ -53,30 +54,55 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
         context['roi'] = fr.get_roi()
         context['roi_daily'] = fr.get_daily_roi()
         context['present_roi_total'] = fr.get_present_roi()
-
         fr.send_email()
         return context
 
 
 class InvestmentCreateView(LoginRequiredMixin, CreateView):
     model = Investment
-    success_url = reverse_lazy('networth-home')
+    # success_url = 
     form_class = InvestmentCreateForm
+    
+    def get_success_url(self):
+        return reverse_lazy('networth-home')
 
     def form_valid(self, form):
         form.instance.owner = self.request.user if self.request.user.is_staff else None
         return super().form_valid(form)
+
+class InvestmentDetailView(LoginRequiredMixin, DetailView):
+    model = Investment
 
 class InvestmentUpdateView(LoginRequiredMixin, UpdateView):
     model = Investment
     success_url = reverse_lazy('networth-home')
     form_class = InvestmentCreateForm
 
+
+class InvestmentRolloverView(LoginRequiredMixin, FormView):
+    # model = Investment
+    form_class = InvestmentRolloverForm
+    success_url = reverse_lazy('networth-home')
+    template_name = 'networth/rollover_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        pk = self.kwargs.get('pk')
+        kwargs['pk'] = pk
+        return kwargs
+
+    def form_valid(self, form):
+        form = InvestmentRolloverForm(pk=self.kwargs['pk'])
+        inv = Investment.objects.get(pk=self.kwargs['pk'])
+        inv.rollover(form.cleaned_data['rate'], form.cleaned_data['start_date'], form.cleaned_data['duration'], 
+                     form.cleaned_data['option'], form.cleaned_data['adjusted_amount'], form.cleaned_data['savings_account'])
+        return super().form_valid(form)
+
 class SavingCreateView(LoginRequiredMixin, CreateView):
     model = Saving
-    success_url = reverse_lazy('networth-home')
     form_class = SavingForm
-
+    success_url = reverse_lazy('networth-home')
+    
     def form_valid(self, form):
         form.instance.owner = self.request.user if self.request.user.is_staff else None
         return super().form_valid(form)

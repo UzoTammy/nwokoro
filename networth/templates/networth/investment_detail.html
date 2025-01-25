@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+{% load custom_tag %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-8">
+            <h3>{{object}}</h3>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Holder<span class="float-right">{{object.holder}}</span></li>
+                <li class="list-group-item">Principal<span class="float-right">{{object.principal}}</span></li>
+                <li class="list-group-item">Rate<span class="float-right">{{object.rate}}%</span></li>
+                <li class="list-group-item">Start Date<span class="float-right">{{object.start_date}}</span></li>
+                <li class="list-group-item">Maturity Date<span class="float-right">{{object.maturity}}</span></li>
+                <li class="list-group-item">Term<span class="float-right">{{object.duration}} days</span></li>
+                <li class="list-group-item">Host Country<span class="float-right">{{object.host_country}}</span></li>
+                <li class="list-group-item">Type<span class="float-right">{{object.category}}</span></li>
+                <li class="list-group-item">Current Status<span class="float-right"> 
+                    {% if object.due_in_days == 0 %} Matured today
+                    {% elif object.due_in_days < 0 %} Matured {{object.due_in_days|scalar_value }} day(s) ago {% else %} Due in {{object.due_in_days}} day(s) {% endif %}</span></li>
+                <li class="list-group-item">Expected ROI<span class="float-right">{{object.roi}}</span></li>
+                <li class="list-group-item">Daily ROI<span class="float-right">{{object.daily_roi}}</span></li>
+                <li class="list-group-item text-success font-weight-bold">Present ROI<span class="float-right">{{object.present_roi}}</span></li>
+                <hr>
+              </ul>
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-outline-dark" href="{% url 'networth-investment-update' object.pk %}">Update</a>
+                    <a class="btn btn-outline-dark" href="{% url 'networth-investment-rollover' object.pk %}">Rollover</a>
+                    <a class="btn btn-outline-dark" href="{% url 'networth-investment-update' object.pk %}">Terminate</a>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

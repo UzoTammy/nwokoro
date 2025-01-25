@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
+from djmoney.models.fields import MoneyField
 
 # Create your models here.
 class CustomAccountManager(BaseUserManager):
@@ -61,7 +62,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         Transaction.objects.create(user=self, transaction_type="Deposit", amount=points,
                                    description=description or 'Points deposited to account')
 
-
     def withdraw(self, points, description=None):
         """
         Withdraw points in multiples of 10,000 and create a transaction record.
@@ -83,7 +83,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             amount=-points,
             description=description or 'Points withdrawn from account')
 
-
+    
 class Transaction(models.Model):
     TRANSACTION_TYPES = (
         ("Deposit", "Deposit"),
@@ -98,3 +98,4 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.transaction_type}: {self.amount} points on {self.timestamp}"
+

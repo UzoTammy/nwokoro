@@ -1,6 +1,6 @@
 
 from django.urls import path
-from .views import (ChoreHome, ChoreDashboard, ChoreSetupView, WorkCreateView, WorkEvaluateView, BonusPointCreateView, 
+from .views import (ChoreHome, RegistrationMessage, ChoreDashboard, ChoreSetupView, WorkCreateView, WorkEvaluateView, BonusPointCreateView, 
                     BonusUpdateView, WorkDoneView, WorkDetailView, JobRegisterCreateView,
                     WorkListView, AssignWorkView, JobRegisterListView, DelegateWorkCreateView,
                     InitiateWorkCreateView, InitiateWorkDetailView, InitiateWorkApproveView,
@@ -9,6 +9,7 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     path('', ChoreHome.as_view(), name='chore-home'),
+    path('registration-message/', RegistrationMessage.as_view(), name='chore-registration-message'),
     path('dashboard/', ChoreDashboard.as_view(), name='chore-dashboard'),
     path('setup/', ChoreSetupView.as_view(), name='chore-setup'),
     path('work/create/', WorkCreateView.as_view(), name='work-create'),

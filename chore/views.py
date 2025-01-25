@@ -35,6 +35,10 @@ class ChoreHome(TemplateView):
         context['works'] = Work.objects.all()
         context['initiatedjobs'] = InitiateWork.objects.filter(approved=False)
         return context
+    
+class RegistrationMessage(TemplateView):
+    template_name = 'chore/registration_message.html'
+
 
 class ChoreDashboard(LoginRequiredMixin, TemplateView):
     template_name = 'chore/dashboard.html'

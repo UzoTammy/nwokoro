@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+
+{% block head %}
+<style>
+    body {
+        background-color: black;
+        color: antiquewhite;
+    }
+</style>
+{% endblock head %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-8">
+            <h3>You want to register?</h3>
+            <hr>
+            <p>This is a private site, you will need a hard token to enable you register</p>
+            <p>Contact Chores Administrator</p>
+            <a class="btn btn-outline-light float-right mr-3" href="{% url 'chore-home' %}">Back</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,6 +1,7 @@
 from django import forms
 from .models import Investment, Saving
-
+from djmoney.forms.fields import MoneyField
+from django.core.validators import MaxValueValidator
 
 class OptionChoices:
     HOLDER_OPTION = [
@@ -35,3 +36,23 @@ class SavingForm(forms.ModelForm):
     class Meta:
         model = Saving
         fields = ['holder', 'value', 'date', 'host_country', 'category']
+
+
+class InvestmentRolloverForm(forms.Form):
+
+    option = forms.ChoiceField(choices=[("PI", "Principal & Interest"), ("PO", "Principal only")], widget=forms.Select(attrs={'id': 'option_select_id'}))
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    rate = forms.FloatField()
+    duration = forms.IntegerField(min_value=0, max_value=32767,  # Match the max value of PositiveSmallIntegerField
+        validators=[MaxValueValidator(32767)])
+    adjusted_amount = forms.DecimalField(max_digits=12, decimal_places=2, initial=0.0, help_text='To normalize the real investment figures')
+    savings_account = forms.ModelChoiceField(queryset=Saving.objects.none(), required=False, widget=forms.Select(attrs={'id': 'savings_account_id', 'class': 'form-control'})) #'style': 'display:none'}), required=False)
+
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+
+        if self.pk:
+            inv = Investment.objects.get(pk=self.pk)
+            queryset = Saving.objects.filter(value_currency=inv.principal.currency)
+            self.fields['savings_account'].queryset=queryset

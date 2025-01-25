@@ -1,5 +1,5 @@
 from decimal import Decimal
-from django.db.models.aggregates import Sum
+from django.db.models.aggregates import Sum, Min
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.http import HttpResponse
@@ -64,6 +64,7 @@ class FinancialReport:
             'roi': self.get_roi(),
             'daily_roi': self.get_daily_roi(),
             'present_roi': self.get_present_roi(),
+            'earliest_due_date': self.investments
         })
         
         # Create the email message

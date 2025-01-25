@@ -9,11 +9,12 @@
             <form class="mt-3" action="" method="post">
                 {% csrf_token %}
                 <legend>Create New Investment</legend>
+                
                 <hr>
                 {{form|crispy}}
                 <div class="m-2">
                     <button class="btn btn-outline-dark" type="submit">Submit</button>
-                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>
+                    <a class="btn btn-outline-dark float-right" href="{{request.META.HTTP_REFERER}}">Back</a>
                 </div>
             </form>
         </div>
