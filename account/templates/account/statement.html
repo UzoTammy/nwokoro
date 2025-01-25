@@ -6,7 +6,7 @@
     <div class="row justify-content-center align-items-center vh-100">
         <div class="col">
             <h3>Statement for {{user.username}} <small class="float-right font-italic text-muted">Balance: {{user.points|floatformat:'g'}}</small></h3>
-            <table class="table">
+            <table class="table" data-toggle="table">
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -17,7 +17,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for transaction in transactions %}
+                    {% for transaction in page_obj %}
                     <tr>
                         <td>{{transaction.timestamp}}</td>
                         <td>{{transaction.description}}</td>
@@ -32,7 +32,30 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <a class="btn btn-outline-dark" href="{% url 'profile' user.pk %}">Return to profile</a>
+
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a class="btn btn-outline-primary btn-sm" href="?page=1"><i class="fa fa-fast-backward"></i></a>
+                        <a class="btn btn-outline-primary btn-sm" href="?page={{ page_obj.previous_page_number }}"><i class="fa fa-backward"></i></a>
+                    {% endif %}
+            
+                    <span class="current text-muted">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+            
+                    {% if page_obj.has_next %}
+                        <a class="btn btn-outline-primary btn-sm" href="?page={{ page_obj.next_page_number }}">
+                            <i class="fa fa-forward"></i>
+                        </a>
+                        <a class="btn btn-outline-primary btn-sm" href="?page={{ page_obj.paginator.num_pages }}">
+                            <i class="fa fa-fast-forward"></i>
+                        </a>
+                    {% endif %}
+                </span>
+            </div>
+
+            <a class="btn btn-outline-dark mt-3 float-right" href="{% url 'profile' user.pk %}">Profile</a>
         </div>
     </div>
 </div>

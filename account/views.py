@@ -7,6 +7,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.paginator import Paginator
 from chore.models import FinishedWork
 from django.db.models import Sum, Avg
 from django.utils.formats import number_format
@@ -108,7 +109,15 @@ class StatementView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['transactions'] = self.get_object().transactions.all().order_by('-timestamp')
+        transactions = self.get_object().transactions.all().order_by('-timestamp')
+        context['transactions'] = transactions
+        # Set up pagination
+        paginator = Paginator(transactions, 3)  # 10 items per page
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        # Add the paginated objects to the context
+        context['page_obj'] = page_obj
         return context
 
 class ForbiddenView(TemplateView):
