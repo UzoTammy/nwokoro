@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.shortcuts import redirect
 from django.db import models
 from django.core.exceptions import ValidationError
 from djmoney.models.fields import MoneyField
@@ -200,8 +201,6 @@ class Stock(models.Model):
             transaction_type='CR'
         )
 
-    
-
 class Saving(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_savings")
     holder = models.CharField(max_length=30)
@@ -213,6 +212,40 @@ class Saving(models.Model):
 
     def __str__(self):
         return f'Saving: {self.value}'
+    
+    def create_investment(self, holder, principal, rate, start_date, duration, category):
+    
+        investment = Investment.objects.create(
+            owner = self.owner,
+            holder = holder,
+            principal = principal,
+            rate = rate,
+            start_date = start_date,
+            duration = duration,
+            host_country = self.host_country,
+            category = category
+        )
+
+        InvestmentTransaction.objects.create(
+            user = self.owner,
+            investment = investment,
+            amount = principal,
+            description = f'Funds from {self.holder} on {start_date}',
+            timestamp = start_date,
+            transaction_type = 'CR'
+        )
+
+        self.value -= principal
+        self.save()
+
+        SavingsTransaction.objects.create(
+            user = self.owner,
+            savings = self,
+            amount = principal,
+            description = f'Funds to {investment.holder} on {start_date}',
+            timestamp = start_date,
+            transaction_type = 'DR'
+        )
     
 
 class InvestmentTransaction(models.Model):

@@ -14,7 +14,7 @@
                 {{form|crispy}}
                 <div class="m-2">
                     <button class="btn btn-outline-dark" type="submit">Submit</button>
-                    <a class="btn btn-outline-dark float-right" href="{{request.META.HTTP_REFERER}}">Back</a>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-saving-detail' view.kwargs.pk %}">Back</a>
                 </div>
             </form>
         </div>

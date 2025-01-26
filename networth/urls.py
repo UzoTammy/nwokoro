@@ -7,7 +7,7 @@ from .views import (NetworthHomeView,
 
 urlpatterns = [
     path('', NetworthHomeView.as_view(), name='networth-home'),
-    path('investment/create/', InvestmentCreateView.as_view(), name='networth-investment-create'),
+    path('investment/<int:pk>/create/', InvestmentCreateView.as_view(), name='networth-investment-create'),
     path('investment/<int:pk>/detail/', InvestmentDetailView.as_view(), name='networth-investment-detail'),
     path('investment/<int:pk>/update/', InvestmentUpdateView.as_view(), name='networth-investment-update'),
     path('investment/<int:pk>/rollover/', InvestmentRolloverView.as_view(), name='networth-investment-rollover'),

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import (MainView, AboutMe, ResumeView, PortfolioScushView, PortfolioFinuelView,
+from .views import (MainView, ErrorView, AboutMe, ResumeView, PortfolioScushView, PortfolioFinuelView,
                      TextingView, NumberToWordView, TinyProjectView, DatabaseLearningView,
                      AutomaticEmailView, NewHomeView, NewAboutMeView, ProfileView, StudentProfileView, 
                      StudentProfileUpdateView,PracticeView, TinyProjectTaxCanadaView
@@ -7,6 +7,7 @@ from .views import (MainView, AboutMe, ResumeView, PortfolioScushView, Portfolio
 
 urlpatterns = [
     path('', MainView.as_view(), name='index'),
+    path('oops/', ErrorView.as_view(), name='error-message'),
     path('aboutme/', AboutMe.as_view(), name='about-me'),
     path('new-about-me', NewAboutMeView.as_view(), name='new-aboutme'),
     path('resume-view/', ResumeView.as_view(), name='resume'),

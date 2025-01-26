@@ -58,16 +58,32 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class InvestmentCreateView(LoginRequiredMixin, CreateView):
-    model = Investment
-    # success_url = 
+class InvestmentCreateView(LoginRequiredMixin, FormView):
     form_class = InvestmentCreateForm
-    
+    template_name = 'networth/investment_form.html'
+
     def get_success_url(self):
         return reverse_lazy('networth-home')
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['pk'] = self.kwargs.get('pk')
+        
+        return kwargs
 
     def form_valid(self, form):
-        form.instance.owner = self.request.user if self.request.user.is_staff else None
+        form.cleaned_data['owner'] = self.request.user if self.request.user.is_staff else None
+        savings_account = Saving.objects.get(pk=self.kwargs['pk'])        
+        savings_account.create_investment(
+            holder=form.cleaned_data['holder'],
+            principal=form.cleaned_data['principal'],
+            rate=form.cleaned_data['rate'],
+            start_date=form.cleaned_data['start_date'],
+            duration=form.cleaned_data['duration'],
+            category=form.cleaned_data['category']
+        )
+        messages.success(self.request, 'Investment created successfully !!!')
+
         return super().form_valid(form)
 
 class InvestmentDetailView(LoginRequiredMixin, DetailView):
@@ -109,7 +125,6 @@ class SavingCreateView(LoginRequiredMixin, CreateView):
 
 class SavingDetailView(LoginRequiredMixin, DetailView):
     model = Saving
-
 
 class SavingUpdateView(LoginRequiredMixin, UpdateView):
     model = Saving

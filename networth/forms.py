@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import ValidationError
 from .models import Investment, Saving
 from djmoney.forms.fields import MoneyField
 from django.core.validators import MaxValueValidator
@@ -24,6 +25,22 @@ class InvestmentCreateForm(forms.ModelForm):
     class Meta:
         model = Investment
         fields = ['holder', 'principal', 'rate', 'start_date', 'duration', 'host_country', 'category']
+    
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+
+        if self.pk:
+            self.savings_account = Saving.objects.get(pk=self.pk)
+
+    def clean(self):
+        if self.savings_account.value.currency != self.cleaned_data['principal'].currency:
+            raise ValidationError("Currency cannot mismatch")
+        
+        if self.savings_account.value < self.cleaned_data['principal']:
+            raise ValidationError("Insufficient fund in saving account")
+            
+
 
 
 class SavingForm(forms.ModelForm):

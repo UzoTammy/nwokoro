@@ -65,17 +65,12 @@
                     </li>
                   {% endfor %}
                 </ul>
-                <a class="btn btn-outline-dark mt-1 float-right" href="{% url 'networth-investment-create' %}">
-                  <i class="fa fa-plus"></i> Investment
-                </a>
                 
               </div> 
             </div>
             {% endif %}
           </div>
-            {% if not investments %}
-              <a class="btn btn-outline-dark" href="{% url 'networth-investment-create' %}">Start Investment</a>
-            {% endif %}
+            
         </div>
     </div>
 

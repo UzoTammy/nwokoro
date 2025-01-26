@@ -46,6 +46,15 @@ class PracticeView(View):
 class MainView(TemplateView):
     template_name = 'core/homepage.html'
 
+
+class ErrorView(TemplateView):
+    template_name = 'core/error.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['message'] = ''
+        return context
+
 class AboutMe(TemplateView):
     template_engine = 'django'
 
