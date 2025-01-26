@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+{% load custom_tag %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-8">
+            <h3>{{object}}</h3>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Holder<span class="float-right">{{object.holder}}</span></li>
+                <li class="list-group-item">Value<span class="float-right">{{object.value}}</span></li>
+                <li class="list-group-item">Host Country<span class="float-right">{{object.host_country}}</span></li>
+                <li class="list-group-item">Type<span class="float-right">{{object.category}}</span></li>
+                <li class="list-group-item">Date<span class="float-right">{{object.date}}</span></li>
+                <hr>
+              </ul>
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-outline-dark" href="{% url 'networth-saving-update' object.pk %}">Update</a>
+                    <a class="btn btn-outline-dark" href="{% url 'networth-investment-create' %}">Invest</a>
+                    <a class="btn btn-outline-dark" href="{% url 'networth-investment-update' object.pk %}">Buy Stock</a>
+                    <a class="btn btn-outline-dark" href="{% url 'networth-investment-update' object.pk %}">Start Business</a>
+                    
+                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

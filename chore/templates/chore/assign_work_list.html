@@ -27,7 +27,7 @@
           <tr>
 
             <td>
-              {% if object.is_expired and not object.assigned.is_staff %}
+              {% if object.is_expired and not user.is_staff %}
               {{object.work}}
               {% else %}
               <a href="{% url 'work-done' object.pk %}">{{object.work}}</a>

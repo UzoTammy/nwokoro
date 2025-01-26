@@ -46,7 +46,6 @@ class PracticeView(View):
 class MainView(TemplateView):
     template_name = 'core/homepage.html'
 
-
 class AboutMe(TemplateView):
     template_engine = 'django'
 
@@ -61,16 +60,13 @@ class TinyProjectView(TemplateView):
     template_name = 'core/portfolio/root.html'
 
 class PortfolioScushView(TemplateView):
-    template_name = 'core/portfolio/scush.html'
-
+    template_name = 'core/portfolio/scushproject.html'
 
 class PortfolioFinuelView(TemplateView):
     template_name = 'core/portfolio/finuel.html'
     
-
 class TextingView(TemplateView):
     template_name = 'core/texting.html'
-
 
 class NumberToWordView(TemplateView):
     template_name = 'core/portfolio/tinyprojects/numtoword.html'

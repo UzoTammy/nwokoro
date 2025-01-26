@@ -112,7 +112,7 @@ class StatementView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         transactions = self.get_object().transactions.all().order_by('-timestamp')
         context['transactions'] = transactions
         # Set up pagination
-        paginator = Paginator(transactions, 3)  # 10 items per page
+        paginator = Paginator(transactions, 10)  # 10 items per page
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 

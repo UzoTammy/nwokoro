@@ -1,5 +1,6 @@
 from decimal import Decimal
 from django.db import models
+from django.core.exceptions import ValidationError
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 from account.models import User
@@ -30,7 +31,7 @@ class Investment(models.Model):
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f'Investment: {self.principal} with {self.holder}'
+        return f'I: {self.principal} with {self.holder} for {self.duration}'
     
     def maturity(self):
         return self.start_date + timezone.timedelta(days=self.duration)
@@ -127,8 +128,6 @@ class Investment(models.Model):
                 transaction_type='CR'
             )
         
-
-
     # def terminate(self):
     #     """
     #     Terminate
@@ -137,6 +136,71 @@ class Investment(models.Model):
     #     c. Create new transaction
     #     """
 
+
+class Stock(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_stocks")
+    holder = models.CharField(max_length=30)
+    units = models.PositiveIntegerField()
+    unit_cost = MoneyField(max_digits=12, decimal_places=2)
+    unit_price = MoneyField(max_digits=12, decimal_places=2)
+    host_country = models.CharField(max_length=30)
+    date_bought = models.DateTimeField(default=timezone.now)
+    date_sold = models.DateTimeField(default=timezone.now, blank=True, null=True)
+    stock_type = models.CharField(max_length=30, default='TFSA')
+
+
+    def __str__(self):
+        return f'{self.stock_type} @ {self.holder}'
+    
+    def clean(self):
+        """Ensure cancelled jobs do not get rated"""
+        super().clean()  # Call parent clean method
+        if self.date_sold and self.date_sold < self.date_bought:
+            raise ValidationError({'date_sold': 'Sold date must be ahead of bought date'})
+
+    def save(self, *args, **kwargs):
+        """Call clean before saving."""
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def is_active(self):
+        if self.date_sold:
+            return False
+        return True
+    
+    def stock_value(self):
+        return self.unit_cost * self.units
+    
+    def current_worth(self):
+        return self.unit_price * self.units
+    
+    
+    def sell(self, selling_date, adjusted_amount, saving_account, description):
+        """
+            a. create date_sold
+            b. transfer value or less to savings account
+            c. generate a transaction
+        """
+
+        self.date_sold = selling_date
+        self.save()
+
+        """Adjusted amount can be nil or something"""
+        amount = self.current_worth() - adjusted_amount
+
+        saving_account.value += amount
+        saving_account.save()
+
+        StockTransaction.objects.create(
+            user=self.owner,
+            stock=self,
+            amount=amount,
+            description=description,
+            timestamp=selling_date,
+            transaction_type='CR'
+        )
+
+    
 
 class Saving(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_savings")
@@ -163,12 +227,22 @@ class InvestmentTransaction(models.Model):
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
     
+class StockTransaction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_stock_transactions")
+    stock = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name='stock_transactions')
+    amount = MoneyField(max_digits=12, decimal_places=2)
+    description = models.TextField(blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+    transaction_type = models.CharField(max_length=2) # DR or CR
+
+    def __str__(self):
+        return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
+    
 
 class SavingsTransaction(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_savings_transactions")
     savings = models.ForeignKey(Saving, on_delete=models.CASCADE, related_name='savings_transactions')
-    
     amount = MoneyField(max_digits=12, decimal_places=2)
     description = models.TextField(blank=True)
     timestamp = models.DateTimeField(default=timezone.now)

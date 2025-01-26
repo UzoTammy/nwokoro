@@ -107,6 +107,10 @@ class SavingCreateView(LoginRequiredMixin, CreateView):
         form.instance.owner = self.request.user if self.request.user.is_staff else None
         return super().form_valid(form)
 
+class SavingDetailView(LoginRequiredMixin, DetailView):
+    model = Saving
+
+
 class SavingUpdateView(LoginRequiredMixin, UpdateView):
     model = Saving
     success_url = reverse_lazy('networth-home')

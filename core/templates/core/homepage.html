@@ -40,6 +40,8 @@
     .bg-grey {
         background-color: grey;
     }
+
+    
 </style>
 {% endblock %}
 
@@ -150,12 +152,12 @@
             <div class="col-sm-3 intro-box">
                 <h3 class="mt-3">Portfolio</h3>
                 <ul class="list-group">
-                    <li class="list-group-item"><a href="https://scush.com.ng/home" target="_blank">SCusH</a>: A custom web application for a business</li>
-                    <li class="list-group-item"><a href="https://www.finuel.org/" target="_blank">Finuel</a>: Financial management application for non-profit
+                    <li class="list-group-item"><a class="text-decoration-none stretched-link" href="{% url 'portfolio-scush' %}">SCusH</a>: A custom web application for a business</li>
+                    <li class="list-group-item"><a class="text-decoration-none" href="{% url 'portfolio-finuel' %}">Finuel</a>: Financial management application for non-profit
                         organisation</li>
-                    <li class="list-group-item"><a href="{% url 'chore-home' %}">Chores</a>: Get Teens and Kids to earn money working at home </li>
-                    <li class="list-group-item"><a href="{% url 'networth-home' %}">Networth</a>: Aggregate your assets </li>
-                    <li class="list-group-item"><a href="{% url 'tinyproject-home' %}">Hands-on Projects</a>: Projects
+                    <li class="list-group-item"><a class="text-decoration-none" href="{% url 'chore-home' %}">Chores</a>: Get young dependants to earn money doing chores at home </li>
+                    <li class="list-group-item"><a class="text-decoration-none" href="{% url 'networth-home' %}">Networth</a>: Aggregating assets and liabilities of a user </li>
+                    <li class="list-group-item"><a class="text-decoration-none" href="{% url 'tinyproject-home' %}">Hands-on Projects</a>: Projects
                         that emphasizes specific concept(s)</li>
                 </ul>
             </div>
@@ -175,7 +177,7 @@
             <div class="col-sm"><a target="_blank" href="https://www.x.com/UzoTammy"><i
                         class="fab fa-twitter text-primary"></i></a> Twitter</div>
             <div class="col-sm"><a target="_blank"
-                    href="https://youtube.com/@uzotammynwokoro1128?si=viI00JJt5XMGFNDa"><i
+                    href="https://youtube.com/channel/UCrrUKGko2XorgKxa1iTrOFA"><i
                         class="fab fa-youtube text-danger"></i></a> YouTube</div>
             <div class="col-sm"><a target="_blank"
                     href="https://www.facebook.com/share/9TNh9xdWhoE6iJE3/?mibextid=qi2Omg"><i

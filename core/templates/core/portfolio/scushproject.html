@@ -17,14 +17,17 @@
         font-weight: bold;
         /* font-family: fantasy; */
         font-size: 100px;
-        @media  screen and (max-width: 768px) {
+
+        @media screen and (max-width: 768px) {
             font-size: 80px;
         }
     }
+
     .greybox {
         background-color: gray;
-        
+
     }
+
     .plainbox {
         background-color: whitesmoke;
     }
@@ -37,22 +40,60 @@
 <div class="container mt-3">
     <div class="row justify-content-center">
         <div class="col-sm-6">
-            <h3 class="text-center pretty-font">Scush Web App</h3>
-            <p class="text-center">
-                <a href="https://www.scush.com.ng" target="_blank"><i class="fa"></i>Visit the website</a></p>
+            <h3 class="pretty-font">Scush Web App</h3>
+            <a class="text-decoration-none" href="https://www.scush.com.ng" target="_blank">Visit Site</a>
         </div>
         <div class="col-sm-6">
             <p class="first-letter text-muted">
-                Scush, a customized SaaS app, that streamlines administrative functions within a company, focusing on three core areas: Stock, 
-                Customers, and Human Resources—aptly reflected in its name, SCusH. Launched in June 2022, this dynamic website has improved 
-                operational efficiency. From processing payroll and tracking key performance indicators to documenting policies and automating,
-                Scush has significantly reduced workloads and minimized chaos and conflict in the workplace. Moreover, its 
-                capabilities extend to financial analytics, offering insightful analysis of Profit and Loss statements and balance sheets 
-                from accounting software. This feature is pivotal in informing critical business decisions. 
-                Scush has not only automated but also transformed administrative processes, proving to be an invaluable asset for Ozone F & L
-                (The owner of the site).
+                SCusH is a customized application designed to streamline administrative functions across key
+                business areas. Launched in June 2022, SCusH has revolutionized operational efficiency for
+                Ozone F & L by automating key processes such as payroll management, performance tracking,
+                policy documentation, and workflow optimization, cashflow and bank reconciliation. Its
+                impact extends to financial analytics, providing insightful reports on Profit and Loss statements and
+                Balance Sheets extracted from an accounting software, enabling data-driven decision-making. By reducing
+                workloads, minimizing workplace conflicts, and fostering a more organized environment, SCusH has
+                transformed administrative processes into a seamless, efficient system and proven to be an indispensable
+                asset for the company.
             </p>
             <hr>
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="col-sm-6">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item first-letter">Apps
+                    <span class="badge badge-pill badge-dark float-right h3">
+                        <p class="h4">17</p>
+                    </span>
+                </li>
+                <li class="list-group-item first-letter">Models
+                    <span class="badge badge-pill badge-dark float-right h3">
+                        <p class="h4">46</p>
+                    </span>
+                </li>
+                <li class="list-group-item first-letter">Views
+                    <span class="badge badge-pill badge-dark float-right h3">
+                        <p class="h4">10</p>
+                    </span>
+                </li>
+                
+            </ul>
+        </div>
+
+        <div class="col-sm-6">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item first-letter">Forms
+                    <span class="badge badge-pill badge-dark float-right h3">
+                        <p class="h4">10</p>
+                    </span>
+                </li>
+                <li class="list-group-item first-letter">Others
+                    <span class="badge badge-pill badge-dark float-right h3">
+                        <p class="h4">10</p>
+                    </span>
+                </li>
+            </ul>
         </div>
     </div>
     <div class="row mb-2">
@@ -63,33 +104,37 @@
         </div>
         <div class="col-sm-8 plainbox">
             <section>
-            <h4 class="first-letter">Technologies</h4>
-            <ol>
-                <li><b>Programming Language:</b> Python programming language and Javascript</li>
-                <li><b>Database:</b> Sqlite for developement and Postgres for production on heroku</li>
-                <li><b>Backend:</b> Django framework technology</li>
-                <li><b>Frontend:</b> Bootstrap CDN, HTML, and CSS</li>
-                <li><b>Storing Media Files:</b> Hosted on amazon S3 storage</li>
-                <li><b>Serving Static Files:</b> Whitenoise</li>
-                <li><b>Email Server:</b> Google gmail</li>
-                <li><b>Message Broker:</b> RabbitMq a heroku add-on</li>
-                <li><b>Domain Source:</b> Namecheap</li>
-                <li><b>Deployment:</b> Deployed on Heroku platform</li>
-                <li><b>Collaboration:</b> Git and GitHub</li>
-                <li><b>Icons:</b> Fontawesome</li>
-            </ol>
+                <h4 class="first-letter">Technologies</h4>
+                <ol>
+                    <li><b>Programming Language:</b> Python programming language and Javascript</li>
+                    <li><b>Database:</b> Sqlite for developement and Postgres for production on heroku</li>
+                    <li><b>Backend:</b> Django framework technology</li>
+                    <li><b>Frontend:</b> Bootstrap CDN, HTML, and CSS</li>
+                    <li><b>Storing Media Files:</b> Hosted on amazon S3 storage</li>
+                    <li><b>Serving Static Files:</b> Whitenoise</li>
+                    <li><b>Email Server:</b> Google gmail</li>
+                    <li><b>Message Broker:</b> RabbitMq a heroku add-on</li>
+                    <li><b>Domain Source:</b> Namecheap</li>
+                    <li><b>Deployment:</b> Deployed on Heroku platform</li>
+                    <li><b>Collaboration:</b> Git and GitHub</li>
+                    <li><b>Icons:</b> Fontawesome</li>
+                </ol>
             </section>
             <hr>
             <section>
-            <h4 class="first-letter">Main Features</h4>
+                <h4 class="first-letter">Main Features</h4>
                 <ol>
                     <li><b>Sending Mails:</b> Able to send mails automatically upon updating or creating records</li>
                     <li><b>Creating PDF:</b> Produce a PDF document as a hard copy</li>
                     <li><b>Able to carryout scheduled tasks:</b> Send notification, mails and execute tasks</li>
-                    <li><b>Present plots and graphs:</b> A pictorial presentation to aid understanding and analysis of data</li>
+                    <li><b>Present plots and graphs:</b> A pictorial presentation to aid understanding and analysis of
+                        data</li>
                 </ol>
             </section>
         </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col"><a class="btn btn-outline-dark float-right" href="{% url 'index' %}">Home</a></div>
     </div>
 </div>
 

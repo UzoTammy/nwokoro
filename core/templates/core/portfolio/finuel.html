@@ -13,7 +13,6 @@
         left: 0;
     }
 
-
     .pretty-font {
         background-image: linear-gradient(to left, rgb(180, 130, 238), indigo, red, green, blue, orange, yellow);
         -webkit-background-clip: text;
@@ -21,7 +20,7 @@
         /* font-size: 40px; */
         font-weight: bold;
         /* font-family: fantasy; */
-        font-size: 150px;
+        font-size: 100px;
         @media  screen and (max-width: 768px) {
             font-size: 100px;
         }
@@ -35,6 +34,9 @@
     <div class="row">
         <div class="col-sm-6">
             <h1 class="text-center pretty-font">Finuel Web App</h1>
+
+            <a class="text-decoration-none" href="https://www.finuel.org/reason-good" target="_blank">View Site</a>
+
             <div class="text-muted first-letter">
                 <p style="font-size: large;">
                     A SaaS project for the finance department of a non-profit organisation based in Canada.
@@ -47,14 +49,51 @@
         </div>
         <div class="col-sm-6 mt-5">
             <img class="shadow" width="100%" src="{% static 'finuel/indexpage.png'%}" alt="">
-            
         </div>
     </div>
+    <div class="row">
+        <div class="col-sm-6 plainbox">
+            <section>
+                <h4 class="first-letter">Technologies</h4>
+                <ol>
+                    <li><b>Programming Language:</b> Python programming language and Javascript</li>
+                    <li><b>Database:</b> Sqlite for developement and Postgres for production on heroku</li>
+                    <li><b>Backend:</b> Django framework technology</li>
+                    <li><b>Frontend:</b> Bootstrap CDN, HTML, and CSS</li>
+                    <li><b>Storing Media Files:</b> Hosted on amazon S3 storage</li>
+                    <li><b>Serving Static Files:</b> Whitenoise</li>
+                    <li><b>Email Server:</b> Google gmail</li>
+                    <li><b>Message Broker:</b> RabbitMq a heroku add-on</li>
+                    <li><b>Domain Source:</b> Namecheap</li>
+                    <li><b>Deployment:</b> Deployed on Heroku platform</li>
+                    <li><b>Collaboration:</b> Git and GitHub</li>
+                    <li><b>Icons:</b> Fontawesome</li>
+                </ol>
+            </section>
+            <hr>
+        </div>
+        
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <section>
+                <h4 class="first-letter">Main Features</h4>
+                <ol>
+                    <li><b>Sending Mails:</b> Able to send mails automatically upon updating or creating records</li>
+                    <li><b>Creating PDF:</b> Produce a PDF document as a hard copy</li>
+                    <li><b>Able to carryout scheduled tasks:</b> Send notification, mails and execute tasks</li>
+                    <li><b>Present plots and graphs:</b> A pictorial presentation to aid understanding and analysis of
+                        data</li>
+                </ol>
+            </section>
+        </div>
+    </div>  
     
-    <div class="row mt-3">
+    <div class="row mb-3">
         <div class="col">
-            <a style="float: right;" class="btn btn-outline-dark" href="{% url 'index' %}">Home</a>
+            <a class="btn btn-outline-dark float-right" href="{% url 'index' %}">Home</a>
         </div>
     </div>
 </div>
+    
 {% endblock %}

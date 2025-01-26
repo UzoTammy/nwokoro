@@ -97,7 +97,7 @@
                 <tbody>
                   {% for saving in savings %}
                   <tr>
-                    <td><a href="{% url 'networth-saving-update' saving.pk %}">{{saving.holder}}</a></td>
+                    <td><a href="{% url 'networth-saving-detail' saving.pk %}">{{saving.holder}}</a></td>
                     <td>{{saving.date}}</td>
                     <td class="text-center">{{saving.host_country}}</td>
                     <td class="text-right">{{saving.value}}</td>
@@ -134,6 +134,7 @@
       {% if not savings %}
         <a class="btn btn-outline-dark" href="{% url 'networth-saving-create' %}">Start Saving</a>
       {% endif %}
+      <a class="btn btn-outline-dark" href="{% url 'index' %}">Borrow</a>
       <a class="btn btn-outline-dark" href="{% url 'index' %}">Back</a>
     </div>
   </div>
