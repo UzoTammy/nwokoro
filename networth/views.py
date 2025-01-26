@@ -10,7 +10,7 @@ from django.views.generic import (TemplateView, CreateView, DetailView, UpdateVi
 from django.contrib.auth.mixins import LoginRequiredMixin
 from djmoney.models.fields import Money
 from .models import Saving, Stock, Investment, ExchangeRate
-from .forms import InvestmentCreateForm, StockCreateForm, SavingForm, InvestmentRolloverForm
+from .forms import InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, InvestmentRolloverForm
 from .emails import FinancialReport
 
 
@@ -157,6 +157,15 @@ class StockCreateView(LoginRequiredMixin, FormView):
         messages.success(self.request, 'Stock investment created successfully !!!')
 
         return super().form_valid(form)
+
+class StockDetailView(LoginRequiredMixin, DetailView):
+    model = Stock
+
+
+class StockUpdateView(LoginRequiredMixin, UpdateView):
+    model = Stock
+    success_url = reverse_lazy('networth-home')
+    form_class = StockUpdateForm
 
 
 class SavingCreateView(LoginRequiredMixin, CreateView):

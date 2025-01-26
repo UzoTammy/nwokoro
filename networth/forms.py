@@ -53,7 +53,7 @@ class StockCreateForm(forms.ModelForm):
 
     class Meta:
         model = Stock
-        fields = ['holder', 'units', 'unit_cost', 'host_country', 'stock_type']
+        fields = ['holder', 'units', 'unit_cost', 'date_bought', 'host_country', 'stock_type']
     
     def __init__(self, *args, **kwargs):
         self.pk = kwargs.pop('pk', None)
@@ -68,7 +68,18 @@ class StockCreateForm(forms.ModelForm):
         
         if self.savings_account.value < self.cleaned_data['unit_cost']:
             raise ValidationError("Insufficient fund in saving account")
-         
+
+class StockUpdateForm(forms.ModelForm):
+    
+    holder = forms.CharField(widget=forms.Select(choices=OptionChoices.HOLDER_OPTION))
+    # date_bought = forms.DateField(label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
+    host_country = forms.CharField(widget=forms.Select(choices=OptionChoices.COUNTRIES))
+    stock_type = forms.CharField(widget=forms.Select(choices=OptionChoices.STOCK_TYPE))
+
+    class Meta:
+        model = Stock
+        fields = ['holder', 'host_country', 'stock_type']
+    
 
 class SavingForm(forms.ModelForm):
 

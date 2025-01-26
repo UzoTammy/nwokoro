@@ -141,7 +141,7 @@
                 <tbody>
                   {% for stock in stocks %}
                   <tr>
-                    <td><a href="{% url 'networth-stock-create' stock.pk %}">{{stock.holder}}</a></td>
+                    <td><a href="{% url 'networth-stock-detail' stock.pk %}">{{stock.holder}}</a></td>
                     <td>{{stock.date_bought.date}}</td>
                     <td class="text-center">{{stock.units}}</td>
                     <td class="text-right">{{stock.unit_cost}}</td>
