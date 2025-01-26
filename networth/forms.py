@@ -6,7 +6,9 @@ from django.core.validators import MaxValueValidator
 
 class OptionChoices:
     HOLDER_OPTION = [
-        ('Axa Mansard', 'Axa Mansard'), ('Scotia Bank', 'Scotia Bank'), ('UBA', 'UBA')
+        ('Axa Mansard', 'Axa Mansard'), ('Scotia Bank', 'Scotia Bank'), ('UBA', 'UBA'),
+        ('FirstBank', 'FirstBank'), ('FCMB', 'FCMB'), ('FidelityBank', 'FidelityBank'),
+        ('Fidson', 'Fidson'), ('Neimeth', 'Neimeth'), ('Transcorp', 'Transcorp')
     ]
     COUNTRIES = [
         ('NG', 'Nigeria'), ('CA', 'Canada'), ('US', 'USA'), 
@@ -15,7 +17,7 @@ class OptionChoices:
         ('GIC', 'GIC'), ('TB', 'Treasury bill'), ('FD', 'Fixed Deposit'), ('CP', 'Commercial Paper'), ('MM','Money Market') 
     ]
     STOCK_TYPE = [
-        ('Scotia Essential', 'Scotia Essential'), ('Scotia Selected', 'Scotia Selected')
+        ('Scotia Essential', 'Scotia Essential'), ('Scotia Selected', 'Scotia Selected'), ('Shares', 'Shares')
     ]
 
 class InvestmentCreateForm(forms.ModelForm):
