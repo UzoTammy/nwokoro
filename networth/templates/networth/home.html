@@ -25,8 +25,56 @@
           </div>
           
         </div>
+    </div>
+
+    <div class="row justify-content-center mt-3 shadow">
+      <div class="col-sm-12">
+        <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Savings</h5>
+        <div class="row mb-3">
+          {% if savings %}
+          <div class="col-sm-8">
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th>Holder</th>
+                    <th>Date</th>
+                    <th class="text-center">Host Country</th>
+                    <th class="text-center">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for saving in savings %}
+                  <tr>
+                    <td><a href="{% url 'networth-saving-detail' saving.pk %}">{{saving.holder}}</a></td>
+                    <td>{{saving.date}}</td>
+                    <td class="text-center">{{saving.host_country}}</td>
+                    <td class="text-right">{{saving.value}}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+            </table>
+          </div>
+          <div class="col-sm-4">
+            <div class="card" style="width: 18rem;">
+              <ul class="list-group list-group-flush">
+                {% for saving in savings_total %}
+                  <li class="list-group-item"> {{saving.currency}}
+                    <span class="float-right">{{saving}}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+              <a class="btn btn-outline-dark mt-1 float-right" href="{% url 'networth-saving-create' %}">
+                <i class="fa fa-plus"></i> Saving</a>
+              
+            </div> 
+          </div>
+          {% endif %}
+        </div>
+          
       </div>
-    <div class="row justify-content-center shadow">
+    </div>
+
+    <div class="row justify-content-center mt-3 shadow">
         <div class="col-sm-12">
           <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Investments</h5>
           <div class="row mb-3">
@@ -76,50 +124,54 @@
 
     <div class="row justify-content-center mt-3 shadow">
       <div class="col-sm-12">
-        <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Savings</h5>
+        <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Stock</h5>
         <div class="row mb-3">
-          {% if savings %}
+          {% if stocks %}
           <div class="col-sm-8">
             <table class="table">
                 <thead>
                   <tr>
                     <th>Holder</th>
                     <th>Date</th>
-                    <th class="text-center">Host Country</th>
+                    <th class="text-center"># of units</th>
+                    <th class="text-center">Cost</th>
                     <th class="text-center">Value</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {% for saving in savings %}
+                  {% for stock in stocks %}
                   <tr>
-                    <td><a href="{% url 'networth-saving-detail' saving.pk %}">{{saving.holder}}</a></td>
-                    <td>{{saving.date}}</td>
-                    <td class="text-center">{{saving.host_country}}</td>
-                    <td class="text-right">{{saving.value}}</td>
+                    <td><a href="{% url 'networth-stock-create' stock.pk %}">{{stock.holder}}</a></td>
+                    <td>{{stock.date_bought.date}}</td>
+                    <td class="text-center">{{stock.units}}</td>
+                    <td class="text-right">{{stock.unit_cost}}</td>
+                    <td class="text-right">{{stock.value}}</td>
                   </tr>
                   {% endfor %}
                 </tbody>
             </table>
           </div>
+          
           <div class="col-sm-4">
             <div class="card" style="width: 18rem;">
               <ul class="list-group list-group-flush">
-                {% for saving in savings_total %}
-                  <li class="list-group-item"> {{saving.currency}}
-                    <span class="float-right">{{saving}}</span>
+                {% for stock in stock_total %}
+                  <li class="list-group-item"> {{stock.currency}}
+                    <span class="float-right">{{stock}}</span>
                   </li>
                 {% endfor %}
               </ul>
-              <a class="btn btn-outline-dark mt-1 float-right" href="{% url 'networth-saving-create' %}">
-                <i class="fa fa-plus"></i> Saving</a>
               
             </div> 
           </div>
+          {% else %}
+          <p class="font-italic ml-2">No Stock investment</p>
           {% endif %}
         </div>
           
       </div>
     </div>
+
 
   <div class="row mt-3">
     <div class="col">

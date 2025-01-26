@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ValidationError
-from .models import Investment, Saving
+from .models import Investment, Stock, Saving
 from djmoney.forms.fields import MoneyField
 from django.core.validators import MaxValueValidator
 
@@ -13,6 +13,9 @@ class OptionChoices:
     ]
     CATEGORIES = [
         ('GIC', 'GIC'), ('TB', 'Treasury bill'), ('FD', 'Fixed Deposit'), ('CP', 'Commercial Paper'), ('MM','Money Market') 
+    ]
+    STOCK_TYPE = [
+        ('Scotia Essential', 'Scotia Essential'), ('Scotia Selected', 'Scotia Selected')
     ]
 
 class InvestmentCreateForm(forms.ModelForm):
@@ -39,9 +42,33 @@ class InvestmentCreateForm(forms.ModelForm):
         
         if self.savings_account.value < self.cleaned_data['principal']:
             raise ValidationError("Insufficient fund in saving account")
-            
 
 
+class StockCreateForm(forms.ModelForm):
+    
+    holder = forms.CharField(widget=forms.Select(choices=OptionChoices.HOLDER_OPTION))
+    date_bought = forms.DateField(label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
+    host_country = forms.CharField(widget=forms.Select(choices=OptionChoices.COUNTRIES))
+    stock_type = forms.CharField(widget=forms.Select(choices=OptionChoices.STOCK_TYPE))
+
+    class Meta:
+        model = Stock
+        fields = ['holder', 'units', 'unit_cost', 'host_country', 'stock_type']
+    
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+
+        if self.pk:
+            self.savings_account = Saving.objects.get(pk=self.pk)
+
+    def clean(self):
+        if self.savings_account.value.currency != self.cleaned_data['unit_cost'].currency:
+            raise ValidationError("Currency cannot mismatch")
+        
+        if self.savings_account.value < self.cleaned_data['unit_cost']:
+            raise ValidationError("Insufficient fund in saving account")
+         
 
 class SavingForm(forms.ModelForm):
 
@@ -53,7 +80,6 @@ class SavingForm(forms.ModelForm):
     class Meta:
         model = Saving
         fields = ['holder', 'value', 'date', 'host_country', 'category']
-
 
 class InvestmentRolloverForm(forms.Form):
 

@@ -3,7 +3,7 @@ import requests
 from django.utils import timezone
 from celery import shared_task
 from .emails import FinancialReport
-from networth.models import ExchangeRate, Investment, Saving
+from networth.models import ExchangeRate, Investment, Saving, Stock
 
 
 
@@ -40,7 +40,8 @@ def fetch_exchange_rate():
 
 @shared_task
 def financial_report_email():
-    investments = Investment.objects.all()
+    investments = Investment.objects.filter(is_active=True)
     savings = Saving.objects.all()
-    fr = FinancialReport(investments, savings)
+    stocks = Stock.objects.all()
+    fr = FinancialReport(investments, savings, stocks)
     fr.send_email()

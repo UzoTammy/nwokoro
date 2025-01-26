@@ -153,11 +153,12 @@ class Stock(models.Model):
     def __str__(self):
         return f'{self.stock_type} @ {self.holder}'
     
-    def clean(self):
-        """Ensure cancelled jobs do not get rated"""
-        super().clean()  # Call parent clean method
-        if self.date_sold and self.date_sold < self.date_bought:
-            raise ValidationError({'date_sold': 'Sold date must be ahead of bought date'})
+    # def clean(self):
+    #     """Ensure cancelled jobs do not get rated"""
+    #     super().clean()  # Call parent clean method
+    #     if self.date_sold:
+    #         if self.date_sold < self.date_bought.date():
+    #             raise ValidationError({'date_sold': 'Sold date must be ahead of bought date'})
 
     def save(self, *args, **kwargs):
         """Call clean before saving."""
@@ -169,12 +170,11 @@ class Stock(models.Model):
             return False
         return True
     
-    def stock_value(self):
+    def value(self):
         return self.unit_cost * self.units
     
     def current_worth(self):
         return self.unit_price * self.units
-    
     
     def sell(self, selling_date, adjusted_amount, saving_account, description):
         """
@@ -244,6 +244,42 @@ class Saving(models.Model):
             amount = principal,
             description = f'Funds to {investment.holder} on {start_date}',
             timestamp = start_date,
+            transaction_type = 'DR'
+        )
+    
+
+    def create_stock(self, holder, units, unit_cost, unit_price, date_bought, stock_type):
+        
+        stock = Stock.objects.create(
+            owner = self.owner,
+            holder = holder,
+            units = units,
+            unit_cost = unit_cost,
+            unit_price = unit_price,
+            date_bought = date_bought,
+            date_sold = None,
+            host_country = self.host_country,
+            stock_type = stock_type
+        )
+
+        StockTransaction.objects.create(
+            user = self.owner,
+            stock = stock,
+            amount = stock.value(),
+            description = f'Funds from {self.holder} on {date_bought}',
+            timestamp = date_bought,
+            transaction_type = 'CR'
+        )
+
+        self.value -= stock.value()
+        self.save()
+
+        SavingsTransaction.objects.create(
+            user = self.owner,
+            savings = self,
+            amount = stock.value(),
+            description = f'Funds to {stock.holder} on {date_bought}',
+            timestamp = date_bought,
             transaction_type = 'DR'
         )
     

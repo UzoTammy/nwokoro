@@ -1,5 +1,6 @@
 from decimal import Decimal
 from django.db.models.aggregates import Sum, Min
+from django.db.models import F
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.http import HttpResponse
@@ -10,9 +11,10 @@ from .models import ExchangeRate
 
 class FinancialReport:
 
-    def __init__(self, investments, savings):
+    def __init__(self, investments, savings, stocks):
         self.investments = investments
         self.savings = savings
+        self.stocks = stocks
         
     @staticmethod    
     def convert_to_base(money_list):
@@ -31,6 +33,15 @@ class FinancialReport:
                 investment_total.append(Money(self.investments.filter(principal_currency=currency).aggregate(Sum('principal'))['principal__sum'], currency))
         return FinancialReport.convert_to_base(investment_total)
     
+    def get_stock_total(self):
+        currencies = self.stocks.values_list('unit_cost_currency', flat=True).distinct().order_by('unit_cost_currency')
+        stock_total = list()
+        if currencies.exists():
+            for currency in currencies:
+                self.stocks = self.stocks.annotate(value=F('unit_cost') * F('units'))
+                stock_total.append(Money(self.stocks.filter(unit_cost_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
+        return FinancialReport.convert_to_base(stock_total)
+    
     def get_saving_total(self):
         currencies = self.savings.values_list('value_currency', flat=True).distinct().order_by('value_currency')
         savings_total = list()
@@ -40,7 +51,7 @@ class FinancialReport:
         return FinancialReport.convert_to_base(savings_total)
     
     def getNetworth(self):
-        return self.get_investment_total() + self.get_saving_total()
+        return self.get_investment_total() + self.get_saving_total() + self.get_stock_total()
     
     def get_roi(self):
         return FinancialReport.convert_to_base([x.roi() for x in self.investments])
