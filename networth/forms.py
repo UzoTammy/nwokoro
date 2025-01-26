@@ -6,9 +6,10 @@ from django.core.validators import MaxValueValidator
 
 class OptionChoices:
     HOLDER_OPTION = [
-        ('Axa Mansard', 'Axa Mansard'), ('Scotia Bank', 'Scotia Bank'), ('UBA', 'UBA'),
-        ('FirstBank', 'FirstBank'), ('FCMB', 'FCMB'), ('FidelityBank', 'FidelityBank'),
-        ('Fidson', 'Fidson'), ('Neimeth', 'Neimeth'), ('Transcorp', 'Transcorp')
+        ('Axa Mansard', 'Axa Mansard'), ('Scotia Bank', 'Scotia Bank'), ('RBC Bank', 'RBC Bank'),
+        ('UBA', 'UBA'), ('FirstBank', 'FirstBank'), ('FCMB', 'FCMB'), ('FidelityBank', 'FidelityBank'),
+        ('Fidson', 'Fidson'), ('Neimeth', 'Neimeth'), ('Transcorp', 'Transcorp'),
+        
     ]
     COUNTRIES = [
         ('NG', 'Nigeria'), ('CA', 'Canada'), ('US', 'USA'), 

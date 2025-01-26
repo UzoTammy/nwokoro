@@ -53,13 +53,12 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
                 savings_total.append(Money(savings.filter(value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
         context['savings_total'] = savings_total
 
-        currencies = stocks.values_list('unit_price_currency', flat=True).distinct().order_by('unit_price_currency')
+        currencies = stocks.values_list('unit_cost_currency', flat=True).distinct().order_by('unit_cost_currency')
+        
         stock_total = list()
         if currencies.exists():
             for currency in currencies:
-                stocks = stocks.filter(unit_price_currency=currency).annotate(value=F('unit_price')*F('units'))
-                if stocks.exists():
-                    stock_total.append(Money(stocks.aggregate(Sum('value'))['value__sum'], currency))
+                stock_total.append(Money(stocks.filter(unit_cost_currency=currency).annotate(value=F('unit_cost') * F('units')).aggregate(Sum('value'))['value__sum'], currency))
         context['stock_total'] = stock_total
         
         context['investment_USD'] = fr.get_investment_total #convert_to_base(investment_total)
