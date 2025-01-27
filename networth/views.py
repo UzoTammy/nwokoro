@@ -12,7 +12,7 @@ from djmoney.models.fields import Money
 from .models import Saving, Stock, Investment, ExchangeRate
 from .forms import InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, InvestmentRolloverForm
 from .emails import FinancialReport
-from .tasks import financial_report_email
+# from .tasks import financial_report_email
 
 def convert_to_base(money_list):
     result = list()
@@ -69,8 +69,11 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
         context['roi'] = fr.get_roi()
         context['roi_daily'] = fr.get_daily_roi()
         context['present_roi_total'] = fr.get_present_roi()
-
-        financial_report_email()
+        canada = ExchangeRate.objects.get(target_currency='CAD')
+        nigeria = ExchangeRate.objects.get(target_currency="NGN")
+        rate = Money(nigeria.rate/canada.rate, 'NGN')
+        context['exchange'] = f'{rate}/CA$ on {canada.updated_at.strftime("%A %d-%b-%Y")}'
+        # financial_report_email()
         return context
 
 class InvestmentCreateView(LoginRequiredMixin, FormView):
