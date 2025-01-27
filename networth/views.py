@@ -12,7 +12,7 @@ from djmoney.models.fields import Money
 from .models import Saving, Stock, Investment, ExchangeRate
 from .forms import InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, InvestmentRolloverForm
 from .emails import FinancialReport
-
+from .tasks import financial_report_email
 
 def convert_to_base(money_list):
     result = list()
@@ -29,9 +29,9 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        investments = Investment.objects.filter(is_active=True)
-        stocks = Stock.objects.all()
-        savings = Saving.objects.all()
+        investments = Investment.objects.filter(is_active=True).filter(owner=self.request.user)
+        stocks = Stock.objects.filter(owner=self.request.user)
+        savings = Saving.objects.filter(owner=self.request.user)
 
         fr = FinancialReport(investments, savings, stocks)
 
@@ -69,7 +69,8 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
         context['roi'] = fr.get_roi()
         context['roi_daily'] = fr.get_daily_roi()
         context['present_roi_total'] = fr.get_present_roi()
-        # fr.send_email()
+
+        financial_report_email()
         return context
 
 class InvestmentCreateView(LoginRequiredMixin, FormView):

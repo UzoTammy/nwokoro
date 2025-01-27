@@ -137,7 +137,6 @@ class Investment(models.Model):
     #     c. Create new transaction
     #     """
 
-
 class Stock(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_stocks")
     holder = models.CharField(max_length=30)
@@ -283,7 +282,6 @@ class Saving(models.Model):
             transaction_type = 'DR'
         )
     
-
 class InvestmentTransaction(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_investment_transactions")
@@ -306,7 +304,6 @@ class StockTransaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
-    
 
 class SavingsTransaction(models.Model):
 
@@ -320,4 +317,33 @@ class SavingsTransaction(models.Model):
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
  
- 
+
+class FinancialData(models.Model):
+    date = models.DateTimeField(auto_now_add=True)
+    worth = MoneyField(max_digits=12, decimal_places=2)
+    savings = MoneyField(max_digits=12, decimal_places=2)
+    investment = MoneyField(max_digits=12, decimal_places=2)
+    stock = MoneyField(max_digits=12, decimal_places=2)
+    business = MoneyField(max_digits=12, decimal_places=2)
+    fixed_asset = MoneyField(max_digits=12, decimal_places=2)
+    liability = MoneyField(max_digits=12, decimal_places=2)
+    roi = MoneyField(max_digits=12, decimal_places=2)
+    daily_roi = MoneyField(max_digits=12, decimal_places=2)
+    present_roi = MoneyField(max_digits=12, decimal_places=2)
+
+    def __str__(self):
+        return f'{self.date}: {self.worth}'
+    
+    
+    def spread(self):
+
+        return {
+            'savings': self.savings/self.worth, 
+            'investment': self.investment/self.worth, 
+            'stock': self.stock/self.worth,
+            'business': self.business/self.worth,
+            'fixed_asset': self.fixed/self.worth
+        }
+    
+    def networth(self):
+        return self.worth - self.liability

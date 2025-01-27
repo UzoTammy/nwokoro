@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.urls import reverse
 from djmoney.models.fields import Money
-from .models import ExchangeRate
+from .models import ExchangeRate, FinancialData
 
 
 class FinancialReport:
@@ -24,6 +24,9 @@ class FinancialReport:
             if exchange.exists():
                 result.append(Money(money.amount/Decimal(exchange.first().rate), exchange.first().base_currency))
         return sum(result)
+
+    def get_owner(self):
+        return self.savings.first().owner
 
     def get_investment_total(self):
         currencies = self.investments.values_list('principal_currency', flat=True).distinct().order_by('principal_currency')
@@ -50,6 +53,15 @@ class FinancialReport:
                 savings_total.append(Money(self.savings.filter(value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
         return FinancialReport.convert_to_base(savings_total)
     
+    def get_business_total(self):
+        return Money(0, 'USD')
+    
+    def get_fixed_asset_total(self):
+        return Money(0, 'USD')
+    
+    def get_liability_total(self):
+        return Money(0, 'USD')
+
     def getNetworth(self):
         return self.get_investment_total() + self.get_saving_total() + self.get_stock_total()
     
@@ -65,13 +77,14 @@ class FinancialReport:
     def send_email(self):
         from_email = "no-reply@chores.com"
 
-        subject = "Daily Finacial Report"
-        to_email = [ 'uzo.tammy@gmail.com' ]
+        subject = "Daily Financial Report"
+        to_email = [ self.get_owner().email ]
 
         html_content = render_to_string('networth/mails/financial_report.html', {
             'networth': self.getNetworth(),
             'investments': self.get_investment_total(),
             'savings': self.get_saving_total(),
+            'stocks': self.get_stock_total(),
             'roi': self.get_roi(),
             'daily_roi': self.get_daily_roi(),
             'present_roi': self.get_present_roi(),
@@ -88,3 +101,17 @@ class FinancialReport:
             # return HttpResponse("Email sent successfully!")
         except Exception as e:
             return HttpResponse(f"Failed to send email: {e}")
+        
+    def save_report(self):
+        FinancialData.objects.create(
+            worth=self.getNetworth(),
+            savings=self.get_saving_total(),
+            investment=self.get_investment_total(),
+            stock=self.get_stock_total(),
+            business=self.get_business_total(),
+            fixed_asset=self.get_fixed_asset_total(),
+            liability=self.get_liability_total(),
+            roi=self.get_roi(),
+            daily_roi=self.get_daily_roi(),
+            present_roi=self.get_present_roi()
+        )
