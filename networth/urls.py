@@ -3,7 +3,8 @@ from django.urls import path
 from .views import (NetworthHomeView, 
                     InvestmentCreateView, InvestmentDetailView, InvestmentRolloverView, InvestmentUpdateView, 
                     StockCreateView, StockDetailView, StockUpdateView,
-                    SavingCreateView, SavingDetailView, SavingUpdateView)
+                    SavingCreateView, SavingDetailView, SavingUpdateView,
+                    BusinessCreateView)
 
 
 urlpatterns = [
@@ -20,4 +21,8 @@ urlpatterns = [
     path('saving/create/', SavingCreateView.as_view(), name='networth-saving-create'),
     path('saving/<int:pk>/detail/', SavingDetailView.as_view(), name='networth-saving-detail'),
     path('saving/<int:pk>/update/', SavingUpdateView.as_view(), name='networth-saving-update'),
+
+    path('business/<int:pk>/create/', BusinessCreateView.as_view(), name='networth-business-create'),
+
+    
 ]

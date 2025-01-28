@@ -9,8 +9,8 @@ from django.db.models import F
 from django.views.generic import (TemplateView, CreateView, DetailView, UpdateView, FormView)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from djmoney.models.fields import Money
-from .models import Saving, Stock, Investment, ExchangeRate
-from .forms import InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, InvestmentRolloverForm
+from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData
+from .forms import InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, InvestmentRolloverForm, BusinessCreateForm
 from .emails import FinancialReport
 # from .tasks import financial_report_email
 
@@ -29,16 +29,27 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # for financial report summanry
+        context['fd'] = FinancialData.objects.latest('date')
+
+        # exchange rate
+        canada = ExchangeRate.objects.get(target_currency='CAD')
+        nigeria = ExchangeRate.objects.get(target_currency="NGN")
+        rate = Money(nigeria.rate/canada.rate, 'NGN')
+        context['exchange'] = f'{rate}/CA$ on {canada.updated_at.strftime("%A %d-%b-%Y")}'
+        
+        # queryset of assets
         investments = Investment.objects.filter(is_active=True).filter(owner=self.request.user)
         stocks = Stock.objects.filter(owner=self.request.user)
         savings = Saving.objects.filter(owner=self.request.user)
-
-        fr = FinancialReport(investments, savings, stocks)
+        business = Business.objects.filter(owner=self.request.user)
 
         context['investments'] = investments.order_by('principal_currency')
         context['savings'] = savings.order_by('value_currency')
         context['stocks'] = stocks.order_by('unit_cost_currency')
+        context['business'] = business.order_by('unit_cost_currency')
 
+        # Asset total
         currencies = investments.values_list('principal_currency', flat=True).distinct().order_by('principal_currency')
         investment_total = list()
         if currencies.exists():
@@ -61,19 +72,9 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
                 stock_total.append(Money(stocks.filter(unit_cost_currency=currency).annotate(value=F('unit_cost') * F('units')).aggregate(Sum('value'))['value__sum'], currency))
         context['stock_total'] = stock_total
         
-        context['investment_USD'] = fr.get_investment_total #convert_to_base(investment_total)
-        context['saving_USD'] =  fr.get_saving_total #convert_to_base(savings_total)
-        context['stock_USD'] = fr.get_stock_total
-        context['networth'] = fr.getNetworth() #sum((convert_to_base(investment_total), convert_to_base(savings_total)))
+        
 
-        context['roi'] = fr.get_roi()
-        context['roi_daily'] = fr.get_daily_roi()
-        context['present_roi_total'] = fr.get_present_roi()
-        canada = ExchangeRate.objects.get(target_currency='CAD')
-        nigeria = ExchangeRate.objects.get(target_currency="NGN")
-        rate = Money(nigeria.rate/canada.rate, 'NGN')
-        context['exchange'] = f'{rate}/CA$ on {canada.updated_at.strftime("%A %d-%b-%Y")}'
-        # financial_report_email()
+        
         return context
 
 class InvestmentCreateView(LoginRequiredMixin, FormView):
@@ -134,14 +135,11 @@ class InvestmentRolloverView(LoginRequiredMixin, FormView):
 class StockCreateView(LoginRequiredMixin, FormView):
     form_class = StockCreateForm
     template_name = 'networth/stock_form.html'
-
-    def get_success_url(self):
-        return reverse_lazy('networth-home')
+    success_url = reverse_lazy('networth-home')
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['pk'] = self.kwargs.get('pk')
-        
         return kwargs
 
     def form_valid(self, form):
@@ -164,13 +162,12 @@ class StockCreateView(LoginRequiredMixin, FormView):
 class StockDetailView(LoginRequiredMixin, DetailView):
     model = Stock
 
-
 class StockUpdateView(LoginRequiredMixin, UpdateView):
     model = Stock
     success_url = reverse_lazy('networth-home')
     form_class = StockUpdateForm
 
-
+# Saving
 class SavingCreateView(LoginRequiredMixin, CreateView):
     model = Saving
     form_class = SavingForm
@@ -188,3 +185,29 @@ class SavingUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('networth-home')
     form_class = SavingForm
 
+# Business
+class BusinessCreateView(LoginRequiredMixin, FormView):
+    success_url = reverse_lazy('networth-home')
+    form_class = BusinessCreateForm
+    template_name = 'networth/stock_form.html'
+
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['pk'] = self.kwargs.get('pk')
+        return kwargs
+
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+
+        savings_account = Saving.objects.get(pk=self.kwargs['pk'])        
+        savings_account.create_business(
+            name=form.cleaned_data['name'],
+            shares=form.cleaned_data['shares'],
+            unit_cost=form.cleaned_data['unit_cost'],
+            date=form.cleaned_data['date'],
+        )
+        messages.success(self.request, 'Business started successfully !!!')
+
+        return super().form_valid(form)

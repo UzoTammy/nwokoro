@@ -1,3 +1,4 @@
+from babel.numbers import format_percent
 from decimal import Decimal
 from django.shortcuts import redirect
 from django.db import models
@@ -7,7 +8,6 @@ from djmoney.money import Money
 from account.models import User
 from django.utils import timezone
 from datetime import date
-
 
 
 class ExchangeRate(models.Model):
@@ -281,7 +281,121 @@ class Saving(models.Model):
             timestamp = date_bought,
             transaction_type = 'DR'
         )
+
+    def create_business(self, name, shares, unit_cost, date):
+        
+        business = Business.objects.create(
+            owner = self.owner,
+            name = name,
+            shares = shares,
+            unit_cost = unit_cost,
+            date = date,
+            host_country = self.host_country,
+        )
+
+        BusinessTransaction.objects.create(
+            user = self.owner,
+            business = business,
+            amount = business.capital(),
+            description = f'Funds from {self.holder} on {date}',
+            timestamp = date,
+            transaction_type = 'CR'
+        )
+
+        self.value -= business.capital()
+        self.save()
+
+        SavingsTransaction.objects.create(
+            user = self.owner,
+            savings = self,
+            amount = business.capital(),
+            description = f'Funds to {business.name} on {date}',
+            timestamp = date,
+            transaction_type = 'DR'
+        )
+
+class Business(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=30)
+    date = models.DateField(default=timezone.now)
+    shares = models.PositiveIntegerField()
+    unit_cost = MoneyField(max_digits=12, decimal_places=2)
+    host_country = models.CharField(max_length=2)
+
+    def __str__(self):
+        return self.name
     
+    class Meta:
+        verbose_name = 'Business'
+
+    def capital(self):
+        return self.shares * self.unit_cost
+    
+class FixedAsset(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=30)
+    date = models.DateField(default=timezone.now)
+    value = MoneyField(max_digits=12, decimal_places=2)
+    host_country = models.CharField(max_length=2)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'FixedAsset'
+    
+class Liability(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=30)
+    date = models.DateField(default=timezone.now)
+    initial_amount = MoneyField(max_digits=12, decimal_places=2)
+    balance_amount = MoneyField(max_digits=12, decimal_places=2)
+    pay_method = models.CharField(max_length=30)
+    interest = models.DecimalField(max_digits=5, decimal_places=2)
+    host_country = models.CharField(max_length=2)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'Liability'
+    
+class BusinessTransaction(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_business_transactions")
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='business_transactions')
+    amount = MoneyField(max_digits=12, decimal_places=2)
+    description = models.TextField(blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+    transaction_type = models.CharField(max_length=2) # DR or CR
+
+    def __str__(self):
+        return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
+    
+class FixedAssetTransaction(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_fixed_asset_transactions")
+    fixed_asset = models.ForeignKey(FixedAsset, on_delete=models.CASCADE, related_name='fixed_asset_transactions')
+    amount = MoneyField(max_digits=12, decimal_places=2)
+    description = models.TextField(blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+    transaction_type = models.CharField(max_length=2) # DR or CR
+
+    def __str__(self):
+        return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
+
+class LiabilityTransaction(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_liability_transactions")
+    liability = models.ForeignKey(Liability, on_delete=models.CASCADE, related_name='liability_transactions')
+    amount = MoneyField(max_digits=12, decimal_places=2)
+    description = models.TextField(blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+    transaction_type = models.CharField(max_length=2) # DR or CR
+
+    def __str__(self):
+        return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
+
 class InvestmentTransaction(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_investment_transactions")
@@ -317,7 +431,6 @@ class SavingsTransaction(models.Model):
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
  
-
 class FinancialData(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     worth = MoneyField(max_digits=12, decimal_places=2)
@@ -330,6 +443,7 @@ class FinancialData(models.Model):
     roi = MoneyField(max_digits=12, decimal_places=2)
     daily_roi = MoneyField(max_digits=12, decimal_places=2)
     present_roi = MoneyField(max_digits=12, decimal_places=2)
+    
 
     def __str__(self):
         return f'{self.date}: {self.worth}'
@@ -338,11 +452,11 @@ class FinancialData(models.Model):
     def spread(self):
 
         return {
-            'savings': self.savings/self.worth, 
-            'investment': self.investment/self.worth, 
+            'savings': format_percent(self.savings/self.worth),
+            'investment': format_percent(self.investment/self.worth),
             'stock': self.stock/self.worth,
             'business': self.business/self.worth,
-            'fixed_asset': self.fixed/self.worth
+            'fixed_asset': self.fixed_asset/self.worth
         }
     
     def networth(self):

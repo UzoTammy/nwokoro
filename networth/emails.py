@@ -63,7 +63,7 @@ class FinancialReport:
         return Money(0, 'USD')
 
     def getNetworth(self):
-        return self.get_investment_total() + self.get_saving_total() + self.get_stock_total()
+        return self.get_investment_total() + self.get_saving_total() + self.get_stock_total() + self.get_business_total() + self.get_fixed_asset_total() - self.get_liability_total()
     
     def get_roi(self):
         return FinancialReport.convert_to_base([x.roi() for x in self.investments])
@@ -73,6 +73,8 @@ class FinancialReport:
     
     def get_present_roi(self):
         return FinancialReport.convert_to_base([x.present_roi() for x in self.investments])
+    
+    
     
     def send_email(self):
         from_email = "no-reply@chores.com"

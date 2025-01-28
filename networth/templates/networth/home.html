@@ -18,27 +18,26 @@
 
             <div class="col-sm-4">
               <ul class="list-group list-group-flush">
-                <li class="list-group-item list-group-item-info">Worth <span class="float-right">{{networth}}</span></li>
-                <li class="list-group-item list-group-item-primary">Expected ROI <span class="float-right">{{roi}}</span></li>
-                <li class="list-group-item list-group-item-primary">Daily ROI <span class="float-right">{{roi_daily}}</span></li>
-                <li class="list-group-item list-group-item-primary">Present ROI<span class="float-right">{{present_roi_total}}</span></li>
+                <li class="list-group-item list-group-item-info">Worth <span class="float-right">{{fd.worth}}</span></li>
+                <li class="list-group-item list-group-item-primary">Expected ROI <span class="float-right">{{fd.roi}}</span></li>
+                <li class="list-group-item list-group-item-primary">Daily ROI <span class="float-right">{{fd.daily_roi}}</span></li>
+                <li class="list-group-item list-group-item-primary">Present ROI<span class="float-right">{{fd.present_roi}}</span></li>
               </ul>
             </div>
 
             <div class="col-sm-4">
               <ul class="list-group list-group-flush">
-                <li class="list-group-item list-group-item-primary">Saving <span class="float-right">{{saving_USD}}</span></li>
-                <li class="list-group-item list-group-item-primary">Investment <span class="float-right">{{investment_USD}}</span></li>
-                <li class="list-group-item list-group-item-primary">Stock <span class="float-right">{{investment_USD}}</span></li>
-                <li class="list-group-item list-group-item-primary">Business  <span class="float-right">$0.00</span></li>
-                
+                <li class="list-group-item list-group-item-primary">Saving <span class="float-right">{{fd.savings}} ({{fd.spread.savings}})</span></li>
+                <li class="list-group-item list-group-item-primary">Investment <span class="float-right">{{fd.investment}} ({{fd.spread.investment}})</span></li>
+                <li class="list-group-item list-group-item-primary">Stock <span class="float-right">{{fd.stock}}</span></li>
+                <li class="list-group-item list-group-item-primary">Business  <span class="float-right">{{fd.business}}</span></li>
               </ul>
             </div>
             
             <div class="col-sm-4">
               <ul class="list-group list-group-flush">
-                <li class="list-group-item list-group-item-primary">Fixed Asset <span class="float-right">$0.00</span></li>
-                <li class="list-group-item list-group-item-danger">Liability <span class="float-right">$0.00</span></li>
+                <li class="list-group-item list-group-item-primary">Fixed Asset <span class="float-right">{{fd.fixed_asset}}</span></li>
+                <li class="list-group-item list-group-item-danger">Liability <span class="float-right">{{fd.liability}}</span></li>
                 <li class="list-group-item list-group-item-primary">Networth (CA) <span class="float-right">$0.00</span></li>
                 <li class="list-group-item list-group-item-primary">Networth (NG)<span class="float-right">$0.00</span></li>
                 
@@ -54,6 +53,7 @@
         <button class="nav-link active" id="nav-home-tab" data-toggle="tab" data-target="#savings" type="button" role="tab" aria-controls="savings" aria-selected="true"><span class="text-info font-italic">Savings</span></button>
         <button class="nav-link" id="nav-profile-tab" data-toggle="tab" data-target="#investment" type="button" role="tab" aria-controls="investment" aria-selected="false"><span class="text-info font-italic">Investment</span></button>
         <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#stock" type="button" role="tab" aria-controls="stock" aria-selected="false"><span class="text-info font-italic">Stock</span></button>
+        <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#business" type="button" role="tab" aria-controls="business" aria-selected="false"><span class="text-info font-italic">Business</span></button>
       </div>
     </nav>
     <div class="tab-content" id="nav-tabContent">
@@ -206,6 +206,56 @@
               </div>
               {% else %}
               <p class="font-italic ml-2">No Stock investment</p>
+              {% endif %}
+            </div>
+              
+          </div>
+        </div>    
+      </div>
+
+      <div class="tab-pane fade" id="business" role="tabpanel" aria-labelledby="nav-contact-tab">
+        <div id="stock" class="row justify-content-center mt-3 shadow">
+          <div class="col-sm-12">
+            <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Business</h5>
+            <div class="row mb-3">
+              {% if business %}
+              <div class="col-sm-8">
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Holder</th>
+                        <th class="text-center"># of shares</th>
+                        <th class="text-center">Cost</th>
+                        <th class="text-center">Capital</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for object in business %}
+                      <tr>
+                        <td><a href="{% url 'networth-stock-detail' 1 %}">{{object.name}}</a></td>
+                        <td class="text-center">{{object.shares}}</td>
+                        <td class="text-right">{{object.unit_cost}}</td>
+                        <td class="text-right">{{object.capital}}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                </table>
+              </div>
+              
+              <div class="col-sm-4">
+                <div class="card" style="width: 18rem;">
+                  <ul class="list-group list-group-flush">
+                    {% for object in stock_total %}
+                      <li class="list-group-item"> {{object.currency}}
+                        <span class="float-right">{{object}}</span>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                  
+                </div> 
+              </div>
+              {% else %}
+              <p class="font-italic ml-2">No Business available</p>
               {% endif %}
             </div>
               

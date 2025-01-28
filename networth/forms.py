@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ValidationError
-from .models import Investment, Stock, Saving
+from .models import Investment, Stock, Saving, Business
 from djmoney.forms.fields import MoneyField
 from django.core.validators import MaxValueValidator
 
@@ -20,6 +20,7 @@ class OptionChoices:
     STOCK_TYPE = [
         ('Scotia Essential', 'Scotia Essential'), ('Scotia Selected', 'Scotia Selected'), ('Shares', 'Shares')
     ]
+
 
 class InvestmentCreateForm(forms.ModelForm):
     
@@ -69,8 +70,9 @@ class StockCreateForm(forms.ModelForm):
         if self.savings_account.value.currency != self.cleaned_data['unit_cost'].currency:
             raise ValidationError("Currency cannot mismatch")
         
-        if self.savings_account.value < self.cleaned_data['unit_cost']:
+        if self.savings_account.value < self.cleaned_data['unit_cost'] * self.cleaned_data['units']:
             raise ValidationError("Insufficient fund in saving account")
+
 
 class StockUpdateForm(forms.ModelForm):
     
@@ -95,6 +97,7 @@ class SavingForm(forms.ModelForm):
         model = Saving
         fields = ['holder', 'value', 'date', 'host_country', 'category']
 
+
 class InvestmentRolloverForm(forms.Form):
 
     option = forms.ChoiceField(choices=[("PI", "Principal & Interest"), ("PO", "Principal only")], widget=forms.Select(attrs={'id': 'option_select_id'}))
@@ -113,3 +116,26 @@ class InvestmentRolloverForm(forms.Form):
             inv = Investment.objects.get(pk=self.pk)
             queryset = Saving.objects.filter(value_currency=inv.principal.currency)
             self.fields['savings_account'].queryset=queryset
+
+
+class BusinessCreateForm(forms.ModelForm):
+    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    host_country = forms.CharField(widget=forms.Select(choices=OptionChoices.COUNTRIES))
+    
+    class Meta:
+        model = Business
+        fields = ['name', 'date', 'shares', 'unit_cost', 'host_country']
+
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+
+        if self.pk:
+            self.savings_account = Saving.objects.get(pk=self.pk)
+
+    def clean(self):
+        if self.savings_account.value.currency != self.cleaned_data['unit_cost'].currency:
+            raise ValidationError("Currency mismatch: A foreign account cannot be used to establish a business")
+        
+        if self.savings_account.value < self.cleaned_data['unit_cost'] * self.cleaned_data['shares']:
+            raise ValidationError(f"Insufficient fund in saving account. You need {self.cleaned_data['unit_cost'] * self.cleaned_data['shares']}")
