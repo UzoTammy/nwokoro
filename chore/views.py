@@ -2,12 +2,12 @@ from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.utils import timezone
 from django.db.models.aggregates import Sum
-from django.views.generic import (TemplateView, CreateView, DetailView, ListView, UpdateView)
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import (TemplateView, CreateView, DetailView, ListView, UpdateView, FormView)
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Work, AssignWork, JobRegister, FinishedWork, InitiateWork, BonusPoint
 from account.models import User, Transaction
 from .forms import (AddWorkForm, EarnPointForm, JobRegisterForm, DelegateWorkForm, InitiateWorkForm,
-                    InitiateWorkApproveForm, BonusPointForm, MyModelForm)
+                    InitiateWorkApproveForm, BonusPointForm, MyModelForm, CompletedJobDecisionForm)
 from django.contrib import messages
 from .emails import Email
 
@@ -105,14 +105,20 @@ class WorkDoneView(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['expired'] = True if self.get_object().end_time <= timezone.now() else False
-        bonus_point_obj = BonusPoint.objects.filter(active=True)
+        completed_job = AssignWork.objects.get(pk=self.kwargs['pk'])
+        bonus = BonusPoint.objects.filter(active=True)
         bonus_point = 0
-        if bonus_point_obj.exists():
-            for p in bonus_point_obj:
-                bonus_point += p.bonus_value * self.get_object().work.point if p.bonus_value <= 1.0 else p.bonus_value
-        context['bonus_point'] = bonus_point #int(0.2 * self.get_object().work.point)
+        if bonus.exists():
+            for obj in bonus:
+                if obj.bonus_value <= 1:
+                    bonus_point += obj.bonus_value * completed_job.work.point
+                else:
+                    bonus_point += obj.bonus_value
+        context['bonus_point'] = bonus_point
+        
         return context
 
+        
     def form_valid(self, form):
         if form.instance.assigned != self.request.user and not self.request.user.is_staff: 
             messages.warning(self.request, 'This Job did not submit because you are not the owner.')
@@ -133,6 +139,27 @@ class WorkDetailView(LoginRequiredMixin, UpdateView):
     form_class = AddWorkForm
     success_url = reverse_lazy('work-list')
 
+
+class DelegateWorkCreateView(LoginRequiredMixin, CreateView):
+    form_class = DelegateWorkForm
+    model = AssignWork
+    success_url = reverse_lazy('assign-work-list')
+    template_name = 'chore/delegate_initiate_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['assignment'] = 'Delegate'
+        return context
+    
+    def form_valid(self, form):
+        form.instance.state = 'active'
+        form.save()
+        messages.success(self.request, f"Job successfully delegated to {form.instance.assigned.username}")
+        # send mail
+        Email.delegate_send_email(self.request, form)
+        return super().form_valid(form)
+
+# CompleteWorkView - where complete is marked
 class AssignWorkView(LoginRequiredMixin, ListView):
     queryset = AssignWork.objects.filter(state='active')|AssignWork.objects.filter(state='repeat')
     template_name = 'chore/assign_work_list.html'
@@ -142,64 +169,68 @@ class AssignWorkView(LoginRequiredMixin, ListView):
         context['completed_works'] = AssignWork.objects.filter(state='complete')
         return context
     
-    def post(self, request, *args, **kwargs):
-        assigned_work = AssignWork.objects.get(pk=request.POST['pk'])
-        worker = assigned_work.assigned
-        work = assigned_work.work
-        # work = work_obj
-        scheduled_time = assigned_work.schedule
-        end_time = assigned_work.end_time
-        finished_time = timezone.now()
-                  
-        if request.POST['supervisorRadios'] == 'done':
-            assigned_work.state = 'done'
-            rating = float(request.POST['rating'])
-            
-            # check if bonus point is added to this job
-            base_point = assigned_work.work.point
-            bonus_point_obj = BonusPoint.objects.filter(active=True)
+class CompletedJobDecisionView(LoginRequiredMixin, UserPassesTestMixin, FormView):
+    template_name = 'chore/completed_job_decision.html'
+    success_url = reverse_lazy('assign-work-list')
+    form_class = CompletedJobDecisionForm # this form was not built
 
-            if bonus_point_obj.exists():
-                bonus_point = 0
-                for point in bonus_point_obj:
-                    if point.bonus_value <= 1.0:
-                        bonus_point += point.bonus_value * base_point
-                    else: 
-                        bonus_point += point.bonus_value
-            else:
-                bonus_point=0
-            state = 'done'
-            reason = ""
-            
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        completed_job = AssignWork.objects.get(pk=self.kwargs['num'])
+        context['object'] = completed_job
+
+        bonus = BonusPoint.objects.filter(active=True)
+        bonus_point = 0
+        if bonus.exists():
+            for obj in bonus:
+                if obj.bonus_value <= 1:
+                    bonus_point += obj.bonus_value * completed_job.work.point
+                else:
+                    bonus_point += obj.bonus_value
+        context['bonus_point'] = bonus_point
+        context['bonus'] = bonus
+        return context
+    
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        return False
+    
+    
+    def form_valid(self, form, **kwargs):
+        data = self.get_context_data(**kwargs)
+        completed_job = data['object']
+
+        if self.request.POST['decision'] == 'done':
+            completed_job.state = 'done'
+            completed_job.save()
+
             # Create the finished work
             fw=FinishedWork.objects.create(
-                worker=worker, work=work, base_point=base_point, 
-                bonus_point=bonus_point, scheduled_time=scheduled_time,
-                end_time=end_time, finished_time=finished_time,
-                state=state, rating=rating, reason=reason
+                worker=completed_job.assigned, work=completed_job.work, base_point=completed_job.work.point, 
+                bonus_point=data['bonus_point'], scheduled_time=completed_job.schedule,
+                end_time=completed_job.end_time, finished_time=timezone.now(),
+                state=completed_job.state, rating=float(self.request.POST['rating']), reason=''
             )
             # assigned_work.assigned.points += fw.points()
-            assigned_work.assigned.deposit(fw.points(), f'Reward for {fw.work.name} done')
-            
-        elif request.POST['supervisorRadios'] == 'repeat':
-            assigned_work.state = 'repeat'
-        else:
-            assigned_work.state = 'cancel'
-            # create the finished work
-            base_point, bonus_point = 0, 0
-            state = 'cancel'
-            reason = "---" # this will come from a post form indicating is cancellation is due 
-                            # expired, not committed or withdrawn
-            
-            # -- base point:0, bonus point:0, state:cancel, reason: not committed/expired/withdrawn
+            completed_job.assigned.deposit(fw.points(), f'Reward for {fw.work.name} done')
+
+        elif self.request.POST['decision'] == 'cancel':
+            completed_job.state = 'cancel'
+            completed_job.save()
+
             FinishedWork.objects.create(
-                worker=worker, work=work, base_point=base_point, 
-                bonus_point=bonus_point, scheduled_time=scheduled_time,
-                end_time=end_time, finished_time=finished_time,
-                state=state, rating=0.0, reason=reason
+                worker=completed_job.assigned, work=completed_job.work, base_point=0, 
+                bonus_point=0, scheduled_time=completed_job.schedule,
+                end_time=completed_job.end_time, finished_time=timezone.now(),
+                state=completed_job.state, rating=0.0, reason=self.request.POST['reason']
             )
-        assigned_work.save()
-        return super().get(request, *args, **kwargs) #redirect('assign-work-list')
+        else:
+            completed_job.state = 'repeat'
+            completed_job.save()
+
+        return super().form_valid(form, **kwargs)
+
 
 class JobRegisterListView(LoginRequiredMixin, ListView):
     model = JobRegister
@@ -217,24 +248,6 @@ class JobRegisterUpdateView(LoginRequiredMixin, UpdateView):
     form_class = JobRegisterForm  
     success_url = reverse_lazy('job-register-list')
 
-class DelegateWorkCreateView(LoginRequiredMixin, CreateView):
-    form_class = DelegateWorkForm
-    model = AssignWork
-    success_url = reverse_lazy('assign-work-list')
-    template_name = 'chore/delegate_initiate_form.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['assignment'] = 'Delegate'
-        return context
-    
-    def form_valid(self, form):
-        form.instance.state = 'active'
-        form.save()
-        messages.success(self.request, f"Job successfully delegated to {form.instance.assigned}")
-        # send mail
-        Email.delegate_send_email(self.request, form)
-        return super().form_valid(form)
 
 class InitiateWorkCreateView(LoginRequiredMixin, CreateView):
     form_class = MyModelForm
@@ -301,3 +314,4 @@ class ConcludedWorkListView(LoginRequiredMixin, ListView):
 class ConcludedWorDetailView(LoginRequiredMixin, DetailView):
     model = FinishedWork
     template_name = 'chore/concluded_work_detail.html'
+

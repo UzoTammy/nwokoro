@@ -11,10 +11,11 @@ from .models import ExchangeRate, FinancialData
 
 class FinancialReport:
 
-    def __init__(self, investments, savings, stocks):
+    def __init__(self, investments, savings, stocks, business):
         self.investments = investments
         self.savings = savings
         self.stocks = stocks
+        self.business = business
         
     @staticmethod    
     def convert_to_base(money_list):
@@ -35,6 +36,14 @@ class FinancialReport:
             for currency in currencies:
                 investment_total.append(Money(self.investments.filter(principal_currency=currency).aggregate(Sum('principal'))['principal__sum'], currency))
         return FinancialReport.convert_to_base(investment_total)
+
+    def get_saving_total(self):
+        currencies = self.savings.values_list('value_currency', flat=True).distinct().order_by('value_currency')
+        savings_total = list()
+        if currencies.exists():
+            for currency in currencies:
+                savings_total.append(Money(self.savings.filter(value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
+        return FinancialReport.convert_to_base(savings_total)
     
     def get_stock_total(self):
         currencies = self.stocks.values_list('unit_cost_currency', flat=True).distinct().order_by('unit_cost_currency')
@@ -45,16 +54,14 @@ class FinancialReport:
                 stock_total.append(Money(self.stocks.filter(unit_cost_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
         return FinancialReport.convert_to_base(stock_total)
     
-    def get_saving_total(self):
-        currencies = self.savings.values_list('value_currency', flat=True).distinct().order_by('value_currency')
-        savings_total = list()
+    def get_business_total(self):
+        currencies = self.business.values_list('unit_cost_currency', flat=True).distinct().order_by('unit_cost_currency')
+        total = list()
         if currencies.exists():
             for currency in currencies:
-                savings_total.append(Money(self.savings.filter(value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
-        return FinancialReport.convert_to_base(savings_total)
-    
-    def get_business_total(self):
-        return Money(0, 'USD')
+                self.business = self.business.annotate(value=F('unit_cost') * F('shares'))
+                total.append(Money(self.business.filter(unit_cost_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
+        return FinancialReport.convert_to_base(total)
     
     def get_fixed_asset_total(self):
         return Money(0, 'USD')
@@ -75,22 +82,25 @@ class FinancialReport:
         return FinancialReport.convert_to_base([x.present_roi() for x in self.investments])
     
     
-    
     def send_email(self):
         from_email = "no-reply@chores.com"
 
-        subject = "Daily Financial Report"
+        subject = "Financial Data Saved to Database"
         to_email = [ self.get_owner().email ]
+
+        fd = FinancialData.objects.latest('date')
 
         html_content = render_to_string('networth/mails/financial_report.html', {
             'networth': self.getNetworth(),
-            'investments': self.get_investment_total(),
             'savings': self.get_saving_total(),
+            'investments': self.get_investment_total(),
             'stocks': self.get_stock_total(),
+            'business': self.get_business_total(),
             'roi': self.get_roi(),
             'daily_roi': self.get_daily_roi(),
             'present_roi': self.get_present_roi(),
-            'earliest_due_date': self.investments
+            'prev_networth': fd.networth,
+            'change_in_networth': self.getNetworth() - fd.networth()
         })
         
         # Create the email message

@@ -77,8 +77,9 @@ class ProfileView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         return context
     
     def post(self, request, *args, **kwargs):
-        redeemable_points = int(request.POST['redeemPoints'])
-
+        
+        redeemable_points = int(''.join(request.POST.get('redeemPoints').split(',')))
+        
         try:
             self.get_object().withdraw(redeemable_points, description=request.POST['reason'])
         except ValidationError as ve:

@@ -246,7 +246,6 @@ class Saving(models.Model):
             transaction_type = 'DR'
         )
     
-
     def create_stock(self, holder, units, unit_cost, unit_price, date_bought, stock_type):
         
         stock = Stock.objects.create(
@@ -313,6 +312,38 @@ class Saving(models.Model):
             timestamp = date,
             transaction_type = 'DR'
         )
+
+    def create_fixed_asset(self, name, value, date):
+        
+        fixed_asset = FixedAsset.objects.create(
+            owner = self.owner,
+            name = name,
+            value = value,
+            date = date,
+            host_country = self.host_country,
+        )
+
+        FixedAssetTransaction.objects.create(
+            user = self.owner,
+            fixed_asset = fixed_asset,
+            amount = fixed_asset.value,
+            description = f'Funds from {self.holder}',
+            timestamp = date,
+            transaction_type = 'CR'
+        )
+
+        self.value -= fixed_asset.value
+        self.save()
+
+        SavingsTransaction.objects.create(
+            user = self.owner,
+            savings = self,
+            amount = fixed_asset.value,
+            description = f'Funds to buy {fixed_asset.name}',
+            timestamp = date,
+            transaction_type = 'DR'
+        )
+
 
 class Business(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)

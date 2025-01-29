@@ -4,7 +4,7 @@ from .views import (ChoreHome, RegistrationMessage, ChoreDashboard, ChoreSetupVi
                     BonusUpdateView, WorkDoneView, WorkDetailView, JobRegisterCreateView,
                     WorkListView, AssignWorkView, JobRegisterListView, DelegateWorkCreateView,
                     InitiateWorkCreateView, InitiateWorkDetailView, InitiateWorkApproveView,
-                    JobRegisterUpdateView, ConcludedWorkListView, ConcludedWorDetailView)
+                    JobRegisterUpdateView, ConcludedWorkListView, ConcludedWorDetailView, CompletedJobDecisionView)
 from django.views.generic import TemplateView
 
 urlpatterns = [
@@ -16,7 +16,7 @@ urlpatterns = [
     path('work-evaluate/', WorkEvaluateView.as_view(), name='work-evaluate'),
     path('bonus-point-new/', BonusPointCreateView.as_view(),name='chore-bonus-point-new'),
     path('<int:pk>/bonus/', BonusUpdateView.as_view(), name='bonus-update'),
-    path('work-done/<int:pk>/', WorkDoneView.as_view(), name='work-done'),
+    path('<int:pk>/work-done/', WorkDoneView.as_view(), name='work-done'),
     path('work/list/', WorkListView.as_view(), name='work-list'),
     path('work/<int:pk>/', WorkDetailView.as_view(), name='work-detail'),
     path('assign-work/', AssignWorkView.as_view(), name='assign-work-list'),
@@ -29,5 +29,6 @@ urlpatterns = [
     path('<int:pk>/initiate-detail/', InitiateWorkDetailView.as_view(), name='initiate-work-detail'),
     path('<int:pk>/initiate-approve/', InitiateWorkApproveView.as_view(), name='initiate-work-approve'),
     path('concluded/', ConcludedWorkListView.as_view(), name='concluded-job'),
-    path('concluded/<int:pk>/detail/', ConcludedWorDetailView.as_view(), name='concluded-detail')
+    path('concluded/<int:pk>/detail/', ConcludedWorDetailView.as_view(), name='concluded-detail'),
+    path('<int:num>/completed-job/', CompletedJobDecisionView.as_view(), name='completed-job-decision'),
 ]

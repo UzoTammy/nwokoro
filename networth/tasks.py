@@ -3,7 +3,7 @@ import requests
 from django.utils import timezone
 from celery import shared_task
 from .emails import FinancialReport
-from networth.models import ExchangeRate, Investment, Saving, Stock
+from networth.models import ExchangeRate, Investment, Saving, Stock, Business
 from account.models import User
 
 
@@ -46,6 +46,8 @@ def financial_report_email():
         if savings.exists():
             investments = Investment.objects.filter(is_active=True).filter(owner__username=user)
             stocks = Stock.objects.filter(owner__username=user)
-            fr = FinancialReport(investments, savings, stocks)
+            business = Business.objects.filter(owner__username=user)
+            
+            fr = FinancialReport(investments, savings, stocks, business)
             fr.send_email()
             fr.save_report()

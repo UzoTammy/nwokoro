@@ -10,9 +10,11 @@ from django.views.generic import (TemplateView, CreateView, DetailView, UpdateVi
 from django.contrib.auth.mixins import LoginRequiredMixin
 from djmoney.models.fields import Money
 from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData
-from .forms import InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, InvestmentRolloverForm, BusinessCreateForm
-from .emails import FinancialReport
+from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, 
+                    InvestmentRolloverForm, BusinessCreateForm, BusinessUpdateForm, FixedAssetCreateForm)
+
 # from .tasks import financial_report_email
+
 
 def convert_to_base(money_list):
     result = list()
@@ -72,9 +74,13 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
                 stock_total.append(Money(stocks.filter(unit_cost_currency=currency).annotate(value=F('unit_cost') * F('units')).aggregate(Sum('value'))['value__sum'], currency))
         context['stock_total'] = stock_total
         
+        business_total = list()
+        if currencies.exists():
+            for currency in currencies:
+                business_total.append(Money(business.filter(unit_cost_currency=currency).annotate(value=F('unit_cost') * F('shares')).aggregate(Sum('value'))['value__sum'], currency))
+        context['business_total'] = business_total
         
-
-        
+        # financial_report_email()
         return context
 
 class InvestmentCreateView(LoginRequiredMixin, FormView):
@@ -189,7 +195,7 @@ class SavingUpdateView(LoginRequiredMixin, UpdateView):
 class BusinessCreateView(LoginRequiredMixin, FormView):
     success_url = reverse_lazy('networth-home')
     form_class = BusinessCreateForm
-    template_name = 'networth/stock_form.html'
+    template_name = 'networth/business_form.html'
 
 
     def get_form_kwargs(self):
@@ -206,6 +212,40 @@ class BusinessCreateView(LoginRequiredMixin, FormView):
             name=form.cleaned_data['name'],
             shares=form.cleaned_data['shares'],
             unit_cost=form.cleaned_data['unit_cost'],
+            date=form.cleaned_data['date'],
+        )
+        messages.success(self.request, 'Business started successfully !!!')
+
+        return super().form_valid(form)
+
+class BusinessDetailView(LoginRequiredMixin, DetailView):
+    model = Business
+
+class BusinessUpdateView(LoginRequiredMixin, UpdateView):
+    model = Business
+    success_url = reverse_lazy('networth-home')
+    form_class = BusinessUpdateForm
+
+
+class FixedAssetCreateView(LoginRequiredMixin, FormView):
+    success_url = reverse_lazy('networth-home')
+    form_class = FixedAssetCreateForm
+    template_name = 'networth/fixed_asset_form.html'
+
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['pk'] = self.kwargs.get('pk')
+        return kwargs
+
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+
+        savings_account = Saving.objects.get(pk=self.kwargs['pk'])        
+        savings_account.create_fixed_asset(
+            name=form.cleaned_data['name'],
+            value=form.cleaned_data['value'],
             date=form.cleaned_data['date'],
         )
         messages.success(self.request, 'Business started successfully !!!')

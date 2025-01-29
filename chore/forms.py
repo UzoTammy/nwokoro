@@ -158,3 +158,9 @@ be the primary consideration in deciding the points.''',
     #     self.fields['name'].widget = forms.Select(choices=[('', 'Select an option')] + [
     #         (item.name, item.name) for item in InitiateWork.objects.all()
     #     ])
+
+class CompletedJobDecisionForm(forms.Form):
+    rating = forms.CharField(widget=forms.Select(
+        choices=[('.65', 'Faily Good'), ('.75', 'Good'), ('.85', 'Very Good'), ('.95', 'Excellent')],
+        attrs={'onchange': 'showElements()'}))
+    
