@@ -485,9 +485,9 @@ class FinancialData(models.Model):
         return {
             'savings': format_percent(self.savings/self.worth),
             'investment': format_percent(self.investment/self.worth),
-            'stock': self.stock/self.worth,
-            'business': self.business/self.worth,
-            'fixed_asset': self.fixed_asset/self.worth
+            'stock': format_percent(self.stock/self.worth),
+            'business': format_percent(self.business/self.worth),
+            'fixed_asset': format_percent(self.fixed_asset/self.worth)
         }
     
     def networth(self):

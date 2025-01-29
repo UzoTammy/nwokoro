@@ -13,9 +13,8 @@
     <div class="jumbotron jumbotron-fluid jumbotron-beige">
         <div class="container">
           <h1 class="display-4">Networth </h1>
-          <small class="text-muted ml-2">Exchange Rate: {{exchange}}</small>
+          <small class="text-muted ml-2">Exchange Rate: {{exchange}}</small> 
           <div class="row">
-
             <div class="col-sm-4">
               <ul class="list-group list-group-flush">
                 <li class="list-group-item list-group-item-info">Worth <span class="float-right">{{fd.worth}}</span></li>
@@ -27,8 +26,8 @@
 
             <div class="col-sm-4">
               <ul class="list-group list-group-flush">
-                <li class="list-group-item list-group-item-primary">Saving <span class="float-right">{{fd.savings}} ({{fd.spread.savings}})</span></li>
-                <li class="list-group-item list-group-item-primary">Investment <span class="float-right">{{fd.investment}} ({{fd.spread.investment}})</span></li>
+                <li class="list-group-item list-group-item-primary">Saving <span class="float-right">{{fd.savings}}</span></li>
+                <li class="list-group-item list-group-item-primary">Investment <span class="float-right">{{fd.investment}}</span></li>
                 <li class="list-group-item list-group-item-primary">Stock <span class="float-right">{{fd.stock}}</span></li>
                 <li class="list-group-item list-group-item-primary">Business  <span class="float-right">{{fd.business}}</span></li>
               </ul>
@@ -44,7 +43,9 @@
               </ul>
             </div>
           </div>
-          
+          <small class="text-muted ml-2">Savings: {{fd.spread.savings}}, Investment: {{fd.spread.investment}}, 
+            Stock: {{fd.spread.stock}}, Business: {{fd.spread.business}}, Fixed Asset: {{fd.spread.fixed_asset}}
+          </small> 
         </div>
     </div>
 

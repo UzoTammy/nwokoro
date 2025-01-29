@@ -67,13 +67,13 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
         context['savings_total'] = savings_total
 
         currencies = stocks.values_list('unit_cost_currency', flat=True).distinct().order_by('unit_cost_currency')
-        
         stock_total = list()
         if currencies.exists():
             for currency in currencies:
                 stock_total.append(Money(stocks.filter(unit_cost_currency=currency).annotate(value=F('unit_cost') * F('units')).aggregate(Sum('value'))['value__sum'], currency))
         context['stock_total'] = stock_total
         
+        currencies = business.values_list('unit_cost_currency', flat=True).distinct().order_by('unit_cost_currency')
         business_total = list()
         if currencies.exists():
             for currency in currencies:
