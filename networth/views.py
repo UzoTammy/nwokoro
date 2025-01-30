@@ -14,7 +14,7 @@ from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, Savi
                     InvestmentRolloverForm, BusinessCreateForm, BusinessUpdateForm, 
                     FixedAssetCreateForm, FixedAssetUpdateForm)
 
-from .tasks import financial_report_email
+# from .tasks import financial_report_email
 
 
 def convert_to_base(money_list):
@@ -91,7 +91,7 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
                 total.append(Money(fixed_asset.filter(value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
         context['fixed_asset_total'] = total
         
-        financial_report_email()
+        # financial_report_email()
         return context
 
 class InvestmentCreateView(LoginRequiredMixin, FormView):
