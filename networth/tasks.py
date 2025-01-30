@@ -3,7 +3,7 @@ import requests
 from django.utils import timezone
 from celery import shared_task
 from .emails import FinancialReport
-from networth.models import ExchangeRate, Investment, Saving, Stock, Business
+from networth.models import ExchangeRate, Investment, Saving, Stock, Business, FixedAsset, Liability
 from account.models import User
 
 
@@ -38,7 +38,7 @@ def fetch_exchange_rate():
     except requests.exceptions.RequestException as e:
         print(f"Error fetching exchange rates: {e}")
 
-@shared_task
+# @shared_task
 def financial_report_email():
     users = User.objects.values_list('username', flat=True)
     for user in users:
@@ -47,7 +47,9 @@ def financial_report_email():
             investments = Investment.objects.filter(is_active=True).filter(owner__username=user)
             stocks = Stock.objects.filter(owner__username=user)
             business = Business.objects.filter(owner__username=user)
+            fixed_asset = FixedAsset.objects.filter(owner__username=user)
+            liability = Liability.objects.filter(owner__username=user)
             
-            fr = FinancialReport(investments, savings, stocks, business)
+            fr = FinancialReport(investments, savings, stocks, business, fixed_asset, liability)
             fr.send_email()
             fr.save_report()

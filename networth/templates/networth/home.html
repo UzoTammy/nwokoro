@@ -277,18 +277,17 @@
                     <thead>
                       <tr>
                         <th>Name</th>
-                        <th class="text-center"># of shares</th>
-                        <th class="text-center">Cost</th>
-                        <th class="text-center">Capital</th>
+                        <th class="text-center">Valuation Date</th>
+                        <th class="text-center">Value</th>
                       </tr>
+
                     </thead>
                     <tbody>
                       {% for object in fixed_asset %}
                       <tr>
-                        <td><a href="{% url 'networth-stock-detail' 1 %}">{{object.name}}</a></td>
+                        <td><a href="{% url 'networth-fixed-asset-detail' object.pk %}">{{object.name}}</a></td>
                         <td class="text-center">{{object.date}}</td>
                         <td class="text-right">{{object.value}}</td>
-                        <td class="text-right">{{object.host_country}}</td>
                       </tr>
                       {% endfor %}
                     </tbody>
@@ -298,7 +297,7 @@
               <div class="col-sm-4">
                 <div class="card" style="width: 18rem;">
                   <ul class="list-group list-group-flush">
-                    {% for object in fixed_asset %}
+                    {% for object in fixed_asset_total %}
                       <li class="list-group-item"> {{object.currency}}
                         <span class="float-right">{{object}}</span>
                       </li>

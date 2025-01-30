@@ -8,18 +8,16 @@
             <h3>{{object}}</h3>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">Name<span class="float-right">{{object.name}}</span></li>
-                <li class="list-group-item">Capital<span class="float-right">{{object.capital}}</span></li>
-                <li class="list-group-item">Shares<span class="float-right">{{object.shares}}</span></li>
-                <li class="list-group-item">Unit Cost<span class="float-right">{{object.unit_cost}}</span></li>
+                <li class="list-group-item">Value<span class="float-right">{{object.value}}</span></li>
+                <li class="list-group-item">Value Date<span class="float-right">{{object.date}}</span></li>
                 <li class="list-group-item">Host Country<span class="float-right">{{object.host_country}}</span></li>
-                <li class="list-group-item">Start Date<span class="float-right">{{object.date}}</span></li>
                 <hr>
               </ul>
             <div class="row">
                 <div class="col">
-                    <a class="btn btn-outline-dark" href="{% url 'networth-business-update' object.pk %}">Update</a>
+                    <a class="btn btn-outline-dark" href="{% url 'networth-fixed-asset-update' object.pk %}">Update</a>
                     
-                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-home'  %}">Back</a>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>
                     
                 </div>
             </div>

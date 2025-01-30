@@ -196,6 +196,17 @@ class FixedAssetCreateForm(forms.ModelForm):
                 f"Insufficient fund in saving account. You have {self.savings_account.value} only")
 
 
+class FixedAssetUpdateForm(forms.ModelForm):
+    # date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    host_country = forms.CharField(
+        widget=forms.Select(choices=OptionChoices.COUNTRIES))
+
+    class Meta:
+        model = FixedAsset
+        fields = ['name', 'host_country']
+
+    
+
 class BusinessUpdateForm(forms.ModelForm):
 
     name = forms.CharField(max_length=50)

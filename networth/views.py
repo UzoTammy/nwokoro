@@ -9,11 +9,12 @@ from django.db.models import F
 from django.views.generic import (TemplateView, CreateView, DetailView, UpdateView, FormView)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from djmoney.models.fields import Money
-from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData
+from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset
 from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, 
-                    InvestmentRolloverForm, BusinessCreateForm, BusinessUpdateForm, FixedAssetCreateForm)
+                    InvestmentRolloverForm, BusinessCreateForm, BusinessUpdateForm, 
+                    FixedAssetCreateForm, FixedAssetUpdateForm)
 
-# from .tasks import financial_report_email
+from .tasks import financial_report_email
 
 
 def convert_to_base(money_list):
@@ -45,11 +46,14 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
         stocks = Stock.objects.filter(owner=self.request.user)
         savings = Saving.objects.filter(owner=self.request.user)
         business = Business.objects.filter(owner=self.request.user)
+        fixed_asset = FixedAsset.objects.filter(owner=self.request.user)
 
         context['investments'] = investments.order_by('principal_currency')
         context['savings'] = savings.order_by('value_currency')
         context['stocks'] = stocks.order_by('unit_cost_currency')
         context['business'] = business.order_by('unit_cost_currency')
+        context['fixed_asset'] = fixed_asset.order_by('value_currency')
+        
 
         # Asset total
         currencies = investments.values_list('principal_currency', flat=True).distinct().order_by('principal_currency')
@@ -80,7 +84,14 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
                 business_total.append(Money(business.filter(unit_cost_currency=currency).annotate(value=F('unit_cost') * F('shares')).aggregate(Sum('value'))['value__sum'], currency))
         context['business_total'] = business_total
         
-        # financial_report_email()
+        currencies = fixed_asset.values_list('value_currency', flat=True).distinct().order_by('value_currency')
+        total = list()
+        if currencies.exists():
+            for currency in currencies:
+                total.append(Money(fixed_asset.filter(value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
+        context['fixed_asset_total'] = total
+        
+        financial_report_email()
         return context
 
 class InvestmentCreateView(LoginRequiredMixin, FormView):
@@ -227,6 +238,7 @@ class BusinessUpdateView(LoginRequiredMixin, UpdateView):
     form_class = BusinessUpdateForm
 
 
+# Fixed Asset
 class FixedAssetCreateView(LoginRequiredMixin, FormView):
     success_url = reverse_lazy('networth-home')
     form_class = FixedAssetCreateForm
@@ -251,3 +263,16 @@ class FixedAssetCreateView(LoginRequiredMixin, FormView):
         messages.success(self.request, 'Business started successfully !!!')
 
         return super().form_valid(form)
+
+
+class FixedAssetDetailView(LoginRequiredMixin, DetailView):
+    model = FixedAsset
+    template_name = 'networth/fixed_asset_detail.html'
+
+class FixedAssetUpdateView(LoginRequiredMixin, UpdateView):
+    model = FixedAsset
+    template_name = 'networth/fixed_asset_form.html'
+    form_class = FixedAssetUpdateForm
+    
+    def get_success_url(self):
+        return reverse_lazy('networth-fixed-asset', kwargs={'pk': self.object.pk})

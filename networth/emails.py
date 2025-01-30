@@ -11,11 +11,13 @@ from .models import ExchangeRate, FinancialData
 
 class FinancialReport:
 
-    def __init__(self, investments, savings, stocks, business):
+    def __init__(self, investments, savings, stocks, business, fixed_asset, liability):
         self.investments = investments
         self.savings = savings
         self.stocks = stocks
         self.business = business
+        self.fixed_asset = fixed_asset
+        self.liability = liability
         
     @staticmethod    
     def convert_to_base(money_list):
@@ -64,7 +66,12 @@ class FinancialReport:
         return FinancialReport.convert_to_base(total)
     
     def get_fixed_asset_total(self):
-        return Money(0, 'USD')
+        currencies = self.fixed_asset.values_list('value_currency', flat=True).distinct().order_by('value_currency')
+        total = list()
+        if currencies.exists():
+            for currency in currencies:
+                total.append(Money(self.fixed_asset.filter(value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
+        return FinancialReport.convert_to_base(total)
     
     def get_liability_total(self):
         return Money(0, 'USD')
@@ -96,6 +103,8 @@ class FinancialReport:
             'investments': self.get_investment_total(),
             'stocks': self.get_stock_total(),
             'business': self.get_business_total(),
+            'fixed_asset': self.get_fixed_asset_total(),
+            'liability': self.get_liability_total(),
             'roi': self.get_roi(),
             'daily_roi': self.get_daily_roi(),
             'present_roi': self.get_present_roi(),

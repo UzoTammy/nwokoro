@@ -5,7 +5,7 @@ from .views import (NetworthHomeView,
                     StockCreateView, StockDetailView, StockUpdateView,
                     SavingCreateView, SavingDetailView, SavingUpdateView,
                     BusinessCreateView, BusinessDetailView, BusinessUpdateView,
-                    FixedAssetCreateView)
+                    FixedAssetCreateView, FixedAssetDetailView, FixedAssetUpdateView)
 
 
 urlpatterns = [
@@ -28,5 +28,7 @@ urlpatterns = [
     path('business/<int:pk>/update/', BusinessUpdateView.as_view(), name='networth-business-update'),
     
     path('fixed-asset/<int:pk>/create/', FixedAssetCreateView.as_view(), name='networth-fixed-asset-create'),
- 
+    path('fixed-asset/<int:pk>/detail/', FixedAssetDetailView.as_view(), name='networth-fixed-asset-detail'),
+    path('fixed-asset/<int:pk>/update/', FixedAssetUpdateView.as_view(), name='networth-fixed-asset-update'),
+    
 ]
