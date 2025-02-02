@@ -38,7 +38,7 @@ def fetch_exchange_rate():
     except requests.exceptions.RequestException as e:
         print(f"Error fetching exchange rates: {e}")
 
-# @shared_task
+@shared_task
 def financial_report_email():
     users = User.objects.values_list('username', flat=True)
     for user in users:

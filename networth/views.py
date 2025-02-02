@@ -11,7 +11,7 @@ from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, Savi
                     FixedAssetCreateForm, FixedAssetUpdateForm,
                     BorrowedFundForm)
 
-from .tasks import financial_report_email
+# from .tasks import financial_report_email
 # from .emails import FinancialReport
     
 # Create your views here.
@@ -88,7 +88,7 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
         # context['fixed_asset_total'] = liability_total
 
         
-        financial_report_email()
+        # financial_report_email()
         # fr = FinancialReport(savings, investments, stocks, business, fixed_asset, liability)
         # context['country_networth'] = fr.country_networth()
         return context
