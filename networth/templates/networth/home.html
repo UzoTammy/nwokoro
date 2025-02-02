@@ -37,9 +37,9 @@
               <ul class="list-group list-group-flush">
                 <li class="list-group-item list-group-item-primary">Fixed Asset <span class="float-right">{{fd.fixed_asset}}</span></li>
                 <li class="list-group-item list-group-item-danger">Liability <span class="float-right">{{fd.liability}}</span></li>
-                <li class="list-group-item list-group-item-primary">Networth (CA) <span class="float-right">$0.00</span></li>
-                <li class="list-group-item list-group-item-primary">Networth (NG)<span class="float-right">$0.00</span></li>
-                
+                {% for country, worth in country_networth.items %}
+                <li class="list-group-item list-group-item-primary">Networth ({{country}}) <span class="float-right">{{worth}}</span></li>
+                {% endfor %}
               </ul>
             </div>
           </div>
@@ -101,7 +101,7 @@
                   <a class="btn btn-outline-primary mt-1 float-right" href="{% url 'networth-saving-create' %}">
                     New Savings Account
                   </a>
-                    <a class="btn btn-outline-primary" href="{% url 'index' %}">Borrow Fund</a>
+                    <a class="btn btn-outline-primary" href="{% url 'networth-external-fund-home' %}"><i class="fa fa-plus text-success"></i> Fund</a>
       
                   
                 </div> 

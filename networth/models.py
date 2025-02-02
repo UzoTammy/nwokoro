@@ -344,6 +344,39 @@ class Saving(models.Model):
             transaction_type = 'DR'
         )
 
+    def borrow_fund(self, source, amount, cost, date):
+        # create borrowed fund
+        bf = BorrowedFund.objects.create(
+            owner = self.owner,
+            source = source,
+            borrowed_amount = amount,
+            settlement_amount = amount + cost,
+            settled_amount = Money(0, amount.currency),
+            date = date,
+            host_country = self.host_country
+
+        )
+        # record the transaction
+        BorrowedFundTransaction.objects.create(
+            user = self.owner,
+            borrowed_fund = bf,
+            amount = amount,
+            description = f'Borrowed funds from {bf.source}',
+            timestamp = date,
+            transaction_type = 'DR'
+        )
+        # credit the savings Account
+        self.value += amount
+        self.save()
+        # record the transaction
+        SavingsTransaction.objects.create(
+            user = self.owner,
+            savings = self,
+            amount = amount,
+            description = f'Borrowed fund from {source}',
+            timestamp = date,
+            transaction_type = 'CR'
+        )
 
 class Business(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -462,6 +495,40 @@ class SavingsTransaction(models.Model):
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
  
+class BorrowedFund(models.Model):
+
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    source = models.CharField(max_length=50)
+    borrowed_amount = MoneyField(max_digits=12, decimal_places=2)
+    settlement_amount = MoneyField(max_digits=12, decimal_places=2)
+    date = models.DateField()
+    repayment_amount = MoneyField(max_digits=12, decimal_places=2, blank=True, null=True)
+    repayment_start_date = models.DateField(blank=True, null=True)
+    repayment_period = models.CharField(max_length=30, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    settled_amount = MoneyField(max_digits=12, decimal_places=2)
+    host_country = models.CharField(max_length=2)
+
+    def __str__(self):
+        return f'BorrowedFund from {self.source}'
+    
+    def expected_number_of_payments(self):
+        return int(self.settlement_amount/self.repayment_amount)
+    
+    def number_of_payments_made(self):
+        return self.borrowed_fund_transactions.all()
+        
+class BorrowedFundTransaction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_borrowed_fund_transactions")
+    borrowed_fund = models.ForeignKey(BorrowedFund, on_delete=models.CASCADE, related_name='borrowed_fund_transactions')
+    amount = MoneyField(max_digits=12, decimal_places=2)
+    description = models.TextField(blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+    transaction_type = models.CharField(max_length=2) # DR or CR
+
+    def __str__(self):
+        return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
+
 class FinancialData(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     worth = MoneyField(max_digits=12, decimal_places=2)
@@ -474,6 +541,8 @@ class FinancialData(models.Model):
     roi = MoneyField(max_digits=12, decimal_places=2)
     daily_roi = MoneyField(max_digits=12, decimal_places=2)
     present_roi = MoneyField(max_digits=12, decimal_places=2)
+    # worth_by_country = models.JSONField(default=dict)
+    # liability_by_country = models.JSONField(default=dict)
     
 
     def __str__(self):
@@ -492,3 +561,6 @@ class FinancialData(models.Model):
     
     def networth(self):
         return self.worth - self.liability
+
+
+    

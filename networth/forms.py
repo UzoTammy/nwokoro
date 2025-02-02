@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ValidationError
-from .models import Investment, Stock, Saving, Business, FixedAsset
-from djmoney.forms.fields import MoneyField
+from .models import Investment, Stock, Saving, Business, FixedAsset, BorrowedFund
+from djmoney.forms.fields import MoneyField, Money
 from django.core.validators import MaxValueValidator
 
 
@@ -18,14 +18,16 @@ class OptionChoices:
         ('NG', 'Nigeria'), ('CA', 'Canada'), ('US', 'USA'),
     ]
     CATEGORIES = [
-        ('GIC', 'GIC'), ('TB', 'Treasury bill'), ('FD',
-                                                  'Fixed Deposit'), ('CP', 'Commercial Paper'), ('MM', 'Money Market')
+        ('GIC', 'GIC'), ('TB', 'Treasury bill'), ('FD', 'Fixed Deposit'),
+        ('CP', 'Commercial Paper'), ('MM', 'Money Market')
     ]
     STOCK_TYPE = [
-        ('Scotia Essential', 'Scotia Essential'), ('Scotia Selected',
-                                                   'Scotia Selected'), ('Shares', 'Shares')
+        ('Scotia Essential', 'Scotia Essential'), ('Scotia Selected', 'Scotia Selected'), ('Shares', 'Shares')
     ]
 
+    PAYMENT_PERIOD = [
+        ('monthly', 'Monthly'), ('bi-weekly', 'Bi-weekly'), ('yearly', 'Yearly'), ('daily', 'Daily'), ('one-time', 'One-time')
+    ]
 
 class InvestmentCreateForm(forms.ModelForm):
 
@@ -205,7 +207,6 @@ class FixedAssetUpdateForm(forms.ModelForm):
         model = FixedAsset
         fields = ['name', 'host_country']
 
-    
 
 class BusinessUpdateForm(forms.ModelForm):
 
@@ -217,3 +218,40 @@ class BusinessUpdateForm(forms.ModelForm):
     class Meta:
         model = Stock
         fields = ['name', 'host_country', 'stock_type', 'unit_cost']
+
+
+class BorrowedFundForm(forms.ModelForm):
+    cost_of_fund = MoneyField(max_digits=12, decimal_places=2)
+    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    savings_account = forms.ModelChoiceField(queryset=Saving.objects.none())
+    host_country = forms.CharField(
+        widget=forms.Select(choices=OptionChoices.COUNTRIES))
+
+
+    class Meta:
+        model = BorrowedFund
+        fields = ['date', 'source', 'borrowed_amount', 'host_country']
+
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+
+        if self.pk:
+            self.savings_account = Saving.objects.filter(pk=self.pk)
+            self.fields['savings_account'].queryset = self.savings_account
+            self.fields['savings_account'].initial = self.savings_account.first()
+            self.fields['savings_account'].disabled = True
+            self.fields['borrowed_amount'].initial = Money(0.00, self.savings_account.first().value.currency)
+            self.fields['cost_of_fund'].initial = Money(0.00, self.savings_account.first().value.currency)
+            self.fields['host_country'].initial = self.savings_account.first().host_country
+
+    def clean_borrowed_amount(self):
+        if self.cleaned_data['borrowed_amount'].currency != self.savings_account.first().value.currency:
+            raise ValidationError('Currency mismatch: Check your currency selection')
+        return self.cleaned_data['borrowed_amount']
+        
+    def clean_settlement_amount(self):
+        if self.cleaned_data['settlement_amount'].currency != self.savings_account.first().value.currency:
+            raise ValidationError('Currency mismatch: Check your currency selection')
+        return self.cleaned_data['settlement_amount']
+        

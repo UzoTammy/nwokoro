@@ -1,30 +1,18 @@
-from decimal import Decimal
-from django.shortcuts import render
-from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.utils import timezone
 from django.contrib import messages
 from django.db.models.aggregates import Sum
 from django.db.models import F
-from django.views.generic import (TemplateView, CreateView, DetailView, UpdateView, FormView)
+from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from djmoney.models.fields import Money
-from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset
+from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, BorrowedFund
 from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, 
                     InvestmentRolloverForm, BusinessCreateForm, BusinessUpdateForm, 
-                    FixedAssetCreateForm, FixedAssetUpdateForm)
+                    FixedAssetCreateForm, FixedAssetUpdateForm,
+                    BorrowedFundForm)
 
-# from .tasks import financial_report_email
-
-
-def convert_to_base(money_list):
-    result = list()
-    for money in money_list:
-        exchange = ExchangeRate.objects.filter(target_currency=money.currency)
-        if exchange.exists():
-            result.append(Money(money.amount/Decimal(exchange.first().rate), exchange.first().base_currency))
-    return sum(result)
-    
+from .tasks import financial_report_email
+from .emails import FinancialReport
     
 # Create your views here.
 class NetworthHomeView(LoginRequiredMixin, TemplateView):
@@ -33,7 +21,8 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # for financial report summanry
-        context['fd'] = FinancialData.objects.latest('date')
+        financial_data = FinancialData.objects.latest('date')
+        context['fd'] = financial_data
 
         # exchange rate
         canada = ExchangeRate.objects.get(target_currency='CAD')
@@ -47,6 +36,7 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
         savings = Saving.objects.filter(owner=self.request.user)
         business = Business.objects.filter(owner=self.request.user)
         fixed_asset = FixedAsset.objects.filter(owner=self.request.user)
+        liability = BorrowedFund.objects.filter(owner=self.request.user)
 
         context['investments'] = investments.order_by('principal_currency')
         context['savings'] = savings.order_by('value_currency')
@@ -54,7 +44,6 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
         context['business'] = business.order_by('unit_cost_currency')
         context['fixed_asset'] = fixed_asset.order_by('value_currency')
         
-
         # Asset total
         currencies = investments.values_list('principal_currency', flat=True).distinct().order_by('principal_currency')
         investment_total = list()
@@ -85,13 +74,23 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
         context['business_total'] = business_total
         
         currencies = fixed_asset.values_list('value_currency', flat=True).distinct().order_by('value_currency')
-        total = list()
+        fixed_asset_total = list()
         if currencies.exists():
             for currency in currencies:
-                total.append(Money(fixed_asset.filter(value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
-        context['fixed_asset_total'] = total
+                fixed_asset_total.append(Money(fixed_asset.filter(value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
+        context['fixed_asset_total'] = fixed_asset_total
+
+        currencies = liability.values_list('borrowed_amount_currency', flat=True).distinct().order_by('borrowed_amount_currency')
+        liability_total = list()
+        if currencies.exists():
+            for currency in currencies:
+                liability_total.append(Money(liability.filter(settlement_amount_currency=currency).aggregate(Sum('settlement_amount'))['settlement_amount__sum'], currency))
+        # context['fixed_asset_total'] = liability_total
+
         
         # financial_report_email()
+        fr = FinancialReport(investments, savings, stocks, business, fixed_asset, liability)
+        context['country_networth'] = fr.country_networth()
         return context
 
 class InvestmentCreateView(LoginRequiredMixin, FormView):
@@ -276,3 +275,31 @@ class FixedAssetUpdateView(LoginRequiredMixin, UpdateView):
     
     def get_success_url(self):
         return reverse_lazy('networth-fixed-asset', kwargs={'pk': self.object.pk})
+
+# External Funds
+class ExternalFundHome(LoginRequiredMixin, ListView):
+    model = Saving
+    template_name = 'networth/external_fund.html'
+
+    
+class BorrowedFundView(LoginRequiredMixin, FormView):
+    template_name = 'networth/borrow_form.html'
+    success_url = reverse_lazy('networth-external-fund-home')
+    form_class = BorrowedFundForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['pk'] = self.kwargs.get('pk')
+        return kwargs
+    
+    def form_valid(self, form):
+        savings_account = form.cleaned_data['savings_account']
+        
+        savings_account.borrow_fund(form.cleaned_data['source'],
+                                    form.cleaned_data['borrowed_amount'],
+                                    form.cleaned_data['cost_of_fund'],
+                                    form.cleaned_data['date'],
+
+                                )
+        messages.success(self.request, 'Transaction is successful !!!')
+        return super().form_valid(form)

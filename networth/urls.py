@@ -5,7 +5,8 @@ from .views import (NetworthHomeView,
                     StockCreateView, StockDetailView, StockUpdateView,
                     SavingCreateView, SavingDetailView, SavingUpdateView,
                     BusinessCreateView, BusinessDetailView, BusinessUpdateView,
-                    FixedAssetCreateView, FixedAssetDetailView, FixedAssetUpdateView)
+                    FixedAssetCreateView, FixedAssetDetailView, FixedAssetUpdateView,
+                    ExternalFundHome, BorrowedFundView)
 
 
 urlpatterns = [
@@ -30,5 +31,8 @@ urlpatterns = [
     path('fixed-asset/<int:pk>/create/', FixedAssetCreateView.as_view(), name='networth-fixed-asset-create'),
     path('fixed-asset/<int:pk>/detail/', FixedAssetDetailView.as_view(), name='networth-fixed-asset-detail'),
     path('fixed-asset/<int:pk>/update/', FixedAssetUpdateView.as_view(), name='networth-fixed-asset-update'),
+
+    path('external-fund/home/', ExternalFundHome.as_view(), name='networth-external-fund-home'),
+    path('<int:pk>/borrow-fund/', BorrowedFundView.as_view(), name='networth-borrow-fund'),
     
 ]
