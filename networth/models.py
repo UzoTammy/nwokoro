@@ -541,8 +541,7 @@ class FinancialData(models.Model):
     roi = MoneyField(max_digits=12, decimal_places=2)
     daily_roi = MoneyField(max_digits=12, decimal_places=2)
     present_roi = MoneyField(max_digits=12, decimal_places=2)
-    # worth_by_country = models.JSONField(default=dict)
-    # liability_by_country = models.JSONField(default=dict)
+    networth_by_country = models.JSONField(null=True)
     
 
     def __str__(self):

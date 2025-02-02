@@ -37,7 +37,7 @@
               <ul class="list-group list-group-flush">
                 <li class="list-group-item list-group-item-primary">Fixed Asset <span class="float-right">{{fd.fixed_asset}}</span></li>
                 <li class="list-group-item list-group-item-danger">Liability <span class="float-right">{{fd.liability}}</span></li>
-                {% for country, worth in country_networth.items %}
+                {% for country, worth in fd.networth_by_country.items %}
                 <li class="list-group-item list-group-item-primary">Networth ({{country}}) <span class="float-right">{{worth}}</span></li>
                 {% endfor %}
               </ul>

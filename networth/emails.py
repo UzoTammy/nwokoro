@@ -1,19 +1,19 @@
 from decimal import Decimal
-from django.db.models.aggregates import Sum, Min
+from babel.numbers import format_currency
+from django.db.models.aggregates import Sum
 from django.db.models import F
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.http import HttpResponse
-from django.urls import reverse
 from djmoney.models.fields import Money
 from .models import ExchangeRate, FinancialData
 
 
 class FinancialReport:
 
-    def __init__(self, investments, savings, stocks, business, fixed_asset, liability):
-        self.investments = investments
+    def __init__(self, savings, investments, stocks, business, fixed_asset, liability):
         self.savings = savings
+        self.investments = investments
         self.stocks = stocks
         self.business = business
         self.fixed_asset = fixed_asset
@@ -142,7 +142,7 @@ class FinancialReport:
         worth = dict()
         countries = self.get_countries()
         for country in countries:
-            worth[country] = self.getNetworth(country)
+            worth[country] = format_currency(self.getNetworth(country).amount, currency='USD', locale='en_US')
         return worth
 
     def send_email(self):
@@ -190,5 +190,6 @@ class FinancialReport:
             liability=self.get_liability_total(),
             roi=self.get_roi(),
             daily_roi=self.get_daily_roi(),
-            present_roi=self.get_present_roi()
+            present_roi=self.get_present_roi(),
+            networth_by_country=self.country_networth()
         )
