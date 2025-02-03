@@ -1,9 +1,8 @@
 
 import requests
-from django.utils import timezone
 from celery import shared_task
 from .emails import FinancialReport
-from networth.models import ExchangeRate, Investment, Saving, Stock, Business, FixedAsset, BorrowedFund
+from networth.models import (ExchangeRate, Investment, Saving, Stock, Business, FixedAsset, BorrowedFund)
 from account.models import User
 
 
