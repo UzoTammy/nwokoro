@@ -541,7 +541,8 @@ class FinancialData(models.Model):
     roi = MoneyField(max_digits=12, decimal_places=2)
     daily_roi = MoneyField(max_digits=12, decimal_places=2)
     present_roi = MoneyField(max_digits=12, decimal_places=2)
-    networth_by_country = models.JSONField(null=True)
+    networth_by_country = models.JSONField(null=True) 
+    exchange_rate = models.JSONField(null=True)
     
 
     def __str__(self):
@@ -560,6 +561,15 @@ class FinancialData(models.Model):
     
     def networth(self):
         return self.worth - self.liability
-
+    
+    def save(self, *args, **kwargs):
+        exchanges = ExchangeRate.objects.exclude(target_currency='USD').values_list('target_currency', 'rate')
+        result = dict()
+        for exchange in exchanges:
+            result[exchange[0]] = exchange[1]
+        self.exchange_rate = result
+        super().save(*args, **kwargs)
+        
+        
 
     

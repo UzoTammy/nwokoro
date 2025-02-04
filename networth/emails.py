@@ -28,7 +28,7 @@ class FinancialReport:
             if exchange.exists():
                 result.append(Money(
                     money.amount/Decimal(exchange.first().rate), exchange.first().base_currency))
-        return sum(result)
+        return sum(result) if result else Money(0, 'USD')
 
     def get_owner(self):
         return self.savings.first().owner
