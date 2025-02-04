@@ -39,7 +39,7 @@ def fetch_exchange_rate():
 
 @shared_task
 def financial_report_email():
-    users = User.objects.values_list('username', flat=True)
+    users = User.objects.filter(is_staff=True).values_list('username', flat=True)
     for user in users:
         savings = Saving.objects.filter(owner__username=user)
         if savings.exists():
@@ -51,4 +51,19 @@ def financial_report_email():
             
             fr = FinancialReport(savings, investments, stocks, business, fixed_asset, liability)
             fr.send_email()
+            fr.save_report()
+
+
+def save_financial_data():
+    users = User.objects.filter(is_staff=True).values_list('username', flat=True)
+    for user in users:
+        savings = Saving.objects.filter(owner__username=user)
+        if savings.exists():
+            investments = Investment.objects.filter(is_active=True).filter(owner__username=user)
+            stocks = Stock.objects.filter(owner__username=user)
+            business = Business.objects.filter(owner__username=user)
+            fixed_asset = FixedAsset.objects.filter(owner__username=user)
+            liability = BorrowedFund.objects.filter(owner__username=user)
+            
+            fr = FinancialReport(savings, investments, stocks, business, fixed_asset, liability)
             fr.save_report()
