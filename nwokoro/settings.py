@@ -166,6 +166,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap4"
 django_on_heroku.settings(locals(), staticfiles=False)
 AUTH_USER_MODEL = 'account.User'
 LOGIN_REDIRECT_URL = 'chore-home'
+LOGOUT_REDIRECT_URL = 'login'
 
 # Celery Configuration Options
 CELERY_BROKER_URL = os.getenv('CLOUDAMQP_URL', 'amqp://guest:guest@127.0.0.1:5672/')

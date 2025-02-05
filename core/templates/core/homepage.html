@@ -102,7 +102,15 @@
                     <div class="col-sm-4 mt-3">
                         <i class="fab fa-html5 text-info"></i> HTML5
                     </div>
-                    
+                    <div class="col-sm-4 mt-3">
+                        <i class="fab fa-typescript text-secondary"></i> Typescript
+                    </div>
+                    <div class="col-sm-4 mt-3">
+                        <i class="fab fa-node text-dark"></i> Node
+                    </div>
+                    <div class="col-sm-4 mt-3">
+                        <i class="fab fa-chakra text-warning"></i> Chakra
+                    </div>
                 </div>
             </div>
 
@@ -132,6 +140,7 @@
                         </small></p>
                     <p class="first-letter">Always Learning <small class="text-muted ml-1">I dread the day I will no longer be able to learn</small></p>
                 </div>
+                
                 <!-- <div class="rounded-pill mb-3">
                     <ul class="list-group">
                         <li class="list-group-item list-group-item-primary">
@@ -159,6 +168,16 @@
                     <li class="list-group-item"><a class="text-decoration-none" href="{% url 'networth-home' %}">Networth</a>: Aggregating assets and liabilities of a user </li>
                     <li class="list-group-item"><a class="text-decoration-none" href="{% url 'tinyproject-home' %}">Hands-on Projects</a>: Projects
                         that emphasizes specific concept(s)</li>
+                    <li class="list-group-item">
+                        {% if user.is_authenticated %}
+                        <form method="post"  action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-dark btn-sm">Logout</button>
+                        </form>
+                        {% else %}
+                        <span class="text-warning">Login credentials needed for this site</span>
+                        {% endif %}
+                    </li>
                 </ul>
             </div>
         </div>

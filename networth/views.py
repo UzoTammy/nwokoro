@@ -10,7 +10,7 @@ from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, Savi
                     InvestmentRolloverForm, BusinessCreateForm, BusinessUpdateForm, 
                     FixedAssetCreateForm, FixedAssetUpdateForm,
                     BorrowedFundForm)
-
+from .plots import bar_chart
 # from .tasks import financial_report_email
 # from .emails import FinancialReport
     
@@ -91,6 +91,20 @@ class NetworthHomeView(LoginRequiredMixin, TemplateView):
         # financial_report_email()
         # fr = FinancialReport(savings, investments, stocks, business, fixed_asset, liability)
         # context['country_networth'] = fr.country_networth()
+        return context
+
+class DashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'networth/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        financials = FinancialData.objects.all()
+        context['financials'] = financials
+        recent_days = [f'{date.day}-{date.month}' for date in financials.values_list('date', flat=True).order_by('date')[10:]]
+        recent_worth = financials.values_list('worth', flat=True).order_by('date')[10:]
+        context['worth_image'] = bar_chart(recent_days, recent_worth, 'Worth', 'Days', 'Networth Trending')
+        recent_daily_roi = financials.values_list('daily_roi', flat=True).order_by('date')[10:]
+        context['daily_roi_image'] = bar_chart(recent_days, recent_daily_roi, 'ROI', 'Days', 'Daily roi')
         return context
 
 class InvestmentCreateView(LoginRequiredMixin, FormView):

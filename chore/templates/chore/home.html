@@ -8,13 +8,17 @@
     .modal {
         color: black;
     }
+
+    a:hover {
+        color: gold;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="row align-items-center justify-content-center vh-100">
-        <div class="col">
+        <div class="col-sm-8">
             {% if user.is_authenticated %}
             <h3>"Your Choices Shape Your Future!"
                 <a class="btn btn-outline-success float-right mr-1" href="{% url 'achieve-home' %}"><i class="fa fa-trophy"></i></a>
@@ -72,24 +76,30 @@
                 <p><a class="" href="">Learning</a> </p>
                 
             {% endif %} 
-            <form method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-outline-light">Logout</button>
-                <a class="btn btn-outline-light" href="{% url 'chore-help' %}">Help</a>
-                {% if user.is_staff %}
-                <a class="btn btn-outline-light" href="{% url 'chore-setup' %}">Setup</a>
-                {% endif %}
-            </form>
+            
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-outline-light" href="{% url 'index' %}">Home</a>
+                    <a class="btn btn-outline-light" href="{% url 'chore-help' %}">Help</a>
+                    {% if user.is_staff %}
+                    <a class="btn btn-outline-light" href="{% url 'chore-setup' %}">Setup</a>
+                    {% endif %}
+                </div>
+            </div>
             {% else %}
             <h1>Welcome to Chores</h1>
             <h4 class="ml-3">An App that rewards effort and commitment at home.</h4>
             <div class="row">
                 <div class="col">
                     <a class="btn btn-outline-light ml-5 mt-3" href="{% url 'login' %}">Sign In</a>
-                    <a class="btn btn-outline-light ml-5 mt-3" href="{% url 'chore-registration-message' %}">Register</a>
+                    <a class="btn btn-outline-light ml-5 mt-3" href="{% url 'chore-help' %}">Help</a>
                     <a class="btn btn-outline-light ml-5 mt-3" href="{% url 'index' %}">Back</a>
                 </div>
             </div>
+            <p class="ml-5 mt-2">
+                <a class="text-decoration-none" href="{% url 'chore-registration-message' %}">Register</a>
+            </p>
+                    
             {% endif %}
 
             {% if user.is_staff %}

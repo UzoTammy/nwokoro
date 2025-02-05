@@ -1,6 +1,6 @@
 
 from django.urls import path
-from .views import (NetworthHomeView, 
+from .views import (NetworthHomeView, DashboardView,
                     InvestmentCreateView, InvestmentDetailView, InvestmentRolloverView, InvestmentUpdateView, 
                     StockCreateView, StockDetailView, StockUpdateView,
                     SavingCreateView, SavingDetailView, SavingUpdateView,
@@ -11,6 +11,7 @@ from .views import (NetworthHomeView,
 
 urlpatterns = [
     path('', NetworthHomeView.as_view(), name='networth-home'),
+    path('dashboard/', DashboardView.as_view(), name='networth-dashboard'),
     path('investment/<int:pk>/create/', InvestmentCreateView.as_view(), name='networth-investment-create'),
     path('investment/<int:pk>/detail/', InvestmentDetailView.as_view(), name='networth-investment-detail'),
     path('investment/<int:pk>/update/', InvestmentUpdateView.as_view(), name='networth-investment-update'),
@@ -34,5 +35,6 @@ urlpatterns = [
 
     path('external-fund/home/', ExternalFundHome.as_view(), name='networth-external-fund-home'),
     path('<int:pk>/borrow-fund/', BorrowedFundView.as_view(), name='networth-borrow-fund'),
+    
     
 ]
