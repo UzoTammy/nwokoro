@@ -100,10 +100,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         financials = FinancialData.objects.all()
         context['financials'] = financials
-        recent_days = [f'{date.day}/{date.month}' for date in financials.values_list('date', flat=True).order_by('date')[10:]]
-        recent_worth = financials.values_list('worth', flat=True).order_by('date')[10:]
+        recent_days = [f'{date.day}/{date.month}' for date in financials.values_list('date', flat=True).order_by('date')]
+        recent_worth = financials.values_list('worth', flat=True).order_by('date')
         context['worth_image'] = bar_chart(recent_days, recent_worth, 'Worth', 'Days', 'Networth Trending')
-        recent_daily_roi = financials.values_list('daily_roi', flat=True).order_by('date')[10:]
+        recent_daily_roi = financials.values_list('daily_roi', flat=True).order_by('date')
         context['daily_roi_image'] = bar_chart(recent_days, recent_daily_roi, 'ROI', 'Days', 'Daily roi')
         return context
 
