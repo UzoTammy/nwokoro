@@ -50,8 +50,8 @@ def financial_report_email():
             liability = BorrowedFund.objects.filter(owner__username=user)
             
             fr = FinancialReport(savings, investments, stocks, business, fixed_asset, liability)
-            fr.send_email()
             fr.save_report()
+            fr.send_email()
 
 
 def save_financial_data():

@@ -1,6 +1,8 @@
+import datetime
+from zoneinfo import ZoneInfo
 from django.urls import reverse_lazy
 from django.contrib import messages
-from django.db.models.aggregates import Sum
+from django.db.models.aggregates import Sum, Min
 from django.db.models import F
 from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView)
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -11,6 +13,7 @@ from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, Savi
                     FixedAssetCreateForm, FixedAssetUpdateForm,
                     BorrowedFundForm)
 from .plots import bar_chart
+
 # from .tasks import financial_report_email
 # from .emails import FinancialReport
     
@@ -98,13 +101,17 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        financials = FinancialData.objects.all()
-        context['financials'] = financials
-        recent_days = [f'{date.day}/{date.month}' for date in financials.values_list('date', flat=True).order_by('date')]
-        recent_worth = financials.values_list('worth', flat=True).order_by('date')
-        context['worth_image'] = bar_chart(recent_days, recent_worth, 'Worth', 'Days', 'Networth Trending')
-        recent_daily_roi = financials.values_list('daily_roi', flat=True).order_by('date')
-        context['daily_roi_image'] = bar_chart(recent_days, recent_daily_roi, 'ROI', 'Days', 'Daily roi')
+        cut_off_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7)
+        financials = FinancialData.objects.filter(date__gte=cut_off_date)
+        
+        # get the minimum worth
+        min_worth = financials.aggregate(Min('worth'))['worth__min']
+        recent_days = [ date.strftime('%m/%d') for date in financials.values_list('date', flat=True) ]
+        recent_worth = [ (worth - min_worth) for worth in financials.values_list('worth', flat=True) ]
+        
+        context['worth_image'] = bar_chart(recent_days, recent_worth, 'Worth', 'Days', 'Worth')
+        recent_daily_roi = financials.values_list('daily_roi', flat=True)
+        context['daily_roi_image'] = bar_chart(recent_days, recent_daily_roi, 'ROI', 'Days', 'Daily ROI')
         return context
 
 class InvestmentCreateView(LoginRequiredMixin, FormView):
@@ -250,7 +257,6 @@ class BusinessUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('networth-home')
     form_class = BusinessUpdateForm
 
-
 # Fixed Asset
 class FixedAssetCreateView(LoginRequiredMixin, FormView):
     success_url = reverse_lazy('networth-home')
@@ -277,7 +283,6 @@ class FixedAssetCreateView(LoginRequiredMixin, FormView):
 
         return super().form_valid(form)
 
-
 class FixedAssetDetailView(LoginRequiredMixin, DetailView):
     model = FixedAsset
     template_name = 'networth/fixed_asset_detail.html'
@@ -295,7 +300,6 @@ class ExternalFundHome(LoginRequiredMixin, ListView):
     model = Saving
     template_name = 'networth/external_fund.html'
 
-    
 class BorrowedFundView(LoginRequiredMixin, FormView):
     template_name = 'networth/borrow_form.html'
     success_url = reverse_lazy('networth-external-fund-home')
