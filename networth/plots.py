@@ -4,7 +4,7 @@ import io
 import base64
 import mpld3
 
-def bar_chart(x_axis, y_axis, Y='Y', X='X', title='Bar Chart', y_limit=None):
+def bar_chart(x_axis, y_axis, Y='Y', X='X', title='Bar Chart', y_min=None):
     
     # Create a bar chart
     plt.switch_backend('AGG')
@@ -15,19 +15,10 @@ def bar_chart(x_axis, y_axis, Y='Y', X='X', title='Bar Chart', y_limit=None):
     plt.title(title)
     plt.tight_layout()
     plt.grid(True, linestyle='--', alpha=0.6)
+    if y_min:
+        plt.ylim(bottom=y_min)
     # Create a bar chart
 
-    # fig, ax = plt.subplots()
-    # ax.bar(x_axis, y_axis, color='skyblue')
-
-    # # Set custom y-axis limits
-    # if y_limit is not None:
-    #     ax.set_ylim(y_limit[0], y_limit[1])
-
-    # # Add labels and title
-    # ax.set_xlabel(X)
-    # ax.set_ylabel(Y)
-    # ax.set_title(title)
     
     # Save the plot to a BytesIO object
     buffer = io.BytesIO()

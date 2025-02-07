@@ -105,13 +105,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         financials = FinancialData.objects.filter(date__gte=cut_off_date)
         
         # get the minimum worth
-        min_worth = financials.aggregate(Min('worth'))['worth__min']
-        recent_days = [ date.strftime('%m/%d') for date in financials.values_list('date', flat=True) ]
-        recent_worth = [ (worth - min_worth) for worth in financials.values_list('worth', flat=True) ]
-        
-        context['worth_image'] = bar_chart(recent_days, recent_worth, 'Worth', 'Days', 'Worth')
-        recent_daily_roi = financials.values_list('daily_roi', flat=True)
-        context['daily_roi_image'] = bar_chart(recent_days, recent_daily_roi, 'ROI', 'Days', 'Daily ROI')
+        if financials:
+            min_worth = financials.aggregate(Min('worth'))['worth__min']
+            recent_days = [ date.strftime('%m/%d') for date in financials.values_list('date', flat=True) ]
+            recent_worth = [ worth for worth in financials.values_list('worth', flat=True) ]
+            context['worth_image'] = bar_chart(recent_days, recent_worth, 'Worth', 'Days', 'Worth', y_min=4*min_worth/5)
+
+            min_roi = financials.aggregate(Min('daily_roi'))['daily_roi__min']
+            recent_daily_roi = financials.values_list('daily_roi', flat=True)
+            context['daily_roi_image'] = bar_chart(recent_days, recent_daily_roi, 'ROI', 'Days', 'Daily ROI', y_min=int(min_roi/2))
         return context
 
 class InvestmentCreateView(LoginRequiredMixin, FormView):
