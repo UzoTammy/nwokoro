@@ -165,7 +165,6 @@ class InvestmentRolloverView(LoginRequiredMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
-        form = InvestmentRolloverForm(pk=self.kwargs['pk'])
         inv = Investment.objects.get(pk=self.kwargs['pk'])
         inv.rollover(form.cleaned_data['rate'], form.cleaned_data['start_date'], form.cleaned_data['duration'], 
                      form.cleaned_data['option'], form.cleaned_data['adjusted_amount'], form.cleaned_data['savings_account'])
