@@ -106,15 +106,17 @@ class FinancialReport:
     def get_liability_total(self, country=None):
         liability = self.liability.filter(host_country=country) if country else self.liability
 
-        currencies = liability.values_list(
-            'borrowed_amount_currency', flat=True).distinct().order_by('borrowed_amount_currency')
         total = list()
-        if currencies.exists():
-            for currency in currencies:
-                liability = liability.annotate(
-                    balance=F('settlement_amount') - F('settled_amount'))
-                total.append(Money(liability.filter(borrowed_amount_currency=currency).aggregate(
-                    Sum('balance'))['balance__sum'], currency))
+        if self.liability.exists():
+            currencies = liability.values_list(
+                'borrowed_amount_currency', flat=True).distinct().order_by('borrowed_amount_currency')
+            if currencies.exists():
+                for currency in currencies:
+                    liability = liability.annotate(
+                        balance=F('settlement_amount') - F('settled_amount'))
+                    total.append(Money(liability.filter(borrowed_amount_currency=currency).aggregate(
+                        Sum('balance'))['balance__sum'], currency))
+            
 
         return FinancialReport.convert_to_base(total)
 
@@ -151,7 +153,7 @@ class FinancialReport:
         subject = "Financial Data Saved to Database"
         to_email = [self.get_owner().email]
 
-        fd = FinancialData.objects.latest('date')
+        fd = FinancialData.objects.order_by('-date')[1] # previous latest
 
         html_content = render_to_string('networth/mails/financial_report.html', {
             'networth': self.getNetworth(),
@@ -165,7 +167,8 @@ class FinancialReport:
             'daily_roi': self.get_daily_roi(),
             'present_roi': self.get_present_roi(),
             'prev_networth': fd.networth,
-            'change_in_networth': self.getNetworth() - fd.networth()
+            'change_in_networth': self.getNetworth() - fd.networth(),
+            'exchange_rate': f"{format_currency(fd.exchange_rate['NGN']/fd.exchange_rate['CAD'], currency='NGN', locale='en_US')}/CA$"
         })
 
         # Create the email message
