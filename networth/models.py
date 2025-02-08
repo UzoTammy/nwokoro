@@ -530,6 +530,7 @@ class BorrowedFundTransaction(models.Model):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
 
 class FinancialData(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     date = models.DateTimeField(auto_now_add=True)
     worth = MoneyField(max_digits=12, decimal_places=2)
     savings = MoneyField(max_digits=12, decimal_places=2)
@@ -547,7 +548,6 @@ class FinancialData(models.Model):
 
     def __str__(self):
         return f'{self.date}: {self.worth}'
-    
     
     def spread(self):
 

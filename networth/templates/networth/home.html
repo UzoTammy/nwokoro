@@ -9,312 +9,349 @@
 </style>
 {% endblock %}
 {% block content %}
-<div class="container">
-    <div class="jumbotron jumbotron-fluid jumbotron-beige">
-        <div class="container">
-          <h1 class="display-4">Networth</h1>
-          <small class="text-muted ml-2">Exchange Rate: {{exchange}} 
-            <a class="float-right mr-3" href="{% url 'networth-dashboard' %}"><i class="fa fa-tachometer-alt"></i></a></small> 
-          <div class="row">
+<div class="container mt-3">
+  {% if fd %}
+  <div class="jumbotron jumbotron-fluid jumbotron-beige">
+    <div class="container">
+      <h4 class="font-italics float-right mr-2">Owner: {{user.username}}</h4>
+      <h1 class="display-4">Networth</h1>
+      <small class="text-muted ml-2">Exchange Rate: {{exchange}}
+        <a class="float-right mr-3" href="{% url 'networth-dashboard' %}"><i
+            class="fa fa-tachometer-alt"></i></a></small>
+      <div class="row">
+        <div class="col-sm-4">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item list-group-item-info">Worth <span class="float-right">{{fd.worth}}</span></li>
+            <li class="list-group-item list-group-item-primary">Expected ROI <span class="float-right">{{fd.roi}}</span>
+            </li>
+            <li class="list-group-item list-group-item-primary">Daily ROI <span
+                class="float-right">{{fd.daily_roi}}</span></li>
+            <li class="list-group-item list-group-item-primary">Present ROI<span
+                class="float-right">{{fd.present_roi}}</span></li>
+          </ul>
+        </div>
+
+        <div class="col-sm-4">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item list-group-item-primary">Saving <span class="float-right">{{fd.savings}}</span>
+            </li>
+            <li class="list-group-item list-group-item-primary">Investment <span
+                class="float-right">{{fd.investment}}</span></li>
+            <li class="list-group-item list-group-item-primary">Stock <span class="float-right">{{fd.stock}}</span></li>
+            <li class="list-group-item list-group-item-primary">Business <span
+                class="float-right">{{fd.business}}</span></li>
+          </ul>
+        </div>
+
+        <div class="col-sm-4">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item list-group-item-primary">Fixed Asset <span
+                class="float-right">{{fd.fixed_asset}}</span></li>
+            <li class="list-group-item list-group-item-danger">Liability <span
+                class="float-right">{{fd.liability}}</span></li>
+            {% for country, worth in fd.networth_by_country.items %}
+            <li class="list-group-item list-group-item-primary">Networth ({{country}}) <span
+                class="float-right">{{worth}}</span></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <small class="text-muted ml-2">Savings: {{fd.spread.savings}}, Investment: {{fd.spread.investment}},
+        Stock: {{fd.spread.stock}}, Business: {{fd.spread.business}}, Fixed Asset: {{fd.spread.fixed_asset}}
+      </small>
+    </div>
+  </div>
+  {% else %}
+  <div class="row mt-3">
+    <div class="col">
+      <h4>Hello {{user.username}}</h4>
+      <h1 class="font-italic">You have no Financial Record</h1>
+      <p class="text-muted">Note: if you create or update an asset, you will not notice the change until end of the day.
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+  <nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+      <button class="nav-link active" id="nav-home-tab" data-toggle="tab" data-target="#savings" type="button"
+        role="tab" aria-controls="savings" aria-selected="true"><span
+          class="text-info font-italic">Savings</span></button>
+      <button class="nav-link" id="nav-profile-tab" data-toggle="tab" data-target="#investment" type="button" role="tab"
+        aria-controls="investment" aria-selected="false"><span class="text-info font-italic">Investment</span></button>
+      <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#stock" type="button" role="tab"
+        aria-controls="stock" aria-selected="false"><span class="text-info font-italic">Stock</span></button>
+      <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#business" type="button" role="tab"
+        aria-controls="business" aria-selected="false"><span class="text-info font-italic">Business</span></button>
+      <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#fixed_asset" type="button"
+        role="tab" aria-controls="fixed_asset" aria-selected="false"><span class="text-info font-italic">Fixed
+          Asset</span></button>
+    </div>
+  </nav>
+
+  <div class="tab-content" id="nav-tabContent">
+
+    <div class="tab-pane fade show active" id="savings" role="tabpanel" aria-labelledby="nav-home-tab">
+      <div class="row justify-content-center mt-3 shadow">
+        <div class="col-sm-12">
+          <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Savings ({{savings.count}})</h5>
+          <div class="row mb-3">
+            {% if savings %}
+            <div class="col-sm-8">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Holder</th>
+                    <th>Date</th>
+                    <th class="text-center">Host Country</th>
+                    <th class="text-center">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for saving in savings %}
+                  <tr>
+                    <td><a href="{% url 'networth-saving-detail' saving.pk %}">{{saving.holder}}</a></td>
+                    <td>{{saving.date}}</td>
+                    <td class="text-center">{{saving.host_country}}</td>
+                    <td class="text-right">{{saving.value}}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
             <div class="col-sm-4">
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item list-group-item-info">Worth <span class="float-right">{{fd.worth}}</span></li>
-                <li class="list-group-item list-group-item-primary">Expected ROI <span class="float-right">{{fd.roi}}</span></li>
-                <li class="list-group-item list-group-item-primary">Daily ROI <span class="float-right">{{fd.daily_roi}}</span></li>
-                <li class="list-group-item list-group-item-primary">Present ROI<span class="float-right">{{fd.present_roi}}</span></li>
-              </ul>
+              <div class="card" style="width: 18rem;">
+                <ul class="list-group list-group-flush">
+                  {% for saving in savings_total %}
+                  <li class="list-group-item"> {{saving.currency}}
+                    <span class="float-right">{{saving}}</span>
+                  </li>
+                  {% endfor %}
+                </ul>
+                <a class="btn btn-outline-primary mt-1 float-right" href="{% url 'networth-saving-create' %}">
+                  Add Savings
+                </a>
+                <a class="btn btn-outline-primary" href="{% url 'networth-external-fund-home' %}"><i
+                    class="fa fa-plus text-success"></i> Fund</a>
+              </div>
+            </div>
+            {% else %}
+            <div class="row">
+              <div class="col">
+                <p class="font-italic ml-3">No Savings</p>
+                <a class="btn btn-outline-primary ml-3" href="{% url 'networth-saving-create' %}">
+                  Add Savings
+                </a>
+              </div>
             </div>
 
-            <div class="col-sm-4">
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item list-group-item-primary">Saving <span class="float-right">{{fd.savings}}</span></li>
-                <li class="list-group-item list-group-item-primary">Investment <span class="float-right">{{fd.investment}}</span></li>
-                <li class="list-group-item list-group-item-primary">Stock <span class="float-right">{{fd.stock}}</span></li>
-                <li class="list-group-item list-group-item-primary">Business  <span class="float-right">{{fd.business}}</span></li>
-              </ul>
-            </div>
-            
-            <div class="col-sm-4">
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item list-group-item-primary">Fixed Asset <span class="float-right">{{fd.fixed_asset}}</span></li>
-                <li class="list-group-item list-group-item-danger">Liability <span class="float-right">{{fd.liability}}</span></li>
-                {% for country, worth in fd.networth_by_country.items %}
-                <li class="list-group-item list-group-item-primary">Networth ({{country}}) <span class="float-right">{{worth}}</span></li>
-                {% endfor %}
-              </ul>
-            </div>
+            {% endif %}
           </div>
-          <small class="text-muted ml-2">Savings: {{fd.spread.savings}}, Investment: {{fd.spread.investment}}, 
-            Stock: {{fd.spread.stock}}, Business: {{fd.spread.business}}, Fixed Asset: {{fd.spread.fixed_asset}}
-          </small> 
+
         </div>
+      </div>
     </div>
 
-    <nav>
-      <div class="nav nav-tabs" id="nav-tab" role="tablist">
-        <button class="nav-link active" id="nav-home-tab" data-toggle="tab" data-target="#savings" type="button" role="tab" aria-controls="savings" aria-selected="true"><span class="text-info font-italic">Savings</span></button>
-        <button class="nav-link" id="nav-profile-tab" data-toggle="tab" data-target="#investment" type="button" role="tab" aria-controls="investment" aria-selected="false"><span class="text-info font-italic">Investment</span></button>
-        <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#stock" type="button" role="tab" aria-controls="stock" aria-selected="false"><span class="text-info font-italic">Stock</span></button>
-        <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#business" type="button" role="tab" aria-controls="business" aria-selected="false"><span class="text-info font-italic">Business</span></button>
-        <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#fixed_asset" type="button" role="tab" aria-controls="fixed_asset" aria-selected="false"><span class="text-info font-italic">Fixed Asset</span></button>
-        
-      </div>
-    </nav>
-    <div class="tab-content" id="nav-tabContent">
-
-      <div class="tab-pane fade show active" id="savings" role="tabpanel" aria-labelledby="nav-home-tab">
-        <div class="row justify-content-center mt-3 shadow">
-          <div class="col-sm-12">
-            <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Savings</h5>
-            <div class="row mb-3">
-              {% if savings %}
-              <div class="col-sm-8">
-                <table class="table">
-                    <thead>
-                      <tr>
-                        <th>Holder</th>
-                        <th>Date</th>
-                        <th class="text-center">Host Country</th>
-                        <th class="text-center">Value</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for saving in savings %}
-                      <tr>
-                        <td><a href="{% url 'networth-saving-detail' saving.pk %}">{{saving.holder}}</a></td>
-                        <td>{{saving.date}}</td>
-                        <td class="text-center">{{saving.host_country}}</td>
-                        <td class="text-right">{{saving.value}}</td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                </table>
-              </div>
-              <div class="col-sm-4">
-                <div class="card" style="width: 18rem;">
-                  <ul class="list-group list-group-flush">
-                    {% for saving in savings_total %}
-                      <li class="list-group-item"> {{saving.currency}}
-                        <span class="float-right">{{saving}}</span>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                  <a class="btn btn-outline-primary mt-1 float-right" href="{% url 'networth-saving-create' %}">
-                    New Savings Account
-                  </a>
-                    <a class="btn btn-outline-primary" href="{% url 'networth-external-fund-home' %}"><i class="fa fa-plus text-success"></i> Fund</a>
-      
-                  
-                </div> 
-              </div>
-              {% endif %}
+    <div class="tab-pane fade" id="investment" role="tabpanel" aria-labelledby="nav-profile-tab">
+      <div class="row justify-content-center mt-3 shadow">
+        <div class="col-sm-12">
+          <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Investment ({{investments.count}})</h5>
+          <div class="row mb-3">
+            {% if investments %}
+            <div class="col-sm-8">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Holder</th>
+                    <th>Maturity</th>
+                    <th>Due in</th>
+                    <th class="text-center">Principal</th>
+                    <th class="text-right">Present ROI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for investment in investments %}
+                  <tr>
+                    <td><a href="{% url 'networth-investment-detail' investment.pk %}">{{investment.holder}}</a></td>
+                    <td>{{investment.maturity}}</td>
+                    <td class="text-center">{% if investment.due_in_days > 0 %} {{investment.due_in_days}} day(s) 
+                      {% else %} Matured {% endif %}</td>
+                    <td class="text-right">{{investment.principal}}</td>
+                    <td class="text-right">{{investment.present_roi}}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
-              
+            <div class="col-sm-4">
+              <div class="card" style="width: 18rem;">
+
+                <ul class="list-group list-group-flush">
+                  {% for investment in investment_total %}
+                  <li class="list-group-item"> {{investment.currency}}
+                    <span class="float-right">{{investment}}</span>
+                  </li>
+                  {% endfor %}
+                </ul>
+
+              </div>
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>
 
-      <div class="tab-pane fade" id="investment" role="tabpanel" aria-labelledby="nav-profile-tab">
-        <div class="row justify-content-center mt-3 shadow">
-          <div class="col-sm-12">
-            <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Investment</h5>
-            <div class="row mb-3">
-              {% if investments %}
-              <div class="col-sm-8">
-                <table class="table">
-                    <thead>
-                      <tr>
-                        <th>Holder</th>
-                        <th>Maturity</th>
-                        <th>Due in</th>
-                        <th class="text-center">Principal</th>
-                        <th class="text-right">Present ROI</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for investment in investments %}
-                      <tr>
-                        <td><a href="{% url 'networth-investment-detail' investment.pk %}">{{investment.holder}}</a></td>
-                        <td>{{investment.maturity}}</td>
-                        <td class="text-center">{% if investment.due_in_days > 0 %} {{investment.due_in_days}} day(s) {% else %} Matured {% endif %}</td>
-                        <td class="text-right">{{investment.principal}}</td>
-                        <td class="text-right">{{investment.present_roi}}</td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                </table>
-              </div>
-              <div class="col-sm-4">
-                <div class="card" style="width: 18rem;">
-  
-                  <ul class="list-group list-group-flush">
-                    {% for investment in investment_total %}
-                      <li class="list-group-item"> {{investment.currency}}
-                        <span class="float-right">{{investment}}</span>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                  
-                </div> 
-              </div>
-              {% endif %}
-            </div>
-              
-          </div>
-      </div>
-  
-      </div>
+    </div>
 
-      <div class="tab-pane fade" id="stock" role="tabpanel" aria-labelledby="nav-contact-tab">
-        <div id="stock" class="row justify-content-center mt-3 shadow">
-          <div class="col-sm-12">
-            <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Stock</h5>
-            <div class="row mb-3">
-              {% if stocks %}
-              <div class="col-sm-8">
-                <table class="table">
-                    <thead>
-                      <tr>
-                        <th>Holder</th>
-                        <th>Date</th>
-                        <th class="text-center"># of units</th>
-                        <th class="text-center">Cost</th>
-                        <th class="text-center">Value</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for stock in stocks %}
-                      <tr>
-                        <td><a href="{% url 'networth-stock-detail' stock.pk %}">{{stock.holder}}</a></td>
-                        <td>{{stock.date_bought.date}}</td>
-                        <td class="text-center">{{stock.units}}</td>
-                        <td class="text-right">{{stock.unit_cost}}</td>
-                        <td class="text-right">{{stock.value}}</td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                </table>
-              </div>
-              
-              <div class="col-sm-4">
-                <div class="card" style="width: 18rem;">
-                  <ul class="list-group list-group-flush">
-                    {% for stock in stock_total %}
-                      <li class="list-group-item"> {{stock.currency}}
-                        <span class="float-right">{{stock}}</span>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                  
-                </div> 
-              </div>
-              {% else %}
-              <p class="font-italic ml-2">No Stock investment</p>
-              {% endif %}
+    <div class="tab-pane fade" id="stock" role="tabpanel" aria-labelledby="nav-contact-tab">
+      <div id="stock" class="row justify-content-center mt-3 shadow">
+        <div class="col-sm-12">
+          <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Stock ({{stocks.count}})</h5>
+          <div class="row mb-3">
+            {% if stocks %}
+            <div class="col-sm-8">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Holder</th>
+                    <th>Date</th>
+                    <th class="text-center"># of units</th>
+                    <th class="text-center">Cost</th>
+                    <th class="text-center">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for stock in stocks %}
+                  <tr>
+                    <td><a href="{% url 'networth-stock-detail' stock.pk %}">{{stock.holder}}</a></td>
+                    <td>{{stock.date_bought.date}}</td>
+                    <td class="text-center">{{stock.units}}</td>
+                    <td class="text-right">{{stock.unit_cost}}</td>
+                    <td class="text-right">{{stock.value}}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
-              
-          </div>
-        </div>    
-      </div>
 
-      <div class="tab-pane fade" id="business" role="tabpanel" aria-labelledby="nav-contact-tab">
-        <div id="stock" class="row justify-content-center mt-3 shadow">
-          <div class="col-sm-12">
-            <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Business</h5>
-            <div class="row mb-3">
-              {% if business %}
-              <div class="col-sm-8">
-                <table class="table">
-                    <thead>
-                      <tr>
-                        <th>Holder</th>
-                        <th class="text-center"># of shares</th>
-                        <th class="text-center">Cost</th>
-                        <th class="text-center">Capital</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for object in business %}
-                      <tr>
-                        <td><a href="{% url 'networth-business-detail' object.pk %}">{{object.name}}</a></td>
-                        <td class="text-center">{{object.shares}}</td>
-                        <td class="text-right">{{object.unit_cost}}</td>
-                        <td class="text-right">{{object.capital}}</td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                </table>
+            <div class="col-sm-4">
+              <div class="card" style="width: 18rem;">
+                <ul class="list-group list-group-flush">
+                  {% for stock in stock_total %}
+                  <li class="list-group-item"> {{stock.currency}}
+                    <span class="float-right">{{stock}}</span>
+                  </li>
+                  {% endfor %}
+                </ul>
+
               </div>
-              
-              <div class="col-sm-4">
-                <div class="card" style="width: 18rem;">
-                  <ul class="list-group list-group-flush">
-                    {% for object in business_total %}
-                      <li class="list-group-item"> {{object.currency}}
-                        <span class="float-right">{{object}}</span>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                  
-                </div> 
-              </div>
-              {% else %}
-              <p class="font-italic ml-2">No Business available</p>
-              {% endif %}
             </div>
-              
+            {% else %}
+            <p class="font-italic ml-2">No Stock investment</p>
+            {% endif %}
           </div>
-        </div>    
+
+        </div>
       </div>
+    </div>
 
-      <div class="tab-pane fade" id="fixed_asset" role="tabpanel" aria-labelledby="nav-contact-tab">
-        <div id="stock" class="row justify-content-center mt-3 shadow">
-          <div class="col-sm-12">
-            <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Fixed Asset</h5>
-            <div class="row mb-3">
-              {% if fixed_asset %}
-              <div class="col-sm-8">
-                <table class="table">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th class="text-center">Valuation Date</th>
-                        <th class="text-center">Value</th>
-                      </tr>
-
-                    </thead>
-                    <tbody>
-                      {% for object in fixed_asset %}
-                      <tr>
-                        <td><a href="{% url 'networth-fixed-asset-detail' object.pk %}">{{object.name}}</a></td>
-                        <td class="text-center">{{object.date}}</td>
-                        <td class="text-right">{{object.value}}</td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                </table>
-              </div>
-              
-              <div class="col-sm-4">
-                <div class="card" style="width: 18rem;">
-                  <ul class="list-group list-group-flush">
-                    {% for object in fixed_asset_total %}
-                      <li class="list-group-item"> {{object.currency}}
-                        <span class="float-right">{{object}}</span>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                  
-                </div> 
-              </div>
-              {% else %}
-              <p class="font-italic ml-2">No Business available</p>
-              {% endif %}
+    <div class="tab-pane fade" id="business" role="tabpanel" aria-labelledby="nav-contact-tab">
+      <div id="stock" class="row justify-content-center mt-3 shadow">
+        <div class="col-sm-12">
+          <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Business ({{business.count}})</h5>
+          <div class="row mb-3">
+            {% if business %}
+            <div class="col-sm-8">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Holder</th>
+                    <th class="text-center"># of shares</th>
+                    <th class="text-center">Cost</th>
+                    <th class="text-center">Capital</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for object in business %}
+                  <tr>
+                    <td><a href="{% url 'networth-business-detail' object.pk %}">{{object.name}}</a></td>
+                    <td class="text-center">{{object.shares}}</td>
+                    <td class="text-right">{{object.unit_cost}}</td>
+                    <td class="text-right">{{object.capital}}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
-              
+
+            <div class="col-sm-4">
+              <div class="card" style="width: 18rem;">
+                <ul class="list-group list-group-flush">
+                  {% for object in business_total %}
+                  <li class="list-group-item"> {{object.currency}}
+                    <span class="float-right">{{object}}</span>
+                  </li>
+                  {% endfor %}
+                </ul>
+
+              </div>
+            </div>
+            {% else %}
+            <p class="font-italic ml-2">No Business available</p>
+            {% endif %}
           </div>
-        </div>    
+
+        </div>
       </div>
+    </div>
+
+    <div class="tab-pane fade" id="fixed_asset" role="tabpanel" aria-labelledby="nav-contact-tab">
+      <div id="stock" class="row justify-content-center mt-3 shadow">
+        <div class="col-sm-12">
+          <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Fixed Asset ({{fixed_asset.count}})</h5>
+          <div class="row mb-3">
+            {% if fixed_asset %}
+            <div class="col-sm-8">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th class="text-center">Valuation Date</th>
+                    <th class="text-center">Value</th>
+                  </tr>
+
+                </thead>
+                <tbody>
+                  {% for object in fixed_asset %}
+                  <tr>
+                    <td><a href="{% url 'networth-fixed-asset-detail' object.pk %}">{{object.name}}</a></td>
+                    <td class="text-center">{{object.date}}</td>
+                    <td class="text-right">{{object.value}}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="col-sm-4">
+              <div class="card" style="width: 18rem;">
+                <ul class="list-group list-group-flush">
+                  {% for object in fixed_asset_total %}
+                  <li class="list-group-item"> {{object.currency}}
+                    <span class="float-right">{{object}}</span>
+                  </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+            {% else %}
+            <p class="font-italic ml-2">No Fixed Asset available</p>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+    </div>
 
   </div>
 
@@ -323,5 +360,6 @@
       <a class="btn btn-outline-dark float-right" href="{% url 'index' %}">Back</a>
     </div>
   </div>
+
 </div>
 {% endblock %}

@@ -180,7 +180,9 @@ class FinancialReport:
             return HttpResponse(f"Failed to send email: {e}")
 
     def save_report(self):
+
         FinancialData.objects.create(
+            owner=self.get_owner(),
             worth=self.getNetworth(),
             savings=self.get_saving_total(),
             investment=self.get_investment_total(),

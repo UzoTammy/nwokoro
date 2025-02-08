@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.db.models.aggregates import Sum, Min
 from django.db.models import F
 from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView)
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from djmoney.models.fields import Money
 from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, BorrowedFund
 from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, 
@@ -18,14 +18,20 @@ from .plots import bar_chart
 # from .emails import FinancialReport
     
 # Create your views here.
-class NetworthHomeView(LoginRequiredMixin, TemplateView):
+class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/home.html'
 
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        return False
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # for financial report summanry
-        financial_data = FinancialData.objects.latest('date')
-        context['fd'] = financial_data
+        financial_data = FinancialData.objects.filter(owner=self.request.user)
+        if financial_data.exists():
+            context['fd'] = financial_data.latest('date')
 
         # exchange rate
         canada = ExchangeRate.objects.get(target_currency='CAD')

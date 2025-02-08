@@ -165,7 +165,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 django_on_heroku.settings(locals(), staticfiles=False)
 AUTH_USER_MODEL = 'account.User'
-LOGIN_REDIRECT_URL = 'chore-home'
+LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'login'
 
 # Celery Configuration Options
