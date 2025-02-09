@@ -1,0 +1,27 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-6">
+            <form action="" method="post">
+                {% csrf_token %}
+                <h3>Activate or Deactivate Registration</h3>
+                <small class="ml-3 text-info">Currently {% if not activate_registration %} deactivated {% else %} activated {% endif %}</small>
+                <hr>
+                <section class="ml-3">
+                    {{form|crispy}}
+                </section>
+                
+                <div class="row">
+                    <div class="col">
+                        <button class="btn btn-outline-dark" type="submit">Submit</button>
+                        <a class="btn btn-outline-dark float-right" href="{% url 'index' %}">Back</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

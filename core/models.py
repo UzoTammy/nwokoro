@@ -1,6 +1,11 @@
 from django.db import models
 
 # Create your models here.
+
+class Config(models.Model):
+    activate_registration = models.BooleanField(default=False)
+    
+
 class StudentProfile(models.Model):
     first_name = models.CharField(max_length=30)
     middle_name = models.CharField(max_length=30, null=True, blank=True)

@@ -144,7 +144,7 @@ class FinancialReport:
         worth = dict()
         countries = self.get_countries()
         for country in countries:
-            worth[country] = format_currency(self.getNetworth(country).amount, currency='USD', locale='en_US')
+            worth[country] = round(self.getNetworth(country).amount, 2)
         return worth
 
     def send_email(self):

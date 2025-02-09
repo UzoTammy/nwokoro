@@ -5,6 +5,7 @@ from django.db.models.aggregates import Sum
 from django.views.generic import (TemplateView, CreateView, DetailView, ListView, UpdateView, FormView)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Work, AssignWork, JobRegister, FinishedWork, InitiateWork, BonusPoint
+from core.models import Config
 from account.models import User, Transaction
 from .forms import (AddWorkForm, EarnPointForm, JobRegisterForm, DelegateWorkForm, InitiateWorkForm,
                     InitiateWorkApproveForm, BonusPointForm, MyModelForm, CompletedJobDecisionForm)
@@ -38,6 +39,11 @@ class ChoreHome(TemplateView):
     
 class RegistrationMessage(TemplateView):
     template_name = 'chore/registration_message.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['activate_registration'] = Config.objects.first().activate_registration
+        return context
 
 
 class ChoreDashboard(LoginRequiredMixin, TemplateView):

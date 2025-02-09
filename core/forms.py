@@ -2,7 +2,7 @@ import string
 import datetime
 from django import forms 
 from crispy_forms.helper import FormHelper
-from .models import StudentProfile
+from .models import StudentProfile, Config
 
 
 class NumberInputForm(forms.Form):
@@ -63,6 +63,10 @@ class ProfileForm(forms.Form):
         if first_name and len(first_name) < 3:
             raise forms.ValidationError('Name must be at least 3 characters long')
         return first_name
+
+class ActivateRegistrationForm(forms.Form):
+
+    activate_registration = forms.BooleanField(required=False)
     
     
 class UpdateProfileForm(forms.ModelForm):

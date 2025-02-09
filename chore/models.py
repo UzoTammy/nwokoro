@@ -107,5 +107,3 @@ class BonusPoint(models.Model):
         #         raise ValidationError("Only one record can have 'active=True' at a time.")
         super().save(*args, **kwargs)
 
-
-

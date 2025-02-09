@@ -170,10 +170,26 @@
                         that emphasizes specific concept(s)</li>
                     <li class="list-group-item">
                         {% if user.is_authenticated %}
-                        <form method="post"  action="{% url 'logout' %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-dark btn-sm">Logout</button>
-                        </form>
+                        <div class="row">
+                            <div class="col">
+                                <form method="post"  action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-dark btn-sm">Logout</button>
+                                </form>        
+                            </div>
+                            <div class="col">
+                                <a  class="btn btn-outline-dark btn-sm" 
+                                    href="{% url 'activate-registration' %}">
+
+                                    {% if activate_registration %}
+                                    <i class="fa fa-toggle-on text-success"></i>
+                                    {% else %}
+                                    <i class="fa fa-toggle-on text-danger"></i>
+                                    {% endif %}
+                                    Register
+                                </a>
+                            </div>
+                        </div>
                         {% else %}
                         <span class="text-warning">Login credentials needed for this site</span>
                         {% endif %}
@@ -209,4 +225,5 @@
         <a class="m-2 mt-2" href="https://doc.uzonwokoro.com"><i class="fa fa-newspaper"></i> Documentation</a>
     </div>
 </div>
+
 {% endblock %}

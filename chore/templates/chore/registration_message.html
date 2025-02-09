@@ -15,8 +15,12 @@
         <div class="col-sm-8">
             <h3>You want to register?</h3>
             <hr>
-            <p>This is a private site, you will need a hard token to enable you register</p>
-            <p>Contact Chores Administrator</p>
+            <p>This is a private site, you will need a private link to enable you register</p>
+            {% if not activate_registration  %}
+            <p>Contact Site Administrator</p>
+            {% else %}
+            <a class="text-decoration-none" href="{% url 'sign-up' %}">Click here to start your registeration</a>
+            {% endif %}
             <a class="btn btn-outline-light float-right mr-3" href="{% url 'chore-home' %}">Back</a>
         </div>
     </div>

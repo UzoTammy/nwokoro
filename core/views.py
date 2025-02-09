@@ -5,22 +5,21 @@ from typing import Any
 
 from django.db.models.query import QuerySet
 from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.http.response import HttpResponse as HttpResponse
 from django.views.generic.base import View, TemplateView
 from django.views.generic.list import ListView
-from django.views.generic.edit import UpdateView
-from .forms import NumberInputForm, ProfileForm, UpdateProfileForm, MyFormSet
+from django.views.generic.edit import UpdateView, FormView
+from .forms import NumberInputForm, ProfileForm, ActivateRegistrationForm, UpdateProfileForm, MyFormSet
 from .tinyproject.numtoword import convert
 from .tinyproject.taxes import CanadaIncomeTaxCalculator as TaxCalc
-from .models import StudentProfile
+from .models import StudentProfile, Config
 
 
 def read_profile():
     with open('./profile.json', 'r') as rf:
         content = json.load(rf)
     return content
-
 
 
 class PracticeView(View):
@@ -46,6 +45,24 @@ class PracticeView(View):
 class MainView(TemplateView):
     template_name = 'core/homepage.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['activate_registration'] = Config.objects.first().activate_registration
+        return context
+
+    
+class ActivateRegistrationView(FormView):
+    template_name = 'core/activate_registration.html'
+    form_class = ActivateRegistrationForm
+    success_url = reverse_lazy('index')
+
+    def form_valid(self, form):
+        # form.instance.activ
+        config = Config.objects.first()
+        config.activate_registration=form.cleaned_data['activate_registration']
+        config.save()
+
+        return super().form_valid(form)
 
 class ErrorView(TemplateView):
     template_name = 'core/error.html'
