@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import io
 import base64
-import mpld3
+import random
 
 def bar_chart(x_axis, y_axis, Y='Y', X='X', title='Bar Chart', y_min=None):
     
@@ -33,17 +33,33 @@ def bar_chart(x_axis, y_axis, Y='Y', X='X', title='Bar Chart', y_min=None):
     return image_base64
 
 
-def interactive_bar_chart(x_axis, y_axis, Y='Y', X='X', title='Interactive Bar Chart'):
-    
-    # Create a bar chart
+def donut_chart(labels:list, sizes):
+
+    colors = ['#ff9999', '#66b3ff', '#99ff99', '#ffcc99', '#ce868c', '#5a59a5', '#848e31']
+
+    if len(labels) == len(sizes): 
+        colors = random.sample(colors, len(labels))
+        
+    # Create a donut chart
     fig, ax = plt.subplots()
-    ax.plot_date(x_axis, y_axis, color='gold')
-    ax.set_xlabel(X)
-    ax.set_ylabel(Y)
-    ax.set_title(title)
+    ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90, wedgeprops={'edgecolor': 'white'})
 
-    # Convert to interactive HTML
-    html_fig = mpld3.fig_to_html(fig)
-    plt.close(fig)
+    # Add a white circle at the center
+    centre_circle = plt.Circle((0, 0), 0.70, fc='white')
+    ax.add_artist(centre_circle)
 
-    return html_fig
+    # Equal aspect ratio
+    ax.axis('equal')
+
+    # Save the plot to a BytesIO object
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    plt.close()
+
+    # Encode the image to base64
+    image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    buffer.close()
+
+    # Pass the image to the template
+    return image_base64

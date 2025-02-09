@@ -12,7 +12,7 @@ from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, Savi
                     InvestmentRolloverForm, BusinessCreateForm, BusinessUpdateForm, 
                     FixedAssetCreateForm, FixedAssetUpdateForm,
                     BorrowedFundForm)
-from .plots import bar_chart
+from .plots import bar_chart, donut_chart
 
 # from .tasks import financial_report_email
 # from .emails import FinancialReport
@@ -120,6 +120,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             min_roi = financials.aggregate(Min('daily_roi'))['daily_roi__min']
             recent_daily_roi = financials.values_list('daily_roi', flat=True)
             context['daily_roi_image'] = bar_chart(recent_days, recent_daily_roi, 'USD($)', 'Days', 'Daily ROI', y_min=int(min_roi/2))
+
+            latest = financials.latest('date')
+            labels = ['saving', 'investment', 'stock', 'fixed asset', 'business']
+            sizes = [latest.savings.amount, latest.investment.amount, latest.stock.amount, latest.fixed_asset.amount, latest.business.amount]
+            context['asset_distribution'] = donut_chart(labels=labels, sizes=sizes)
+            labels = latest.networth_by_country.keys()
+            sizes = latest.networth_by_country.values()
+            
+            context['asset_location'] = donut_chart(labels, sizes)
         return context
 
 class InvestmentCreateView(LoginRequiredMixin, FormView):
