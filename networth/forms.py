@@ -1,29 +1,21 @@
 from django import forms
 from django.forms import ValidationError
 from .models import Investment, Stock, Saving, Business, FixedAsset, BorrowedFund
+from core.models import Config
 from djmoney.forms.fields import MoneyField, Money
 from django.core.validators import MaxValueValidator
 
 
 class OptionChoices:
-    HOLDER_OPTION = [
-        ('Axa Mansard', 'Axa Mansard'), ('Scotia Bank',
-                                         'Scotia Bank'), ('RBC Bank', 'RBC Bank'),
-        ('UBA', 'UBA'), ('FirstBank', 'FirstBank'), ('FCMB',
-                                                     'FCMB'), ('FidelityBank', 'FidelityBank'),
-        ('Fidson', 'Fidson'), ('Neimeth', 'Neimeth'), ('Transcorp', 'Transcorp'),
+    
+    config = Config.objects.first()
+    HOLDER_OPTION = config.networth_options['holders']
+    
+    COUNTRIES = config.networth_options['countries']
+    
+    CATEGORIES = config.networth_options['categories']
 
-    ]
-    COUNTRIES = [
-        ('NG', 'Nigeria'), ('CA', 'Canada'), ('US', 'USA'),
-    ]
-    CATEGORIES = [
-        ('GIC', 'GIC'), ('TB', 'Treasury bill'), ('FD', 'Fixed Deposit'),
-        ('CP', 'Commercial Paper'), ('MM', 'Money Market')
-    ]
-    STOCK_TYPE = [
-        ('Scotia Essential', 'Scotia Essential'), ('Scotia Selected', 'Scotia Selected'), ('Shares', 'Shares')
-    ]
+    STOCK_TYPE = config.networth_options['stock_type']
 
     PAYMENT_PERIOD = [
         ('monthly', 'Monthly'), ('bi-weekly', 'Bi-weekly'), ('yearly', 'Yearly'), ('daily', 'Daily'), ('one-time', 'One-time')

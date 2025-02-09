@@ -4,7 +4,7 @@ from django.db import models
 
 class Config(models.Model):
     activate_registration = models.BooleanField(default=False)
-    
+    networth_options = models.JSONField(default=dict) # holders, countries, categories, stock_type
 
 class StudentProfile(models.Model):
     first_name = models.CharField(max_length=30)

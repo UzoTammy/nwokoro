@@ -59,21 +59,21 @@
                       <div class="col-md-8">
                         <div class="card-body">
                             <h5 class="first-letter">
-                                I graduated as an engineer and have had over a decade experience in business operation,
-                                sales and distribution.
+                                I had an undergraduate chemical engineering training. With over a decade experience in business operation,
+                                sales and redistribution in the FMCG sector.
                             </h5>
                             <h5 class="first-letter">
                                 Currently, I am working towards establishing a career in IT; backend development, web
-                                developement, automating tasks, API and Cybersecurity.
+                                developement, task automation, building API and a little bit of Cybersecurity training.
                             </h5>
                             <h5 class="first-letter">
-                                My interest is to help businesses increase in value through technology.
+                                My interest is to help businesses increase value with technology.
                             </h5>
                         </div>
                       </div>
                     </div>
                 </div>
-                <h5>I work with these softwares</h5>
+                <h5>I work with</h5>
                 <div class="row mt-3">
                     <div class="col-sm-4">
                         <i class="fab fa-python text-warning"></i> Python
@@ -94,7 +94,7 @@
                         <i class="fab fa-react text-info"></i> React
                     </div>
                     <div class="col-sm-4 mt-3">
-                        <i class="fab fa-django"></i> Django
+                        <i class="fab fa-microsoft"></i> Django
                     </div>
                     <div class="col-sm-4 mt-3">
                         <i class="fas fa-flask text-primary"></i> Flask
@@ -103,42 +103,42 @@
                         <i class="fab fa-html5 text-info"></i> HTML5
                     </div>
                     <div class="col-sm-4 mt-3">
-                        <i class="fab fa-typescript text-secondary"></i> Typescript
+                        <i class="fab fa-microsoft text-warning"></i> Typescript
                     </div>
                     <div class="col-sm-4 mt-3">
                         <i class="fab fa-node text-dark"></i> Node
                     </div>
                     <div class="col-sm-4 mt-3">
-                        <i class="fab fa-chakra text-warning"></i> Chakra
+                        <i class="fab fa-microsoft text-info"></i> Chakra
                     </div>
                 </div>
             </div>
 
             <div class="col-sm-3 float-right">
                 <div class="left-border-line">
-                    <p class="first-letter">Problem Solving 
+                    <p class="first-letter">Problem Solving -
                         <small class="text-muted ml-1">
                             I am relentless in finding solutions,
                             staying on it no matter how long it takes.
                         </small>  
                     </p>
-                    <p class="first-letter">Analytical 
+                    <p class="first-letter">Analytical -
                         <small class="text-muted ml-1">
                             I believe in data-driven decisions, 
                             using analysis and critical thinking to gain 
                             insights and drive impactful outcomes.
                         </small>
                     </p>
-                    <p class="first-letter">Committed
-                        <small class="text-muted ml-1">Accepting payment without full commitment is unthinkable; 
-                            integrity demands nothing less.
+                    <p class="first-letter">Committed -
+                        <small class="text-muted ml-1">True commitment means never accepting payment 
+                            without delivering fully—because integrity is the foundation of every meaningful relationship.
                         </small>
                     </p>
-                    <p class="first-letter">Team Player 
+                    <p class="first-letter">Team Player -
                         <small class="text-muted ml-1">
-                            I thrive in collaborative environments; working alone brings out the least of what I can offer.
+                            I thrive in collaborative environment; working together helps me become more productive.
                         </small></p>
-                    <p class="first-letter">Always Learning <small class="text-muted ml-1">I dread the day I will no longer be able to learn</small></p>
+                    <p class="first-letter">Always Learning - <small class="text-muted ml-1">I am continuously learning</small></p>
                 </div>
                 
                 <!-- <div class="rounded-pill mb-3">
@@ -177,6 +177,7 @@
                                     <button type="submit" class="btn btn-outline-dark btn-sm">Logout</button>
                                 </form>        
                             </div>
+                            {% if user.is_superuser %}
                             <div class="col">
                                 <a  class="btn btn-outline-dark btn-sm" 
                                     href="{% url 'activate-registration' %}">
@@ -189,6 +190,7 @@
                                     Register
                                 </a>
                             </div>
+                            {% endif %}
                         </div>
                         {% else %}
                         <span class="text-warning">Login credentials needed for this site</span>
