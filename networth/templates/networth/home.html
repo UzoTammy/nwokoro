@@ -51,14 +51,12 @@
                 class="float-right">{{fd.liability}}</span></li>
             {% for country, worth in fd.networth_by_country.items %}
             <li class="list-group-item list-group-item-primary">Networth ({{country}}) <span
-                class="float-right">{{worth}}</span></li>
+                class="float-right">${{worth|floatformat:'2g'}}</span></li>
             {% endfor %}
           </ul>
         </div>
       </div>
-      <small class="text-muted ml-2">Savings: {{fd.spread.savings}}, Investment: {{fd.spread.investment}},
-        Stock: {{fd.spread.stock}}, Business: {{fd.spread.business}}, Fixed Asset: {{fd.spread.fixed_asset}}
-      </small>
+      
     </div>
   </div>
   {% else %}

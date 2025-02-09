@@ -107,8 +107,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         cut_off_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7)
-        financials = FinancialData.objects.filter(owner=self.request.user).filter(date__gte=cut_off_date)
+        financials = FinancialData.objects.filter(owner=self.request.user).filter(date__gte=cut_off_date).order_by('date')
         
         # get the minimum worth
         if financials:
