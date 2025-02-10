@@ -37,7 +37,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         canada = ExchangeRate.objects.get(target_currency='CAD')
         nigeria = ExchangeRate.objects.get(target_currency="NGN")
         rate = Money(nigeria.rate/canada.rate, 'NGN')
-        context['exchange'] = f'{rate}/CA$ on {canada.updated_at.strftime("%A %d-%b-%Y")}'
+        context['exchange'] = f'{rate}/CA$ on {canada.updated_at.strftime("%A %d-%b-%Y")}{canada.updated_at}'
         
         # queryset of assets
         investments = Investment.objects.filter(is_active=True).filter(owner=self.request.user)
