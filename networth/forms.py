@@ -7,15 +7,18 @@ from django.core.validators import MaxValueValidator
 
 
 class OptionChoices:
-    
-    config = Config.objects.first()
-    HOLDER_OPTION = config.networth_options['holders']
-    
-    COUNTRIES = config.networth_options['countries']
-    
-    CATEGORIES = config.networth_options['categories']
 
-    STOCK_TYPE = config.networth_options['stock_type']
+    @classmethod
+    def get_options(cls):
+        return Config.objects.first()
+    
+    # HOLDER_OPTION = OptionChoices.get .networth_options['holders']
+    
+    # COUNTRIES = config.networth_options['countries']
+    
+    # CATEGORIES = config.networth_options['categories']
+
+    # STOCK_TYPE = config.networth_options['stock_type']
 
     PAYMENT_PERIOD = [
         ('monthly', 'Monthly'), ('bi-weekly', 'Bi-weekly'), ('yearly', 'Yearly'), ('daily', 'Daily'), ('one-time', 'One-time')
@@ -24,13 +27,13 @@ class OptionChoices:
 class InvestmentCreateForm(forms.ModelForm):
 
     holder = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.HOLDER_OPTION))
+        choices=OptionChoices.get_options().networth_options['holders']))
     start_date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.COUNTRIES))
+        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
     category = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.CATEGORIES))
+        choices=OptionChoices.get_options().networth_options['categories']))
 
     class Meta:
         model = Investment
@@ -55,13 +58,13 @@ class InvestmentCreateForm(forms.ModelForm):
 class StockCreateForm(forms.ModelForm):
 
     holder = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.HOLDER_OPTION))
+        choices=OptionChoices.get_options().networth_options['holders']))
     date_bought = forms.DateField(
         label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.COUNTRIES))
+        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
     stock_type = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.STOCK_TYPE))
+        widget=forms.Select(choices=OptionChoices.get_options().networth_options['stock_type']))
 
     class Meta:
         model = Stock
@@ -86,12 +89,12 @@ class StockCreateForm(forms.ModelForm):
 class StockUpdateForm(forms.ModelForm):
 
     holder = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.HOLDER_OPTION))
+        choices=OptionChoices.get_options().networth_options['holders']))
     # date_bought = forms.DateField(label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.COUNTRIES))
+        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
     stock_type = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.STOCK_TYPE))
+        widget=forms.Select(choices=OptionChoices.get_options().networth_options['stock_type']))
 
     class Meta:
         model = Stock
@@ -101,12 +104,12 @@ class StockUpdateForm(forms.ModelForm):
 class SavingForm(forms.ModelForm):
 
     holder = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.HOLDER_OPTION))
+        choices=OptionChoices.get_options().networth_options['holders']))
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.COUNTRIES))
+        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
     category = forms.CharField(widget=forms.Select(
-        choices=[('TSFA', 'TSFA'), ('Standard', 'Standard')]))
+        choices=OptionChoices.get_options().networth_options['categories']))
 
     class Meta:
         model = Saving
@@ -141,7 +144,7 @@ class InvestmentRolloverForm(forms.Form):
 class BusinessCreateForm(forms.ModelForm):
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.COUNTRIES))
+        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
 
     class Meta:
         model = Business
@@ -167,7 +170,7 @@ class BusinessCreateForm(forms.ModelForm):
 class FixedAssetCreateForm(forms.ModelForm):
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.COUNTRIES))
+        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
 
     class Meta:
         model = FixedAsset
@@ -193,7 +196,7 @@ class FixedAssetCreateForm(forms.ModelForm):
 class FixedAssetUpdateForm(forms.ModelForm):
     # date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.COUNTRIES))
+        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
 
     class Meta:
         model = FixedAsset
@@ -205,7 +208,7 @@ class BusinessUpdateForm(forms.ModelForm):
     name = forms.CharField(max_length=50)
     # date_bought = forms.DateField(label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.COUNTRIES))
+        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
     
     class Meta:
         model = Stock
@@ -217,7 +220,7 @@ class BorrowedFundForm(forms.ModelForm):
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     savings_account = forms.ModelChoiceField(queryset=Saving.objects.none())
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.COUNTRIES))
+        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
 
 
     class Meta:
