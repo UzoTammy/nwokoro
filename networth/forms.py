@@ -27,13 +27,13 @@ class OptionChoices:
 class InvestmentCreateForm(forms.ModelForm):
 
     holder = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.get_options().networth_options['holders']))
+        choices=[('A', 'a'), ('B', 'b')] )) #OptionChoices.get_options().networth_options['holders'])
     start_date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
+        widget=forms.Select(choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['countries']
     category = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.get_options().networth_options['categories']))
+        choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['categories']
 
     class Meta:
         model = Investment
@@ -54,17 +54,16 @@ class InvestmentCreateForm(forms.ModelForm):
         if self.savings_account.value < self.cleaned_data['principal']:
             raise ValidationError("Insufficient fund in saving account")
 
-
 class StockCreateForm(forms.ModelForm):
 
     holder = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.get_options().networth_options['holders']))
+        choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['holders']
     date_bought = forms.DateField(
         label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
+        widget=forms.Select(choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['countries']
     stock_type = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['stock_type']))
+        widget=forms.Select(choices=[('A', 'a'), ('B', 'b')]))#OptionChoices.get_options().networth_options['stock_type']
 
     class Meta:
         model = Stock
@@ -85,36 +84,33 @@ class StockCreateForm(forms.ModelForm):
         if self.savings_account.value < self.cleaned_data['unit_cost'] * self.cleaned_data['units']:
             raise ValidationError("Insufficient fund in saving account")
 
-
 class StockUpdateForm(forms.ModelForm):
 
     holder = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.get_options().networth_options['holders']))
+        choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['holders']
     # date_bought = forms.DateField(label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
+        widget=forms.Select(choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['countries']
     stock_type = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['stock_type']))
+        widget=forms.Select(choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['stock_type']
 
     class Meta:
         model = Stock
         fields = ['holder', 'host_country', 'stock_type']
 
-
 class SavingForm(forms.ModelForm):
 
     holder = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.get_options().networth_options['holders']))
+        choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['holders']
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
+        widget=forms.Select(choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['countries']
     category = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.get_options().networth_options['categories']))
+        choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['categories']
 
     class Meta:
         model = Saving
         fields = ['holder', 'value', 'date', 'host_country', 'category']
-
 
 class InvestmentRolloverForm(forms.Form):
 
@@ -140,11 +136,10 @@ class InvestmentRolloverForm(forms.Form):
                 value_currency=inv.principal.currency)
             self.fields['savings_account'].queryset = queryset
 
-
 class BusinessCreateForm(forms.ModelForm):
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
+        widget=forms.Select(choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['countries']
 
     class Meta:
         model = Business
@@ -166,11 +161,10 @@ class BusinessCreateForm(forms.ModelForm):
             raise ValidationError(
                 f"Insufficient fund in saving account. You need {self.cleaned_data['unit_cost'] * self.cleaned_data['shares']}")
 
-
 class FixedAssetCreateForm(forms.ModelForm):
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
+        widget=forms.Select(choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['countries']
 
     class Meta:
         model = FixedAsset
@@ -192,35 +186,32 @@ class FixedAssetCreateForm(forms.ModelForm):
             raise ValidationError(
                 f"Insufficient fund in saving account. You have {self.savings_account.value} only")
 
-
 class FixedAssetUpdateForm(forms.ModelForm):
     # date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
+        widget=forms.Select(choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['countries']
 
     class Meta:
         model = FixedAsset
         fields = ['name', 'host_country']
-
 
 class BusinessUpdateForm(forms.ModelForm):
 
     name = forms.CharField(max_length=50)
     # date_bought = forms.DateField(label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
+        widget=forms.Select(choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['countries']
     
     class Meta:
         model = Stock
         fields = ['name', 'host_country', 'stock_type', 'unit_cost']
-
 
 class BorrowedFundForm(forms.ModelForm):
     cost_of_fund = MoneyField(max_digits=12, decimal_places=2)
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     savings_account = forms.ModelChoiceField(queryset=Saving.objects.none())
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries']))
+        widget=forms.Select(choices=[('A', 'a'), ('B', 'b')])) #OptionChoices.get_options().networth_options['countries']
 
 
     class Meta:

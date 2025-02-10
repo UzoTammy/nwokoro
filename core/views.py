@@ -47,7 +47,7 @@ class MainView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['activate_registration'] = Config.objects.first().activate_registration
+        # context['activate_registration'] = Config.objects.first().activate_registration
         return context
 
     
@@ -57,10 +57,10 @@ class ActivateRegistrationView(FormView):
     success_url = reverse_lazy('index')
 
     def form_valid(self, form):
-        # form.instance.activ
-        config = Config.objects.first()
-        config.activate_registration=form.cleaned_data['activate_registration']
-        config.save()
+        
+        # config = Config.objects.first()
+        # config.activate_registration=form.cleaned_data['activate_registration']
+        # config.save()
 
         return super().form_valid(form)
 
