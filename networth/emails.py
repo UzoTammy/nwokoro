@@ -31,6 +31,7 @@ class FinancialReport:
         return sum(result) if result else Money(0, 'USD')
 
     def get_owner(self):
+        # string
         return self.savings.first().owner
 
     def get_countries(self):
@@ -144,7 +145,7 @@ class FinancialReport:
         worth = dict()
         countries = self.get_countries()
         for country in countries:
-            worth[country] = round(self.getNetworth(country).amount, 2)
+            worth[country] = float(round(self.getNetworth(country).amount, 2))
         return worth
 
     def send_email(self):
@@ -185,7 +186,7 @@ class FinancialReport:
     def save_report(self):
 
         FinancialData.objects.create(
-            owner=self.get_owner(),
+            owner=self.get_owner(), # string
             worth=self.getNetworth(),
             savings=self.get_saving_total(),
             investment=self.get_investment_total(),
