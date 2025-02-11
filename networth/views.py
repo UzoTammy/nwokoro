@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from djmoney.models.fields import Money
 from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, BorrowedFund
 from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, 
-                    InvestmentRolloverForm, BusinessCreateForm, BusinessUpdateForm, 
+                    InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm, 
                     FixedAssetCreateForm, FixedAssetUpdateForm,
                     BorrowedFundForm)
 from .plots import bar_chart, donut_chart
@@ -37,7 +37,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         canada = ExchangeRate.objects.get(target_currency='CAD')
         nigeria = ExchangeRate.objects.get(target_currency="NGN")
         rate = Money(nigeria.rate/canada.rate, 'NGN')
-        context['exchange'] = f'{rate}/CA$ on {canada.updated_at.strftime("%A %d-%b-%Y")}{canada.updated_at}'
+        context['exchange'] = f'{rate}/CA$ on {canada.updated_at.strftime("%A %d-%b-%Y")}'
         
         # queryset of assets
         investments = Investment.objects.filter(is_active=True).filter(owner=self.request.user)
@@ -184,6 +184,26 @@ class InvestmentRolloverView(LoginRequiredMixin, FormView):
         inv = Investment.objects.get(pk=self.kwargs['pk'])
         inv.rollover(form.cleaned_data['rate'], form.cleaned_data['start_date'], form.cleaned_data['duration'], 
                      form.cleaned_data['option'], form.cleaned_data['adjusted_amount'], form.cleaned_data['savings_account'])
+        return super().form_valid(form)
+
+class InvestmentTerminationView(LoginRequiredMixin, FormView):
+    # model = Investment
+    form_class = InvestmentTerminationForm
+    success_url = reverse_lazy('networth-home')
+    template_name = 'networth/terminate_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        pk = self.kwargs.get('pk')
+        kwargs['pk'] = pk
+        return kwargs
+
+    def form_valid(self, form):
+        inv = Investment.objects.get(pk=self.kwargs['pk'])
+        adjuster = -1 if form.cleaned_data['amount_type'] == 'DR' else 1
+        amount = inv.principal + inv.roi() + Money(adjuster * form.cleaned_data['adjusted_amount'], inv.principal.currency)
+        inv.terminate(amount, form.cleaned_data['savings_account'], form.cleaned_data['timestamp'])
+        messages.success(self.request, "Investment dropped into savings successfully")
         return super().form_valid(form)
 
 class StockCreateView(LoginRequiredMixin, FormView):

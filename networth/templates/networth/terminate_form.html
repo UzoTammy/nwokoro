@@ -8,7 +8,7 @@
         <div class="col-sm-6">
             <form class="mt-3" action="" method="post">
                 {% csrf_token %}
-                <legend>Investment Rollover</legend>
+                <legend>Investment Termination Form</legend>
                 <hr>
                 {{form|crispy}}
                     
@@ -22,23 +22,5 @@
     </div>
     
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const selectField = document.getElementById('option_select_id');
-        const modelChoice = document.getElementById('div_id_savings_account');
-        
-        modelChoice.style.display = 'none'; // Hide the container (field + label)
-
-        selectField.addEventListener('change', function () {
-            if (this.value === 'PO') {
-                modelChoice.style.display = 'block'; // Show the container (field + label)
-
-            } else {
-                modelChoice.style.display = 'none'; // Hide the container (field + label)
-            }
-        });
-    });
-</script>
         
 {% endblock %}

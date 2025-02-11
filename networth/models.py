@@ -20,6 +20,17 @@ class ExchangeRate(models.Model):
         return f"{self.base_currency} to {self.target_currency}: {self.rate}"
 
 # Create your models here.
+class Saving(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_savings")
+    holder = models.CharField(max_length=30)
+    value = MoneyField(max_digits=12, decimal_places=2)
+    host_country = models.CharField(max_length=30)
+    date = models.DateField(default=date.today)
+    category = models.CharField(max_length=30, default='TFSA')
+
+    def __str__(self):
+        return f'Savings: {self.value}'
+
 class Investment(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     holder = models.CharField(max_length=30)
@@ -32,7 +43,7 @@ class Investment(models.Model):
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f'I: {self.principal} with {self.holder} for {self.duration}'
+        return f'I: {self.principal}-{self.holder}-{self.duration} days'
     
     def maturity(self):
         return self.start_date + timezone.timedelta(days=self.duration)
@@ -107,6 +118,7 @@ class Investment(models.Model):
                 host_country=self.host_country,
                 category=self.category
             )
+
             InvestmentTransaction.objects.create(
                 user=self.owner,
                 investment=self,
@@ -129,13 +141,37 @@ class Investment(models.Model):
                 transaction_type='CR'
             )
         
-    # def terminate(self):
-    #     """
-    #     Terminate
-    #     a. Deactivate current investment
-    #     b. Move funds to savings account
-    #     c. Create new transaction
-    #     """
+    def terminate(self, amount, savings, timestamp):
+        """
+        Terminate
+        a. Deactivate current investment
+        b. Move funds to savings account
+        c. Create new transaction
+        """
+        self.is_active = False
+        self.save()
+
+        InvestmentTransaction.objects.create(
+            user=self.owner,
+            investment=self,
+            amount=amount,
+            description="Terminated investment",
+            timestamp=timestamp,
+            transaction_type='DR'
+        )
+
+        savings.value += amount
+        savings.save()
+
+        SavingsTransaction.objects.create(
+            user=self.owner,
+            savings=savings,
+            amount=amount,
+            description="investment proceed",
+            timestamp=timestamp,
+            transaction_type='CR'
+        )
+
 
 class Stock(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_stocks")
@@ -200,13 +236,6 @@ class Stock(models.Model):
             transaction_type='CR'
         )
 
-class Saving(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_savings")
-    holder = models.CharField(max_length=30)
-    value = MoneyField(max_digits=12, decimal_places=2)
-    host_country = models.CharField(max_length=30)
-    date = models.DateField(default=date.today)
-    category = models.CharField(max_length=30, default='TFSA')
 
 
     def __str__(self):

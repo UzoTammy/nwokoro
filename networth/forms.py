@@ -1,5 +1,6 @@
 from django import forms
 from django.forms import ValidationError
+from django.utils import timezone
 from .models import Investment, Stock, Saving, Business, FixedAsset, BorrowedFund
 from core.models import Config
 from djmoney.forms.fields import MoneyField, Money
@@ -233,3 +234,23 @@ class BorrowedFundForm(forms.ModelForm):
             raise ValidationError('Currency mismatch: Check your currency selection')
         return self.cleaned_data['settlement_amount']
         
+class InvestmentTerminationForm(forms.Form):
+    adjusted_amount = forms.DecimalField(
+        max_digits=12, decimal_places=2, initial=0.0, help_text='To normalize the real investment figures')
+    amount_type = forms.CharField(widget=forms.Select(choices=[('CR', 'CR'), ('DR', 'DR')]))
+    savings_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(
+        attrs={'class': 'form-control'}))  # 'style': 'display:none'}), required=False)
+    timestamp = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type':'datetime-local'}), initial=timezone.now())
+
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+
+        if self.pk:
+            investment = Investment.objects.get(pk=self.pk)
+            queryset = Saving.objects.filter(
+                value_currency=investment.principal.currency)
+            self.fields['savings_account'].queryset = queryset
+            
+        
+
