@@ -1,12 +1,13 @@
 from django.urls import path
 from .views import (MainView, ErrorView, AboutMe, ResumeView, PortfolioScushView, PortfolioFinuelView,
-                     TextingView, NumberToWordView, TinyProjectView, DatabaseLearningView,
+                     TextingView, NumberToWordView, TinyProjectView, DatabaseLearningView, PreferenceView,
                      AutomaticEmailView, NewHomeView, NewAboutMeView, ProfileView, StudentProfileView, 
                      StudentProfileUpdateView,PracticeView, TinyProjectTaxCanadaView, ActivateRegistrationView
                      )
 
 urlpatterns = [
     path('', MainView.as_view(), name='index'),
+    path('preference/', PreferenceView.as_view(), name='preference'),
     path('activate-registration', ActivateRegistrationView.as_view(), name='activate-registration'),
     path('oops/', ErrorView.as_view(), name='error-message'),
     path('aboutme/', AboutMe.as_view(), name='about-me'),

@@ -26,7 +26,6 @@ class EditProfileForm(UserChangeForm):
         model = User
         fields = ['username', 'email', 'date_of_birth']
 
-
 class PasswordResetForm(PasswordResetForm):
     email2 = forms.CharField(max_length=50)
 

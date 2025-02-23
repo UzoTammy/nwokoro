@@ -69,6 +69,7 @@ wcwidth = "==0.2.13"
 django-money = "*"
 matplotlib = "*"
 mpld3 = "*"
+django-select2 = "*"
 
 [dev-packages]
 

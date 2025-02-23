@@ -2,7 +2,6 @@ from collections.abc import Sequence
 import json
 import datetime
 from typing import Any
-
 from django.db.models.query import QuerySet
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
@@ -10,10 +9,14 @@ from django.http.response import HttpResponse as HttpResponse
 from django.views.generic.base import View, TemplateView
 from django.views.generic.list import ListView
 from django.views.generic.edit import UpdateView, FormView
-from .forms import NumberInputForm, ProfileForm, ActivateRegistrationForm, UpdateProfileForm, MyFormSet
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from .forms import NumberInputForm, ProfileForm, ActivateRegistrationForm, UpdateProfileForm, MyFormSet, PreferenceForm
 from .tinyproject.numtoword import convert
 from .tinyproject.taxes import CanadaIncomeTaxCalculator as TaxCalc
-from .models import StudentProfile, Config
+from .models import StudentProfile
+from account.models import User, Preference
+
 
 
 def read_profile():
@@ -21,6 +24,29 @@ def read_profile():
         content = json.load(rf)
     return content
 
+def prosecute(preferences, action, subject, value=None, new_value=None):
+    preference = preferences.get()
+
+    if subject in preference.networth:
+        subjects = preference.networth[subject]
+
+    if action == 'remove':
+        subjects.remove(value)
+        preference.networth[subject] = subjects
+    if action == 'update':
+        indx = subjects.index(value)
+        subjects[indx] = new_value
+        preference.networth[subject] = subjects
+    if action == 'add':
+        if subject in preference.networth:
+            subjects.append(new_value)
+            preference.networth[subject] = subjects
+        else:
+            preference.networth[subject] = [new_value]
+
+    preference.save() 
+
+    
 
 class PracticeView(View):
     
@@ -47,10 +73,63 @@ class MainView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['activate_registration'] = Config.objects.first().activate_registration
         return context
 
+
+class PreferenceView(LoginRequiredMixin, FormView):
+    template_name = 'core/preference.html'
+    form_class = PreferenceForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        preferences = Preference.objects.filter(user=self.request.user)
+        if not preferences.exists(): 
+            Preference.objects.create(user=self.request.user)
+        
+        if self.request.GET:
+            get_key = list(self.request.GET.keys())[0]
+            
+            action, subject = get_key.split('-')[0], get_key.split('-')[1]
+            value = self.request.GET[get_key]
+            
+            new_value = self.request.session.get('new_value', None)
+            if subject == 'countries':
+                if len(new_value) == 2:
+                    prosecute(preferences, action, subject, value, new_value)
+                else:   
+                    messages.info(self.request, "Use country's 2-letter code")
+        
+            elif subject == 'currencies':
+                if len(new_value) == 3:
+                    prosecute(preferences, action, subject, value, new_value)
+                else:
+                    messages.info(self.request, "Use currency's 3-letter code")
+            else:
+                prosecute(preferences, action, subject, value, new_value)
+
+        context['preferences'] = preferences.get()
+        data = self.request.session.get('networth', None)
+        
+        if data:
+            context['message'] = (data['networth'], data['new_value'])
+            del self.request.session['networth']
+        return context
     
+
+    def post(self, request, *args, **kwargs):
+
+        key, action, value = request.POST['networth'], request.POST['action'], request.POST['new_value']
+
+        preference = Preference.objects.get(user=self.request.user)
+        if key == 'holders':
+            if action == 'Add':
+                preference.networth['holders'].append(value)
+                preference.save()
+            if action == 'Update':
+                request.session['networth'] = request.POST
+            
+        return redirect('preference')
+
 class ActivateRegistrationView(FormView):
     template_name = 'core/activate_registration.html'
     form_class = ActivateRegistrationForm

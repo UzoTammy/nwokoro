@@ -28,7 +28,6 @@ class CustomAccountManager(BaseUserManager):
         
         return self.create_user(email=email, username=username, date_of_birth=date_of_birth, password=password, **extra_fields)
     
-
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=True)
     email = models.EmailField(verbose_name='email', max_length=50, unique=True)
@@ -39,6 +38,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    preferences = models.JSONField(default=dict)
     
     
     objects = CustomAccountManager()
@@ -82,6 +82,12 @@ class User(AbstractBaseUser, PermissionsMixin):
             transaction_type="Withdrawal",
             amount=-points,
             description=description or 'Points withdrawn from account')
+
+class Preference(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='preference')
+    networth = models.JSONField(default=dict)
+    # networth_currencies = models.JSONField(default=list)
+    # networth_countries = models.JSONField(default=list)
 
     
 class Transaction(models.Model):

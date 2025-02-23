@@ -8,11 +8,12 @@ from django.views.generic import (TemplateView, ListView,  CreateView, DetailVie
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from djmoney.models.fields import Money
 from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, BorrowedFund
-from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, 
+from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, SavingFormUpdate,
                     InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm, 
                     FixedAssetCreateForm, FixedAssetUpdateForm,
                     BorrowedFundForm)
 from .plots import bar_chart, donut_chart
+from account.models import Preference
 
 # from .tasks import financial_report_email
 # from .emails import FinancialReport
@@ -142,7 +143,7 @@ class InvestmentCreateView(LoginRequiredMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['pk'] = self.kwargs.get('pk')
-        
+        kwargs['user'] = self.request.user
         return kwargs
 
     def form_valid(self, form):
@@ -158,6 +159,12 @@ class InvestmentCreateView(LoginRequiredMixin, FormView):
         )
         messages.success(self.request, 'Investment created successfully !!!')
 
+        preference = Preference.objects.get(user=self.request.user)
+        networth = preference.networth
+        if 'holders' in networth:
+            if form.cleaned_data['holder'] not in networth['holders']:
+                networth['holders'] = form.cleaned_data['holder']
+
         return super().form_valid(form)
 
 class InvestmentDetailView(LoginRequiredMixin, DetailView):
@@ -167,6 +174,17 @@ class InvestmentUpdateView(LoginRequiredMixin, UpdateView):
     model = Investment
     success_url = reverse_lazy('networth-home')
     form_class = InvestmentCreateForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_update'] = True
+        return context
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # kwargs['pk'] = self.kwargs.get('pk')
+        kwargs['user'] = self.request.user
+        return kwargs
 
 class InvestmentRolloverView(LoginRequiredMixin, FormView):
     # model = Investment
@@ -214,6 +232,7 @@ class StockCreateView(LoginRequiredMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['pk'] = self.kwargs.get('pk')
+        kwargs['user'] = self.request.user
         return kwargs
 
     def form_valid(self, form):
@@ -241,11 +260,22 @@ class StockUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('networth-home')
     form_class = StockUpdateForm
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+
 # Saving
 class SavingCreateView(LoginRequiredMixin, CreateView):
     model = Saving
     form_class = SavingForm
     success_url = reverse_lazy('networth-home')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
     
     def form_valid(self, form):
         form.instance.owner = self.request.user if self.request.user.is_staff else None
@@ -257,18 +287,28 @@ class SavingDetailView(LoginRequiredMixin, DetailView):
 class SavingUpdateView(LoginRequiredMixin, UpdateView):
     model = Saving
     success_url = reverse_lazy('networth-home')
-    form_class = SavingForm
+    form_class = SavingFormUpdate
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_update'] = True
+        return context
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
 # Business
 class BusinessCreateView(LoginRequiredMixin, FormView):
     success_url = reverse_lazy('networth-home')
     form_class = BusinessCreateForm
     template_name = 'networth/business_form.html'
 
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['pk'] = self.kwargs.get('pk')
+        kwargs['user'] = self.request.user
         return kwargs
 
 

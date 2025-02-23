@@ -3,6 +3,7 @@ import datetime
 from django import forms 
 from crispy_forms.helper import FormHelper
 from .models import StudentProfile, Config
+from account.models import Preference
 
 
 class NumberInputForm(forms.Form):
@@ -128,3 +129,12 @@ class MyForm(forms.Form):
 
 
 MyFormSet = forms.formset_factory(MyForm, extra=3)
+
+class PreferenceForm(forms.Form):
+    networth = forms.ChoiceField(choices=[('holders', 'Holders'), ('countries', 'Countries')], label='networth')
+    action = forms.ChoiceField(choices=[('Add', 'Add'), ('Update', 'Update')])
+    new_value = forms.CharField(max_length=20, 
+                    help_text='Limited to 20 characters', 
+                    widget=forms.TextInput(attrs={'placeholder': 'for add & update only'})
+                )
+    

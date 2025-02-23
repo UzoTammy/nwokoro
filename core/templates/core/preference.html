@@ -1,0 +1,113 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content%}
+
+<!-- Profile Picture -->
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-sm-7">
+            <h3>Your Preference</h3>
+            <hr>
+            <form action="" method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+
+                <div class="row mt-3">
+                    <div class="col">
+                        <button class="btn btn-outline-dark" type="submit">Submit</button>
+                        <a class="btn btn-outline-dark float-right mr-1" href="{% url 'index' %}">Home</a>
+                    </div>
+                </div>
+            </form>
+            {% if message %}
+            <ul class="list-group list-group-flush mt-3">
+                <li class="list-group-item">
+                    You have chosen to update your list of <span class="text-danger">{{message|first}}</span> with <span class="text-danger">{{message|last}}</span>
+                </li>
+                <li class="list-group-item">Click <i class="fa fa-edit text-info"></i> icon by the side of the item to update.</li>
+            </ul>
+            
+            {% endif %}
+        </div>
+
+        <div class="col-sm-5">
+            {% if not preferences.networth %}
+            <div class="row mt-3">
+                <div class="col">
+                    <h5>You have no list of holders</h5>
+                    <p>
+                        If you will deal with financial institutions regularly, it will be convenient to
+                        have your investment or savings form list these institutions or establishment which are called
+                        <i class="text-info">Holders</i> in this app.
+                    </p>
+                </div>
+            </div>
+            {% else %}
+            <div class="row mt-3">
+                <div class="col">
+                    <h5 class="font-italic text-muted">List of holders</h5>
+                    <ul class="list-group mt-3">
+                        {% for holder in preferences.networth.holders %}
+                        <li class="list-group-item">{{holder}}
+                            <a class="btn btn-outline-dark btn-sm float-right ml-1" href="?remove-holders={{holder}}"><i
+                                    class="fa fa-times text-danger"></i></a>
+                            <a class="btn btn-outline-dark btn-sm float-right" href="?update-holders={{holder}}"><i
+                                    class="fa fa-edit text-info"></i></a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col">
+                    <h5 class="font-italic text-muted">List of countries</h5>
+                    <ul class="list-group mt-3">
+                        <li class="list-group-item list-group-item-primary"><small>use 2-letter country code</small>
+                        </li>
+                        {% for country in preferences.networth.countries %}
+                        <li class="list-group-item">{{country}}
+                            <a class="btn btn-outline-dark btn-sm float-right ml-1"
+                                href="?remove-countries={{country}}"><i class="fa fa-times text-danger"></i></a>
+                            <a class="btn btn-outline-dark btn-sm float-right" href="?update-countries={{country}}"><i
+                                    class="fa fa-edit text-info"></i></a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h5 class="font-italic text-muted">List of currencies</h5>
+
+                    <ul class="list-group mt-3">
+                        <li class="list-group-item list-group-item-primary"><small>use 3-letter currency code</small>
+                        </li>
+                        {% for currency in preferences.networth.currencies %}
+                        <li class="list-group-item">{{currency}}
+                            <a class="btn btn-outline-dark btn-sm float-right ml-1"
+                                href="?remove-currencies={{currency}}"><i class="fa fa-times text-danger"></i></a>
+                            <a class="btn btn-outline-dark btn-sm float-right" href="?update-currencies={{currency}}"><i
+                                    class="fa fa-edit text-info"></i></a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+
+    const networth = document.getElementById('id_networth');
+
+    networth.addEventListener('input', function () {
+        // Show the spinner modal
+        let new_value = document.getElementById('id_new_value')
+        new_value.innerHTML = 'Hello';
+
+    });
+</script>
+{% endblock content%}
