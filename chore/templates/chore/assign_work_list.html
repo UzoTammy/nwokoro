@@ -32,7 +32,7 @@
               {% elif object.is_expired and user.is_staff %}
                 <a href="{% url 'extend-time' object.pk %}">{{object.work}}</a>
               {% else %}
-                <a href="{% url 'assign-work' object.pk %}">{{object.work}}</a>
+                <a href="{% url 'work-done' object.pk %}">{{object.work}}</a>
               {% endif %}
             </td>
             <td>{{object.schedule}}</td>
