@@ -8,7 +8,7 @@ from .models import Work, AssignWork, JobRegister, FinishedWork, InitiateWork, B
 from core.models import Config
 from account.models import User, Transaction
 from .forms import (AddWorkForm, EarnPointForm, JobRegisterForm, DelegateWorkForm, InitiateWorkForm,
-                    InitiateWorkApproveForm, BonusPointForm, MyModelForm, CompletedJobDecisionForm)
+                    InitiateWorkApproveForm, BonusPointForm, MyModelForm, CompletedJobDecisionForm, ExtendTimeForm)
 from django.contrib import messages
 from .emails import Email
 
@@ -320,4 +320,16 @@ class ConcludedWorkListView(LoginRequiredMixin, ListView):
 class ConcludedWorDetailView(LoginRequiredMixin, DetailView):
     model = FinishedWork
     template_name = 'chore/concluded_work_detail.html'
+
+class ChoreExtendTime(LoginRequiredMixin, UpdateView):
+    model = AssignWork
+    template_name = 'chore/extend_time_form.html'
+    form_class = ExtendTimeForm
+    success_url = reverse_lazy('assign-work-list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        obj = AssignWork.objects.get(pk=self.kwargs['pk'])
+        context['object'] = obj
+        return context
 

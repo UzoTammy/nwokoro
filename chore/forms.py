@@ -164,3 +164,10 @@ class CompletedJobDecisionForm(forms.Form):
         choices=[('.65', 'Faily Good'), ('.75', 'Good'), ('.85', 'Very Good'), ('.95', 'Excellent')],
         attrs={'onchange': 'showElements()'}))
     
+
+class ExtendTimeForm(forms.ModelForm):
+    end_time = forms.DateTimeField(label='New Expiry Time', widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}))
+
+    class Meta:
+        model = AssignWork
+        fields = ['end_time']

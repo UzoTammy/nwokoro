@@ -28,9 +28,9 @@
 
             <td>
               {% if object.is_expired and not user.is_staff %}
-              {{object.work}}
+                {{object.work}}
               {% else %}
-              <a href="{% url 'work-done' object.pk %}">{{object.work}}</a>
+                <a href="{% url 'extend-time' object.pk %}">{{object.work}}</a>
               {% endif %}
             </td>
             <td>{{object.schedule}}</td>
