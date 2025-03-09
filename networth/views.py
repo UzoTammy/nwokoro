@@ -14,6 +14,7 @@ from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, Savi
                     BorrowedFundForm)
 from .plots import bar_chart, donut_chart
 from account.models import Preference
+from babel.numbers import format_percent
 
 # from .tasks import financial_report_email
 # from .emails import FinancialReport
@@ -108,6 +109,21 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # get the record of the first date of the current year
+        current_year = datetime.date.today().year
+        qs = FinancialData.objects.filter(date__year=current_year).order_by('date')
+        if qs.exists():
+            obj = qs.first()
+            networth = obj.networth()
+            daily_roi = 1.2 * obj.daily_roi # 20% above the first roi of the year
+
+            context['financials'] = {
+                'base_networth': networth,
+                'base_daily_roi': daily_roi,
+                'EYEV': 365 * daily_roi + networth,
+                'EYEP':  format_percent(round((365 * daily_roi)/networth, 4), decimal_quantization=False, locale='en_US')
+            }
+            
 
         cut_off_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7)
         financials = FinancialData.objects.filter(owner=self.request.user).filter(date__gte=cut_off_date).order_by('date')
