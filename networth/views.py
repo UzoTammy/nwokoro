@@ -15,9 +15,6 @@ from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, Savi
 from .plots import bar_chart, donut_chart
 from account.models import Preference
 from babel.numbers import format_percent
-
-# from .tasks import financial_report_email
-# from .emails import FinancialReport
     
 # Create your views here.
 class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -113,7 +110,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         current_year = datetime.date.today().year
         qs = FinancialData.objects.filter(date__year=current_year).order_by('date')
         if qs.exists():
-            obj = qs.first()
+            
+            obj = qs.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else qs.first()
             networth = obj.networth()
             daily_roi = 1.2 * obj.daily_roi # 20% above the first roi of the year
 
