@@ -2,6 +2,7 @@ from django import forms
 from django.forms import ValidationError
 from django.utils import timezone
 from .models import Investment, Stock, Saving, Business, FixedAsset, BorrowedFund
+from account.models import User
 from account.models import Preference
 from core.models import Config
 from djmoney.forms.fields import MoneyField, Money
@@ -342,4 +343,32 @@ class InvestmentTerminationForm(forms.Form):
             self.fields['savings_account'].queryset = queryset
             
         
+class SavingsCounterTransferForm(forms.Form):
+    receiver_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(attrs={'class': 'form-control'}))
+    donor_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(attrs={'class': 'form-control'}))
+    amount = forms.DecimalField(
+        max_digits=12, decimal_places=2, initial=0.0, help_text='Must not be greater than donor amount')
+    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
 
+
+    def __init__(self, *args, **kwargs):
+        self.username = kwargs.pop('username', None)
+        super().__init__(*args, **kwargs)
+
+        if self.username:
+            owner = User.objects.get(username=self.username)
+            queryset = Saving.objects.filter(owner=owner)
+            self.fields['receiver_account'].queryset = queryset
+            self.fields['donor_account'].queryset = queryset
+        
+
+    def clean(self):
+        if self.cleaned_data['receiver_account'] == self.cleaned_data['donor_account']:
+            raise ValidationError(message='Both Accounts cannot be the same')
+        if self.cleaned_data['receiver_account'].value.currency != self.cleaned_data['donor_account'].value.currency:
+            raise ValidationError(message='Receiver and Donor Account currency must be the same')
+        if self.cleaned_data['receiver_account'].host_country != self.cleaned_data['donor_account'].host_country:
+            raise ValidationError(message='Host country of both accounts must be the same')
+        if self.cleaned_data['donor_account'].value.amount < self.cleaned_data['amount']:
+            raise ValidationError(message='Insufficient fund in Donor Account')
+    

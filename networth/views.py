@@ -10,7 +10,7 @@ from djmoney.models.fields import Money
 from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, BorrowedFund
 from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, SavingFormUpdate,
                     InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm, 
-                    FixedAssetCreateForm, FixedAssetUpdateForm,
+                    FixedAssetCreateForm, FixedAssetUpdateForm, SavingsCounterTransferForm,
                     BorrowedFundForm)
 from .plots import bar_chart, donut_chart
 from account.models import Preference
@@ -392,6 +392,7 @@ class ExternalFundHome(LoginRequiredMixin, ListView):
     template_name = 'networth/external_fund.html'
 
 class BorrowedFundView(LoginRequiredMixin, FormView):
+
     template_name = 'networth/borrow_form.html'
     success_url = reverse_lazy('networth-external-fund-home')
     form_class = BorrowedFundForm
@@ -411,4 +412,28 @@ class BorrowedFundView(LoginRequiredMixin, FormView):
 
                                 )
         messages.success(self.request, 'Transaction is successful !!!')
+        return super().form_valid(form)
+    
+class SavingsCounterTransferView(LoginRequiredMixin, FormView):
+    form_class = SavingsCounterTransferForm
+    success_url = reverse_lazy('networth-home')
+    template_name = 'networth/saving_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['saving_transfer'] = True
+        return context
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['username'] = self.request.user.username
+        return kwargs
+    
+    def form_valid(self, form):
+        receiver: Saving = form.cleaned_data['receiver_account']
+        donor = form.cleaned_data['donor_account']
+        amount = Money(form.cleaned_data['amount'], donor.value.currency)
+        
+        receiver.fund_transfer(donor, amount, form.cleaned_data['date'])
+        messages.success(self.request, f"Fund moved from {donor} to {receiver} !!!")
         return super().form_valid(form)

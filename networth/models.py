@@ -7,7 +7,7 @@ from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 from account.models import User
 from django.utils import timezone
-from datetime import date, datetime
+from datetime import date, datetime, time
 
 
 class ExchangeRate(models.Model):
@@ -197,7 +197,30 @@ class Saving(models.Model):
             transaction_type = 'CR'
         )
 
+    def fund_transfer(self, donor, amount:Money, date):
+        self.value += amount
+        self.save()
+        donor.value -= amount
+        donor.save()
 
+        SavingsTransaction.objects.create(
+            user = self.owner,
+            savings = self,
+            amount = amount,
+            description = 'Received from another savings',
+            timestamp = datetime.combine(date, time()),
+            transaction_type = 'CR'
+        )
+
+        SavingsTransaction.objects.create(
+            user = self.owner,
+            savings = donor,
+            amount = amount,
+            description = 'Transfered to another savings',
+            timestamp = datetime.combine(date, time()),
+            transaction_type = 'DR'
+        )
+        
 class Investment(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     holder = models.CharField(max_length=30)
