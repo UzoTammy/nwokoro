@@ -2,7 +2,7 @@ import datetime
 from zoneinfo import ZoneInfo
 from django.urls import reverse_lazy
 from django.contrib import messages
-from django.db.models.aggregates import Sum, Min
+from django.db.models.aggregates import Sum, Min, Max
 from django.db.models import F
 from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -108,7 +108,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         # get the record of the first date of the current year
         current_year = datetime.date.today().year
-        qs = FinancialData.objects.filter(date__year=current_year).order_by('date')
+        qs = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year).order_by('date')
         if qs.exists():
             
             obj = qs.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else qs.first()
@@ -122,6 +122,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 'EYEP':  format_percent(round((365 * daily_roi)/networth, 4), decimal_quantization=False, locale='en_US')
             }
             
+            qs = qs.annotate(networth = F('worth')-F('liability'))
+            max_networth = qs.aggregate(Max('networth'))['networth__max']
+            context['max_networth'] = Money(max_networth, 'USD')
+            context['date_max_networth'] = qs.filter(networth=max_networth).first().date.date
+            context['max_rate'] = ('NGN', max([r[0]['NGN'] for r in qs.values_list('exchange_rate') if r[0] is not None]))
 
         cut_off_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7)
         financials = FinancialData.objects.filter(owner=self.request.user).filter(date__gte=cut_off_date).order_by('date')

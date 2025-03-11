@@ -8,12 +8,23 @@
 {% block content %}
 <div class="container mt-3">
     <div class="row justify-content-center">
-        <div class="col-sm-8">
+        <div class="col-sm-6">
             <ul class="list-group">
-                <li class="list-group-item">Base Networth <span class="float-right">{{financials.base_networth}}</span></li>
-                <li class="list-group-item">Base Daily ROI <span class="float-right">{{financials.base_daily_roi}}</span></li>
-                <li class="list-group-item">Expected Year-End Networth <span class="float-right">{{financials.EYEV}}</span></li>
-                <li class="list-group-item">Expected Year-End Percent <span class="float-right">{{financials.EYEP}}</span></li>
+                <li class="list-group-item">Base Networth <span class="float-right">{{financials.base_networth}}</span>
+                </li>
+                <li class="list-group-item">Base Daily ROI <span
+                        class="float-right">{{financials.base_daily_roi}}</span></li>
+                <li class="list-group-item">Expected Year-End Networth <span
+                        class="float-right">{{financials.EYEV}}</span></li>
+                <li class="list-group-item">Expected Year-End Percent <span
+                        class="float-right">{{financials.EYEP}}</span></li>
+            </ul>
+        </div>
+        <div class="col-sm-6">
+            <ul class="list-group">
+                <li class="list-group-item">Max Networth <span class="float-right">{{max_networth}}</span></li>
+                <li class="list-group-item">Date of Max Networth <span class="float-right">{{date_max_networth}}</span></li>
+                <li class="list-group-item">Worst Rate <span class="float-right">{{max_rate|first}}{{max_rate|last}}/$</span></li>
             </ul>
         </div>
     </div>
@@ -29,10 +40,12 @@
     </div>
     <div class="row mt-3">
         <div class="col">
-            <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ asset_distribution|safe }}"alt="Bar Chart">
+            <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ asset_distribution|safe }}"
+                alt="Bar Chart">
         </div>
         <div class="col">
-            <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ asset_location|safe }}"alt="Bar Chart">
+            <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ asset_location|safe }}"
+                alt="Bar Chart">
         </div>
     </div>
 
