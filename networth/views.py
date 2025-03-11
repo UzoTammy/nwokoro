@@ -112,21 +112,22 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         if qs.exists():
             
             obj = qs.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else qs.first()
-            networth = obj.networth()
+            base_networth = obj.networth()
             daily_roi = 1.2 * obj.daily_roi # 20% above the first roi of the year
 
             context['financials'] = {
-                'base_networth': networth,
+                'base_networth': base_networth,
                 'base_daily_roi': daily_roi,
-                'EYEV': 365 * daily_roi + networth,
-                'EYEP':  format_percent(round((365 * daily_roi)/networth, 4), decimal_quantization=False, locale='en_US')
+                'EYEV': 365 * daily_roi + base_networth,
+                'EYEP':  format_percent(round((365 * daily_roi)/base_networth, 4), decimal_quantization=False, locale='en_US')
             }
             
-            qs = qs.annotate(networth = F('worth')-F('liability'))
-            max_networth = qs.aggregate(Max('networth'))['networth__max']
+            qs = qs.annotate(f_networth = F('worth')-F('liability'))
+            max_networth = qs.aggregate(Max('f_networth'))['f_networth__max']
             context['max_networth'] = Money(max_networth, 'USD')
-            context['date_max_networth'] = qs.filter(networth=max_networth).first().date.date
+            context['date_max_networth'] = qs.filter(f_networth=max_networth).first().date.date
             context['max_rate'] = ('NGN', max([r[0]['NGN'] for r in qs.values_list('exchange_rate') if r[0] is not None]))
+            context['present_growth'] = format_percent(round((qs.latest('date').networth() - base_networth)/base_networth, 5), decimal_quantization=False, locale='en_US')
 
         cut_off_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7)
         financials = FinancialData.objects.filter(owner=self.request.user).filter(date__gte=cut_off_date).order_by('date')
