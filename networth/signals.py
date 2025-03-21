@@ -4,15 +4,15 @@ from networth.models import Saving, Investment, Stock
 
 @receiver(post_save, sender=Saving)
 def update_savings_holders(sender, instance, created, **kwargs):
-    if created:
+    # update preference for both create and update of savings
         instance.update_holders()
 
 @receiver(post_save, sender=Investment)
 def update_investment_holders(sender, instance, created, **kwargs):
-    if created:
+    # update preference for both create and update of Investment
         instance.update_holders()
 
 @receiver(post_save, sender=Stock)
 def update_stock_holders(sender, instance, created, **kwargs):
-    if created:
-        instance.update_holders()
+    # update preference for both create and update of Stock
+    instance.update_holders()
