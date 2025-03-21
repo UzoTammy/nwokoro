@@ -17,7 +17,13 @@
       <h1 class="display-4">Networth</h1>
       <small class="text-muted ml-2">Exchange Rate: {{exchange}}
         <a class="float-right mr-3" href="{% url 'networth-dashboard' %}"><i
-            class="fa fa-tachometer-alt"></i></a></small>
+            class="fa fa-tachometer-alt"></i>
+        </a>
+          
+            <a class="float-right mr-3" href="{% url 'institution-report' %}"><i
+              class="fa fa-table"></i>
+          </a>
+      </small>
       <div class="row">
         <div class="col-sm-4">
           <ul class="list-group list-group-flush">

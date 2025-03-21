@@ -1,8 +1,6 @@
 from babel.numbers import format_percent
 from decimal import Decimal
-from django.shortcuts import redirect
 from django.db import models
-from django.core.exceptions import ValidationError
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 from account.models import User
@@ -27,6 +25,8 @@ class Saving(models.Model):
     host_country = models.CharField(max_length=30)
     date = models.DateField(default=date.today)
     category = models.CharField(max_length=30, default='TFSA')
+    description = models.CharField(max_length=250, default='')
+
 
     def __str__(self):
         return f'Savings: {self.value}'
@@ -220,7 +220,13 @@ class Saving(models.Model):
             timestamp = datetime.combine(date, time()),
             transaction_type = 'DR'
         )
-        
+    
+    def update_holders(self):
+        # get all holders in savings
+        holders = Saving.objects.filter(owner=self.owner).values_list('holder', flat=True).distinct()
+        self.owner.preference.savings_holders = list(holders)
+        self.owner.preference.save()
+
 class Investment(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     holder = models.CharField(max_length=30)
@@ -231,6 +237,8 @@ class Investment(models.Model):
     host_country = models.CharField(max_length=30)
     category = models.CharField(max_length=30, default='GIC')
     is_active = models.BooleanField(default=True)
+    description = models.CharField(max_length=250, default='')
+
 
     def __str__(self):
         return f'I: {self.principal}-{self.holder}-{self.duration} days'
@@ -362,6 +370,12 @@ class Investment(models.Model):
             transaction_type='CR'
         )
 
+    def update_holders(self):
+        # get all holders in savings
+        holders = Investment.objects.filter(owner=self.owner).values_list('holder', flat=True).distinct()
+        self.owner.preference.investment_holders = list(holders)
+        self.owner.preference.save()
+
 class Stock(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_stocks")
     holder = models.CharField(max_length=30)
@@ -372,6 +386,8 @@ class Stock(models.Model):
     date_bought = models.DateTimeField(default=timezone.now)
     date_sold = models.DateTimeField(default=timezone.now, blank=True, null=True)
     stock_type = models.CharField(max_length=30, default='TFSA')
+    description = models.CharField(max_length=250, default='')
+
 
     def __str__(self):
         return f'{self.stock_type} @ {self.holder}'
@@ -417,13 +433,21 @@ class Stock(models.Model):
             transaction_type='CR'
         )
 
+    def update_holders(self):
+        # get all holders in savings
+        holders = Stock.objects.filter(owner=self.owner).values_list('holder', flat=True).distinct()
+        self.owner.preference.stock_holders = list(holders)
+        self.owner.preference.save()
+
 class Business(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=100)
     date = models.DateField(default=timezone.now)
     shares = models.PositiveIntegerField()
     unit_cost = MoneyField(max_digits=12, decimal_places=2)
     host_country = models.CharField(max_length=2)
+    description = models.CharField(max_length=250, default='')
+
 
     def __str__(self):
         return self.name
@@ -434,12 +458,19 @@ class Business(models.Model):
     def capital(self):
         return self.shares * self.unit_cost
     
+    def update_holders(self):
+        # get all holders in savings
+        holders = Business.objects.filter(owner=self.owner).values_list('name', flat=True).distinct()
+        self.owner.preference.business_holders = list(holders)
+        self.owner.preference.save()
+
 class FixedAsset(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
     date = models.DateField(default=timezone.now)
     value = MoneyField(max_digits=12, decimal_places=2)
     host_country = models.CharField(max_length=2)
+    description = models.CharField(max_length=250, default='')
 
     def __str__(self):
         return self.name
@@ -447,6 +478,12 @@ class FixedAsset(models.Model):
     class Meta:
         verbose_name = 'FixedAsset'
     
+    def update_holders(self):
+        # get all holders in savings
+        holders = FixedAsset.objects.filter(owner=self.owner).values_list('name', flat=True).distinct()
+        self.owner.preference.fixed_asset_holders = list(holders)
+        self.owner.preference.save()
+
 class Liability(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=30)

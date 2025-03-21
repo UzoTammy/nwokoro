@@ -82,14 +82,19 @@ class User(AbstractBaseUser, PermissionsMixin):
             transaction_type="Withdrawal",
             amount=-points,
             description=description or 'Points withdrawn from account')
-
+     
 class Preference(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='preference')
-    networth = models.JSONField(default=dict)
-    # networth_currencies = models.JSONField(default=list)
-    # networth_countries = models.JSONField(default=list)
+    savings_holders = models.JSONField(default=list)
+    investment_holders = models.JSONField(default=list)
+    fixed_asset_holders = models.JSONField(default=list)
+    stock_holders = models.JSONField(default=list)
+    business_holders = models.JSONField(default=list)
 
-    
+
+    def __str__(self):
+        return f'{self.user.username} preference'
+       
 class Transaction(models.Model):
     TRANSACTION_TYPES = (
         ("Deposit", "Deposit"),

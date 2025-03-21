@@ -1,4 +1,5 @@
 import datetime
+from decimal import Decimal
 from zoneinfo import ZoneInfo
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -8,14 +9,16 @@ from django.views.generic import (TemplateView, ListView,  CreateView, DetailVie
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from djmoney.models.fields import Money
 from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, BorrowedFund
-from .forms import (InvestmentCreateForm, StockCreateForm, StockUpdateForm, SavingForm, SavingFormUpdate,
+from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm, StockUpdateForm, SavingForm, SavingFormUpdate,
                     InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm, 
                     FixedAssetCreateForm, FixedAssetUpdateForm, SavingsCounterTransferForm,
                     BorrowedFundForm)
 from .plots import bar_chart, donut_chart
-from account.models import Preference
 from babel.numbers import format_percent
+from networth.models import ExchangeRate
+
     
+
 # Create your views here.
 class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/home.html'
@@ -177,14 +180,9 @@ class InvestmentCreateView(LoginRequiredMixin, FormView):
             duration=form.cleaned_data['duration'],
             category=form.cleaned_data['category']
         )
+
+    
         messages.success(self.request, 'Investment created successfully !!!')
-
-        preference = Preference.objects.get(user=self.request.user)
-        networth = preference.networth
-        if 'holders' in networth:
-            if form.cleaned_data['holder'] not in networth['holders']:
-                networth['holders'] = form.cleaned_data['holder']
-
         return super().form_valid(form)
 
 class InvestmentDetailView(LoginRequiredMixin, DetailView):
@@ -193,7 +191,7 @@ class InvestmentDetailView(LoginRequiredMixin, DetailView):
 class InvestmentUpdateView(LoginRequiredMixin, UpdateView):
     model = Investment
     success_url = reverse_lazy('networth-home')
-    form_class = InvestmentCreateForm
+    form_class = InvestmentUpdateForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -202,7 +200,6 @@ class InvestmentUpdateView(LoginRequiredMixin, UpdateView):
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # kwargs['pk'] = self.kwargs.get('pk')
         kwargs['user'] = self.request.user
         return kwargs
 
@@ -443,3 +440,35 @@ class SavingsCounterTransferView(LoginRequiredMixin, FormView):
         receiver.fund_transfer(donor, amount, form.cleaned_data['date'])
         messages.success(self.request, f"Fund moved from {donor} to {receiver} !!!")
         return super().form_valid(form)
+    
+class InstitutionReportView(LoginRequiredMixin, TemplateView):
+    template_name = 'networth/institution.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        investments = Investment.objects.filter(is_active=True).filter(owner=self.request.user).order_by('holder')
+        holders_in_investment = investments.values_list('holder', flat=True).distinct()
+        dataset = list()
+        for holder in holders_in_investment:
+            
+            # institution = investments.first().holder
+            principals = list(obj.principal for obj in investments.filter(holder=holder))
+            records = list()
+            sub_total = Decimal(0)
+            for principal in principals:
+                exchange_rate = ExchangeRate.objects.get(target_currency=principal.currency)
+                base_amount = principal.amount / Decimal(exchange_rate.rate)
+                records.append({
+                    'currency': principal.currency,
+                    'target_amount': principal,
+                    'base_amount': Money(base_amount, 'USD')
+                })
+                sub_total += base_amount
+            dataset.append({
+                'holder': holder,
+                'records': records,
+                'sub_total': Money(sub_total, 'USD')
+            })
+        context['institutions'] = dataset
+        context['total'] = sum(data['sub_total'] for data in dataset)
+        return context

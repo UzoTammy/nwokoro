@@ -12,7 +12,11 @@ class OptionChoices:
 
     @classmethod
     def get_options(cls):
-        return Config.objects.first()
+        return {
+            'countries': [("CA", 'Canada'), ('NG', 'Nigeria'), ('US', 'United States')],
+            'categories': [('GIC', 'GIC'), ('FD', 'Fixed Deposit'), ('TB', 'Treasury Bills'), ('CP', 'Commercial Paper')],
+            'stock_type': [('Scotia', 'Scotia')]
+        }
     
     PAYMENT_PERIOD = [('monthly', 'Monthly'), ('bi-weekly', 'Bi-weekly'), ('yearly', 'Yearly'), ('daily', 'Daily'), ('one-time', 'One-time')]
 
@@ -31,8 +35,8 @@ class ChoiceOrInputWidget(forms.MultiWidget):
 
 class ComboField(forms.MultiValueField):
 
-    def __init__(self, choices=(), *args, **kwargs):
-        # self.choices = choices
+    def __init__(self, choices=None, *args, **kwargs):
+        self.choices = choices
         widget = ChoiceOrInputWidget(choices=choices)
         fields = [
             forms.ChoiceField(choices=choices, required=False),
@@ -45,123 +49,17 @@ class ComboField(forms.MultiValueField):
         
         if data_list[0] == '':
             return data_list[1]
-        return data_list[0] if data_list else None
-         
-class InvestmentCreateForm(forms.ModelForm):
-    
-    holder = forms.ChoiceField(widget=forms.Select(
-        choices=[(None, 'List is empty')])) #
-    
-    start_date = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date'}))
-    
-    host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries'])) # OptionChoices.get_options().networth_options['countries']
-    
-    category = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.get_options().networth_options['categories'])) # OptionChoices.get_options().networth_options['categories']
-
-    class Meta:
-        model = Investment
-        fields = ['holder', 'principal', 'rate', 'start_date',
-                  'duration', 'host_country', 'category']
-
-    def __init__(self, *args, **kwargs):
-        self.pk = kwargs.pop('pk', None)
-        self.user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-        
-        if self.pk:
-            self.savings_account = Saving.objects.get(pk=self.pk)
-
-        if self.user:
-            preference = Preference.objects.get(user=self.user)
-            if 'holders' in preference.networth:
-                dynamic_choices = [(None, 'List of Holders')]
-                dynamic_choices = dynamic_choices + [(holder, holder) for holder in preference.networth['holders']]#
-            self.fields['holder'].choices = dynamic_choices
-            self.fields['holder'].help_text = "If holder is not listed, you must go to preference to add it"
-    
-    def clean(self):
-        if self.savings_account.value.currency != self.cleaned_data['principal'].currency:
-            raise ValidationError("Currency cannot mismatch")
-
-        if self.savings_account.value < self.cleaned_data['principal']:
-            raise ValidationError("Insufficient fund in saving account")
-        
-class StockCreateForm(forms.ModelForm):
-    
-    holder = forms.ChoiceField(widget=forms.Select(
-        choices=[(None, 'List is empty')])) #
-    
-    date_bought = forms.DateField(
-        label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
-    host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries'])) #
-    stock_type = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['stock_type']))#
-    
-        
-    class Meta:
-        model = Stock
-        fields = ['holder', 'units', 'unit_cost',
-                  'date_bought', 'host_country', 'stock_type']
-
-    def __init__(self, *args, **kwargs):
-        self.pk = kwargs.pop('pk', None)
-        self.user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-        
-        if self.pk:
-            self.savings_account = Saving.objects.get(pk=self.pk)
-
-        if self.user:
-            preference = Preference.objects.get(user=self.user)
-            if 'holders' in preference.networth:
-                self.fields['holder'].choices = [(holder, holder) for holder in preference.networth['holders']]
-                self.fields['holder'].help_text = "If holder is not listed, you must go to preference to add it"
-            
-
-    def clean(self):
-        if self.savings_account.value.currency != self.cleaned_data['unit_cost'].currency:
-            raise ValidationError("Currency cannot mismatch")
-
-        if self.savings_account.value < self.cleaned_data['unit_cost'] * self.cleaned_data['units']:
-            raise ValidationError("Insufficient fund in saving account")
-
-class StockUpdateForm(forms.ModelForm):
-
-    holder = forms.ChoiceField(widget=forms.Select(
-        choices=[(None, 'List is empty')])) #
-    # date_bought = forms.DateField(label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
-    host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries'])) #
-    stock_type = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['stock_type'])) #
-    
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-        
-        if self.user:
-            preference = Preference.objects.get(user=self.user)
-            if 'holders' in preference.networth:
-                self.fields['holder'].choices = [(holder, holder) for holder in preference.networth['holders']]
-                self.fields['holder'].help_text = "If holder is not listed, you must go to preference to add it"
-            
-    class Meta:
-        model = Stock
-        fields = ['holder', 'host_country', 'stock_type']
+        return data_list[0] if data_list else None    
 
 class SavingForm(forms.ModelForm):
 
-    holder = forms.ChoiceField(widget=forms.Select(
-        choices=())) #
+    holder_select = forms.CharField(widget=forms.Select(choices=()), label='Select Holder', required=False)
+    holder_text = forms.CharField(label='Or Type Holder', required=False)
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries'])) #
+        widget=forms.Select(choices=OptionChoices.get_options()['countries'])) #
     category = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.get_options().networth_options['categories'])) #
+        choices=OptionChoices.get_options()['categories'])) #
     
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -170,21 +68,146 @@ class SavingForm(forms.ModelForm):
 
         if self.user:
             preference = Preference.objects.get(user=self.user)
-            if 'holders' in preference.networth:
-                dynamic_choices = [(None, 'List of Holders')]
-                dynamic_choices = dynamic_choices + [(holder, holder) for holder in preference.networth['holders']]#
-            self.fields['holder'].choices = dynamic_choices
-            self.fields['holder'].help_text = "If holder is not listed, you must go to preference to add it"
+            if preference.savings_holders:
+                dynamic_choices = [(None, 'List of Holders')] + [(holder, holder) for holder in preference.savings_holders]
+            
+            self.fields['holder_select'].widget.choices = dynamic_choices
+            self.fields['holder_select'].help_text = "If holder is not listed, type the holder below"
     
     class Meta:
         model = Saving
-        fields = ['holder', 'value', 'date', 'host_country', 'category']
+        fields = ['holder_select', 'holder_text', 'value', 'date', 'host_country', 'category']
 
-class SavingFormUpdate(SavingForm):
+    def clean(self):
+        if self.cleaned_data['holder_select'] == '' and self.cleaned_data['holder_text'] == '':
+            raise ValidationError(message='Select Holder or Text Holder must have a value')
+        if self.cleaned_data['holder_select'] != '' and self.cleaned_data['holder_text'] != '':
+            raise ValidationError(message='Both Select holder and Text holder cannot be filled')    
+        
+class SavingFormUpdate(forms.ModelForm):
+    holder = forms.CharField(widget=forms.Select(choices=()), label='Select Holder', required=False)
+    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    host_country = forms.CharField(
+        widget=forms.Select(choices=OptionChoices.get_options()['countries'])) #
+    category = forms.CharField(widget=forms.Select(
+        choices=OptionChoices.get_options()['categories'])) #
+    
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        dynamic_choices = kwargs.pop('choices', [(None, 'List is empty')])  # Get dynamic choices from kwargs
+        super().__init__(*args, **kwargs)
+
+        if self.user:
+            preference = Preference.objects.get(user=self.user)
+            if preference.savings_holders:
+                dynamic_choices = [(None, 'List of Holders')] + [(holder, holder) for holder in preference.savings_holders]
+            
+            self.fields['holder'].widget.choices = dynamic_choices
+            self.fields['holder'].help_text = "If holder is not listed, type the holder below"
+    
 
     class Meta:
         model = Saving
         fields = ['holder', 'date', 'host_country', 'category']
+
+class InvestmentCreateForm(forms.ModelForm):
+    
+    holder_select = forms.CharField(widget=forms.Select(choices=[(None, 'List is empty')])) #
+    holder_text = forms.ChoiceField(label='Or Type Holder')
+
+    start_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}))
+    
+    host_country = forms.CharField(
+        widget=forms.Select(choices=OptionChoices.get_options().get('countries'))) # OptionChoices.get_options().networth_options['countries']
+    
+    category = forms.CharField(widget=forms.Select(
+        choices=OptionChoices.get_options().get('categories'))) # OptionChoices.get_options().networth_options['categories']
+
+    class Meta:
+        model = Investment
+        fields = ['holder_select', 'holder_text', 'principal', 'rate', 'start_date',
+                  'duration', 'host_country', 'category', 'description']
+
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        if self.pk:
+            self.savings_account = Saving.objects.get(pk=self.pk)
+
+        if self.user:
+            preference = Preference.objects.get(user=self.user)
+
+            dynamic_choices = [(None, 'List of Holders')] + [(holder, holder) for holder in preference.investment_holders]
+            
+            self.fields['holder_select'].widget.choices = dynamic_choices
+            self.fields['holder_select'].help_text = "If holder is not listed, fill it below"
+    
+    def clean(self):
+        if self.savings_account.value.currency != self.cleaned_data['principal'].currency:
+            raise ValidationError("Currency cannot mismatch")
+
+        if self.savings_account.value < self.cleaned_data['principal']:
+            raise ValidationError("Insufficient fund in saving account")
+        
+class InvestmentUpdateForm(forms.ModelForm):
+    
+    holder = forms.CharField(widget=forms.Select(choices=[(None, 'List is empty')])) #
+    
+    start_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}))
+    
+    host_country = forms.CharField(
+        widget=forms.Select(choices=OptionChoices.get_options().get('countries'))) # OptionChoices.get_options().networth_options['countries']
+    
+    category = forms.CharField(widget=forms.Select(
+        choices=OptionChoices.get_options().get('categories'))) # OptionChoices.get_options().networth_options['categories']
+
+    class Meta:
+        model = Investment
+        fields = ['holder', 'principal', 'rate', 'start_date',
+                  'duration', 'host_country', 'category', 'description']
+
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        if self.pk:
+            self.savings_account = Saving.objects.get(pk=self.pk)
+
+        if self.user:
+            preference = Preference.objects.get(user=self.user)
+            holders = [(holder, holder) for holder in preference.investment_holders]
+            dynamic_choices = [(None, 'List of Holders')] + holders
+            self.fields['holder'].widget.choices = dynamic_choices
+            
+    def clean(self):
+        if self.savings_account.value.currency != self.cleaned_data['principal'].currency:
+            raise ValidationError("Currency cannot mismatch")
+
+        if self.savings_account.value < self.cleaned_data['principal']:
+            raise ValidationError("Insufficient fund in saving account")
+
+class InvestmentTerminationForm(forms.Form):
+    adjusted_amount = forms.DecimalField(
+        max_digits=12, decimal_places=2, initial=0.0, help_text='To normalize the real investment figures')
+    amount_type = forms.CharField(widget=forms.Select(choices=[('CR', 'CR'), ('DR', 'DR')]))
+    savings_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(
+        attrs={'class': 'form-control'}))  # 'style': 'display:none'}), required=False)
+    timestamp = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type':'datetime-local'}), initial=timezone.now())
+
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+
+        if self.pk:
+            investment = Investment.objects.get(pk=self.pk)
+            queryset = Saving.objects.filter(
+                value_currency=investment.principal.currency)
+            self.fields['savings_account'].queryset = queryset
 
 class InvestmentRolloverForm(forms.Form):
 
@@ -210,10 +233,74 @@ class InvestmentRolloverForm(forms.Form):
                 value_currency=inv.principal.currency)
             self.fields['savings_account'].queryset = queryset
 
+class StockCreateForm(forms.ModelForm):
+    
+    holder_select = forms.CharField(widget=forms.Select(choices=[(None, 'List is empty')]),
+                                    label='Select Holder') #
+    holder_text = forms.CharField(label='Or Type Holder') #
+    
+    date_bought = forms.DateField(
+        label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
+    host_country = forms.CharField(
+        widget=forms.Select(choices=OptionChoices.get_options().get('countries'))) #
+    stock_type = forms.CharField(
+        widget=forms.Select(choices=OptionChoices.get_options().get('stock_type')))#
+    
+        
+    class Meta:
+        model = Stock
+        fields = ['holder_select', 'holder_text', 'units', 'unit_cost',
+                  'date_bought', 'host_country', 'stock_type']
+
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        if self.pk:
+            self.savings_account = Saving.objects.get(pk=self.pk)
+
+        if self.user:
+            preference = Preference.objects.get(user=self.user)
+            self.fields['holder_select'].widget.choices = [(holder, holder) for holder in preference.stock_holders]
+            self.fields['holder_select'].help_text = "If holder is not listed, you must go to preference to add it"
+            
+
+    def clean(self):
+        if self.savings_account.value.currency != self.cleaned_data['unit_cost'].currency:
+            raise ValidationError("Currency cannot mismatch")
+
+        if self.savings_account.value < self.cleaned_data['unit_cost'] * self.cleaned_data['units']:
+            raise ValidationError("Insufficient fund in saving account")
+
+class StockUpdateForm(forms.ModelForm):
+
+    holder = forms.ChoiceField(widget=forms.Select(
+        choices=[(None, 'List is empty')])) #
+    # date_bought = forms.DateField(label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
+    host_country = forms.CharField(
+        widget=forms.Select(choices=OptionChoices.get_options()['countries'])) #
+    stock_type = forms.CharField(
+        widget=forms.Select(choices=OptionChoices.get_options()['stock_type'])) #
+    
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        if self.user:
+            preference = Preference.objects.get(user=self.user)
+            self.fields['holder'].choices = [(holder, holder) for holder in preference.stock_holders]
+            self.fields['holder'].help_text = "If holder is not listed, you must go to preference to add it"
+            
+    class Meta:
+        model = Stock
+        fields = ['holder', 'host_country', 'stock_type']
+
 class BusinessCreateForm(forms.ModelForm):
+    # holder = forms.ChoiceField(choices=())
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries'])) #
+        widget=forms.Select(choices=OptionChoices.get_options()['countries'])) #
 
     class Meta:
         model = Business
@@ -227,12 +314,11 @@ class BusinessCreateForm(forms.ModelForm):
         if self.pk:
             self.savings_account = Saving.objects.get(pk=self.pk)
 
-        if self.user:
-            preference = Preference.objects.get(user=self.user)
-            if 'holders' in preference.networth:
-                dynamic_choices = [(holder, holder) for holder in preference.networth['holders']]
-            self.fields['name'] = ComboField(choices=dynamic_choices)
-            self.fields['name'].label = 'Company Name'
+        # if self.user:
+        #     preference = Preference.objects.get(user=self.user)
+        #     names = [(name, name) for name in preference.investment_holders]
+        #     self.fields['holder'].choices = names
+        #     self.fields['holder'].label = 'Company Name'
         
 
     def clean(self):
@@ -247,7 +333,7 @@ class BusinessCreateForm(forms.ModelForm):
 class FixedAssetCreateForm(forms.ModelForm):
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries'])) #O
+        widget=forms.Select(choices=OptionChoices.get_options()['countries'])) #O
 
     class Meta:
         model = FixedAsset
@@ -259,6 +345,7 @@ class FixedAssetCreateForm(forms.ModelForm):
 
         if self.pk:
             self.savings_account = Saving.objects.get(pk=self.pk)
+        
 
     def clean(self):
         if self.savings_account.value.currency != self.cleaned_data['value'].currency:
@@ -272,7 +359,7 @@ class FixedAssetCreateForm(forms.ModelForm):
 class FixedAssetUpdateForm(forms.ModelForm):
     # date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries'])) #
+        widget=forms.Select(choices=OptionChoices.get_options()['countries'])) #
 
     class Meta:
         model = FixedAsset
@@ -283,7 +370,7 @@ class BusinessUpdateForm(forms.ModelForm):
     name = forms.CharField(max_length=50)
     # date_bought = forms.DateField(label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries'])) #
+        widget=forms.Select(choices=OptionChoices.get_options()['countries'])) #
     
     class Meta:
         model = Stock
@@ -294,7 +381,7 @@ class BorrowedFundForm(forms.ModelForm):
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     savings_account = forms.ModelChoiceField(queryset=Saving.objects.none())
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options().networth_options['countries'])) #
+        widget=forms.Select(choices=OptionChoices.get_options()['countries'])) #
 
 
     class Meta:
@@ -323,25 +410,6 @@ class BorrowedFundForm(forms.ModelForm):
         if self.cleaned_data['settlement_amount'].currency != self.savings_account.first().value.currency:
             raise ValidationError('Currency mismatch: Check your currency selection')
         return self.cleaned_data['settlement_amount']
-        
-class InvestmentTerminationForm(forms.Form):
-    adjusted_amount = forms.DecimalField(
-        max_digits=12, decimal_places=2, initial=0.0, help_text='To normalize the real investment figures')
-    amount_type = forms.CharField(widget=forms.Select(choices=[('CR', 'CR'), ('DR', 'DR')]))
-    savings_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(
-        attrs={'class': 'form-control'}))  # 'style': 'display:none'}), required=False)
-    timestamp = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type':'datetime-local'}), initial=timezone.now())
-
-    def __init__(self, *args, **kwargs):
-        self.pk = kwargs.pop('pk', None)
-        super().__init__(*args, **kwargs)
-
-        if self.pk:
-            investment = Investment.objects.get(pk=self.pk)
-            queryset = Saving.objects.filter(
-                value_currency=investment.principal.currency)
-            self.fields['savings_account'].queryset = queryset
-            
         
 class SavingsCounterTransferForm(forms.Form):
     receiver_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(attrs={'class': 'form-control'}))

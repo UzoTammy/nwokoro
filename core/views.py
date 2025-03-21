@@ -46,7 +46,8 @@ def prosecute(preferences, action, subject, value=None, new_value=None):
 
     preference.save() 
 
-    
+class MeHome(LoginRequiredMixin, TemplateView):
+    template_name = 'core/me_home.html'
 
 class PracticeView(View):
     

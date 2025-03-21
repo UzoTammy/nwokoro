@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (MainView, ErrorView, AboutMe, ResumeView, PortfolioScushView, PortfolioFinuelView,
                      TextingView, NumberToWordView, TinyProjectView, DatabaseLearningView, PreferenceView,
                      AutomaticEmailView, NewHomeView, NewAboutMeView, ProfileView, StudentProfileView, 
-                     StudentProfileUpdateView,PracticeView, TinyProjectTaxCanadaView, ActivateRegistrationView
+                     StudentProfileUpdateView,PracticeView, TinyProjectTaxCanadaView, ActivateRegistrationView,
+                     MeHome
                      )
 
 urlpatterns = [
@@ -11,6 +12,7 @@ urlpatterns = [
     path('activate-registration', ActivateRegistrationView.as_view(), name='activate-registration'),
     path('oops/', ErrorView.as_view(), name='error-message'),
     path('aboutme/', AboutMe.as_view(), name='about-me'),
+    path('me/home', MeHome.as_view(), name='me-home'),
     path('new-about-me', NewAboutMeView.as_view(), name='new-aboutme'),
     path('resume-view/', ResumeView.as_view(), name='resume'),
     path('portfolio-scush/', PortfolioScushView.as_view(), name='portfolio-scush'),

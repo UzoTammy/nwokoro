@@ -1,0 +1,66 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    {% if institutions %}
+    <div class="row">
+        <div class="col">
+            <h3>Institutional Report <span class="float-right">{{total}}</span></h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Institution</th>
+                        <th class="text-center">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for institution in institutions %}
+                    
+                        <tr>
+                            <th>{{institution.holder}}</th>
+                            <td>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Amount(Host)</th>
+                                            <th class="text-right">Amount(USD)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for record in institution.records %}
+                                        <tr>
+                                            <td>{{record.target_amount}}</td>
+                                            <td class="text-right">{{record.base_amount}}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th>Total</th>
+                                            <th class="text-right">{{institution.sub_total}}</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </td>
+                        </tr>
+                    
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+        </div>
+    </div>
+    {% else %}
+        <h3>No institutional Report available</h3>
+    {% endif %}
+
+    <div class="row mb-3">
+        <div class="col"><a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Home</a></div>
+    </div>
+</div>
+{% endblock %}

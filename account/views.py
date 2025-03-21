@@ -2,7 +2,7 @@ import os
 from django.shortcuts import render, redirect
 from django.views.generic import CreateView, DetailView, UpdateView, TemplateView
 from .forms import SignUpForm, EditProfileForm, PasswordResetForm
-from .models import User, Transaction
+from .models import User, Transaction, Preference
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
 from django.urls import reverse_lazy
@@ -35,7 +35,8 @@ class SignUpView(CreateView):
                 Submit('register', 'Register', css_class='btn btn-primary')
             )
         )
-
+    
+    
 class ProfileView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = User
     template_name = 'account/profile.html'
