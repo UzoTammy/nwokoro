@@ -167,30 +167,21 @@ class InvestmentUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Investment
-        fields = ['holder', 'principal', 'rate', 'start_date',
+        fields = ['holder', 'rate', 'start_date',
                   'duration', 'host_country', 'category', 'description']
 
     def __init__(self, *args, **kwargs):
-        self.pk = kwargs.pop('pk', None)
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         
-        if self.pk:
-            self.savings_account = Saving.objects.get(pk=self.pk)
-
+        
         if self.user:
             preference = Preference.objects.get(user=self.user)
             holders = [(holder, holder) for holder in preference.investment_holders]
             dynamic_choices = [(None, 'List of Holders')] + holders
             self.fields['holder'].widget.choices = dynamic_choices
             
-    def clean(self):
-        if self.savings_account.value.currency != self.cleaned_data['principal'].currency:
-            raise ValidationError("Currency cannot mismatch")
-
-        if self.savings_account.value < self.cleaned_data['principal']:
-            raise ValidationError("Insufficient fund in saving account")
-
+    
 class InvestmentTerminationForm(forms.Form):
     adjusted_amount = forms.DecimalField(
         max_digits=12, decimal_places=2, initial=0.0, help_text='To normalize the real investment figures')
