@@ -15,7 +15,6 @@ from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm,
                     BorrowedFundForm)
 from .plots import bar_chart, donut_chart
 from babel.numbers import format_percent
-from networth.models import ExchangeRate
 
     
 
@@ -96,12 +95,6 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         if currencies.exists():
             for currency in currencies:
                 liability_total.append(Money(liability.filter(settlement_amount_currency=currency).aggregate(Sum('settlement_amount'))['settlement_amount__sum'], currency))
-        # context['fixed_asset_total'] = liability_total
-
-        
-        # financial_report_email()
-        # fr = FinancialReport(savings, investments, stocks, business, fixed_asset, liability)
-        # context['country_networth'] = fr.country_networth()
         return context
 
 class DashboardView(LoginRequiredMixin, TemplateView):

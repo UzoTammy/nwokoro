@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    .list-group {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+
+    .styled-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .styled-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 5px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .styled-list li:last-child {
+      border-bottom: none;
+    }
+
+    .list-group-item {
+      font-weight: normal;
+      color: #555;
+    }
+
+    .item-value {
+      text-align: right;
+      color: #007bff;
+    }
+  </style>
+  <title>Personal email</title>
+</head>
+
+<body>
+  <div class="list-group">
+    <h4>Investment maturing in one week</h4>
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr style="border-bottom: 1px solid #ddd;">
+        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Principal</td>
+        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{principal}}</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #ddd;">
+        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Due Date</td>
+        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{due_date}}</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #ddd;">
+        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Expected Yield</td>
+        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{yield}}</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #ddd;">
+        <td style="font-weight: bold; color: #555; padding: 15px 10px;">
+            {{message|default_if_none: 'No message'}}
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="">
+    <a href="https://uzonwokoro.com/networth/{{link_to_investment}}">See investment details</a>
+  </div>
+</body>
+
+</html>

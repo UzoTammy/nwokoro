@@ -175,11 +175,11 @@ class FinancialReport:
         # Create the email message
         msg = EmailMultiAlternatives(subject, "plain text", from_email, to_email,
                                      headers={"Reply-To": "nwokorouzo@gmail.com"},)
+        
         msg.attach_alternative(html_content, "text/html")
 
         try:
             msg.send()
-            # return HttpResponse("Email sent successfully!")
         except Exception as e:
             return HttpResponse(f"Failed to send email: {e}")
 
@@ -199,3 +199,5 @@ class FinancialReport:
             present_roi=self.get_present_roi(),
             networth_by_country=self.country_networth()
         )
+
+
