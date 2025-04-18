@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.models.aggregates import Sum, Min, Max
-from django.db.models import F
+from django.db.models import F, ExpressionWrapper, DateTimeField, Func
 from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from djmoney.models.fields import Money
@@ -16,7 +16,22 @@ from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm,
 from .plots import bar_chart, donut_chart
 from babel.numbers import format_percent
 
+
+def is_homogenous(value: list):
+    if not value:
+        return False
+    if len(value) == 1:
+        return False
+    if len(value) == 2 and value[0] != value[1]:
+        return False
+    return True
     
+def highest_occurring_item(value: list):
+    result = list()
+    items = set(value)
+    for item in items:
+        result.append((item, value.count(item)))
+    return max(result, key=lambda x: x[1])[0]
 
 # Create your views here.
 class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -440,28 +455,41 @@ class InstitutionReportView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         investments = Investment.objects.filter(is_active=True).filter(owner=self.request.user).order_by('holder')
-        holders_in_investment = investments.values_list('holder', flat=True).distinct()
+        holders_in_investment:Investment = investments.values_list('holder', flat=True).distinct()
         dataset = list()
+
+        
         for holder in holders_in_investment:
-            
-            # institution = investments.first().holder
             principals = list(obj.principal for obj in investments.filter(holder=holder))
+
+            # Total on local currency (Regarded here as currency with the highest occurrence)
+            currencies = [principal.currency for principal in principals]
+            local_currency: str|None = highest_occurring_item(currencies) if is_homogenous(currencies) else None
+            
             records = list()
             sub_total = Decimal(0)
             for principal in principals:
                 exchange_rate = ExchangeRate.objects.get(target_currency=principal.currency)
                 base_amount = principal.amount / Decimal(exchange_rate.rate)
+
                 records.append({
                     'currency': principal.currency,
                     'target_amount': principal,
                     'base_amount': Money(base_amount, 'USD')
                 })
                 sub_total += base_amount
+                
             dataset.append({
                 'holder': holder,
                 'records': records,
                 'sub_total': Money(sub_total, 'USD')
             })
+
+            if local_currency is not None:
+                exchange_rate = ExchangeRate.objects.get(target_currency=local_currency).rate
+                dataset[-1].update({'local_total': Money(sub_total*Decimal(exchange_rate), local_currency)})
+
         context['institutions'] = dataset
         context['total'] = sum(data['sub_total'] for data in dataset)
+        
         return context

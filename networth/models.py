@@ -376,6 +376,7 @@ class Investment(models.Model):
         self.owner.preference.investment_holders = list(holders)
         self.owner.preference.save()
 
+
 class Stock(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_stocks")
     holder = models.CharField(max_length=30)
@@ -439,6 +440,7 @@ class Stock(models.Model):
         self.owner.preference.stock_holders = list(holders)
         self.owner.preference.save()
 
+
 class Business(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
@@ -464,6 +466,7 @@ class Business(models.Model):
         self.owner.preference.business_holders = list(holders)
         self.owner.preference.save()
 
+
 class FixedAsset(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
@@ -484,6 +487,7 @@ class FixedAsset(models.Model):
         self.owner.preference.fixed_asset_holders = list(holders)
         self.owner.preference.save()
 
+
 class Liability(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
@@ -500,6 +504,7 @@ class Liability(models.Model):
     class Meta:
         verbose_name = 'Liability'
     
+
 class BusinessTransaction(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_business_transactions")
@@ -512,6 +517,7 @@ class BusinessTransaction(models.Model):
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
     
+
 class FixedAssetTransaction(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_fixed_asset_transactions")
@@ -523,6 +529,7 @@ class FixedAssetTransaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
+
 
 class LiabilityTransaction(models.Model):
 
@@ -536,6 +543,7 @@ class LiabilityTransaction(models.Model):
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
 
+
 class InvestmentTransaction(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_investment_transactions")
@@ -547,7 +555,8 @@ class InvestmentTransaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
-    
+
+
 class StockTransaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_stock_transactions")
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name='stock_transactions')
@@ -558,6 +567,7 @@ class StockTransaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
+
 
 class SavingsTransaction(models.Model):
 
@@ -571,6 +581,7 @@ class SavingsTransaction(models.Model):
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
  
+
 class BorrowedFund(models.Model):
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -593,7 +604,8 @@ class BorrowedFund(models.Model):
     
     def number_of_payments_made(self):
         return self.borrowed_fund_transactions.all()
-        
+
+
 class BorrowedFundTransaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_borrowed_fund_transactions")
     borrowed_fund = models.ForeignKey(BorrowedFund, on_delete=models.CASCADE, related_name='borrowed_fund_transactions')
@@ -604,6 +616,7 @@ class BorrowedFundTransaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
+
 
 class FinancialData(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)

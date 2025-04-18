@@ -59,5 +59,5 @@ urlpatterns = [
     path('saving/counter-transfer/', SavingsCounterTransferView.as_view(),
          name='saving-counter-transfer'),
 
-    path('instition-report', InstitutionReportView.as_view(), name='institution-report') 
+    path('institution-report', InstitutionReportView.as_view(), name='institution-report') 
 ]

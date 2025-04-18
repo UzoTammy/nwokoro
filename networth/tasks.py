@@ -71,7 +71,6 @@ def save_financial_data():
             fr = FinancialReport(savings, investments, stocks, business, fixed_asset, liability)
             fr.save_report()
 
-
 def send_investment_email(investment: Investment):
     
     from_email = "no-reply@chores.com"
@@ -104,7 +103,6 @@ def send_investment_email(investment: Investment):
         msg.send()
     except Exception as e:
         return HttpResponse(f"Failed to send email: {e}")
-
  
 @shared_task
 def investment_notification():
