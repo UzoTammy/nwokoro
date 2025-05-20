@@ -77,7 +77,7 @@ def send_investment_email(investment: Investment):
 
     to_email = [investment.owner.email]
 
-    if investment.due_in_days == 7:
+    if investment.due_in_days() == 7:
         message = "This is to remind you that your investment will be due one week from today"
     elif investment.due_in_days() == 3:
         message = "Your investment will be due in 3 days. You need to plan next invest if you have not"
@@ -110,12 +110,6 @@ def investment_notification():
     for user in users:
         investments = Investment.objects.filter(owner__username=user)
         for investment in investments:
-            if investment.due_in_days() == 7:
+            if investment.due_in_days() == 7 or investment.due_in_days() == 3 or investment.due_in_days() == 0:
                 send_investment_email(investment)
-            elif investment.due_in_days() == 3:
-                send_investment_email(investment)
-            elif investment.due_in_days() == 0:
-                send_investment_email(investment)
-            else:
-                pass # do nothing
-
+            

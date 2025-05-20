@@ -184,7 +184,7 @@ class InvestmentUpdateForm(forms.ModelForm):
     
 class InvestmentTerminationForm(forms.Form):
     adjusted_amount = forms.DecimalField(
-        max_digits=12, decimal_places=2, initial=0.0, help_text='To normalize the real investment figures')
+        max_digits=12, decimal_places=2, initial=0.0, help_text='Amount to add or to deduct from accrued interest')
     amount_type = forms.CharField(widget=forms.Select(choices=[('CR', 'CR'), ('DR', 'DR')]))
     savings_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(
         attrs={'class': 'form-control'}))  # 'style': 'display:none'}), required=False)

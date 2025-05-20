@@ -243,15 +243,15 @@ class Investment(models.Model):
     def __str__(self):
         return f'I: {self.principal}-{self.holder}-{self.duration} days'
     
-    def maturity(self):
+    def maturity(self)->date:
         return self.start_date + timezone.timedelta(days=self.duration)
 
-    def is_matured(self):
-        if date.today()>self.maturity():
+    def is_matured(self)->bool:
+        if date.today() > self.maturity():
             return True
         return False
     
-    def due_in_days(self):
+    def due_in_days(self)->int:
         return (self.maturity() - date.today()).days
     
     def daily_roi(self):

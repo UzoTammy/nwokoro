@@ -199,5 +199,3 @@ class FinancialReport:
             present_roi=self.get_present_roi(),
             networth_by_country=self.country_networth()
         )
-
-
