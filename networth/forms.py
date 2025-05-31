@@ -112,8 +112,9 @@ class SavingFormUpdate(forms.ModelForm):
 
 class InvestmentCreateForm(forms.ModelForm):
     
-    holder_select = forms.CharField(widget=forms.Select(choices=[(None, 'List is empty')])) #
-    holder_text = forms.ChoiceField(label='Or Type Holder')
+    holder_select = forms.CharField(label="Select Holder", widget=forms.Select(choices=[(None, 'List is empty')]), required=False) #
+    holder_text = forms.CharField(label='Or Enter Holder', required=False, 
+                                  widget=forms.TextInput(attrs={'placeholder': 'Required if none is selected above'}))
 
     start_date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'}))
