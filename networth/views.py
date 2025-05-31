@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.models.aggregates import Sum, Min, Max
-from django.db.models import F, ExpressionWrapper, DateTimeField, Func
+from django.db.models import F
 from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from djmoney.models.fields import Money
@@ -179,17 +179,21 @@ class InvestmentCreateView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         form.cleaned_data['owner'] = self.request.user if self.request.user.is_staff else None
-        savings_account = Saving.objects.get(pk=self.kwargs['pk'])        
+        savings_account = Saving.objects.get(pk=self.kwargs['pk'])  
+        start_date = form.cleaned_data['start_date']
+        
+        dt = datetime.datetime.combine(start_date, datetime.time.min)
+        tz = ZoneInfo("UTC")
+        aware_date = dt.replace(tzinfo=tz)
         savings_account.create_investment(
-            holder=form.cleaned_data['holder'],
+            holder=form.cleaned_data['holder_select'] if form.cleaned_data['holder_select'] else form.cleaned_data['holder_text'],
             principal=form.cleaned_data['principal'],
             rate=form.cleaned_data['rate'],
-            start_date=form.cleaned_data['start_date'],
+            start_date=aware_date,
             duration=form.cleaned_data['duration'],
             category=form.cleaned_data['category']
         )
-
-    
+        print(dt, aware_date)
         messages.success(self.request, 'Investment created successfully !!!')
         return super().form_valid(form)
 
@@ -336,7 +340,6 @@ class BusinessCreateView(LoginRequiredMixin, FormView):
         kwargs['user'] = self.request.user
         return kwargs
 
-
     def form_valid(self, form):
         form.instance.owner = self.request.user
 
@@ -370,7 +373,6 @@ class FixedAssetCreateView(LoginRequiredMixin, FormView):
         kwargs = super().get_form_kwargs()
         kwargs['pk'] = self.kwargs.get('pk')
         return kwargs
-
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
