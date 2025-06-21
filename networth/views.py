@@ -154,7 +154,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             min_roi = financials.aggregate(Min('daily_roi'))['daily_roi__min']
             recent_daily_roi = financials.values_list('daily_roi', flat=True)
             context['daily_roi_image'] = bar_chart(recent_days, recent_daily_roi, 'USD($)', 'Days', 'Daily ROI', y_min=int(min_roi/2))
-
+            # context['scipy'] = scipy_bar()
             latest = financials.latest('date')
             labels = ['saving', 'investment', 'stock', 'fixed asset', 'business']
             sizes = [latest.savings.amount, latest.investment.amount, latest.stock.amount, latest.fixed_asset.amount, latest.business.amount]
@@ -163,6 +163,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             sizes = latest.networth_by_country.values()
             
             context['asset_location'] = donut_chart(labels, sizes)
+            
         return context
 
 class InvestmentCreateView(LoginRequiredMixin, FormView):
