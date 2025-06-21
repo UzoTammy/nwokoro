@@ -227,6 +227,31 @@ class Saving(models.Model):
         self.owner.preference.savings_holders = list(holders)
         self.owner.preference.save()
 
+    def convert_fund(self, receiver, amount: Money, converted_amount):
+        
+        self.value -= amount
+        self.save()
+        receiver.value += converted_amount
+        receiver.save()
+
+        SavingsTransaction.objects.create(
+            user = self.owner,
+            savings = self,
+            amount = amount,
+            description = 'Fund conversion',
+            timestamp = datetime.now(),
+            transaction_type = 'DR'
+        )
+
+        SavingsTransaction.objects.create(
+            user = self.owner,
+            savings = receiver,
+            amount = converted_amount,
+            description = 'Fund conversion',
+            timestamp = datetime.now(),
+            transaction_type = 'CR'
+        )
+
 class Investment(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     holder = models.CharField(max_length=30)

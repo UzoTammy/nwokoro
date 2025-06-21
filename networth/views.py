@@ -1,4 +1,5 @@
 import datetime
+from django.http import HttpResponse
 from decimal import Decimal
 from zoneinfo import ZoneInfo
 from django.urls import reverse_lazy
@@ -12,7 +13,7 @@ from .models import Saving, Stock, Investment, ExchangeRate, Business, Financial
 from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm, StockUpdateForm, SavingForm, SavingFormUpdate,
                     InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm, 
                     FixedAssetCreateForm, FixedAssetUpdateForm, SavingsCounterTransferForm,
-                    BorrowedFundForm)
+                    BorrowedFundForm, ConversionForm)
 from .plots import bar_chart, donut_chart
 from babel.numbers import format_percent
 
@@ -294,7 +295,6 @@ class StockUpdateView(LoginRequiredMixin, UpdateView):
         kwargs['user'] = self.request.user
         return kwargs
 
-
 # Saving
 class SavingCreateView(LoginRequiredMixin, CreateView):
     model = Saving
@@ -308,6 +308,7 @@ class SavingCreateView(LoginRequiredMixin, CreateView):
     
     def form_valid(self, form):
         form.instance.owner = self.request.user if self.request.user.is_staff else None
+        form.instance.holder = form.cleaned_data['holder_text'] if form.cleaned_data['holder_text'] != '' else form.cleaned_data['holder_select']
         return super().form_valid(form)
 
 class SavingDetailView(LoginRequiredMixin, DetailView):
@@ -327,6 +328,25 @@ class SavingUpdateView(LoginRequiredMixin, UpdateView):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
+
+class SavingsConversionView(LoginRequiredMixin, FormView):
+    success_url = reverse_lazy('networth-home')
+    form_class = ConversionForm
+    template_name = 'networth/conversion_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['username'] = self.request.user.username
+        return kwargs
+
+    def form_valid(self, form):
+        source:Saving = form.cleaned_data['source_account']
+        receiver = form.cleaned_data['receiver_account']
+        amount = form.cleaned_data['amount']
+        converted_amount = form.cleaned_data['converted_amount']
+        source.convert_fund(receiver, amount, converted_amount)
+        messages.success(self.request, "Fund conversion complete !!!")
+        return super().form_valid(form) 
     
 # Business
 class BusinessCreateView(LoginRequiredMixin, FormView):

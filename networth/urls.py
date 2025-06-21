@@ -1,9 +1,12 @@
 
 from django.urls import path
 from .views import (NetworthHomeView, DashboardView,
-                    InvestmentCreateView, InvestmentDetailView, InvestmentRolloverView, InvestmentUpdateView, InvestmentTerminationView,
+                    InvestmentCreateView, InvestmentDetailView, 
+                    InvestmentRolloverView, InvestmentUpdateView, 
+                    InvestmentTerminationView,
                     StockCreateView, StockDetailView, StockUpdateView,
                     SavingCreateView, SavingDetailView, SavingUpdateView,
+                    SavingsConversionView,
                     BusinessCreateView, BusinessDetailView, BusinessUpdateView,
                     FixedAssetCreateView, FixedAssetDetailView, FixedAssetUpdateView,
                     ExternalFundHome, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView)
@@ -36,6 +39,8 @@ urlpatterns = [
          name='networth-saving-detail'),
     path('saving/<int:pk>/update/', SavingUpdateView.as_view(),
          name='networth-saving-update'),
+     path('saving/conversion/', SavingsConversionView.as_view(), 
+          name='saving-conversion'),
 
     path('business/<int:pk>/create/', BusinessCreateView.as_view(),
          name='networth-business-create'),

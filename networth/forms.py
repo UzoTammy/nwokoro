@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django import forms
 from django.forms import ValidationError
 from django.utils import timezone
@@ -110,6 +111,56 @@ class SavingFormUpdate(forms.ModelForm):
         model = Saving
         fields = ['holder', 'date', 'host_country', 'category']
 
+class ConversionForm(forms.Form):
+    CURRENCIES = [('NGN', 'NGN'), ('USD', 'USD'), ('CAD', 'CAD')]
+
+    source_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(attrs={'class': 'form-control'}))
+    receiver_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(attrs={'class': 'form-control'}))
+    exchange_rate = MoneyField(decimal_places=2, min_value=1, default_currency='NGN')
+    amount = MoneyField(decimal_places=2)
+
+    def __init__(self, *args, **kwargs):
+        self.username = kwargs.pop('username', None)
+        super().__init__(*args, **kwargs)
+
+        if self.username:
+            owner = User.objects.get(username=self.username)
+            queryset = Saving.objects.filter(owner=owner)
+            self.fields['source_account'].queryset = queryset
+            self.fields['receiver_account'].queryset = queryset
+
+              
+    def clean(self):
+        source_currency = self.cleaned_data["source_account"].value.currency
+        receiver_currency = self.cleaned_data["receiver_account"].value.currency
+
+        if self.cleaned_data.get("source_account") == self.cleaned_data.get("receiver_account"):
+            raise ValidationError("Conversion is not necessary for same savings account")
+        
+        if source_currency == receiver_currency:
+            raise ValidationError("Source account currency must differ from receiver account currency")
+        
+        if not (self.cleaned_data['amount'].currency == source_currency or self.cleaned_data['amount'].currency == receiver_currency):
+            raise ValidationError(f"Currency must either be {source_currency} or {receiver_currency}")
+        
+        if not (self.cleaned_data['exchange_rate'].currency == source_currency or self.cleaned_data['exchange_rate'].currency == receiver_currency):
+            raise ValidationError(f"Currency must either be {source_currency} or {receiver_currency}")
+        
+        # normal will be exchange currency matching receicver currency
+        exchange_rate = self.cleaned_data['exchange_rate'].amount if self.cleaned_data['exchange_rate'].currency != source_currency else 1/self.cleaned_data['exchange_rate'].amount
+        
+        if self.cleaned_data['amount'].currency == source_currency:
+            converted_amount = Money(round(self.cleaned_data['amount'].amount * exchange_rate, 2), receiver_currency)
+        else:
+            converted_amount = self.cleaned_data['amount']
+
+            # normalized amount MUST be in same currency with source currency
+            self.cleaned_data['amount'] = Money(round(self.cleaned_data['amount'].amount / exchange_rate, 2), source_currency)
+        self.cleaned_data['converted_amount'] = converted_amount
+
+        if self.cleaned_data['amount'] > self.cleaned_data['source_account'].value:
+            raise ValidationError("Insufficient fund in source account")
+        
 class InvestmentCreateForm(forms.ModelForm):
     
     holder_select = forms.CharField(label="Select Holder", widget=forms.Select(choices=[(None, 'List is empty')]), required=False) #
@@ -182,7 +233,6 @@ class InvestmentUpdateForm(forms.ModelForm):
             dynamic_choices = [(None, 'List of Holders')] + holders
             self.fields['holder'].widget.choices = dynamic_choices
             
-    
 class InvestmentTerminationForm(forms.Form):
     adjusted_amount = forms.DecimalField(
         max_digits=12, decimal_places=2, initial=0.0, help_text='Amount to add or to deduct from accrued interest')
@@ -431,4 +481,5 @@ class SavingsCounterTransferForm(forms.Form):
             raise ValidationError(message='Host country of both accounts must be the same')
         if self.cleaned_data['donor_account'].value.amount < self.cleaned_data['amount']:
             raise ValidationError(message='Insufficient fund in Donor Account')
-    
+        
+        
