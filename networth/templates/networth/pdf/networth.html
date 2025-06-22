@@ -5,33 +5,38 @@
 <table>
     <tr>
         <td class="text-left">{{user.username}}</td>
-        <td>{{fd.date}}</td>
+        <td>{{fd.date}} 
+        <small>{{fd.exchange_rate}}</small></td>
     </tr>
 </table>
-<table>
-    <tr>
-        <td class="text-left">Networth as at {{fd_first.date}}</td>
-        <td>{{fd_first.worth}}</td>
-    </tr>
-    <tr>
-        <td class="text-left">Current Networth</td>
-        <td>{{fd.worth}}</td>
-    </tr>
-    <tr>
-        <td class="text-left">ROI taken</td>
-        <td class="{% if fd_first.growth.amount > 0 %}  text-success {% endif %}">
-            ({{fd_first.growth_percent}}) {{fd_first.growth}}
-        </td>
-    </tr>
-    <tr>
-        <td class="text-left">OnGoing ROI</td>
-        <td>{{fd.present_roi}}</td>
-    </tr>
-    <tr>
-        <td class="text-left">Liability</td>
-        <td>{{fd.liability}}</td>
-    </tr>
-</table>
+<div class="section">
+
+    <table>
+        <h3>Actual</h3>
+        <tr>
+            <td class="text-left">Networth as at {{fd_first.date}}</td>
+            <td>{{fd_first.worth}}</td>
+        </tr>
+        <tr>
+            <td class="text-left">Current Networth</td>
+            <td>{{fd.worth}}</td>
+        </tr>
+        <tr>
+            <td class="text-left">ROI taken</td>
+            <td class="{% if fd_first.growth.amount > 0 %}  text-success {% endif %}">
+                ({{fd_first.growth_percent}}) {{fd_first.growth}}
+            </td>
+        </tr>
+        <tr>
+            <td class="text-left">OnGoing ROI</td>
+            <td>{{fd.present_roi}}</td>
+        </tr>
+        <tr>
+            <td class="text-left">Liability</td>
+            <td>{{fd.liability}}</td>
+        </tr>
+    </table>
+</div>
 
 <div class="section">
     <img style="width: 350px; height: auto;" src="data:image/png;base64,{{ plot|safe }}" alt="">
@@ -40,6 +45,7 @@
 
 <div class="section">
     <table>
+        <h3>Target</h3>
         <tr>
             <td class="text-left">Daily ROI Target</td>
             <td>{{fd_first.base_daily_roi}}</td>
@@ -54,9 +60,24 @@
         </tr>
     </table>
 </div>
-
-<div class="footer">
-    <small>{{fd.exchange_rate}}</small>
+<div class="section">
+    <table>
+        <tr>
+            <td>Fixed Asset</td>
+            <td>Business</td>
+            <td>Stock</td>
+            <td>Investment</td>
+            <td>Savings</td>
+        </tr>
+        <tr>
+            <td>{{instruments.fixed_asset}}</td>
+            <td>{{instruments.business}}</td>
+            <td>{{instruments.stock}}</td>
+            <td>{{instruments.investment}}</td>
+            <td>{{instruments.savings}}</td>
+        </tr>
+        
+    </table>
 </div>
 
 {% endblock %}

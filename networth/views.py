@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 from django.http import HttpResponse
 from decimal import Decimal
 from zoneinfo import ZoneInfo
@@ -550,5 +551,46 @@ class PDFNetworthReport(WeasyTemplateResponseMixin, UserPassesTestMixin, Templat
         
         context['donot'] = donut_chart(["CAN", "NGN", "USA"], 
                                        [can, ngn, usa])
+        fixed_asset = FixedAsset.objects.filter(owner=self.request.user)
+        business = Business.objects.filter(owner=self.request.user)
+        stock = Stock.objects.filter(owner=self.request.user)
+        investment = Investment.objects.filter(owner=self.request.user).filter(is_active=True)
+        savings = Saving.objects.filter(owner=self.request.user)
         
+        
+        context['instruments']  = {
+            'fixed_asset': self.get_USD_value(fd, fixed_asset),
+            'business': self.get_USD_value(fd, business, 'business'),
+            'stock': self.get_USD_value(fd, stock, 'stock'),
+            'investment': self.get_USD_value(fd, investment, 'investment'),
+            'savings': self.get_USD_value(fd, savings)
+        }
         return context
+
+    def get_USD_value(self, fd, instrument, _type: Optional[str]=None):
+        if _type == 'investment'.lower():
+            currencies = instrument.values_list('principal_currency', flat=True).distinct()
+        elif _type == 'business'.lower() or _type == 'stock'.lower():
+            currencies = instrument.values_list('unit_cost_currency', flat=True).distinct()
+        else:
+            currencies = instrument.values_list('value_currency', flat=True).distinct()
+        
+        total = 0
+        for currency in currencies:
+            if _type == 'investment'.lower():
+                raw_value = instrument.filter(principal_currency=currency).aggregate(Sum('principal'))['principal__sum']
+            elif _type == 'business'.lower():
+                raw_value = instrument.filter(unit_cost_currency=currency).annotate(value=F('shares')*F('unit_cost')).aggregate(Sum('value'))['value__sum']
+            elif _type == 'stock'.lower():
+                raw_value = instrument.filter(unit_cost_currency=currency).annotate(value=F('units')*F('unit_cost')).aggregate(Sum('value'))['value__sum']
+            else:
+                raw_value = instrument.filter(value_currency=currency).aggregate(Sum('value'))['value__sum']
+            if currency == 'NGN' or currency == 'CAD':
+                value = float(raw_value)/fd.exchange_rate[currency]
+            else:
+                value = float(raw_value)
+            total += value
+            
+        return Money(total, 'USD')
+
+           
