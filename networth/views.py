@@ -529,11 +529,17 @@ class PDFNetworthReport(WeasyTemplateResponseMixin, UserPassesTestMixin, Templat
         context = super().get_context_data(**kwargs)
         current_year = datetime.date.today().year
         record = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
-        first_record = record.earliest('date')
-        first_worth = first_record.worth
+        first_record = record.earliest('date') if current_year != 2025 else record.filter(date__date=datetime.date(2025, 2, 1)).first()
+        first_worth = first_record.networth()
+        base_daily_roi = 1.2 * first_record.daily_roi # 20% above the first roi of the year
         first_date = datetime.date(year=current_year, month=1, day=1).strftime("%d %b, %Y")
+        target_roi = base_daily_roi * 365 
         fd = record.latest('date')
-        context['fd_first'] = {'worth': first_worth, 'date': first_date, 'growth': fd.worth - first_worth}
+        growth_percent = format_percent(round((fd.networth() - first_worth)/first_worth, 4), decimal_quantization=False, locale='en_US')
+        expected_growth_rate = format_percent(round((target_roi)/first_worth, 4), decimal_quantization=False, locale='en_US')
+        context['fd_first'] = {'worth': first_worth, 'date': first_date, 'growth': fd.networth() - first_worth,
+                               'base_daily_roi': base_daily_roi, 'target_roi': target_roi, 
+                               'growth_percent': growth_percent, 'expected_growth_rate': expected_growth_rate}
         context['fd'] = fd
         context['plot'] = bar_chart(['Fixed Asset', 'Stock', 'Investment', 'Savings',  'Business'], 
                                     [fd.fixed_asset.amount, fd.stock.amount, fd.investment.amount, fd.savings.amount, fd.business.amount],
