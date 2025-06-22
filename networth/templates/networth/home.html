@@ -16,13 +16,11 @@
       <h4 class="font-italics float-right mr-2">Owner: {{user.username}}</h4>
       <h1 class="display-4">Networth</h1>
       <small class="ml-3">As at {{fd.date}}</small>
-      <a class="float-right mr-3" href="{% url 'networth-dashboard' %}"><i
-        class="fa fa-tachometer-alt"></i>
+      <a class="float-right mr-3" href="{% url 'networth-dashboard' %}"><i class="fa fa-tachometer-alt"></i>
       </a>
-          
-            <a class="float-right mr-3" href="{% url 'institution-report' %}"><i
-              class="fa fa-table"></i>
-          </a>
+      <a class="float-right mr-3 text-info" href="{% url 'pdf-networth' %}"><i class="fa fa-file-pdf"></i></a>
+      <a class="float-right mr-3" href="{% url 'institution-report' %}"><i class="fa fa-table"></i>
+      </a>
       </small>
       <div class="row">
         <div class="col-sm-4">
@@ -32,7 +30,7 @@
             </li>
             <li class="list-group-item list-group-item-primary">Daily ROI <span
                 class="float-right">{{fd.daily_roi}}</span></li>
-            <li class="list-group-item list-group-item-primary">Present ROI<span
+            <li class="list-group-item list-group-item-primary">Accrued ROI<span
                 class="float-right">{{fd.present_roi}}</span></li>
           </ul>
         </div>
@@ -62,8 +60,8 @@
           </ul>
         </div>
       </div>
-      
-    </div>  
+
+    </div>
   </div>
   <div class="row col"><small class="text-muted ml-2">Exchange Rate: {{exchange}}</div>
   {% else %}
@@ -178,7 +176,7 @@
                     <th>Maturity</th>
                     <th>Due in</th>
                     <th class="text-center">Principal</th>
-                    <th class="text-right">Present ROI</th>
+                    <th class="text-right">Accrued ROI</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -186,7 +184,7 @@
                   <tr>
                     <td><a href="{% url 'networth-investment-detail' investment.pk %}">{{investment.holder}}</a></td>
                     <td>{{investment.maturity}}</td>
-                    <td class="text-center">{% if investment.due_in_days > 0 %} {{investment.due_in_days}} day(s) 
+                    <td class="text-center">{% if investment.due_in_days > 0 %} {{investment.due_in_days}} day(s)
                       {% else %} Matured {% endif %}</td>
                     <td class="text-right">{{investment.principal}}</td>
                     <td class="text-right">{{investment.present_roi}}</td>

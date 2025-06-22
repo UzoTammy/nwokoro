@@ -33,7 +33,7 @@ def bar_chart(x_axis, y_axis, Y='Y', X='X', title='Bar Chart', y_min=None):
 
     return _plot(plt)
 
-def donut_chart(labels:list, sizes):
+def donut_chart(labels:list, sizes:list):
 
     colors = ['#ff9999', '#66b3ff', '#99ff99', '#ffcc99', '#ce868c', '#5a59a5', '#848e31']
 

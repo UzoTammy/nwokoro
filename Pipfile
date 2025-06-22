@@ -71,6 +71,7 @@ matplotlib = "*"
 mpld3 = "*"
 django-select2 = "*"
 scipy = "*"
+django-weasyprint = "*"
 
 [dev-packages]
 

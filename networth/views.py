@@ -16,7 +16,7 @@ from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm,
                     BorrowedFundForm, ConversionForm)
 from .plots import bar_chart, donut_chart
 from babel.numbers import format_percent
-
+from django_weasyprint import WeasyTemplateResponseMixin
 
 def is_homogenous(value: list):
     if not value:
@@ -514,5 +514,35 @@ class InstitutionReportView(LoginRequiredMixin, TemplateView):
 
         context['institutions'] = dataset
         context['total'] = sum(data['sub_total'] for data in dataset)
+        
+        return context
+    
+class PDFNetworthReport(WeasyTemplateResponseMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/pdf/networth.html'
+
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        return False
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        current_year = datetime.date.today().year
+        record = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
+        first_record = record.earliest('date')
+        first_worth = first_record.worth
+        first_date = datetime.date(year=current_year, month=1, day=1).strftime("%d %b, %Y")
+        fd = record.latest('date')
+        context['fd_first'] = {'worth': first_worth, 'date': first_date, 'growth': fd.worth - first_worth}
+        context['fd'] = fd
+        context['plot'] = bar_chart(['Fixed Asset', 'Stock', 'Investment', 'Savings',  'Business'], 
+                                    [fd.fixed_asset.amount, fd.stock.amount, fd.investment.amount, fd.savings.amount, fd.business.amount],
+                                    "Worth", "Instrument Type", "Worth Distribution")
+        can = fd.networth_by_country.get('CA', 0)
+        ngn = fd.networth_by_country.get('NG', 0)
+        usa = fd.networth_by_country.get('US', 0)
+        
+        context['donot'] = donut_chart(["CAN", "NGN", "USA"], 
+                                       [can, ngn, usa])
         
         return context

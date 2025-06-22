@@ -1,0 +1,45 @@
+{% extends 'networth/pdf/base_pdf.html' %}
+
+{% block content %} 
+    <h1 class="text-center">Networth Report</h1>
+    <table>
+        <tr>
+            <td class="text-left">Networth as at {{fd_first.date}}</td>
+            <td>{{fd_first.worth}}</td>
+        </tr>
+        <tr>
+            <td class="text-left">Current Networth</td>
+            <td>{{fd.worth}}</td>
+        </tr>
+        <tr>
+            <td class="text-left {% if not fd_first.growth.amount > 0 %}  text-success {% endif %}">Growth/Loss</td>
+            <td>{{fd_first.growth}}</td>
+        </tr>
+        <tr>
+            <td class="text-left">Expected ROI</td>
+            <td>{{fd.roi}}</td>
+        </tr>
+        <tr>
+            <td class="text-left">Daily ROI</td>
+            <td>{{fd.daily_roi}}</td>
+        </tr>
+        <tr>
+            <td class="text-left">ROI standing as at {{fd.date}}</td>
+            <td>{{fd.present_roi}}</td>
+        </tr>
+        <tr>
+            <td class="text-left">Liability</td>
+            <td>{{fd.liability}}</td>
+        </tr>
+    </table>
+
+    <div class="section">
+        <img style="width: 350px; height: auto;" src="data:image/png;base64,{{ plot|safe }}" alt="">
+        <img style="width: 350px; height: auto;" src="data:image/png;base64,{{ donot|safe }}" alt="">
+    </div>
+
+    <div class="footer">
+        <small>{{fd.exchange_rate}}</small>
+    </div>
+
+{% endblock %}

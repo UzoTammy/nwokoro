@@ -9,7 +9,8 @@ from .views import (NetworthHomeView, DashboardView,
                     SavingsConversionView,
                     BusinessCreateView, BusinessDetailView, BusinessUpdateView,
                     FixedAssetCreateView, FixedAssetDetailView, FixedAssetUpdateView,
-                    ExternalFundHome, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView)
+                    ExternalFundHome, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView,
+                    PDFNetworthReport)
 
 
 urlpatterns = [
@@ -64,5 +65,7 @@ urlpatterns = [
     path('saving/counter-transfer/', SavingsCounterTransferView.as_view(),
          name='saving-counter-transfer'),
 
-    path('institution-report', InstitutionReportView.as_view(), name='institution-report') 
+    path('institution-report', InstitutionReportView.as_view(), name='institution-report'),
+
+    path('pdf/networth', PDFNetworthReport.as_view(), name='pdf-networth')
 ]
