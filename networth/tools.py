@@ -5,7 +5,7 @@ from django.db.models.aggregates import Sum
 
 from djmoney.money import Money
 
-from .models import ExchangeRate
+from .models import ExchangeRate, FinancialData
 
 
 def get_value(instrument:QuerySet, _type:Optional[str]):
@@ -84,4 +84,12 @@ def get_USD_value(instrument:QuerySet, _type:Optional[str]):
             
         return Money(total, 'USD')
 
-    
+def naira_valuation():
+    """
+        The devaluation of naira since beginning of the year
+    """
+    fd = FinancialData.objects.exclude(exchange_rate=None)
+    date = fd.earliest('date').date
+    value = fd.earliest('date').exchange_rate['NGN'] - fd.latest('date').exchange_rate['NGN']
+    tag = 'lost' if value < 0 else 'gained'
+    return Money(round(abs(value), 2), 'NGN'), tag, date.strftime('%d %b, %Y') #{'old_value': fd.earliest('date').exchange_rate['NGN'], 'new_value': fd.latest('date').exchange_rate['NGN']}

@@ -63,7 +63,12 @@
 
     </div>
   </div>
-  <div class="row col"><small class="text-muted ml-2">Exchange Rate: {{exchange}}</div>
+  <div class="row col">
+    <small class="text-muted ml-2">Exchange Rate: {{exchange}}.
+      {{naira_value_comment}}
+    </small>
+
+  </div>
   {% else %}
   <div class="row mt-3">
     <div class="col">

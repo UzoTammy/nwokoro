@@ -19,7 +19,7 @@ from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm,
                     BorrowedFundForm, ConversionForm)
 from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, BorrowedFund
 from .plots import bar_chart, donut_chart
-from .tools import get_value
+from .tools import get_value, naira_valuation
 
 def is_homogenous(value: list):
     if not value:
@@ -58,6 +58,8 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         nigeria = ExchangeRate.objects.get(target_currency="NGN")
         rate = Money(nigeria.rate/canada.rate, 'NGN')
         context['exchange'] = f'{rate}/CA$ on {canada.updated_at.strftime("%A %d-%b-%Y")}'
+        comment = f"Naira have {naira_valuation()[1]} {naira_valuation()[0]} since {naira_valuation()[2]}"
+        context['naira_value_comment'] = comment
         
         # queryset of assets
         investments = Investment.objects.filter(is_active=True).filter(owner=self.request.user)
