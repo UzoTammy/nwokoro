@@ -1,11 +1,12 @@
-from typing import Optional
+import datetime
+from typing import Optional, List
 
-from django.db.models import F, QuerySet
+from django.db.models import F, QuerySet, Q
 from django.db.models.aggregates import Sum
 
 from djmoney.money import Money
 
-from .models import ExchangeRate, FinancialData
+from .models import ExchangeRate, FinancialData, Investment
 
 
 def get_value(instrument:QuerySet, _type:Optional[str]):
@@ -93,3 +94,38 @@ def naira_valuation():
     value = fd.earliest('date').exchange_rate['NGN'] - fd.latest('date').exchange_rate['NGN']
     tag = 'lost' if value < 0 else 'gained'
     return Money(round(abs(value), 2), 'NGN'), tag, date.strftime('%d %b, %Y') #{'old_value': fd.earliest('date').exchange_rate['NGN'], 'new_value': fd.latest('date').exchange_rate['NGN']}
+
+
+
+
+def ytd_roi(year:Optional[int]=None)->List[dict]:
+    """
+        This function takes a year and returns investment
+        yields according to the various currencies
+        :prams 
+            - year
+        :return
+            - list of dictionaries.Each dictionary represents
+            a group of investments in one currency
+    """
+    if year is None:
+        year = datetime.datetime.now().year
+    investments = Investment.objects.filter(Q(start_date__year=year)|Q(start_date__year=year-1))
+    currencies = investments.values_list('principal_currency', flat=True).distinct()
+    store = list()
+    for currency in currencies:
+        store.append(investments.filter(principal_currency=currency))
+    
+    summation = list()
+    for qs in store:
+        principal = roi = Money(0, qs.first().principal.currency)
+        for investment in qs:
+            principal += investment.principal
+            roi += investment.roi()
+        summation.append({'principal': principal, 'roi': roi, 'percent': round(roi/principal, 5)})
+    return summation
+
+def set_roi_target(year=None):
+    investments = ytd_roi(year)
+    for investment in investments:
+        pass

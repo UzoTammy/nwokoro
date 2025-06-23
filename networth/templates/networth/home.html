@@ -200,15 +200,22 @@
             </div>
             <div class="col-sm-4">
               <div class="card" style="width: 18rem;">
-
                 <ul class="list-group list-group-flush">
                   {% for investment in investment_total %}
                   <li class="list-group-item"> {{investment.currency}}
                     <span class="float-right">{{investment}}</span>
                   </li>
                   {% endfor %}
+                  <li class="list-group-item text-center">YTD</li>
+                  {% for investment in year_roi %}
+                  <li class="list-group-item">
+                     Principal <span class="float-right">{{investment.principal}}</span>
+                  </li>
+                  <li class="list-group-item">
+                     ROI <span class="float-right">{{investment.roi}}</span>
+                  </li>
+                  {% endfor%}
                 </ul>
-
               </div>
             </div>
             {% endif %}

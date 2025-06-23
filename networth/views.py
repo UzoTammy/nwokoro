@@ -19,7 +19,7 @@ from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm,
                     BorrowedFundForm, ConversionForm)
 from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, BorrowedFund
 from .plots import bar_chart, donut_chart
-from .tools import get_value, naira_valuation
+from .tools import get_value, naira_valuation, set_roi_target, ytd_roi
 
 def is_homogenous(value: list):
     if not value:
@@ -81,6 +81,8 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['stock_total'] = get_value(stocks, 'stock')
         context['business_total'] = get_value(business, 'business')
         context['fixed_asset_total'] = get_value(fixed_asset, 'asset')
+        context['year'] = '2025'
+        context['year_roi'] = ytd_roi(2025)
 
         # currencies = liability.values_list('borrowed_amount_currency', flat=True).distinct().order_by('borrowed_amount_currency')
         # liability_total = list()
@@ -101,7 +103,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             
             obj = qs.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else qs.first()
             base_networth = obj.networth()
-            daily_roi = 1.2 * obj.daily_roi # 20% above the first roi of the year
+            daily_roi = 1.2 * obj.daily_roi # 20% above the start roi of the year
 
             context['financials'] = {
                 'base_networth': base_networth,
