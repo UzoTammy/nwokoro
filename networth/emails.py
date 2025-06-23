@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.http import HttpResponse
 from djmoney.models.fields import Money
 from .models import ExchangeRate, FinancialData
+from .tools import get_USD_value
 
 
 class FinancialReport:
@@ -36,73 +37,79 @@ class FinancialReport:
 
     def get_countries(self):
         # based on the premise that all host country must have savings account
-        save = list(self.savings.values_list(
+        countries = list(self.savings.values_list(
             'host_country', flat=True).distinct())
-        return save
+        return countries
 
     def get_saving_total(self, country=None):
         savings = self.savings.filter(host_country=country) if country else self.savings
 
-        currencies = savings.values_list(
-            'value_currency', flat=True).distinct().order_by('value_currency')
-        savings_total = list()
-        if currencies.exists():
-            for currency in currencies:
-                savings_total.append(Money(savings.filter(
-                    value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
-        return FinancialReport.convert_to_base(savings_total)
+        # currencies = savings.values_list(
+        #     'value_currency', flat=True).distinct().order_by('value_currency')
+        # savings_total = list()
+        # if currencies.exists():
+        #     for currency in currencies:
+        #         savings_total.append(Money(savings.filter(
+        #             value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
+        # return FinancialReport.convert_to_base(savings_total)
+        
+        return get_USD_value(savings, 'saving')
 
     def get_investment_total(self, country=None):
         investments = self.investments.filter(host_country=country) if country else self.investments
 
-        currencies = investments.values_list(
-            'principal_currency', flat=True).distinct().order_by('principal_currency')
-        investment_total = list()
-        if currencies.exists():
-            for currency in currencies:
-                investment_total.append(Money(investments.filter(
-                    principal_currency=currency).aggregate(Sum('principal'))['principal__sum'], currency))
-        return FinancialReport.convert_to_base(investment_total)
+        # currencies = investments.values_list(
+        #     'principal_currency', flat=True).distinct().order_by('principal_currency')
+        # investment_total = list()
+        # if currencies.exists():
+        #     for currency in currencies:
+        #         investment_total.append(Money(investments.filter(
+        #             principal_currency=currency).aggregate(Sum('principal'))['principal__sum'], currency))
+        # return FinancialReport.convert_to_base(investment_total)
+        return get_USD_value(investments, 'investment')
 
     def get_stock_total(self, country=None):
         stocks = self.stocks.filter(host_country=country) if country else self.stocks
 
-        currencies = stocks.values_list(
-            'unit_cost_currency', flat=True).distinct().order_by('unit_cost_currency')
-        stock_total = list()
-        if currencies.exists():
-            for currency in currencies:
-                stocks = stocks.annotate(
-                    value=F('unit_cost') * F('units'))
-                stock_total.append(Money(stocks.filter(
-                    unit_cost_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
-        return FinancialReport.convert_to_base(stock_total)
+        # currencies = stocks.values_list(
+        #     'unit_cost_currency', flat=True).distinct().order_by('unit_cost_currency')
+        # stock_total = list()
+        # if currencies.exists():
+        #     for currency in currencies:
+        #         stocks = stocks.annotate(
+        #             value=F('unit_cost') * F('units'))
+        #         stock_total.append(Money(stocks.filter(
+        #             unit_cost_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
+        # return FinancialReport.convert_to_base(stock_total)
+        return get_USD_value(stocks, 'stock')
 
     def get_business_total(self, country=None):
         business = self.business.filter(host_country=country) if country else self.business
 
-        currencies = business.values_list(
-            'unit_cost_currency', flat=True).distinct().order_by('unit_cost_currency')
-        total = list()
-        if currencies.exists():
-            for currency in currencies:
-                business = business.annotate(
-                    value=F('unit_cost') * F('shares'))
-                total.append(Money(business.filter(unit_cost_currency=currency).aggregate(
-                    Sum('value'))['value__sum'], currency))
-        return FinancialReport.convert_to_base(total)
+        # currencies = business.values_list(
+        #     'unit_cost_currency', flat=True).distinct().order_by('unit_cost_currency')
+        # total = list()
+        # if currencies.exists():
+        #     for currency in currencies:
+        #         business = business.annotate(
+        #             value=F('unit_cost') * F('shares'))
+        #         total.append(Money(business.filter(unit_cost_currency=currency).aggregate(
+        #             Sum('value'))['value__sum'], currency))
+        # return FinancialReport.convert_to_base(total)
+        return get_USD_value(business, 'business')
 
     def get_fixed_asset_total(self, country=None):
         fixed_asset = self.fixed_asset.filter(host_country=country) if country else self.fixed_asset
 
-        currencies = fixed_asset.values_list(
-            'value_currency', flat=True).distinct().order_by('value_currency')
-        total = list()
-        if currencies.exists():
-            for currency in currencies:
-                total.append(Money(fixed_asset.filter(
-                    value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
-        return FinancialReport.convert_to_base(total)
+        # currencies = fixed_asset.values_list(
+        #     'value_currency', flat=True).distinct().order_by('value_currency')
+        # total = list()
+        # if currencies.exists():
+        #     for currency in currencies:
+        #         total.append(Money(fixed_asset.filter(
+        #             value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
+        # return FinancialReport.convert_to_base(total)
+        return get_USD_value(fixed_asset, 'asset')
 
     def get_liability_total(self, country=None):
         liability = self.liability.filter(host_country=country) if country else self.liability

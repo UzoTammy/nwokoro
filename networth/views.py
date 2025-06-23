@@ -1,23 +1,25 @@
 import datetime
-from typing import Optional
-from django.http import HttpResponse
 from decimal import Decimal
 from zoneinfo import ZoneInfo
+
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.models.aggregates import Sum, Min, Max
 from django.db.models import F
 from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
+from babel.numbers import format_percent
 from djmoney.models.fields import Money
-from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, BorrowedFund
+from django_weasyprint import WeasyTemplateResponseMixin
+
 from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm, StockUpdateForm, SavingForm, SavingFormUpdate,
                     InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm, 
                     FixedAssetCreateForm, FixedAssetUpdateForm, SavingsCounterTransferForm,
                     BorrowedFundForm, ConversionForm)
+from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, BorrowedFund
 from .plots import bar_chart, donut_chart
-from babel.numbers import format_percent
-from django_weasyprint import WeasyTemplateResponseMixin
+from .tools import get_value
 
 def is_homogenous(value: list):
     if not value:
@@ -63,7 +65,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         savings = Saving.objects.filter(owner=self.request.user)
         business = Business.objects.filter(owner=self.request.user)
         fixed_asset = FixedAsset.objects.filter(owner=self.request.user)
-        liability = BorrowedFund.objects.filter(owner=self.request.user)
+        # liability = BorrowedFund.objects.filter(owner=self.request.user)
 
         context['investments'] = investments.order_by('host_country')
         context['savings'] = savings.order_by('value_currency')
@@ -72,46 +74,17 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['fixed_asset'] = fixed_asset.order_by('value_currency')
         
         # Asset total
-        currencies = investments.values_list('principal_currency', flat=True).distinct().order_by('principal_currency')
-        investment_total = list()
-        if currencies.exists():
-            for currency in currencies:
-                investment_total.append(Money(investments.filter(principal_currency=currency).aggregate(Sum('principal'))['principal__sum'], currency))
-        context['investment_total'] = investment_total
+        context['investment_total'] = get_value(investments, 'investment')
+        context['savings_total'] = get_value(savings, 'saving')
+        context['stock_total'] = get_value(stocks, 'stock')
+        context['business_total'] = get_value(business, 'business')
+        context['fixed_asset_total'] = get_value(fixed_asset, 'asset')
 
-        currencies = savings.values_list('value_currency', flat=True).distinct().order_by('value_currency')
-        savings_total = list()
-        if currencies.exists():
-            for currency in currencies:
-                savings_total.append(Money(savings.filter(value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
-        context['savings_total'] = savings_total
-
-        currencies = stocks.values_list('unit_cost_currency', flat=True).distinct().order_by('unit_cost_currency')
-        stock_total = list()
-        if currencies.exists():
-            for currency in currencies:
-                stock_total.append(Money(stocks.filter(unit_cost_currency=currency).annotate(value=F('unit_cost') * F('units')).aggregate(Sum('value'))['value__sum'], currency))
-        context['stock_total'] = stock_total
-        
-        currencies = business.values_list('unit_cost_currency', flat=True).distinct().order_by('unit_cost_currency')
-        business_total = list()
-        if currencies.exists():
-            for currency in currencies:
-                business_total.append(Money(business.filter(unit_cost_currency=currency).annotate(value=F('unit_cost') * F('shares')).aggregate(Sum('value'))['value__sum'], currency))
-        context['business_total'] = business_total
-        
-        currencies = fixed_asset.values_list('value_currency', flat=True).distinct().order_by('value_currency')
-        fixed_asset_total = list()
-        if currencies.exists():
-            for currency in currencies:
-                fixed_asset_total.append(Money(fixed_asset.filter(value_currency=currency).aggregate(Sum('value'))['value__sum'], currency))
-        context['fixed_asset_total'] = fixed_asset_total
-
-        currencies = liability.values_list('borrowed_amount_currency', flat=True).distinct().order_by('borrowed_amount_currency')
-        liability_total = list()
-        if currencies.exists():
-            for currency in currencies:
-                liability_total.append(Money(liability.filter(settlement_amount_currency=currency).aggregate(Sum('settlement_amount'))['settlement_amount__sum'], currency))
+        # currencies = liability.values_list('borrowed_amount_currency', flat=True).distinct().order_by('borrowed_amount_currency')
+        # liability_total = list()
+        # if currencies.exists():
+        #     for currency in currencies:
+        #         liability_total.append(Money(liability.filter(settlement_amount_currency=currency).aggregate(Sum('settlement_amount'))['settlement_amount__sum'], currency))
         return context
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -551,46 +524,7 @@ class PDFNetworthReport(WeasyTemplateResponseMixin, UserPassesTestMixin, Templat
         
         context['donot'] = donut_chart(["CAN", "NGN", "USA"], 
                                        [can, ngn, usa])
-        fixed_asset = FixedAsset.objects.filter(owner=self.request.user)
-        business = Business.objects.filter(owner=self.request.user)
-        stock = Stock.objects.filter(owner=self.request.user)
-        investment = Investment.objects.filter(owner=self.request.user).filter(is_active=True)
-        savings = Saving.objects.filter(owner=self.request.user)
         
-        
-        context['instruments']  = {
-            'fixed_asset': self.get_USD_value(fd, fixed_asset),
-            'business': self.get_USD_value(fd, business, 'business'),
-            'stock': self.get_USD_value(fd, stock, 'stock'),
-            'investment': self.get_USD_value(fd, investment, 'investment'),
-            'savings': self.get_USD_value(fd, savings)
-        }
         return context
-
-    def get_USD_value(self, fd, instrument, _type: Optional[str]=None):
-        if _type == 'investment'.lower():
-            currencies = instrument.values_list('principal_currency', flat=True).distinct()
-        elif _type == 'business'.lower() or _type == 'stock'.lower():
-            currencies = instrument.values_list('unit_cost_currency', flat=True).distinct()
-        else:
-            currencies = instrument.values_list('value_currency', flat=True).distinct()
-        
-        total = 0
-        for currency in currencies:
-            if _type == 'investment'.lower():
-                raw_value = instrument.filter(principal_currency=currency).aggregate(Sum('principal'))['principal__sum']
-            elif _type == 'business'.lower():
-                raw_value = instrument.filter(unit_cost_currency=currency).annotate(value=F('shares')*F('unit_cost')).aggregate(Sum('value'))['value__sum']
-            elif _type == 'stock'.lower():
-                raw_value = instrument.filter(unit_cost_currency=currency).annotate(value=F('units')*F('unit_cost')).aggregate(Sum('value'))['value__sum']
-            else:
-                raw_value = instrument.filter(value_currency=currency).aggregate(Sum('value'))['value__sum']
-            if currency == 'NGN' or currency == 'CAD':
-                value = float(raw_value)/fd.exchange_rate[currency]
-            else:
-                value = float(raw_value)
-            total += value
-            
-        return Money(total, 'USD')
 
            
