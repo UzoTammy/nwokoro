@@ -19,7 +19,7 @@ from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm,
                     BorrowedFundForm, ConversionForm)
 from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, BorrowedFund
 from .plots import bar_chart, donut_chart
-from .tools import get_value, naira_valuation, set_roi_target, ytd_roi
+from .tools import get_value, naira_valuation, ytd_roi
 
 def is_homogenous(value: list):
     if not value:
@@ -502,11 +502,13 @@ class InstitutionReportView(LoginRequiredMixin, TemplateView):
     
 class PDFNetworthReport(WeasyTemplateResponseMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/pdf/networth.html'
+    header_html = None
 
     def test_func(self):
         if self.request.user.is_staff:
             return True
         return False
+    
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -520,8 +522,9 @@ class PDFNetworthReport(WeasyTemplateResponseMixin, UserPassesTestMixin, Templat
         fd = record.latest('date')
         growth_percent = format_percent(round((fd.networth() - first_worth)/first_worth, 4), decimal_quantization=False, locale='en_US')
         expected_growth_rate = format_percent(round((target_roi)/first_worth, 4), decimal_quantization=False, locale='en_US')
+        
         context['fd_first'] = {'worth': first_worth, 'date': first_date, 'growth': fd.networth() - first_worth,
-                               'base_daily_roi': base_daily_roi, 'target_roi': target_roi, 
+                               'base_daily_roi': base_daily_roi, 'target_roi': target_roi, 'record': first_record,
                                'growth_percent': growth_percent, 'expected_growth_rate': expected_growth_rate}
         context['fd'] = fd
         context['plot'] = bar_chart(['Fixed Asset', 'Stock', 'Investment', 'Savings',  'Business'], 

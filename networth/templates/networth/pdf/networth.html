@@ -5,14 +5,13 @@
 <table>
     <tr>
         <td class="text-left">{{user.username}}</td>
-        <td>{{fd.date}} 
-        <small>{{fd.exchange_rate}}</small></td>
+        <td>{{fd.date}} </td>
     </tr>
 </table>
 <div class="section">
 
     <table>
-        <h3>Actual</h3>
+        <h3>Summary</h3>
         <tr>
             <td class="text-left">Networth as at {{fd_first.date}}</td>
             <td>{{fd_first.worth}}</td>
@@ -22,17 +21,17 @@
             <td>{{fd.worth}}</td>
         </tr>
         <tr>
-            <td class="text-left">ROI taken</td>
+            <td class="text-left">Earned</td>
             <td class="{% if fd_first.growth.amount > 0 %}  text-success {% endif %}">
                 ({{fd_first.growth_percent}}) {{fd_first.growth}}
             </td>
         </tr>
         <tr>
-            <td class="text-left">OnGoing ROI</td>
+            <td class="text-left">Pending ROI</td>
             <td>{{fd.present_roi}}</td>
         </tr>
         <tr>
-            <td class="text-left">Liability</td>
+            <td class="text-left">Current Liability</td>
             <td>{{fd.liability}}</td>
         </tr>
     </table>
@@ -45,7 +44,7 @@
 
 <div class="section">
     <table>
-        <h3>Target</h3>
+        <h3>Expectation</h3>
         <tr>
             <td class="text-left">Daily ROI Target</td>
             <td>{{fd_first.base_daily_roi}}</td>
@@ -62,7 +61,9 @@
 </div>
 <div class="section">
     <table>
+        <h3>Appropriation</h3>
         <tr>
+            <td>Period</td>
             <td>Fixed Asset</td>
             <td>Business</td>
             <td>Stock</td>
@@ -70,14 +71,27 @@
             <td>Savings</td>
         </tr>
         <tr>
+            <td>Present</td>
             <td>{{fd.fixed_asset}}</td>
             <td>{{fd.business}}</td>
             <td>{{fd.stock}}</td>
             <td>{{fd.investment}}</td>
             <td>{{fd.savings}}</td>
         </tr>
-        
+
+        <tr>
+            <td>Previous</td>
+            <td>{{fd_first.record.fixed_asset}}</td>
+            <td>{{fd_first.record.business}}</td>
+            <td>{{fd_first.record.stock}}</td>
+            <td>{{fd_first.record.investment}}</td>
+            <td>{{fd_first.record.savings}}</td>
+        </tr>
     </table>
+</div>
+
+<div class="footer">
+    <small>exchange rate: {{fd.exchange_rate}}</small>
 </div>
 
 {% endblock %}

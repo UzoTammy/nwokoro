@@ -6,6 +6,7 @@
 
     <title>Networth Report</title>
     <style>
+        
         body {
             font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
             color: #333;
@@ -78,10 +79,10 @@
         }
         @page{
             size: 'A4';
-            margin: 2.5cm .5cm 2.5cm .5cm;
+            margin: 1.0cm .5cm 1.0cm .5cm;
 
             @top-center{
-            content: 'Finuel Report';
+            content: none;
             color: red;
             font-size: larger;
             }
@@ -89,7 +90,6 @@
     </style>
 </head>
 <body>
-    
     {% block content %} {% endblock %}
 </body>
 </html>
