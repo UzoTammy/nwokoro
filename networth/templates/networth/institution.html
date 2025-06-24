@@ -20,14 +20,14 @@
                         <th class="text-right">ROI in USD</th>
                     </tr>
                 </thead>
-                {% for institution in institutions %}
-                {% for key, value in institution.items %}
+                {% for holders_data in institutions %}
+                {% for key, value in holders_data.items %}
                 
                 <tbody>
                     <tr>
                         <th><h6 class="text-danger">{{key}}</h6></th>
                     </tr>
-                    {% for record in value %}
+                    {% for record in value|first %}
                     <tr>
                         <td>{{record.value}}</td>
                         <td class="text-right">{{record.value_in_usd}}</td>
@@ -35,15 +35,14 @@
                         <td class="text-right">{{record.roi_in_usd}}</td>
                     </tr>
                     {% endfor %}
+                    <tr>
+                        <td>Total</td>
+                        <td class="text-right" colspan="1">{{value|last|first}}</td>
+                        <td class="text-right" colspan="2">{{value|last|last}}</td>
+                    </tr>
                 </tbody>
                 {% endfor %}
                 {% endfor %}
-                <tfoot>
-                    <tr>
-                        <th class="text-left">{{institution.local_total}}</th>
-                        <th class="text-right">{{institution.sub_total}}</th>
-                    </tr>
-                </tfoot>
             </table>
             </td>
             </tr>

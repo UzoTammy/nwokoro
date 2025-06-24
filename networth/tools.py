@@ -137,6 +137,8 @@ def investments_by_holder(owner):
         exch = ExchangeRate.objects.all()
         holder = qs.first().holder
         store = list()
+        # totals = list()
+        value_total = roi_total = Money(0, 'USD')
         for obj in qs:
             data = {"value": obj.principal, 'maturity': obj.maturity()}
             rate = exch.get(target_currency=obj.principal.currency).rate
@@ -144,7 +146,10 @@ def investments_by_holder(owner):
             roi_in_usd = float(obj.roi().amount)/rate
             data['value_in_usd'] = Money(value_in_usd, 'USD')
             data['roi_in_usd'] = Money(roi_in_usd, 'USD')
+            value_total += Money(value_in_usd, 'USD')
+            roi_total += Money(roi_in_usd, 'USD')
             store.append(data)
-        holders_data = {holder: store}
+        holders_data = {holder: (store, (value_total, roi_total))}
+        # [{holder: ([], (value total, roi total))}]
         stack.append(holders_data)
     return stack
