@@ -19,7 +19,7 @@ from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm,
                     BorrowedFundForm, ConversionForm)
 from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, BorrowedFund
 from .plots import bar_chart, donut_chart
-from .tools import get_value, naira_valuation, ytd_roi
+from .tools import get_value, naira_valuation, ytd_roi, investments_by_holder
 
 def is_homogenous(value: list):
     if not value:
@@ -460,44 +460,8 @@ class InstitutionReportView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        investments = Investment.objects.filter(is_active=True).filter(owner=self.request.user).order_by('holder')
-        holders_in_investment:Investment = investments.values_list('holder', flat=True).distinct()
-        dataset = list()
-
         
-        for holder in holders_in_investment:
-            principals = list(obj.principal for obj in investments.filter(holder=holder))
-
-            # Total on local currency (Regarded here as currency with the highest occurrence)
-            currencies = [principal.currency for principal in principals]
-            local_currency: str|None = highest_occurring_item(currencies) if is_homogenous(currencies) else None
-            
-            records = list()
-            sub_total = Decimal(0)
-            for principal in principals:
-                exchange_rate = ExchangeRate.objects.get(target_currency=principal.currency)
-                base_amount = principal.amount / Decimal(exchange_rate.rate)
-
-                records.append({
-                    'currency': principal.currency,
-                    'target_amount': principal,
-                    'base_amount': Money(base_amount, 'USD')
-                })
-                sub_total += base_amount
-                
-            dataset.append({
-                'holder': holder,
-                'records': records,
-                'sub_total': Money(sub_total, 'USD')
-            })
-
-            if local_currency is not None:
-                exchange_rate = ExchangeRate.objects.get(target_currency=local_currency).rate
-                dataset[-1].update({'local_total': Money(sub_total*Decimal(exchange_rate), local_currency)})
-
-        context['institutions'] = dataset
-        context['total'] = sum(data['sub_total'] for data in dataset)
-        
+        context['institutions'] = investments_by_holder(self.request.user)
         return context
     
 class PDFNetworthReport(WeasyTemplateResponseMixin, UserPassesTestMixin, TemplateView):

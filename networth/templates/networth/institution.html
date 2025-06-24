@@ -14,49 +14,43 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Institution</th>
-                        <th class="text-center">Amount</th>
+                        <th>Holder & Value</th>
+                        <th class="text-right">Value in USD</th>
+                        <th class="text-right">Maturity</th>
+                        <th class="text-right">ROI in USD</th>
                     </tr>
                 </thead>
+                {% for institution in institutions %}
+                {% for key, value in institution.items %}
+                
                 <tbody>
-                    {% for institution in institutions %}
-                    
-                        <tr>
-                            <th>{{institution.holder}}</th>
-                            <td>
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Amount(Host)</th>
-                                            <th class="text-right">Amount(USD)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for record in institution.records %}
-                                        <tr>
-                                            <td>{{record.target_amount}}</td>
-                                            <td class="text-right">{{record.base_amount}}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th class="text-left">{{institution.local_total}}</th>
-                                            <th class="text-right">{{institution.sub_total}}</th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </td>
-                        </tr>
-                    
+                    <tr>
+                        <th><h6 class="text-danger">{{key}}</h6></th>
+                    </tr>
+                    {% for record in value %}
+                    <tr>
+                        <td>{{record.value}}</td>
+                        <td class="text-right">{{record.value_in_usd}}</td>
+                        <td class="text-right">{{record.maturity}}</td>
+                        <td class="text-right">{{record.roi_in_usd}}</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
+                {% endfor %}
+                {% endfor %}
+                <tfoot>
+                    <tr>
+                        <th class="text-left">{{institution.local_total}}</th>
+                        <th class="text-right">{{institution.sub_total}}</th>
+                    </tr>
+                </tfoot>
             </table>
-            
+            </td>
+            </tr>
         </div>
     </div>
     {% else %}
-        <h3>No institutional Report available</h3>
+    <h3>No institutional Report available</h3>
     {% endif %}
 
     <div class="row mb-3">

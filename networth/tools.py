@@ -126,7 +126,25 @@ def ytd_roi(owner, year:Optional[int]=None)->List[dict]:
         summation.append({'principal': principal, 'roi': roi, 'percent': round(100*roi/principal, 2)})
     return summation
 
-def set_roi_target(year=None):
-    investments = ytd_roi(year)
-    for investment in investments:
-        pass
+
+def investments_by_holder(owner):
+    stack = list()
+    active_investments = Investment.objects.filter(is_active=True).filter(owner=owner)
+    holders = active_investments.values_list('holder', flat=True).distinct()
+    investments = list(active_investments.filter(holder=holder) for holder in holders)
+
+    for qs in investments:
+        exch = ExchangeRate.objects.all()
+        holder = qs.first().holder
+        store = list()
+        for obj in qs:
+            data = {"value": obj.principal, 'maturity': obj.maturity()}
+            rate = exch.get(target_currency=obj.principal.currency).rate
+            value_in_usd = float(obj.principal.amount)/rate
+            roi_in_usd = float(obj.roi().amount)/rate
+            data['value_in_usd'] = Money(value_in_usd, 'USD')
+            data['roi_in_usd'] = Money(roi_in_usd, 'USD')
+            store.append(data)
+        holders_data = {holder: store}
+        stack.append(holders_data)
+    return stack
