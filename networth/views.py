@@ -82,7 +82,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['business_total'] = get_value(business, 'business')
         context['fixed_asset_total'] = get_value(fixed_asset, 'asset')
 
-        context['year_roi'] = ytd_roi(datetime.date.today().year)
+        context['year_roi'] = ytd_roi(self.request.user, datetime.date.today().year)
 
         # currencies = liability.values_list('borrowed_amount_currency', flat=True).distinct().order_by('borrowed_amount_currency')
         # liability_total = list()
@@ -119,8 +119,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             context['date_max_networth'] = qs.filter(f_networth=max_networth).first().date.date
             context['max_rate'] = ('NGN', max([r[0]['NGN'] for r in qs.values_list('exchange_rate') if r[0] is not None]))
             context['present_growth'] = format_percent(round((qs.latest('date').networth() - base_networth)/base_networth, 5), decimal_quantization=False, locale='en_US')
-            context['ytd_roi'] = ytd_roi(current_year)
-            context['ytd_roi_prev'] = ytd_roi(current_year-1)
+            
+            context['ytd_roi'] = ytd_roi(self.request.user, current_year)
+            context['ytd_roi_prev'] = ytd_roi(self.request.user, current_year-1)
+            context['ytd_roi_next'] = ytd_roi(self.request.user, current_year+1)
 
         cut_off_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7)
         financials = FinancialData.objects.filter(owner=self.request.user).filter(date__gte=cut_off_date).order_by('date')

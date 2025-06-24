@@ -51,9 +51,11 @@
     </div>
     <div class="row mt-3">
         <div class="col">
-            <table class="table table-stripped">
+            <table class="table table-bordered">
+                <legend>Return on Investment Outlook</legend>
                 <thead>
                     <tr>
+                        <th></th>
                         {% for i in ytd_roi %}
                         <th colspan="3" class="text-center">{{i.principal.currency}}</th>
                         {% endfor %}
@@ -61,13 +63,23 @@
                     <tr>
                         <th>Period</th>
                         {% for i in ytd_roi %}
-                        <th>Principal</th>
+                        <th>Investment</th>
                         <th>ROI</th>
                         <th>%</th>
                         {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
+                    {% if ytd_roi_next %}
+                    <tr>
+                        <td>Next year</td>
+                        {% for investment in ytd_roi_next %}
+                        <td>{{investment.principal.amount}}</td>
+                        <td>{{investment.roi.amount|floatformat:2}}</td>
+                        <td>{{investment.percent}}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endif %}
                     <tr>
                         <td>Current year</td>
                         {% for investment in ytd_roi %}
