@@ -48,9 +48,48 @@
             <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ asset_location|safe }}"
                 alt="Bar Chart">
         </div>
-        
     </div>
-
+    <div class="row mt-3">
+        <div class="col">
+            <table class="table table-stripped">
+                <thead>
+                    <tr>
+                        {% for i in ytd_roi %}
+                        <th colspan="3" class="text-center">{{i.principal.currency}}</th>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>Period</th>
+                        {% for i in ytd_roi %}
+                        <th>Principal</th>
+                        <th>ROI</th>
+                        <th>%</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Current year</td>
+                        {% for investment in ytd_roi %}
+                        <td>{{investment.principal.amount}}</td>
+                        <td>{{investment.roi.amount|floatformat:2}}</td>
+                        <td>{{investment.percent}}</td>
+                        {% endfor %}
+                    </tr>
+                    {% if ytd_roi_prev %}
+                    <tr>
+                        <td>Previous year</td>
+                        {% for investment in ytd_roi_prev %}
+                        <td>{{investment.principal.amount}}</td>
+                        <td>{{investment.roi.amount|floatformat:2}}</td>
+                        <td>{{investment.percent}}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
     <div class="row mt-3">
         <div class="col">
             <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>

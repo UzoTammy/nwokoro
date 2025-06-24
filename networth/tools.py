@@ -96,8 +96,6 @@ def naira_valuation():
     return Money(round(abs(value), 2), 'NGN'), tag, date.strftime('%d %b, %Y') #{'old_value': fd.earliest('date').exchange_rate['NGN'], 'new_value': fd.latest('date').exchange_rate['NGN']}
 
 
-
-
 def ytd_roi(year:Optional[int]=None)->List[dict]:
     """
         This function takes a year and returns investment
@@ -110,7 +108,10 @@ def ytd_roi(year:Optional[int]=None)->List[dict]:
     """
     if year is None:
         year = datetime.datetime.now().year
-    investments = Investment.objects.filter(Q(start_date__year=year)|Q(start_date__year=year-1))
+    # investments = Investment.objects.filter(Q(start_date__year=year)|Q(start_date__year=year-1))
+    investments = Investment.objects.all()
+    pks = [investment.pk for investment in investments if investment.maturity().year == year]
+    investments = Investment.objects.filter(pk__in=pks)
     currencies = investments.values_list('principal_currency', flat=True).distinct()
     store = list()
     for currency in currencies:
@@ -122,7 +123,7 @@ def ytd_roi(year:Optional[int]=None)->List[dict]:
         for investment in qs:
             principal += investment.principal
             roi += investment.roi()
-        summation.append({'principal': principal, 'roi': roi, 'percent': round(roi/principal, 5)})
+        summation.append({'principal': principal, 'roi': roi, 'percent': round(100*roi/principal, 2)})
     return summation
 
 def set_roi_target(year=None):
