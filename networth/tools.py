@@ -98,33 +98,36 @@ def naira_valuation():
 
 def ytd_roi(owner, year:Optional[int]=None)->List[dict]:
     """
-        This function takes a year and returns investment
+        This function takes a year of a user and returns investment
         yields according to the various currencies
-        :prams 
+        :params 
+            - owner
             - year
         :return
-            - list of dictionaries.Each dictionary represents
-            a group of investments in one currency
+            - dict of dict
     """
     if year is None:
         year = datetime.datetime.now().year
-    # investments = Investment.objects.filter(Q(start_date__year=year)|Q(start_date__year=year-1))
+
     investments = Investment.objects.filter(owner=owner)
     pks = [investment.pk for investment in investments if investment.maturity().year == year]
     investments = Investment.objects.filter(pk__in=pks)
-    currencies = investments.values_list('principal_currency', flat=True).distinct()
+    currencies = ExchangeRate.objects.values_list('target_currency', flat=True)
     store = list()
     for currency in currencies:
         store.append(investments.filter(principal_currency=currency))
-    
-    summation = list()
-    for qs in store:
-        principal = roi = Money(0, qs.first().principal.currency)
-        for investment in qs:
-            principal += investment.principal
-            roi += investment.roi()
-        summation.append({'principal': principal, 'roi': roi, 'percent': round(100*roi/principal, 2)})
-    return summation
+     
+    stack = dict()
+    for qs, currency in zip(store, currencies):
+        if qs.exists():
+            principal = roi = Money(0, currency)
+            for investment in qs:
+                principal += investment.principal
+                roi += investment.roi()
+            stack[currency] = {'principal': principal, 'roi': roi, 'percent': round(100*roi/principal, 2)}
+        else:
+            stack[currency] = {'principal': Money(0, currency), 'roi': Money(0, currency), 'percent': 0.0} 
+    return stack
 
 
 def investments_by_holder(owner):

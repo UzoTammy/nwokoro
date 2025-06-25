@@ -56,8 +56,8 @@
                 <thead>
                     <tr>
                         <th></th>
-                        {% for i in ytd_roi %}
-                        <th colspan="3" class="text-center">{{i.principal.currency}}</th>
+                        {% for key in ytd_roi.keys %}
+                        <th colspan="3" class="text-center">{{key}}</th>
                         {% endfor %}
                     </tr>
                     <tr>
@@ -73,8 +73,8 @@
                     {% if ytd_roi_next %}
                     <tr>
                         <td>Next year</td>
-                        {% for investment in ytd_roi_next %}
-                        <td>{{investment.principal.amount}}</td>
+                        {% for key, investment in ytd_roi_next.items %}
+                        <td>{{investment.principal.amount|floatformat:2}}</td>
                         <td>{{investment.roi.amount|floatformat:2}}</td>
                         <td>{{investment.percent}}</td>
                         {% endfor %}
@@ -82,8 +82,8 @@
                     {% endif %}
                     <tr>
                         <td>Current year</td>
-                        {% for investment in ytd_roi %}
-                        <td>{{investment.principal.amount}}</td>
+                        {% for key, investment in ytd_roi.items %}
+                        <td>{{investment.principal.amount|floatformat:2}}</td>
                         <td>{{investment.roi.amount|floatformat:2}}</td>
                         <td>{{investment.percent}}</td>
                         {% endfor %}
@@ -91,8 +91,8 @@
                     {% if ytd_roi_prev %}
                     <tr>
                         <td>Previous year</td>
-                        {% for investment in ytd_roi_prev %}
-                        <td>{{investment.principal.amount}}</td>
+                        {% for key, investment in ytd_roi_prev.items %}
+                        <td>{{investment.principal.amount|floatformat:2}}</td>
                         <td>{{investment.roi.amount|floatformat:2}}</td>
                         <td>{{investment.percent}}</td>
                         {% endfor %}
