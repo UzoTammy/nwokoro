@@ -13,21 +13,21 @@
     <table>
         <h3>Summary</h3>
         <tr>
-            <td class="text-left">Networth as at {{fd_first.date}}</td>
+            <td class="text-left">Worth as at {{fd_first.date}}</td>
             <td>{{fd_first.worth}}</td>
         </tr>
         <tr>
-            <td class="text-left">Current Networth</td>
+            <td class="text-left">Current Worth</td>
             <td>{{fd.worth}}</td>
         </tr>
         <tr>
-            <td class="text-left">Earned</td>
+            <td class="text-left">Growth</td>
             <td class="{% if fd_first.growth.amount > 0 %}  text-success {% endif %}">
                 ({{fd_first.growth_percent}}) {{fd_first.growth}}
             </td>
         </tr>
         <tr>
-            <td class="text-left">Pending ROI</td>
+            <td class="text-left">Current Earning (<small>not taking</small>)</td>
             <td>{{fd.present_roi}}</td>
         </tr>
         <tr>
@@ -61,7 +61,7 @@
 </div>
 <div class="section">
     <table>
-        <h3>Appropriation</h3>
+        <h3>Asset Distribution</h3>
         <tr>
             <td>Period</td>
             <td>Fixed Asset</td>
