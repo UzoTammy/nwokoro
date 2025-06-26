@@ -419,12 +419,13 @@ class BusinessUpdateForm(forms.ModelForm):
         fields = ['name', 'host_country', 'stock_type', 'unit_cost']
 
 class BorrowedFundForm(forms.ModelForm):
-    cost_of_fund = MoneyField(max_digits=12, decimal_places=2)
-    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     savings_account = forms.ModelChoiceField(queryset=Saving.objects.none())
     host_country = forms.CharField(
         widget=forms.Select(choices=OptionChoices.get_options()['countries'])) #
 
+    cost_of_fund = MoneyField(max_digits=12, decimal_places=2)
+    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    
 
     class Meta:
         model = BorrowedFund
@@ -438,10 +439,14 @@ class BorrowedFundForm(forms.ModelForm):
             self.savings_account = Saving.objects.filter(pk=self.pk)
             self.fields['savings_account'].queryset = self.savings_account
             self.fields['savings_account'].initial = self.savings_account.first()
-            self.fields['savings_account'].disabled = True
             self.fields['borrowed_amount'].initial = Money(0.00, self.savings_account.first().value.currency)
             self.fields['cost_of_fund'].initial = Money(0.00, self.savings_account.first().value.currency)
             self.fields['host_country'].initial = self.savings_account.first().host_country
+
+            self.fields['host_country'].disabled = True
+            self.fields['savings_account'].disabled = True
+            
+
 
     def clean_borrowed_amount(self):
         if self.cleaned_data['borrowed_amount'].currency != self.savings_account.first().value.currency:

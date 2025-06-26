@@ -4,44 +4,95 @@
 <style>
   .jumbotron {
     background-color: rgb(204, 220, 234);
-    border-radius: 10% 10% 3% 3%;
+    border-radius: 3% 3% 10% 10%;
   }
 </style>
 {% endblock %}
 {% block content %}
 <div class="container">
   <div class="row justify-content-center align-items-center vh-100">
-    <div class="col-sm-8">
+    <div class="col-sm-10">
       <div class="row">
         <div class="col">
-          <h3>External Funds</h3>
-          <table class="table" data-toggle="table">
-              <thead>
-                <tr>
-                  <th>Account</th>
-                  <th>Host Country</th>
-                  <th>Value</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for object in object_list %}
-                  <tr>
-                    <td>{{object.holder}}</td>
-                    <td>{{object.host_country}}</td>
-                    <td>{{object.value}}</td>
-                    <td><a class="btn btn-outline-dark btn-sm mr-2" href="{% url 'networth-borrow-fund' object.pk %}">Borrow</a><a class="btn btn-outline-dark btn-sm mr-2" href="">Income</a></td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-          </table>
+          <div class="jumbotron">
+            <h1 class="display-4">External Funds</h1>
+            <p class="lead">External funding can happen in three ways. Reward will pull fund out of 
+              your networth, reducing it. Inject will do the opposite, which is to add fund into your
+              networth. Finally, borrow will add to your worth and to your liability resulting in no change
+              to your networth.  
+            </p>
+            <hr class="my-4">
+          </div>
+          <form action="" method="post">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col">
+                <h4>Choose action to implement</h4>
+                <div class="form-check form-check-inline ml-3 mb-2">
+                  <input class="form-check-input" type="radio" name="radioAction" id="inlineRadio1" value="reward">
+                  <label class="form-check-label" for="inlineRadio1">
+                    Reward: Take out fund out of your networth for personal use.
+                  </label>
+                </div>
+                <div class="form-check form-check-inline ml-3 mb-2">
+                  <input class="form-check-input" type="radio" name="radioAction" id="inlineRadio2" value="inject">
+                  <label class="form-check-label" for="inlineRadio2">
+                    Inject: Add fund to boost your networth. This can come from wages/salaries, gift, lottery and etc
+                  </label>
+                </div>
+                <div class="form-check form-check-inline ml-3 mb-2">
+                  <input class="form-check-input" type="radio" name="radioAction" id="inlineRadio3" value="borrow">
+                  <label class="form-check-label" for="inlineRadio3">
+                    Borrow: Loan fund to buy stock and/or asset, start a business and/or invest which must be repaid at
+                    a later date.
+                  </label>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="row mt-3">
+              <div class="col">
+                <table class="table" data-toggle="table">
+                  <h4>Which savings account will the fund drop or taken from?</h4>
+                  <thead>
+                    <tr>
+                      <th>Action</th>
+                      <th>Account</th>
+                      <th>Host Country</th>
+                      <th>Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for object in object_list %}
+                    <tr>
+                      <td>
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="radioSaving" id="inlineRadio{{object.pk}}"
+                            value="{{object.pk}}">
+                        </div>
+                      </td>
+                      <td>{{object.holder}}</td>
+                      <td>{{object.host_country}}</td>
+                      <td>{{object.value}}</td>
+                    </tr>
+                    {% endfor %}
+
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="row m-3">
+              <div class="col">
+                <button class="btn btn-outline-dark" type="submit">Proceed</button>
+                <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
-      <div class="row mt-3">
-        <div class="col">
-          <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>
-        </div>
-      </div>
+
     </div>
   </div>
 

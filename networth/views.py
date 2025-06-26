@@ -2,7 +2,8 @@ import datetime
 from decimal import Decimal
 from zoneinfo import ZoneInfo
 
-from django.urls import reverse_lazy
+from django.shortcuts import redirect
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.db.models.aggregates import Sum, Min, Max
 from django.db.models import F
@@ -407,6 +408,16 @@ class FixedAssetUpdateView(LoginRequiredMixin, UpdateView):
 class ExternalFundHome(LoginRequiredMixin, ListView):
     model = Saving
     template_name = 'networth/external_fund.html'
+
+    def post(self, request, *args, **kwargs):
+        
+        if not('radioAction' in request.POST and 'radioSaving' in request.POST):
+            messages.info(request, "You must choose Action to take and Saving Account to proceed")
+            return super().get(request, *args, **kwargs)
+        savings_account = Saving.objects.get(pk=request.POST['radioSaving'])
+        if request.POST['radioAction'] == 'reward':
+            reverse_url = reverse('networth-borrow-fund', kwargs={'pk': request.POST['radioSaving']})
+            return redirect(reverse_url)
 
 class BorrowedFundView(LoginRequiredMixin, FormView):
 
