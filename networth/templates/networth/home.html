@@ -6,7 +6,6 @@
     background-color: rgb(204, 220, 234);
     border-radius: 10% 10% 3% 3%;
   }
-  
 </style>
 {% endblock %}
 {% block content %}
@@ -27,8 +26,10 @@
         <div class="col-sm-4">
           <ul class="list-group list-group-flush">
             <li class="list-group-item list-group-item-info">Worth <span class="float-right">{{fd.worth}}</span></li>
-            <li class="list-group-item list-group-item-primary">Earnable <span class="float-right">{{fd.roi}}</span></li>
-            <li class="list-group-item list-group-item-primary">Current Earning <span class="float-right">{{fd.present_roi}}</span></li>
+            <li class="list-group-item list-group-item-primary">Earnable <span class="float-right">{{fd.roi}}</span>
+            </li>
+            <li class="list-group-item list-group-item-primary">Current Earning <span
+                class="float-right">{{fd.present_roi}}</span></li>
             <li class="list-group-item list-group-item-primary">Daily ROI<span
                 class="float-right">{{fd.daily_roi}}</span></li>
           </ul>
@@ -38,8 +39,9 @@
           <ul class="list-group list-group-flush">
             <li class="list-group-item list-group-item-primary">Saving <span class="float-right">{{fd.savings}}</span>
             </li>
-            <li class="list-group-item list-group-item-primary">Investment 
-              <span class="float-right">{{fd.investment}}</span></li>
+            <li class="list-group-item list-group-item-primary">Investment
+              <span class="float-right">{{fd.investment}}</span>
+            </li>
             <li class="list-group-item list-group-item-primary">Stock <span class="float-right">{{fd.stock}}</span></li>
             <li class="list-group-item list-group-item-primary">Business <span
                 class="float-right">{{fd.business}}</span></li>
@@ -59,7 +61,7 @@
           </ul>
         </div>
       </div>
-      
+
     </div>
   </div>
   <div class="row">
@@ -68,7 +70,7 @@
         {{naira_value_comment}}
       </small>
     </div>
-    
+
   </div>
   {% else %}
   <div class="row mt-3">
@@ -103,7 +105,32 @@
     <div class="tab-pane fade show active" id="savings" role="tabpanel" aria-labelledby="nav-home-tab">
       <div class="row justify-content-center mt-3 shadow">
         <div class="col-sm-12">
-          <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Savings ({{savings.count}})</h5>
+          <div class="row">
+            <div class="col">
+              <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Savings ({{savings.count}})</h5>
+            </div>
+            <div class="col float-right">
+              <ul class="list-group list-group-horizontal list-group-flush">
+                  <a class="list-group-item list-group-item-action" href="{% url 'networth-saving-create' %}">
+                    <i class="fa fa-plus text-success"></i> Add
+                  </a>
+                
+                <a class="list-group-item list-group-item-action" href="{% url 'networth-external-fund-home' %}">
+                    <i class="fa fa-arrow-right text-success"></i>
+                    <i class="fas fa-external-link-alt text-success"></i> Ext
+                  </a>
+                
+                  <a class="list-group-item list-group-item-action" href="{% url 'saving-counter-transfer' %}">
+                    <i class="fa fa-arrow-right text-success"></i><i class="fa fa-arrow-left text-danger"></i>
+                    Xfer
+                  </a>
+                  <a class="list-group-item list-group-item-action" href="{% url 'saving-conversion' %}">
+                    <i class="fa fa-arrows-alt text-success"></i> Conv
+                  </a>
+              </ul>
+            </div>
+          </div>
+
           <div class="row mb-3">
             {% if savings %}
             <div class="col-sm-8">
@@ -137,19 +164,6 @@
                   </li>
                   {% endfor %}
                 </ul>
-                <a class="btn btn-outline-primary mt-1 float-right" href="{% url 'networth-saving-create' %}">
-                  <i class="fa fa-plus text-success"></i> New Account
-                </a>
-                <a class="btn btn-outline-primary" href="{% url 'networth-external-fund-home' %}">
-                  <i class="fa fa-arrow-right text-success"></i>
-                  <i class="fas fa-external-link-alt text-success"></i> External</a>
-
-                <a class="btn btn-outline-primary" href="{% url 'saving-counter-transfer' %}">
-                  <i class="fa fa-arrow-right text-success"></i><i class="fa fa-arrow-left text-danger"></i> Transfer
-                </a>
-                <a class="btn btn-outline-primary" href="{% url 'saving-conversion' %}">
-                  <i class="fa fa-arrows-alt text-success"></i> Convert
-                </a>
               </div>
             </div>
             {% else %}
@@ -209,15 +223,15 @@
                   </li>
                   {% endfor %}
                   {% if year_roi %}
-                    <li class="list-group-item text-center">Current Year Achievable</li>
-                    {% for key, investment in year_roi.items %}
-                    <li class="list-group-item">
-                      Principal <span class="float-right">{{investment.principal}}</span>
-                    </li>
-                    <li class="list-group-item">
-                      ROI <span class="float-right">{{investment.roi}}</span>
-                    </li>
-                    {% endfor%}
+                  <li class="list-group-item text-center">Current Year Achievable</li>
+                  {% for key, investment in year_roi.items %}
+                  <li class="list-group-item">
+                    Principal <span class="float-right">{{investment.principal}}</span>
+                  </li>
+                  <li class="list-group-item">
+                    ROI <span class="float-right">{{investment.roi}}</span>
+                  </li>
+                  {% endfor%}
                   {% endif %}
                 </ul>
               </div>
