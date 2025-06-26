@@ -138,10 +138,11 @@
                   {% endfor %}
                 </ul>
                 <a class="btn btn-outline-primary mt-1 float-right" href="{% url 'networth-saving-create' %}">
-                  Add Savings
+                  <i class="fa fa-plus text-success"></i> New Account
                 </a>
-                <a class="btn btn-outline-primary" href="{% url 'networth-external-fund-home' %}"><i
-                    class="fa fa-plus text-success"></i> Fund</a>
+                <a class="btn btn-outline-primary" href="{% url 'networth-external-fund-home' %}">
+                  <i class="fa fa-arrow-right text-success"></i>
+                  <i class="fas fa-external-link-alt text-success"></i> External</a>
 
                 <a class="btn btn-outline-primary" href="{% url 'saving-counter-transfer' %}">
                   <i class="fa fa-arrow-right text-success"></i><i class="fa fa-arrow-left text-danger"></i> Transfer
@@ -209,7 +210,7 @@
                   {% endfor %}
                   {% if year_roi %}
                     <li class="list-group-item text-center">Current Year Achievable</li>
-                    {% for investment in year_roi %}
+                    {% for key, investment in year_roi.items %}
                     <li class="list-group-item">
                       Principal <span class="float-right">{{investment.principal}}</span>
                     </li>
