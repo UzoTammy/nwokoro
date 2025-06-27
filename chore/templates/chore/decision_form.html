@@ -1,0 +1,165 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-3">
+
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-8">
+            <form id="decisionForm" action="" method="post">
+                {% csrf_token %}
+                <h5>Decision on completed job by {{object.assigned.username}}</h5>
+                - (<small>{{object.work}}</small>)
+                <hr>
+                <div class="form-group" id="ratingDiv">
+                    <label for="">Rating</label>
+                    <select class="form-control" name="rating">
+                        <option value="0.7">Fairly Good</option>
+                        <option value="0.8">Good</option>
+                        <option value="0.9">Very Good</option>
+                        <option value="1.0">Excellent</option>
+                    </select>
+                </div>
+                <hr>
+                <div class="form-check">
+                    <input oninput="ratingShow()" class="form-check-input" type="radio" name="decision"
+                        id="decisionDone" value="done" checked>
+                    <label class="form-check-label" for="decisionDone">
+                        Done: Job is inspected and it is done satisfactorily.
+                    </label>
+                </div>
+                <div class="form-check mt-3">
+                    <input oninput="ratingShow()" class="form-check-input" type="radio" name="decision"
+                        id="decisionRepeat" value="repeat">
+                    <label class="form-check-label" for="decisionRepeat">
+                        Repeat: Job is not done satisfactorily. Give a second chance to repeat the job.
+                    </label>
+                </div>
+                <div class="form-check mt-3">
+                    <input oninput="ratingShow()" class="form-check-input" type="radio" name="decision"
+                        id="decisionCancel" value="cancel">
+                    <label class="form-check-label" for="decisionCancel">
+                        Cancel: Job is withdrawn
+                    </label>
+                </div>
+                <hr>
+                <div id="reasonDiv" class="form-group" hidden="true">
+                    <label for="">Reason</label>
+                    <input class="form-control" type="text" name="reason" value="not committed">
+                </div>
+                <input type="text" name="pk" value="{{object.pk}}" hidden="true">
+
+                <div class="row">
+                    <div class="col">
+                        <button type="submit" class="btn btn-outline-dark">Submit</button>
+                        <a class="btn btn-outline-dark float-right" href="{% url 'completed-job-decision' object.pk %}">Back</a>
+                    </div>
+                </div>
+            </form>
+
+                <div class="modal fade" id="completedJob{{object.pk}}" data-backdrop="static" data-keyboard="false"
+                    tabindex="-1" aria-labelledby="completedJobLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-dark text-white">
+                                <h5 class="modal-title" id="completedJobLabel">Decision</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span class="text-danger" aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body ml-3">
+
+                                <div class="form-group" id="ratingDiv">
+                                    <label for="">Rating</label>
+                                    <select class="form-control" name="rating">
+                                        <option value="0.7">Fairly Good</option>
+                                        <option value="0.8">Good</option>
+                                        <option value="0.9">Very Good</option>
+                                        <option value="1.0">Excellent</option>
+                                    </select>
+                                </div>
+                                <hr>
+                                <div class="form-check">
+                                    <input oninput="ratingShow()" class="form-check-input" type="radio" name="decision"
+                                        id="decisionDone" value="done" checked>
+                                    <label class="form-check-label" for="decisionDone">
+                                        Done: Job is inspected and it is done satisfactorily.
+                                    </label>
+                                </div>
+                                <div class="form-check mt-3">
+                                    <input oninput="ratingShow()" class="form-check-input" type="radio" name="decision"
+                                        id="decisionRepeat" value="repeat">
+                                    <label class="form-check-label" for="decisionRepeat">
+                                        Repeat: Job is not done satisfactorily. Give a second chance to repeat the job.
+                                    </label>
+                                </div>
+                                <div class="form-check mt-3">
+                                    <input oninput="ratingShow()" class="form-check-input" type="radio" name="decision"
+                                        id="decisionCancel" value="cancel">
+                                    <label class="form-check-label" for="decisionCancel">
+                                        Cancel: Job is withdrawn
+                                    </label>
+                                </div>
+                                <hr>
+                                <div id="reasonDiv" class="form-group" hidden="true">
+                                    <label for="">Reason</label>
+                                    <input class="form-control" type="text" name="reason" value="not committed">
+                                </div>
+                                <input type="text" name="pk" value="{{object.pk}}" hidden="true">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-outline-dark">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Spinner Modal -->
+<div class="modal" id="loadingSpinner" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Processing, please wait...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('decisionForm'); // Replace with your form's ID
+
+        form.addEventListener('submit', function () {
+            // Show the spinner
+            const spinnerModal = new bootstrap.Modal(document.getElementById('loadingSpinner'));
+            spinnerModal.show();
+        });
+    });
+
+    function ratingShow() {
+        if (document.getElementById('decisionDone').checked) {
+            document.getElementById('ratingDiv').hidden = false;
+            document.getElementById('reasonDiv').hidden = true;
+        } else if (document.getElementById('decisionRepeat').checked) {
+            document.getElementById('ratingDiv').hidden = true;
+            document.getElementById('reasonDiv').hidden = true;
+        } else {
+            document.getElementById('ratingDiv').hidden = true;
+            document.getElementById('reasonDiv').hidden = false;
+        }
+    }
+
+</script>
+
+{% endblock %}

@@ -175,14 +175,13 @@ class AssignWorkView(LoginRequiredMixin, ListView):
         context['completed_works'] = AssignWork.objects.filter(state='complete')
         return context
     
-class CompletedJobDecisionView(LoginRequiredMixin, UserPassesTestMixin, FormView):
+class CompletedJobDecisionView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'chore/completed_job_decision.html'
-    success_url = reverse_lazy('assign-work-list')
-    form_class = CompletedJobDecisionForm # this form was not built
+    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        completed_job = AssignWork.objects.get(pk=self.kwargs['num'])
+        completed_job = AssignWork.objects.get(pk=self.kwargs['pk'])
         context['object'] = completed_job
 
         bonus = BonusPoint.objects.filter(active=True)
@@ -195,6 +194,7 @@ class CompletedJobDecisionView(LoginRequiredMixin, UserPassesTestMixin, FormView
                     bonus_point += obj.bonus_value
         context['bonus_point'] = bonus_point
         context['bonus'] = bonus
+        
         return context
     
     def test_func(self):
@@ -202,6 +202,36 @@ class CompletedJobDecisionView(LoginRequiredMixin, UserPassesTestMixin, FormView
             return True
         return False
     
+class DecisionView(LoginRequiredMixin, UserPassesTestMixin, FormView):
+    template_name = 'chore/decision_form.html'
+    form_class = CompletedJobDecisionForm # this form was not built
+    success_url = reverse_lazy('assign-work-list')
+    
+    
+    # def get_success_url(self):
+    #     return reverse_lazy('completed-job-decision', kwargs={'pk': self.kwargs['pk']})
+    
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        return False
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        completed_job = AssignWork.objects.get(pk=self.kwargs['pk'])
+        context['object'] = completed_job
+        bonus = BonusPoint.objects.filter(active=True)
+        bonus_point = 0
+        if bonus.exists():
+            for obj in bonus:
+                if obj.bonus_value <= 1:
+                    bonus_point += obj.bonus_value * completed_job.work.point
+                else:
+                    bonus_point += obj.bonus_value
+        context['bonus_point'] = bonus_point
+        context['bonus'] = bonus
+        
+        return context
     
     def form_valid(self, form, **kwargs):
         data = self.get_context_data(**kwargs)
@@ -237,7 +267,7 @@ class CompletedJobDecisionView(LoginRequiredMixin, UserPassesTestMixin, FormView
 
         return super().form_valid(form, **kwargs)
 
-
+    
 class JobRegisterListView(LoginRequiredMixin, ListView):
     model = JobRegister
     template_name = 'chore/work_register_list.html'

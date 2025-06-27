@@ -4,7 +4,8 @@ from .views import (ChoreHome, RegistrationMessage, ChoreDashboard, ChoreSetupVi
                     BonusUpdateView, WorkDoneView, WorkDetailView, JobRegisterCreateView,
                     WorkListView, AssignWorkView, JobRegisterListView, DelegateWorkCreateView,
                     InitiateWorkCreateView, InitiateWorkDetailView, InitiateWorkApproveView,ChoreExtendTime,
-                    JobRegisterUpdateView, ConcludedWorkListView, ConcludedWorDetailView, CompletedJobDecisionView)
+                    JobRegisterUpdateView, ConcludedWorkListView, ConcludedWorDetailView, CompletedJobDecisionView,
+                    DecisionView)
 from django.views.generic import TemplateView
 
 urlpatterns = [
@@ -30,6 +31,7 @@ urlpatterns = [
     path('<int:pk>/initiate-approve/', InitiateWorkApproveView.as_view(), name='initiate-work-approve'),
     path('concluded/', ConcludedWorkListView.as_view(), name='concluded-job'),
     path('concluded/<int:pk>/detail/', ConcludedWorDetailView.as_view(), name='concluded-detail'),
-    path('<int:num>/completed-job/', CompletedJobDecisionView.as_view(), name='completed-job-decision'),
+    path('<int:pk>/completed-job/', CompletedJobDecisionView.as_view(), name='completed-job-decision'),
+    path('decision/<int:pk>/', DecisionView.as_view(), name='decided'),
     path('extend-time/<int:pk>/', ChoreExtendTime.as_view(), name='extend-time')
 ]
