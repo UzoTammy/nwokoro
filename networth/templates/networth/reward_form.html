@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-6">
+            <form class="mt-3" action="" method="post">
+                {% csrf_token %}
+                <legend>Reward Fund</legend>
+                <hr>
+                <ul class="list-group">
+                    <li class="list-group-item">From Savings Account <span class="float-right">{{account_value}}</span></li>
+                </ul>
+                <div class="form-group mt-3">
+                    {{form|crispy}}
+                </div>
+                <div class="m-2">
+                    <button class="btn btn-outline-dark" type="submit">Submit</button>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-external-fund-home' %}">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

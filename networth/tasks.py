@@ -1,10 +1,13 @@
 
 import requests
 import datetime
+
 from celery import shared_task
-from .emails import FinancialReport
-from networth.models import (ExchangeRate, Investment, Saving, Stock, Business, FixedAsset, BorrowedFund)
+
+from .tools import get_user_finances
+from .models import Investment, ExchangeRate
 from account.models import User
+
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.http import HttpResponse
@@ -44,32 +47,18 @@ def fetch_exchange_rate():
 @shared_task
 def financial_report_email():
     users = User.objects.filter(is_staff=True).values_list('username', flat=True)
-    for user in users:
-        savings = Saving.objects.filter(owner__username=user)
-        if savings.exists():
-            investments = Investment.objects.filter(is_active=True).filter(owner__username=user)
-            stocks = Stock.objects.filter(owner__username=user)
-            business = Business.objects.filter(owner__username=user)
-            fixed_asset = FixedAsset.objects.filter(owner__username=user)
-            liability = BorrowedFund.objects.filter(owner__username=user)
-            
-            fr = FinancialReport(savings, investments, stocks, business, fixed_asset, liability)
+    for username in users:
+        fr = get_user_finances(username)
+        if fr is not None:
             fr.save_report()
             fr.send_email()
 
-def save_financial_data():
-    users = User.objects.filter(is_staff=True).values_list('username', flat=True)
-    for user in users:
-        savings = Saving.objects.filter(owner__username=user)
-        if savings.exists():
-            investments = Investment.objects.filter(is_active=True).filter(owner__username=user)
-            stocks = Stock.objects.filter(owner__username=user)
-            business = Business.objects.filter(owner__username=user)
-            fixed_asset = FixedAsset.objects.filter(owner__username=user)
-            liability = BorrowedFund.objects.filter(owner__username=user)
-            
-            fr = FinancialReport(savings, investments, stocks, business, fixed_asset, liability)
-            fr.save_report()
+# def save_financial_data():
+#     users = User.objects.filter(is_staff=True).values_list('username', flat=True)
+#     for username in users:
+#         fr = get_user_finances(username)
+#         if fr is not None:
+#             fr.save_report()
 
 def send_investment_email(investment: Investment):
     
@@ -107,9 +96,10 @@ def send_investment_email(investment: Investment):
 @shared_task
 def investment_notification():
     users = User.objects.filter(is_staff=True).values_list('username', flat=True)
-    for user in users:
-        investments = Investment.objects.filter(owner__username=user)
-        for investment in investments:
-            if investment.due_in_days() == 7 or investment.due_in_days() == 3 or investment.due_in_days() == 0:
-                send_investment_email(investment)
-            
+    for username in users:
+        fr = get_user_finances(username)
+        if fr is not None:
+            for investment in fr.investments:
+                if investment.due_in_days() == 7 or investment.due_in_days() == 3 or investment.due_in_days() == 0:
+                    send_investment_email(investment)
+                

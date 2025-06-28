@@ -1,11 +1,9 @@
-from decimal import Decimal
 from django import forms
 from django.forms import ValidationError
 from django.utils import timezone
-from .models import Investment, Stock, Saving, Business, FixedAsset, BorrowedFund
+from .models import (Investment, Stock, Saving, Business, FixedAsset, RewardFund, BorrowedFund, InjectFund)
 from account.models import User
 from account.models import Preference
-from core.models import Config
 from djmoney.forms.fields import MoneyField, Money
 from django.core.validators import MaxValueValidator
 
@@ -420,16 +418,18 @@ class BusinessUpdateForm(forms.ModelForm):
 
 class BorrowedFundForm(forms.ModelForm):
     savings_account = forms.ModelChoiceField(queryset=Saving.objects.none())
+    
+    date = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+                               initial=timezone.now)
+    terminal_date = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+                               initial=timezone.now() + timezone.timedelta(days=365),
+                               help_text=' default is 1 year from today')
     host_country = forms.CharField(
         widget=forms.Select(choices=OptionChoices.get_options()['countries'])) #
-
-    cost_of_fund = MoneyField(max_digits=12, decimal_places=2)
-    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     
-
     class Meta:
         model = BorrowedFund
-        fields = ['date', 'source', 'borrowed_amount', 'host_country']
+        fields = ['date', 'source', 'host_country', 'borrowed_amount', 'settlement_amount', 'terminal_date', 'description']
 
     def __init__(self, *args, **kwargs):
         self.pk = kwargs.pop('pk', None)
@@ -440,24 +440,74 @@ class BorrowedFundForm(forms.ModelForm):
             self.fields['savings_account'].queryset = self.savings_account
             self.fields['savings_account'].initial = self.savings_account.first()
             self.fields['borrowed_amount'].initial = Money(0.00, self.savings_account.first().value.currency)
-            self.fields['cost_of_fund'].initial = Money(0.00, self.savings_account.first().value.currency)
-            self.fields['host_country'].initial = self.savings_account.first().host_country
-
-            self.fields['host_country'].disabled = True
+            self.fields['settlement_amount'].initial = Money(0.00, self.savings_account.first().value.currency)
             self.fields['savings_account'].disabled = True
             
 
-
     def clean_borrowed_amount(self):
         if self.cleaned_data['borrowed_amount'].currency != self.savings_account.first().value.currency:
-            raise ValidationError('Currency mismatch: Check your currency selection')
+            raise ValidationError('Currency mismatch error')
         return self.cleaned_data['borrowed_amount']
         
     def clean_settlement_amount(self):
         if self.cleaned_data['settlement_amount'].currency != self.savings_account.first().value.currency:
-            raise ValidationError('Currency mismatch: Check your currency selection')
-        return self.cleaned_data['settlement_amount']
+            raise ValidationError('Currency mismatch error')
+        if self.cleaned_data['settlement_amount'] < self.cleaned_data['borrowed_amount']:
+            raise ValidationError("Borrowed amount cannot be less than settlement amount")
         
+        return self.cleaned_data['settlement_amount']  
+    
+    def clean_terminal_date(self):
+        if self.cleaned_data['terminal_date'] < self.cleaned_data['date']:
+            raise ValidationError("Settlement date must be a date in the future")
+        return self.cleaned_data['terminal_date']
+        
+    
+class RewardFundForm(forms.ModelForm):
+    date = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        initial=timezone.now)
+    
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+
+        if self.pk:
+            self.account = Saving.objects.filter(pk=self.pk)
+            self.fields['amount'].initial = Money(0.00, self.account.first().value.currency)
+            
+    class Meta:
+        model = RewardFund
+        fields = ['date', 'amount', 'description']
+
+    def clean_amount(self):
+        if self.cleaned_data['amount'].currency != self.account.first().value.currency:
+            raise ValidationError("Inconsistent currency error")
+        if self.cleaned_data['amount'] > self.account.first().value:
+            raise ValidationError("Insufficient fund error")
+        return self.cleaned_data['amount']
+        
+class InjectFundForm(forms.ModelForm):
+    date = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}), initial=timezone.now)
+    
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+
+        if self.pk:
+            self.account = Saving.objects.filter(pk=self.pk)
+            self.fields['amount'].initial = Money(0.00, self.account.first().value.currency)
+            
+    class Meta:
+        model = InjectFund
+        fields = ['date', 'amount', 'description']
+
+    def clean_amount(self):
+        if self.cleaned_data['amount'].currency != self.account.first().value.currency:
+            raise ValidationError("Inconsistent currency error")
+        return self.cleaned_data['amount']
+         
 class SavingsCounterTransferForm(forms.Form):
     receiver_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(attrs={'class': 'form-control'}))
     donor_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(attrs={'class': 'form-control'}))
@@ -486,5 +536,3 @@ class SavingsCounterTransferForm(forms.Form):
             raise ValidationError(message='Host country of both accounts must be the same')
         if self.cleaned_data['donor_account'].value.amount < self.cleaned_data['amount']:
             raise ValidationError(message='Insufficient fund in Donor Account')
-        
-        

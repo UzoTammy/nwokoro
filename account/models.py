@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
-from djmoney.models.fields import MoneyField
 
 # Create your models here.
 class CustomAccountManager(BaseUserManager):
@@ -39,7 +38,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     preferences = models.JSONField(default=dict)
-    
     
     objects = CustomAccountManager()
     
@@ -90,7 +88,6 @@ class Preference(models.Model):
     fixed_asset_holders = models.JSONField(default=list)
     stock_holders = models.JSONField(default=list)
     business_holders = models.JSONField(default=list)
-
 
     def __str__(self):
         return f'{self.user.username} preference'

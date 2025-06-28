@@ -1,15 +1,15 @@
 
 from django.urls import path
 from .views import (NetworthHomeView, DashboardView,
-                    InvestmentCreateView, InvestmentDetailView, 
-                    InvestmentRolloverView, InvestmentUpdateView, 
+                    InvestmentCreateView, InvestmentDetailView,
+                    InvestmentRolloverView, InvestmentUpdateView,
                     InvestmentTerminationView,
                     StockCreateView, StockDetailView, StockUpdateView,
                     SavingCreateView, SavingDetailView, SavingUpdateView,
                     SavingsConversionView,
                     BusinessCreateView, BusinessDetailView, BusinessUpdateView,
                     FixedAssetCreateView, FixedAssetDetailView, FixedAssetUpdateView,
-                    ExternalFundHome, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView,
+                    ExternalFundHome, RewardFundView, InjectFundView, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView,
                     PDFNetworthReport)
 
 
@@ -40,8 +40,8 @@ urlpatterns = [
          name='networth-saving-detail'),
     path('saving/<int:pk>/update/', SavingUpdateView.as_view(),
          name='networth-saving-update'),
-     path('saving/conversion/', SavingsConversionView.as_view(), 
-          name='saving-conversion'),
+    path('saving/conversion/', SavingsConversionView.as_view(),
+         name='saving-conversion'),
 
     path('business/<int:pk>/create/', BusinessCreateView.as_view(),
          name='networth-business-create'),
@@ -59,13 +59,21 @@ urlpatterns = [
 
     path('external-fund/home/', ExternalFundHome.as_view(),
          name='networth-external-fund-home'),
+
+    path('<int:pk>/reward-fund/', RewardFundView.as_view(),
+         name='networth-reward-fund'),
+
+    path('<int:pk>/inject-fund/', InjectFundView.as_view(),
+         name='networth-inject-fund'),
+
     path('<int:pk>/borrow-fund/', BorrowedFundView.as_view(),
          name='networth-borrow-fund'),
 
     path('saving/counter-transfer/', SavingsCounterTransferView.as_view(),
          name='saving-counter-transfer'),
 
-    path('institution-report', InstitutionReportView.as_view(), name='institution-report'),
+    path('institution-report', InstitutionReportView.as_view(),
+         name='institution-report'),
 
     path('pdf/networth', PDFNetworthReport.as_view(), name='pdf-networth')
 ]

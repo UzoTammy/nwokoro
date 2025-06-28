@@ -2,6 +2,7 @@ import datetime
 from decimal import Decimal
 from zoneinfo import ZoneInfo
 
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
@@ -17,8 +18,9 @@ from django_weasyprint import WeasyTemplateResponseMixin
 from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm, StockUpdateForm, SavingForm, SavingFormUpdate,
                     InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm, 
                     FixedAssetCreateForm, FixedAssetUpdateForm, SavingsCounterTransferForm,
-                    BorrowedFundForm, ConversionForm)
-from .models import Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, BorrowedFund
+                    BorrowedFundForm, ConversionForm, RewardFundForm, InjectFundForm)
+from .models import (Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, 
+                     RewardFund, InjectFund, BorrowedFund)
 from .plots import bar_chart, donut_chart
 from .tools import get_value, naira_valuation, ytd_roi, investments_by_holder
 
@@ -85,11 +87,6 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         context['year_roi'] = ytd_roi(self.request.user, datetime.date.today().year)
 
-        # currencies = liability.values_list('borrowed_amount_currency', flat=True).distinct().order_by('borrowed_amount_currency')
-        # liability_total = list()
-        # if currencies.exists():
-        #     for currency in currencies:
-        #         liability_total.append(Money(liability.filter(settlement_amount_currency=currency).aggregate(Sum('settlement_amount'))['settlement_amount__sum'], currency))
         return context
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -414,13 +411,61 @@ class ExternalFundHome(LoginRequiredMixin, ListView):
         if not('radioAction' in request.POST and 'radioSaving' in request.POST):
             messages.info(request, "You must choose Action to take and Saving Account to proceed")
             return super().get(request, *args, **kwargs)
-        savings_account = Saving.objects.get(pk=request.POST['radioSaving'])
-        if request.POST['radioAction'] == 'reward':
+        
+        if request.POST['radioAction'] == 'borrow':
             reverse_url = reverse('networth-borrow-fund', kwargs={'pk': request.POST['radioSaving']})
-            return redirect(reverse_url)
+        elif request.POST['radioAction'] == 'reward':
+            reverse_url = reverse("networth-reward-fund", kwargs={'pk': request.POST['radioSaving']})  
+        else:
+            reverse_url = reverse("networth-inject-fund", kwargs={'pk': request.POST['radioSaving']})  
+        return redirect(reverse_url)
+
+class RewardFundView(LoginRequiredMixin, FormView):
+    model = RewardFund
+    success_url = reverse_lazy('networth-external-fund-home')
+    form_class = RewardFundForm
+    template_name = 'networth/reward_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['pk'] = self.kwargs.get('pk')
+        return kwargs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['account_value'] = Saving.objects.get(pk=self.kwargs['pk']).value
+        return context
+    
+    def form_valid(self, form):
+        form.instance.savings_account = Saving.objects.get(pk=self.kwargs['pk'])
+        form.instance.owner = form.instance.savings_account.owner
+        form.instance.savings_transaction()
+        messages.success(self.request, 'Fund withdrawal is successfully !!!')
+        form.instance.save()
+        return super().form_valid(form)
+
+class InjectFundView(LoginRequiredMixin, FormView):
+    model = InjectFund
+    success_url = reverse_lazy('networth-external-fund-home')
+    form_class = InjectFundForm
+    template_name = 'networth/inject_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['pk'] = self.kwargs.get('pk')
+        return kwargs
+    
+    def form_valid(self, form):
+        form.instance.savings_account = Saving.objects.get(pk=self.kwargs['pk'])
+        form.instance.owner = self.request.user
+        form.instance.savings_transaction()
+        messages.success(self.request, 'Fund injection is successfully !!!')
+        form.instance.save()
+        return super().form_valid(form)
+        
 
 class BorrowedFundView(LoginRequiredMixin, FormView):
-
+    model = BorrowedFund
     template_name = 'networth/borrow_form.html'
     success_url = reverse_lazy('networth-external-fund-home')
     form_class = BorrowedFundForm
@@ -432,15 +477,16 @@ class BorrowedFundView(LoginRequiredMixin, FormView):
     
     def form_valid(self, form):
         savings_account = form.cleaned_data['savings_account']
+        form.instance.savings_account = savings_account
+        form.instance.owner = savings_account.owner
         
         savings_account.borrow_fund(form.cleaned_data['source'],
                                     form.cleaned_data['borrowed_amount'],
-                                    form.cleaned_data['cost_of_fund'],
                                     form.cleaned_data['date'],
-
                                 )
         messages.success(self.request, 'Transaction is successful !!!')
-        return super().form_valid(form)
+        # return super().form_valid(form)
+        return HttpResponse('Done !!')
     
 class SavingsCounterTransferView(LoginRequiredMixin, FormView):
     form_class = SavingsCounterTransferForm

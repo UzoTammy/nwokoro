@@ -17,7 +17,7 @@ class ExchangeRate(models.Model):
     def __str__(self):
         return f"{self.base_currency} to {self.target_currency}: {self.rate}"
 
-# Create your models here.
+# Internal Objects - Static.
 class Saving(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_savings")
     holder = models.CharField(max_length=50)
@@ -163,39 +163,40 @@ class Saving(models.Model):
             transaction_type = 'DR'
         )
 
-    def borrow_fund(self, source, amount, cost, date):
+    def borrow(self, source, amount, settlement_amount, date, terminal_date, description):
         # create borrowed fund
         bf = BorrowedFund.objects.create(
-            owner = self.owner,
-            source = source,
-            borrowed_amount = amount,
-            settlement_amount = amount + cost,
-            settled_amount = Money(0, amount.currency),
-            date = date,
-            host_country = self.host_country
-
+            owner=self.owner,
+            source=source,
+            borrowed_amount=amount,
+            settlement_amount=settlement_amount,
+            date=date,
+            terminal_date=terminal_date,
+            description=description
         )
         # record the transaction
         BorrowedFundTransaction.objects.create(
-            user = self.owner,
-            borrowed_fund = bf,
-            amount = amount,
-            description = f'Borrowed funds from {bf.source}',
-            timestamp = date,
-            transaction_type = 'DR'
+            user=self.owner,
+            borrowed_fund=bf,
+            amount=amount,
+            description=f'Borrowed funds from {bf.source}',
+            timestamp=date,
+            transaction_type='DR'
         )
         # credit the savings Account
         self.value += amount
         self.save()
+
         # record the transaction
         SavingsTransaction.objects.create(
-            user = self.owner,
-            savings = self,
-            amount = amount,
-            description = f'Borrowed fund from {source}',
-            timestamp = date,
-            transaction_type = 'CR'
+            user=self.owner,
+            savings=self,
+            amount=amount,
+            description=f'Borrowed fund from {source}',
+            timestamp=date,
+            transaction_type='CR'
         )
+
 
     def fund_transfer(self, donor, amount:Money, date):
         self.value += amount
@@ -252,6 +253,7 @@ class Saving(models.Model):
             transaction_type = 'CR'
         )
 
+# Internal Objects - Instruments
 class Investment(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     holder = models.CharField(max_length=30)
@@ -524,7 +526,72 @@ class Liability(models.Model):
     
     class Meta:
         verbose_name = 'Liability'
+
     
+# External Objects
+class BorrowedFund(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    source = models.CharField(max_length=50)
+    host_country = models.CharField(max_length=2, default='NG')
+    borrowed_amount = MoneyField(max_digits=12, decimal_places=2)
+    settlement_amount = MoneyField(max_digits=12, decimal_places=2)
+    date = models.DateTimeField()
+    savings_account = models.ForeignKey(Saving, on_delete=models.CASCADE)
+    description = models.CharField(max_length=250, blank=True)
+    terminal_date = models.DateTimeField()
+
+    def __str__(self):
+        return f'Borrow {self.source}: {self.borrowed_amount}'
+    
+# There is no need for Rewayd & Inject Trasaction objects
+class RewardFund(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateTimeField(default=timezone.now)
+    amount = MoneyField(max_digits=12, decimal_places=2)
+    savings_account = models.ForeignKey(Saving, on_delete=models.CASCADE)
+    description = models.CharField(max_length=250, blank=True)
+
+    def __str__(self):
+        return f"Reward {self.owner.username}: {self.amount}"
+    
+    def savings_transaction(self):
+        
+        SavingsTransaction.objects.create(
+            user=self.owner,
+            savings=self.savings_account,
+            amount=self.amount,
+            description=self.description,
+            timestamp=self.date,
+            transaction_type='DR'
+        )
+        self.savings_account.value -= self.amount
+        self.savings_account.save()
+
+class InjectFund(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateTimeField(default=timezone.now)
+    amount = MoneyField(max_digits=12, decimal_places=2)
+    savings_account = models.ForeignKey(Saving, on_delete=models.CASCADE)
+    description = models.CharField(max_length=250, blank=True)
+
+    def __str__(self):
+        return f"Inject {self.owner.username}: {self.amount}"
+    
+    def savings_transaction(self):
+        
+        SavingsTransaction.objects.create(
+            user=self.owner,
+            savings=self.savings_account,
+            amount=self.amount,
+            description=self.description,
+            timestamp=self.date,
+            transaction_type='CR'
+        )
+        self.savings_account.value += self.amount
+        self.savings_account.save()
+        
+
+# transactions
 class BusinessTransaction(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_business_transactions")
@@ -596,29 +663,6 @@ class SavingsTransaction(models.Model):
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
  
-class BorrowedFund(models.Model):
-
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    source = models.CharField(max_length=50)
-    borrowed_amount = MoneyField(max_digits=12, decimal_places=2)
-    settlement_amount = MoneyField(max_digits=12, decimal_places=2)
-    date = models.DateField()
-    repayment_amount = MoneyField(max_digits=12, decimal_places=2, blank=True, null=True)
-    repayment_start_date = models.DateField(blank=True, null=True)
-    repayment_period = models.CharField(max_length=30, blank=True, null=True)
-    is_active = models.BooleanField(default=True)
-    settled_amount = MoneyField(max_digits=12, decimal_places=2)
-    host_country = models.CharField(max_length=2)
-
-    def __str__(self):
-        return f'BorrowedFund from {self.source}'
-    
-    def expected_number_of_payments(self):
-        return int(self.settlement_amount/self.repayment_amount)
-    
-    def number_of_payments_made(self):
-        return self.borrowed_fund_transactions.all()
-
 class BorrowedFundTransaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_borrowed_fund_transactions")
     borrowed_fund = models.ForeignKey(BorrowedFund, on_delete=models.CASCADE, related_name='borrowed_fund_transactions')
@@ -629,6 +673,7 @@ class BorrowedFundTransaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
+
 
 class FinancialData(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
