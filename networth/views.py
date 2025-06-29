@@ -18,7 +18,7 @@ from django_weasyprint import WeasyTemplateResponseMixin
 from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm, StockUpdateForm, SavingForm, SavingFormUpdate,
                     InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm, 
                     FixedAssetCreateForm, FixedAssetUpdateForm, SavingsCounterTransferForm,
-                    BorrowedFundForm, ConversionForm, RewardFundForm, InjectFundForm)
+                    BorrowedFundForm, ConversionForm, RewardFundForm, InjectFundForm, LiabilityRepayForm)
 from .models import (Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, 
                      RewardFund, InjectFund, BorrowedFund)
 from .plots import bar_chart, donut_chart
@@ -70,13 +70,14 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         savings = Saving.objects.filter(owner=self.request.user)
         business = Business.objects.filter(owner=self.request.user)
         fixed_asset = FixedAsset.objects.filter(owner=self.request.user)
-        # liability = BorrowedFund.objects.filter(owner=self.request.user)
+        liabilities = BorrowedFund.objects.filter(owner=self.request.user)
 
         context['investments'] = investments.order_by('host_country')
         context['savings'] = savings.order_by('value_currency')
         context['stocks'] = stocks.order_by('unit_cost_currency')
         context['business'] = business.order_by('unit_cost_currency')
         context['fixed_asset'] = fixed_asset.order_by('value_currency')
+        context['liabilities'] = liabilities.order_by('host_country')
         
         # Asset total
         context['investment_total'] = get_value(investments, 'investment')
@@ -84,6 +85,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['stock_total'] = get_value(stocks, 'stock')
         context['business_total'] = get_value(business, 'business')
         context['fixed_asset_total'] = get_value(fixed_asset, 'asset')
+        context['liabilities_total'] = get_value(liabilities, 'liability')
 
         context['year_roi'] = ytd_roi(self.request.user, datetime.date.today().year)
 
@@ -400,6 +402,52 @@ class FixedAssetUpdateView(LoginRequiredMixin, UpdateView):
     
     def get_success_url(self):
         return reverse_lazy('networth-fixed-asset', kwargs={'pk': self.object.pk})
+
+class LiabilityDetailView(LoginRequiredMixin, DetailView):
+    model = BorrowedFund
+    template_name = 'networth/liability_detail.html'
+
+class LiabilityUpdateView(LoginRequiredMixin, UpdateView):
+    model = BorrowedFund
+    template_name = 'networth/borrow_form.html'
+    form_class = BorrowedFundForm
+
+    def get_success_url(self):
+        url = reverse('networth-liability-detail', kwargs={'pk': self.kwargs['pk']})
+        return url
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        borrowedfund = BorrowedFund.objects.get(pk=self.kwargs.get('pk'))
+        kwargs['pk'] = borrowedfund.savings_account.pk
+        return kwargs
+    
+class LiabilityRepayView(LoginRequiredMixin, FormView):
+    # model = BorrowedFund
+    template_name = 'networth/repay_form.html'
+    form_class = LiabilityRepayForm
+
+    def get_success_url(self):
+        return reverse('networth-liability-detail', kwargs={'pk': self.kwargs['pk']})
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        borrowedfund = BorrowedFund.objects.get(pk=self.kwargs.get('pk'))
+        kwargs['pk'] = borrowedfund.pk
+        return kwargs
+    
+    def form_valid(self, form):
+        bf = BorrowedFund.objects.get(pk=self.kwargs['pk'])
+
+        bf.repay(
+            form.cleaned_data['amount'],
+            form.cleaned_data['description'],
+            form.cleaned_data['date'],
+            form.cleaned_data['savings_account']
+        )
+        messages.success(self.request, f"Repayment made from {form.cleaned_data['savings_account']}")
+        return super().form_valid(form)
+    
 
 # External Funds
 class ExternalFundHome(LoginRequiredMixin, ListView):

@@ -1,0 +1,34 @@
+{% extends 'core/base.html' %}
+{% load custom_tag %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-8">
+            <h3>{{object}}</h3>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Borrower<span class="float-right">{{object.source}}</span></li>
+                <li class="list-group-item">Borrowed Amount<span class="float-right">{{object.borrowed_amount}}</span></li>
+                <li class="list-group-item">Settlement Amount<span class="float-right">{{object.settlement_amount}}</span></li>
+                <li class="list-group-item">Date<span class="float-right">{{object.date}}</span></li>
+                <li class="list-group-item">Terminal Date<span class="float-right">{{object.terminal_date}}</span></li>
+                <li class="list-group-item">Host Country<span class="float-right">{{object.host_country}}</span></li>
+                <li class="list-group-item">Borrowed Into<span class="float-right">{{object.savings_account}}</span></li>
+                {% if object.description %}
+                <li class="list-group-item text-center">{{object.description}}</li>
+                {% endif %}
+                <hr>
+              </ul>
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-outline-dark" href="{% url 'networth-liability-update' object.pk %}">Update</a>
+                    <a class="btn btn-outline-dark" href="{% url 'networth-liability-repay' object.pk %}">Repay</a>
+                    <a class="btn btn-outline-dark" href="{% url 'networth-investment-terminate' object.pk %}">Close</a>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

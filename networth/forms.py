@@ -461,8 +461,7 @@ class BorrowedFundForm(forms.ModelForm):
         if self.cleaned_data['terminal_date'] < self.cleaned_data['date']:
             raise ValidationError("Settlement date must be a date in the future")
         return self.cleaned_data['terminal_date']
-        
-    
+           
 class RewardFundForm(forms.ModelForm):
     date = forms.DateTimeField(
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
@@ -507,7 +506,46 @@ class InjectFundForm(forms.ModelForm):
         if self.cleaned_data['amount'].currency != self.account.first().value.currency:
             raise ValidationError("Inconsistent currency error")
         return self.cleaned_data['amount']
-         
+
+class LiabilityRepayForm(forms.ModelForm):
+    savings_account = forms.ModelChoiceField(queryset=Saving.objects.none(), label='From')
+    amount = forms.DecimalField(
+        max_digits=12, decimal_places=2, initial=0.0, 
+        help_text='Must be less than settlement amount'
+    )
+    date = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+                               initial=timezone.now)
+    description = forms.CharField(max_length=250)
+
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+
+        if self.pk:
+            self.bf = BorrowedFund.objects.get(pk=self.pk)
+            self.fields['settlement_amount'].initial = self.bf.settlement_amount
+            self.fields['settlement_amount'].disabled = True
+            savings = Saving.objects.filter(value_currency=self.bf.settlement_amount.currency)
+            self.fields['savings_account'].queryset = savings
+            self.fields['savings_account'].initial = savings.first()
+            
+            
+    class Meta:
+        model = BorrowedFund
+        fields = ['settlement_amount']
+
+    def clean_amount(self):
+        self.cleaned_data['amount'] = Money(self.cleaned_data['amount'], self.cleaned_data['settlement_amount'].currency)
+        if self.cleaned_data['amount'] > self.cleaned_data['settlement_amount']:
+            raise ValidationError("Excess repayment error") 
+        return self.cleaned_data['amount']
+    
+    def clean(self):
+        self.cleaned_data['owner'] = self.bf.owner
+
+        
+
+
 class SavingsCounterTransferForm(forms.Form):
     receiver_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(attrs={'class': 'form-control'}))
     donor_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(attrs={'class': 'form-control'}))

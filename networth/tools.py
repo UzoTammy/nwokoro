@@ -17,12 +17,12 @@ from .models import (ExchangeRate, Investment, Saving, Stock, Business, FixedAss
 class FinancialReport:
 
     def __init__(self, savings, investments, stocks, business, fixed_asset, liability):
-        self.savings = savings
-        self.investments = investments
-        self.stocks = stocks
-        self.business = business
-        self.fixed_asset = fixed_asset
-        self.liability = liability
+        self.savings=savings
+        self.investments=investments
+        self.stocks=stocks
+        self.business=business
+        self.fixed_asset=fixed_asset
+        self.liability=liability
 
     @staticmethod
     def convert_to_base(money_list):
@@ -189,6 +189,9 @@ def get_value(instrument:QuerySet, _type:Optional[str]):
         currencies = instrument.values_list('unit_cost_currency', flat=True).distinct()
     elif _type.lower() == 'asset' or _type.lower() == 'saving':
         currencies = instrument.values_list('value_currency', flat=True).distinct()
+    elif _type.lower() == 'liability':
+        currencies = instrument.values_list('settlement_amount_currency', flat=True).distinct()
+    
     else:
         raise ValueError("Unacceptable instrument type argument")
         
@@ -201,6 +204,8 @@ def get_value(instrument:QuerySet, _type:Optional[str]):
             raw_value = instrument.filter(unit_cost_currency=currency).annotate(value=F('units')*F('unit_cost')).aggregate(Sum('value'))['value__sum']
         elif _type.lower() == 'asset' or _type.lower() == 'saving':
             raw_value = instrument.filter(value_currency=currency).aggregate(Sum('value'))['value__sum']
+        elif _type.lower() == 'liability':
+            raw_value = instrument.filter(settlement_amount_currency=currency).aggregate(Sum('settlement_amount'))['settlement_amount__sum']
     
         totals.append(Money(raw_value, currency))
           

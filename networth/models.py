@@ -197,7 +197,6 @@ class Saving(models.Model):
             transaction_type='CR'
         )
 
-
     def fund_transfer(self, donor, amount:Money, date):
         self.value += amount
         self.save()
@@ -539,9 +538,35 @@ class BorrowedFund(models.Model):
     savings_account = models.ForeignKey(Saving, on_delete=models.CASCADE)
     description = models.CharField(max_length=250, blank=True)
     terminal_date = models.DateTimeField()
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return f'Borrow {self.source}: {self.borrowed_amount}'
+    
+    def repay(self, amount, description, timestamp, savings_account):
+
+        BorrowedFundTransaction.objects.create(
+            user=self.owner,
+            borrowed_fund=self,
+            amount=amount,
+            description=description,
+            timestamp=timestamp,
+            transaction_type='CR'
+        ) 
+        self.settlement_amount -= amount
+        self.save()
+
+        SavingsTransaction.objects.create(
+            user=self.owner,
+            savings=savings_account,
+            amount=amount,
+            description=description,
+            timestamp=timestamp,
+            transaction_type='DR'
+        )
+        savings_account.value -= amount
+        savings_account.save()
+
     
 # There is no need for Rewayd & Inject Trasaction objects
 class RewardFund(models.Model):
@@ -673,7 +698,6 @@ class BorrowedFundTransaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
-
 
 class FinancialData(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)

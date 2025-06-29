@@ -10,7 +10,7 @@ from .views import (NetworthHomeView, DashboardView,
                     BusinessCreateView, BusinessDetailView, BusinessUpdateView,
                     FixedAssetCreateView, FixedAssetDetailView, FixedAssetUpdateView,
                     ExternalFundHome, RewardFundView, InjectFundView, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView,
-                    PDFNetworthReport)
+                    PDFNetworthReport, LiabilityDetailView, LiabilityUpdateView, LiabilityRepayView)
 
 
 urlpatterns = [
@@ -56,6 +56,14 @@ urlpatterns = [
          name='networth-fixed-asset-detail'),
     path('fixed-asset/<int:pk>/update/', FixedAssetUpdateView.as_view(),
          name='networth-fixed-asset-update'),
+
+    path('liability/<int:pk>/detail/', LiabilityDetailView.as_view(),
+         name='networth-liability-detail'),
+    path('liability/<int:pk>/update/', LiabilityUpdateView.as_view(),
+         name='networth-liability-update'),
+     path('liability/<int:pk>/repay/', LiabilityRepayView.as_view(),
+         name='networth-liability-repay'),
+
 
     path('external-fund/home/', ExternalFundHome.as_view(),
          name='networth-external-fund-home'),
