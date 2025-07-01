@@ -537,9 +537,9 @@ class BorrowedFundView(LoginRequiredMixin, FormView):
         form.instance.savings_account = savings_account
         form.instance.owner = savings_account.owner
         
-        savings_account.borrow_fund(form.cleaned_data['source'],
-                                    form.cleaned_data['borrowed_amount'],
-                                    form.cleaned_data['date'],
+        savings_account.borrow(form.cleaned_data['source'],
+                                form.cleaned_data['borrowed_amount'],
+                                form.cleaned_data['date'],
                                 )
         messages.success(self.request, 'Transaction is successful !!!')
         # return super().form_valid(form)
