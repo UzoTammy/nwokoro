@@ -539,12 +539,14 @@ class BorrowedFundView(LoginRequiredMixin, FormView):
         
         savings_account.borrow(form.cleaned_data['source'],
                                 form.cleaned_data['borrowed_amount'],
+                                form.cleaned_data['settlement_amount'],
                                 form.cleaned_data['date'],
-                                )
+                                form.cleaned_data['terminal_date'],
+                                form.cleaned_data['description']
+                            )
         messages.success(self.request, 'Transaction is successful !!!')
-        # return super().form_valid(form)
-        return HttpResponse('Done !!')
-    
+        return super().form_valid(form)
+        
 class SavingsCounterTransferView(LoginRequiredMixin, FormView):
     form_class = SavingsCounterTransferForm
     success_url = reverse_lazy('networth-home')

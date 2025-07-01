@@ -171,6 +171,7 @@ class Saving(models.Model):
             borrowed_amount=amount,
             settlement_amount=settlement_amount,
             date=date,
+            savings_account=self,
             terminal_date=terminal_date,
             description=description
         )
