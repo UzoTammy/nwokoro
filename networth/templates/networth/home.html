@@ -83,6 +83,30 @@
   </div>
   {% endif %}
 
+  <div class="row mt-3">
+    <div class="col-sm-8">
+      <table class="table table-sm table-primary table-bordered">
+        <legend class="text-italic">Recent Transactions</legend>
+        <thead>
+          <tr>
+            <th>Transaction</th>
+            <th>Date</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for transaction in recent_transactions %}
+          <tr>
+            {% for param in transaction %}
+            <td>{{param}}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <nav>
     <div class="nav nav-tabs" id="nav-tab" role="tablist">
       <button class="nav-link active" id="nav-home-tab" data-toggle="tab" data-target="#savings" type="button"

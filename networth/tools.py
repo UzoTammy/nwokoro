@@ -1,9 +1,10 @@
 import datetime
 from decimal import Decimal
+from itertools import chain
 from typing import Optional, List
 
 from django.core.mail import EmailMultiAlternatives
-from django.db.models import F, QuerySet
+from django.db.models import F, QuerySet, Value
 from django.db.models.aggregates import Sum
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -13,7 +14,33 @@ from babel.numbers import format_currency
 
 from .models import (ExchangeRate, Investment, Saving, Stock, Business, FixedAsset, BorrowedFund, FinancialData)
 
+class Tax:
+    nta2025_bands = [(800_000, 0), (2_200_000, .15), (9_000_000, .18), (13_000_000, .21), (25_000_000, .23), (50_000_0000, .25)]
+    
+    def __init__(self, income:float, rent:float=0):
+        self.income = income
+        self.rent = rent
 
+    def _rent_relief(self, rent):
+        relief = .3 * rent
+        if relief > 500_000:
+            return 500_000
+        return relief
+
+    def calculate_nigerian_income_tax(self, income:float, rent:float=0):
+        income -= self._rent_relief(rent)
+        payable = 0
+        i = 0
+        while income > 0:
+            if income >= Tax.nta2025_bands[i][0]:
+                payable += Tax.nta2025_bands[i][0] * Tax.nta2025_bands[i][1]
+            else:
+                payable += income * Tax.nta2025_bands[i][1]
+            income -= Tax.nta2025_bands[i][0]
+            i += 1
+            
+        return payable
+            
 class FinancialReport:
 
     def __init__(self, savings, investments, stocks, business, fixed_asset, liability):
@@ -319,3 +346,15 @@ def investments_by_holder(owner):
         # [{holder: ([], (value total, roi total))}]
         stack.append(holders_data)
     return stack
+
+def recent_transactions(*transactions):
+     
+    bucket = list()   
+    for transaction in transactions:
+        qs = transaction.objects.all()
+        action = qs.model.__name__[:-11]
+        qs = qs.annotate(action=Value(action)).values_list('action', 'timestamp', 'amount')
+        bucket.append(qs)
+    chained_bucket = chain(*bucket)
+    sorted_bucket = sorted(chained_bucket, key=lambda x:x[1], reverse=True)
+    return sorted_bucket[:5]

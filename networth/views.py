@@ -1,5 +1,6 @@
 import datetime
 from decimal import Decimal
+from itertools import chain
 from zoneinfo import ZoneInfo
 
 from django.http import HttpResponse
@@ -20,9 +21,11 @@ from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm,
                     FixedAssetCreateForm, FixedAssetUpdateForm, SavingsCounterTransferForm,
                     BorrowedFundForm, ConversionForm, RewardFundForm, InjectFundForm, LiabilityRepayForm)
 from .models import (Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, 
-                     RewardFund, InjectFund, BorrowedFund)
+                     RewardFund, InjectFund, BorrowedFund, SavingsTransaction, InvestmentTransaction,
+                     BusinessTransaction, BorrowedFundTransaction, StockTransaction, FixedAssetTransaction)
+
 from .plots import bar_chart, donut_chart
-from .tools import get_value, naira_valuation, ytd_roi, investments_by_holder
+from .tools import get_value, naira_valuation, ytd_roi, investments_by_holder, recent_transactions
 
 def is_homogenous(value: list):
     if not value:
@@ -40,6 +43,7 @@ def highest_occurring_item(value: list):
         result.append((item, value.count(item)))
     return max(result, key=lambda x: x[1])[0]
 
+        
 # Create your views here.
 class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/home.html'
@@ -89,6 +93,11 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         context['year_roi'] = ytd_roi(self.request.user, datetime.date.today().year)
 
+        
+        transactions = [SavingsTransaction, InvestmentTransaction,BusinessTransaction, StockTransaction, 
+                        BorrowedFundTransaction, FixedAssetTransaction]
+
+        context['recent_transactions'] = recent_transactions(*transactions)
         return context
 
 class DashboardView(LoginRequiredMixin, TemplateView):
