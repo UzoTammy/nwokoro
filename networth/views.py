@@ -18,14 +18,17 @@ from django_weasyprint import WeasyTemplateResponseMixin
 
 from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm, StockUpdateForm, SavingForm, SavingFormUpdate,
                     InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm, 
-                    FixedAssetCreateForm, FixedAssetUpdateForm, SavingsCounterTransferForm,
+                    FixedAssetCreateForm, FixedAssetUpdateForm, SavingsCounterTransferForm, BusinessPlowBackForm,
+                    BusinessLiquidateForm,
                     BorrowedFundForm, ConversionForm, RewardFundForm, InjectFundForm, LiabilityRepayForm)
 from .models import (Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, 
                      RewardFund, InjectFund, BorrowedFund, SavingsTransaction, InvestmentTransaction,
                      BusinessTransaction, BorrowedFundTransaction, StockTransaction, FixedAssetTransaction)
 
 from .plots import bar_chart, donut_chart
-from .tools import get_value, naira_valuation, ytd_roi, investments_by_holder, recent_transactions
+from .tools import (get_value, naira_valuation, ytd_roi, investments_by_holder, recent_transactions,
+                )
+
 
 def is_homogenous(value: list):
     if not value:
@@ -374,6 +377,39 @@ class BusinessUpdateView(LoginRequiredMixin, UpdateView):
     model = Business
     success_url = reverse_lazy('networth-home')
     form_class = BusinessUpdateForm
+
+class BusinessPlowBackView(LoginRequiredMixin, FormView):
+    template_name = 'networth/plow_back_form.html'
+    form_class = BusinessPlowBackForm
+    
+    def get_success_url(self):
+        return reverse('networth-business-detail', kwargs={'pk': self.kwargs['pk']})
+    
+    def form_valid(self, form):
+        business = Business.objects.get(pk=self.kwargs['pk'])
+
+        business.plow_back(**form.cleaned_data)
+        messages.success(self.request, 'Profit plowed back successfully !!!')
+        return super().form_valid(form)
+
+class BusinessLiquidateView(LoginRequiredMixin, FormView):
+    template_name = 'networth/liquidate_form.html'
+    form_class = BusinessLiquidateForm
+    
+    def get_success_url(self):
+        return reverse('networth-business-detail', kwargs={'pk': self.kwargs['pk']})
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['pk'] = self.kwargs.get('pk')
+        return kwargs
+    
+    def form_valid(self, form):
+        business = Business.objects.get(pk=self.kwargs['pk'])
+        business.liquidate(**form.cleaned_data)
+        messages.success(self.request, "Liquidation completed successfully !!!")
+        return super().form_valid(form)
+    
 
 # Fixed Asset
 class FixedAssetCreateView(LoginRequiredMixin, FormView):

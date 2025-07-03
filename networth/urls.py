@@ -7,7 +7,8 @@ from .views import (NetworthHomeView, DashboardView,
                     StockCreateView, StockDetailView, StockUpdateView,
                     SavingCreateView, SavingDetailView, SavingUpdateView,
                     SavingsConversionView,
-                    BusinessCreateView, BusinessDetailView, BusinessUpdateView,
+                    BusinessCreateView, BusinessDetailView, BusinessUpdateView, BusinessPlowBackView,
+                    BusinessLiquidateView,
                     FixedAssetCreateView, FixedAssetDetailView, FixedAssetUpdateView,
                     ExternalFundHome, RewardFundView, InjectFundView, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView,
                     PDFNetworthReport, LiabilityDetailView, LiabilityUpdateView, LiabilityRepayView)
@@ -49,7 +50,11 @@ urlpatterns = [
          name='networth-business-detail'),
     path('business/<int:pk>/update/', BusinessUpdateView.as_view(),
          name='networth-business-update'),
-
+     path('business/<int:pk>/plow_back/', BusinessPlowBackView.as_view(),
+         name='networth-business-plow-back'),
+     path('business/<int:pk>/liquate/', BusinessLiquidateView.as_view(),
+         name='networth-business-liquidate'),
+     
     path('fixed-asset/<int:pk>/create/', FixedAssetCreateView.as_view(),
          name='networth-fixed-asset-create'),
     path('fixed-asset/<int:pk>/detail/', FixedAssetDetailView.as_view(),

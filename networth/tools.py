@@ -358,3 +358,4 @@ def recent_transactions(*transactions):
     chained_bucket = chain(*bucket)
     sorted_bucket = sorted(chained_bucket, key=lambda x:x[1], reverse=True)
     return sorted_bucket[:5]
+

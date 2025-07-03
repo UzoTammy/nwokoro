@@ -474,6 +474,7 @@ class Business(models.Model):
     unit_cost = MoneyField(max_digits=12, decimal_places=2)
     host_country = models.CharField(max_length=2)
     description = models.CharField(max_length=250, default='')
+    is_active = models.BooleanField(default=True)
 
 
     def __str__(self):
@@ -482,7 +483,7 @@ class Business(models.Model):
     class Meta:
         verbose_name = 'Business'
 
-    def capital(self):
+    def capital(self)->Money:
         return self.shares * self.unit_cost
     
     def update_holders(self):
@@ -490,6 +491,59 @@ class Business(models.Model):
         holders = Business.objects.filter(owner=self.owner).values_list('name', flat=True).distinct()
         self.owner.preference.business_holders = list(holders)
         self.owner.preference.save()
+
+    def plow_back(self, **form_data):
+        if form_data['plow_back_type'] == 'B' and form_data['price_units'] == '1':
+            raise ValueError('UserInputMismatch error occurred')
+        if (form_data['plow_back_type'] == 'P' or form_data['plow_back_type'] == 'S') and form_data['price_units'] != '1':
+            raise ValueError('UserInputMismatch error occurred')
+        capital = self.capital().amount
+        if form_data['price_amount'] == Decimal('0'):
+            new_shares = round((capital + form_data['units_amount'])/self.unit_cost.amount, 0)
+            self.shares = new_shares
+        elif form_data['units_amount'] == Decimal('0'):
+            new_price = round((capital + form_data['price_amount'])/self.shares, 2)
+            self.unit_cost = new_price
+        else:
+            new_shares = round((capital + form_data['units_amount'])/self.unit_cost.amount, 0)
+            new_price = round((capital + form_data['price_amount'])/new_shares, 2)
+            self.shares, self.unit_cost = new_shares, new_price
+        self.date = date(year=self.date.year+1, month=self.date.month, day=self.date.day)
+        self.save()
+        BusinessTransaction.objects.create(
+            user=self.owner,
+            business=self,
+            amount=Money(form_data['profit'], self.unit_cost.currency),
+            description=f'Plow back profit for {self.date.year-1} applied',
+            timestamp=datetime.combine(self.date, time()),
+            transaction_type='CR'
+        )
+
+    def liquidate(self, **form_data):
+        amount = form_data['number_of_shares'] * self.unit_cost
+        
+        BusinessTransaction.objects.create(
+            user=self.owner,
+            business=self,
+            amount=amount,
+            description=f"Liquidation of {self.name}",
+            transaction_type='DR'         
+        )
+
+        self.shares -= form_data['number_of_shares']
+        if self.shares == 0:
+            self.is_active = False
+        self.save()
+
+        SavingsTransaction.objects.create(
+            user=self.owner,
+            savings=form_data['savings_account'],
+            amount=amount,
+            description='Business liquidation',
+            timestamp=form_data['timestamp'],
+            transaction_type='CR'
+        )
+        
 
 class FixedAsset(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -567,8 +621,7 @@ class BorrowedFund(models.Model):
         )
         savings_account.value -= amount
         savings_account.save()
-
-    
+  
 # There is no need for Rewayd & Inject Trasaction objects
 class RewardFund(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)

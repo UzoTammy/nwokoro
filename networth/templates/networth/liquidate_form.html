@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-6">
+            <form class="mt-3" action="" method="post">
+                {% csrf_token %}
+                <legend>Liquidation</legend>
+                <hr>
+                {{form|crispy}}
+                <div class="m-2">
+                    <button class="btn btn-outline-dark" type="submit">Submit</button>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-business-detail' view.kwargs.pk %}">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    divShares = document.getElementById('div_id_number_of_shares')
+    liquidationType = document.getElementById('id_liquidation_type')
+    numberOfShares = document.getElementById('id_number_of_shares')
+    
+    liquidationType.addEventListener('change', (event) => {
+        const selectedValue = event.target.value;
+        
+        if (selectedValue == 'C') {
+            divShares.style.display = 'none';
+            numberOfShares.value = null
+        } else {
+            divShares.style.display = 'block';
+        }
+    })
+</script>
+{% endblock %}

@@ -18,9 +18,9 @@
             <div class="row">
                 <div class="col">
                     <a class="btn btn-outline-dark" href="{% url 'networth-business-update' object.pk %}">Update</a>
-                    
+                    <a class="btn btn-outline-dark" href="{% url 'networth-business-plow-back' object.pk %}">Plow Back</a>
+                    <a class="btn btn-outline-dark" href="{% url 'networth-business-liquidate' object.pk %}">Liquidate</a>
                     <a class="btn btn-outline-dark float-right" href="{% url 'networth-home'  %}">Back</a>
-                    
                 </div>
             </div>
         </div>
