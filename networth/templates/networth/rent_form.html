@@ -1,0 +1,21 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-sm-6">
+            <form class="mt-3" action="" method="post">
+                {% csrf_token %}
+                <legend> {{ title }}</legend>
+                <hr>
+                {{form|crispy}}
+                <div class="m-2">
+                    <button class="btn btn-outline-dark" type="submit">Submit</button>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-fixed-asset-detail' view.kwargs.pk %}">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

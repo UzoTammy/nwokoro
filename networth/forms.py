@@ -1,8 +1,9 @@
+import datetime
 from decimal import Decimal
 from django import forms
 from django.forms import ValidationError
 from django.utils import timezone
-from .models import (Investment, Stock, Saving, Business, FixedAsset, RewardFund, BorrowedFund, InjectFund)
+from .models import (Investment, Stock, Saving, Business, FixedAsset, RewardFund, BorrowedFund, InjectFund, Rent)
 from account.models import User
 from account.models import Preference
 from djmoney.forms.fields import MoneyField, Money
@@ -406,6 +407,43 @@ class FixedAssetUpdateForm(forms.ModelForm):
         model = FixedAsset
         fields = ['name', 'host_country']
 
+class FixedAssetRentForm(forms.ModelForm):
+
+    # amount = forms.DecimalField(max_digits=12, decimal_places=2)
+    date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        initial=datetime.date.today
+    )
+    # duration = forms.IntegerField(initial=1)
+    period = forms.ChoiceField(choices=[("Y", "Year"), ("M", 'Month')])
+
+    class Meta:
+        model = Rent
+        fields = ('amount', 'date', 'duration', 'period')
+
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+
+        if self.pk:
+            self.fixed_asset = FixedAsset.objects.get(pk=self.pk)
+
+    # def clean(self):
+    #     self.cleaned_data['amount'] = Money(self.cleaned_data['amount'], self.fixed_asset.value.currency)
+    
+class FixedAssetCollectRentForm(forms.Form):
+    savings_account = forms.ModelChoiceField(queryset=Saving.objects.none())
+
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+
+        if self.pk:
+            fixed_asset = FixedAsset.objects.get(pk=self.pk)
+            currency = fixed_asset.value.currency
+            self.fields['savings_account'].queryset = Saving.objects.filter(value_currency=currency)
+            
+
 class BusinessUpdateForm(forms.ModelForm):
 
     name = forms.CharField(max_length=50)
@@ -471,8 +509,6 @@ class BusinessLiquidateForm(forms.Form):
         else:
             if self.cleaned_data['number_of_shares'] >= self.business.shares:
                 raise ValidationError("All/excess shares can't be taken with partial option")
-        
-
 
 class BorrowedFundForm(forms.ModelForm):
     savings_account = forms.ModelChoiceField(queryset=Saving.objects.none())
@@ -600,7 +636,6 @@ class LiabilityRepayForm(forms.ModelForm):
     
     def clean(self):
         self.cleaned_data['owner'] = self.bf.owner
-
     
 class SavingsCounterTransferForm(forms.Form):
     receiver_account = forms.ModelChoiceField(queryset=Saving.objects.none(), widget=forms.Select(attrs={'class': 'form-control'}))

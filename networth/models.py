@@ -5,8 +5,8 @@ from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 from account.models import User
 from django.utils import timezone
-from datetime import date, datetime, time
-
+from datetime import date, datetime, time, timedelta
+import calendar
 
 class ExchangeRate(models.Model):
     base_currency = models.CharField(max_length=3)
@@ -544,6 +544,25 @@ class Business(models.Model):
             transaction_type='CR'
         )
         
+class Rent(models.Model):
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    date = models.DateField()
+    duration = models.IntegerField(default=1)
+    period = models.CharField(max_length=5)
+    is_active = models.BooleanField(default=True)
+
+    def due_date(self):
+        if self.period == 'M':
+            
+            if self.date.month + self.duration > 12:
+                yr, mn = divmod(self.date.month+self.duration, 12)
+                year, month = self.date.year+yr, mn
+            else:
+                year, month = self.date.year, self.date.month + self.duration
+        else:
+            year, month = self.date.year+self.duration, self.date.month
+
+        return date(year, month, self.date.day)
 
 class FixedAsset(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -552,6 +571,7 @@ class FixedAsset(models.Model):
     value = MoneyField(max_digits=12, decimal_places=2)
     host_country = models.CharField(max_length=2)
     description = models.CharField(max_length=250, default='')
+    rent = models.ForeignKey(Rent, on_delete=models.CASCADE, default=None, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -565,6 +585,43 @@ class FixedAsset(models.Model):
         self.owner.preference.fixed_asset_holders = list(holders)
         self.owner.preference.save()
 
+    def create_rent(self, **form_data):
+        rent = Rent.objects.create(**form_data)
+        self.rent = rent
+        self.save()
+
+    def collect_rent(self, savings_account):
+        # rent will move money to saving account
+        if self.rent is None:
+            raise Exception("Rent is inactive or doesn't exist for this property")
+        
+        SavingsTransaction.objects.create(
+            user=self.owner,
+            savings=savings_account,
+            amount=self.rent.amount,
+            description=f"Rent collected for {self.rent.due_date().strftime('%b %Y')}",
+            timestamp=timezone.now()
+        )
+        savings_account.value.amount += self.rent.amount
+        savings_account.save()
+
+        self.rent.date = self.rent.due_date()
+        self.rent.save()
+        
+    def stop_rent(self):
+        if self.rent is None:
+            raise Exception("Rent do not exist")
+        self.rent.is_active = False
+        self.rent.save()
+
+    def restore_rent(self):
+        if self.rent is None:
+            raise Exception("Rent do not exist")
+        self.rent.is_active = True
+        self.rent.save()
+    
+        # self.rent = None
+        
 class Liability(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=30)

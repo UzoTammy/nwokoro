@@ -9,7 +9,7 @@ from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.db.models.aggregates import Sum, Min, Max
 from django.db.models import F
-from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView)
+from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView, RedirectView)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from babel.numbers import format_percent
@@ -18,10 +18,11 @@ from django_weasyprint import WeasyTemplateResponseMixin
 
 from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm, StockUpdateForm, SavingForm, SavingFormUpdate,
                     InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm, 
-                    FixedAssetCreateForm, FixedAssetUpdateForm, SavingsCounterTransferForm, BusinessPlowBackForm,
+                    FixedAssetCreateForm, FixedAssetUpdateForm, FixedAssetRentForm, FixedAssetCollectRentForm,
+                    SavingsCounterTransferForm, BusinessPlowBackForm,
                     BusinessLiquidateForm,
                     BorrowedFundForm, ConversionForm, RewardFundForm, InjectFundForm, LiabilityRepayForm)
-from .models import (Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, 
+from .models import (Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, Rent,
                      RewardFund, InjectFund, BorrowedFund, SavingsTransaction, InvestmentTransaction,
                      BusinessTransaction, BorrowedFundTransaction, StockTransaction, FixedAssetTransaction)
 
@@ -75,7 +76,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         investments = Investment.objects.filter(is_active=True).filter(owner=self.request.user)
         stocks = Stock.objects.filter(owner=self.request.user)
         savings = Saving.objects.filter(owner=self.request.user)
-        business = Business.objects.filter(owner=self.request.user)
+        business = Business.objects.filter(owner=self.request.user).filter(is_active=True)
         fixed_asset = FixedAsset.objects.filter(owner=self.request.user)
         liabilities = BorrowedFund.objects.filter(owner=self.request.user)
 
@@ -250,6 +251,7 @@ class InvestmentTerminationView(LoginRequiredMixin, FormView):
         messages.success(self.request, "Investment dropped into savings successfully")
         return super().form_valid(form)
 
+# stock
 class StockCreateView(LoginRequiredMixin, FormView):
     form_class = StockCreateForm
     template_name = 'networth/stock_form.html'
@@ -440,6 +442,12 @@ class FixedAssetDetailView(LoginRequiredMixin, DetailView):
     model = FixedAsset
     template_name = 'networth/fixed_asset_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # rent_obj = self.request.GET['rent'] == 'show' or 'rent' not in self.request.GET
+        # context['show_rent_obj'] = rent_obj
+        return context
+
 class FixedAssetUpdateView(LoginRequiredMixin, UpdateView):
     model = FixedAsset
     template_name = 'networth/fixed_asset_form.html'
@@ -448,6 +456,77 @@ class FixedAssetUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('networth-fixed-asset', kwargs={'pk': self.object.pk})
 
+class FixedAssetRentView(LoginRequiredMixin, FormView):
+    template_name = 'networth/rent_form.html'
+    form_class = FixedAssetRentForm
+
+    def get_success_url(self):
+        return reverse('networth-fixed-asset-detail', kwargs={'pk': self.kwargs['pk']})
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Rent'
+        return context
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['pk'] = self.kwargs.get('pk')
+        return kwargs
+
+    def form_valid(self, form):
+        fixed_asset = FixedAsset.objects.get(pk=self.kwargs['pk'])
+        fixed_asset.create_rent(**form.cleaned_data)
+        messages.success(self.request, 'Rent is successfully created !!!')
+        return super().form_valid(form)
+
+class FixedAssetCollectRentView(LoginRequiredMixin, FormView):
+    form_class = FixedAssetCollectRentForm
+    template_name = 'networth/rent_form.html'
+
+    def get_success_url(self):
+        return reverse('networth-fixed-asset-detail', kwargs={'pk': self.kwargs['pk']})
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Collect Rent'
+        return context
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['pk'] = self.kwargs.get('pk')
+        return kwargs
+    
+    def form_valid(self, form):
+        fixed_asset = FixedAsset.objects.get(pk=self.kwargs['pk'])
+        fixed_asset.collect_rent(form.cleaned_data['savings_account'])
+        messages.success(self.request, 'Rent collected successfully !!!')
+        return super().form_valid(form)
+
+class FixedAssetStopRentView(LoginRequiredMixin, RedirectView):
+
+    def get_redirect_url(self, *args, **kwargs):
+        fixed_asset = FixedAsset.objects.get(pk=kwargs['pk'])
+        fixed_asset.stop_rent()
+        messages.success(self.request, 'Rent is stopped successfully !!!')
+        return reverse('networth-fixed-asset-detail', kwargs={'pk': kwargs['pk']})
+
+class FixedAssetRestoreRentView(LoginRequiredMixin, RedirectView):
+
+    def get_redirect_url(self, *args, **kwargs):
+        fixed_asset = FixedAsset.objects.get(pk=kwargs['pk'])
+        fixed_asset.restore_rent()
+        messages.success(self.request, 'Rent is restored successfully !!!')
+        return reverse('networth-fixed-asset-detail', kwargs={'pk': kwargs['pk']})
+
+class FixedAssetUpdateRentView(LoginRequiredMixin, UpdateView):
+    model = Rent
+    form_class = FixedAssetRentForm
+    pk_url_kwarg = 'rent_pk'
+    
+    def get_success_url(self):
+        return reverse('networth-fixed-asset-detail', kwargs={'pk': self.kwargs['pk']})
+
+# liability
 class LiabilityDetailView(LoginRequiredMixin, DetailView):
     model = BorrowedFund
     template_name = 'networth/liability_detail.html'

@@ -11,14 +11,53 @@
                 <li class="list-group-item">Value<span class="float-right">{{object.value}}</span></li>
                 <li class="list-group-item">Value Date<span class="float-right">{{object.date}}</span></li>
                 <li class="list-group-item">Host Country<span class="float-right">{{object.host_country}}</span></li>
-                <hr>
-              </ul>
+                {% if object.rent %}
+                    {% if request.GET.rent == 'hide' or not request.GET %}
+                    <li class="list-group-item">This property is rented
+                        <span class="float-right"><a href="?rent=show">show</a></span>
+                    </li>
+                    {% endif %}
+                    
+                    {% if request.GET.rent == 'show' %}
+                    <li class="list-group-item">
+                        <ul class="list-group list-group-flush shadow-lg">
+                            <li class="list-group-item list-group-item-secondary"><span class="text-info">Rent Info</span>
+                                - {% if object.rent.is_active %}<span class="text-success">Active</span>  {% else %} <span class="text-danger">Inactive</span> {% endif %}
+                                <a class="float-right" href="?rent=hide">hide</a></li>
+                            <li class="list-group-item list-group-item-secondary">Amount <span class="float-right">{{object.value.currency}}{{object.rent.amount}}</span></li>
+                            <li class="list-group-item list-group-item-secondary">Date Rented <span class="float-right">{{object.rent.date}} 
+                                for {{object.rent.duration}}{% if object.rent.period == 'M' %} Month {% else %} Year {% endif %}</span>
+                            </li>
+                            <li class="list-group-item list-group-item-secondary">Due Date <span class="float-right">{{object.rent.due_date}}</span></li>
+                            <li class="list-group-item list-group-item-secondary">
+                                <a class="btn btn-outline-dark btn-sm" href="{% url 'networth-fixed-asset-rent-update' object.pk object.rent.pk %}">Update</a>
+                                {% if object.rent.is_active %}
+                                <a class="btn btn-outline-dark btn-sm" href="{% url 'networth-fixed-asset-rent-collect' object.pk %}">Collect Rent</a>
+                                
+                                <span class="float-right">
+                                    <a class="btn btn-outline-dark btn-sm" href="{% url 'networth-fixed-asset-rent-stop' object.pk %}">Stop <i class="fa fa-stop text-danger"></i></a>
+                                </span>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    {% else %}
+                    <li class="list-group-item text-center text-danger">This property is not rented</li>
+                {% endif %}
+            </ul>
+            <hr>
             <div class="row">
                 <div class="col">
                     <a class="btn btn-outline-dark" href="{% url 'networth-fixed-asset-update' object.pk %}">Update</a>
-                    
+                    {% if not object.rent %}
+                    <a class="btn btn-outline-dark" href="{% url 'networth-fixed-asset-rent' object.pk %}">Create Rent</a>
+                    {% endif %}
+                    {% if object.rent and not object.rent.is_active %}
+                    <a class="btn btn-outline-dark" href="{% url 'networth-fixed-asset-rent-restore' object.pk %}">Restore Rent</a>
+                    {% endif %}
                     <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>
-                    
+
                 </div>
             </div>
         </div>
