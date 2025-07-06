@@ -30,7 +30,7 @@ def bar_chart(x_axis, y_axis, Y='Y', X='X', title='Bar Chart', y_min=None):
     if y_min:
         plt.ylim(bottom=y_min)
     # Create a bar chart
-
+    
     return _plot(plt)
 
 def donut_chart(labels:list, sizes:list):
@@ -53,3 +53,19 @@ def donut_chart(labels:list, sizes:list):
 
     return _plot(plt)
 
+def plot(x_axis, y_axis, Y='Y', X='X', title='Bar Chart', y_min=None):
+    # Create a bar chart
+    plt.switch_backend('AGG')
+    plt.figure(figsize=(6, 4))
+    plt.plot(x_axis, y_axis, color='skyblue')
+    plt.xlabel(X)
+    plt.ylabel(Y)
+    plt.title(title)
+    plt.tight_layout()
+    plt.grid(True, linestyle='--', alpha=0.6)
+    if y_min:
+        plt.ylim(bottom=y_min)
+    # plt.show()
+    return _plot(plt)
+
+# plot([0, 10, 20, 30], [0, 20, 40, 60], X='X', Y='Y', title='XY', y_min=None)

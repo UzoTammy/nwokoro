@@ -354,14 +354,13 @@ def recent_transactions(*transactions):
         qs = transaction.objects.only('timestamp', 'amount_currency', 'amount')
         action = qs.model.__name__[:-11]
         qss = qs.annotate(action=Value(action)).values_list('action', 'timestamp__date', 'amount_currency', 'amount')
-        qss = list((item[0], item[1], f'{item[2]}{item[3]}') for item in qss)
+        qss = list((item[0], item[1], f'{item[2]}{item[3]:,.2f}') for item in qss)
         bucket.append(qss)
     chained_bucket = chain(*bucket)
     sorted_bucket = sorted(chained_bucket, key=lambda x:x[1], reverse=True)
     sorted_bucket = sorted_bucket[:6]
     
     return sorted_bucket
-
 
 def currency_pair(currency, host_country):
     """
@@ -395,7 +394,10 @@ def currency_pair(currency, host_country):
         exchange_rate = ExchangeRate.objects.get(target_currency=currency).rate
     result[0] = Money(round(result[0]/Decimal(exchange_rate), 2), 'USD')
     result[1] = Money(round(result[1], 2), 'USD')
-    result.append(result[0]/result[1])
+    try:
+        result.append(result[0]/result[1])
+    except ZeroDivisionError('No networth in US dollars'):
+        return
     return {'local': result[0], 'usd': result[1], 'equilibrium': round(result[2], 2)}
 
 def number_of_instruments(username):

@@ -98,7 +98,11 @@
           {% for transaction in recent_transactions %}
           <tr>
             {% for param in transaction %}
-              <td class="{% if forloop.counter == 3 %} text-right {% endif %}">{{param}}</td>
+              {% if forloop.counter == 3 %}
+              <td class=" text-right">{{param}}</td>
+              {% else %}
+              <td>{{param}}</td>
+               {% endif %}
             {% endfor %}
           </tr>
           {% endfor %}
@@ -483,8 +487,14 @@
           <div class="row mb-3">
               <div class="col">
                 <ul class="list-group">
-                  <li class="list-group-item">{{currency_pair.local}} : {{currency_pair.usd}}, equilibrium @ {{currency_pair.equilibrium}}</li>
-                  <li class="list-group-item">Number of Active Instruments: <span class="float-right">{{number_of_instruments|first}}({{number_of_instruments|last}})</span></li>
+                  <li class="list-group-item">
+                    {% if currency_pair %}
+                      {{currency_pair.local}} : {{currency_pair.usd}}, equilibrium @ {{currency_pair.equilibrium}}
+                    {% else %}
+                      No US dollar asset in the chosen country
+                    {% endif %}
+                  </li>
+                  <li class="list-group-item">Number of instruments are {{number_of_instruments|first}} out of {{number_of_instruments|last}} Assets</li>
                 </ul>
               </div>
               <div class="col"></div>

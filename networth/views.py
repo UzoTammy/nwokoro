@@ -25,7 +25,7 @@ from .models import (Saving, Stock, Investment, ExchangeRate, Business, Financia
                      RewardFund, InjectFund, BorrowedFund, SavingsTransaction, InvestmentTransaction,
                      BusinessTransaction, BorrowedFundTransaction, StockTransaction, FixedAssetTransaction)
 
-from .plots import bar_chart, donut_chart
+from .plots import bar_chart, donut_chart, plot
 from .tools import (get_value, naira_valuation, ytd_roi, investments_by_holder, 
                     recent_transactions, currency_pair, number_of_instruments, number_of_assets)
 
@@ -100,6 +100,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                         BorrowedFundTransaction, FixedAssetTransaction]
 
         context['recent_transactions'] = recent_transactions(*transactions)
+        
         context['currency_pair'] = currency_pair('NGN', 'NG')
         context['number_of_instruments'] = (number_of_instruments(self.request.user.username), number_of_assets(self.request.user.username))
         return context
@@ -145,7 +146,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             min_worth = financials.aggregate(Min('worth'))['worth__min']
             recent_days = [ date.strftime('%m/%d') for date in financials.values_list('date', flat=True) ]
             recent_networth = [ financial.networth().amount for financial in financials ]
-            context['networth_image'] = bar_chart(recent_days, recent_networth, 'USD($)', 'Days', 'Networth', y_min=4*min_worth/5)
+            # context['networth_image'] = plot(recent_days, recent_networth, 'USD($)', 'Days', 'Networth', y_min=4*min_worth/5)
+            bar_chart(recent_days, recent_networth, 'USD($)', 'Days', 'Networth', y_min=4*min_worth/5)
 
             min_roi = financials.aggregate(Min('daily_roi'))['daily_roi__min']
             recent_daily_roi = financials.values_list('daily_roi', flat=True)
