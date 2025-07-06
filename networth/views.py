@@ -143,15 +143,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         
         # get the minimum worth
         if financials:
-            min_worth = financials.aggregate(Min('worth'))['worth__min']
+            # min_worth = financials.aggregate(Min('worth'))['worth__min']
             recent_days = [ date.strftime('%m/%d') for date in financials.values_list('date', flat=True) ]
             recent_networth = [ financial.networth().amount for financial in financials ]
-            context['networth_image'] = plot(recent_days, recent_networth, 'USD($)', 'Days', 'Networth', y_min=4*min_worth/5)
+            context['networth_image'] = plot(recent_days, recent_networth, 'USD($)', 'Days', 'Networth')
             # bar_chart(recent_days, recent_networth, 'USD($)', 'Days', 'Networth', y_min=4*min_worth/5)
 
-            min_roi = financials.aggregate(Min('daily_roi'))['daily_roi__min']
+            # min_roi = financials.aggregate(Min('daily_roi'))['daily_roi__min']
             recent_daily_roi = financials.values_list('daily_roi', flat=True)
-            context['daily_roi_image'] = bar_chart(recent_days, recent_daily_roi, 'USD($)', 'Days', 'Daily ROI', y_min=int(min_roi/2))
+            context['daily_roi_image'] = plot(recent_days, recent_daily_roi, 'USD($)', 'Days', 'Daily ROI')
             # context['scipy'] = scipy_bar()
             latest = financials.latest('date')
             labels = ['saving', 'investment', 'stock', 'fixed asset', 'business']
