@@ -84,21 +84,21 @@
   {% endif %}
 
   <div class="row mt-3">
-    <div class="col-sm-8">
-      <table class="table table-sm table-primary table-bordered">
+    <div class="col-sm-6">
+      <table class="table table-sm table-light table-striped" data-toggle="table">
         <legend class="text-italic">Recent Transactions</legend>
         <thead>
           <tr>
             <th>Transaction</th>
             <th>Date</th>
-            <th>Value</th>
+            <th class="text-right">Value</th>
           </tr>
         </thead>
         <tbody>
           {% for transaction in recent_transactions %}
           <tr>
             {% for param in transaction %}
-            <td>{{param}}</td>
+              <td class="{% if forloop.counter == 3 %} text-right {% endif %}">{{param}}</td>
             {% endfor %}
           </tr>
           {% endfor %}
@@ -108,29 +108,34 @@
   </div>
 
   <nav>
-    <div class="nav nav-tabs" id="nav-tab" role="tablist">
-      <button class="nav-link active" id="nav-home-tab" data-toggle="tab" data-target="#savings" type="button"
+    <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+      <button class="nav-link active" id="nav-savings-tab" data-toggle="tab" data-target="#savings" type="button"
         role="tab" aria-controls="savings" aria-selected="true"><span
           class="text-info font-italic">Savings</span></button>
-      <button class="nav-link" id="nav-profile-tab" data-toggle="tab" data-target="#investment" type="button" role="tab"
+      <button class="nav-link" id="nav-investment-tab" data-toggle="tab" data-target="#investment" type="button" role="tab"
         aria-controls="investment" aria-selected="false"><span class="text-info font-italic">Investment</span></button>
-      <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#stock" type="button" role="tab"
+      <button class="nav-link" id="nav-stock-tab" data-toggle="tab" data-target="#stock" type="button" role="tab"
         aria-controls="stock" aria-selected="false"><span class="text-info font-italic">Stock</span></button>
-      <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#business" type="button" role="tab"
+      <button class="nav-link" id="nav-business-tab" data-toggle="tab" data-target="#business" type="button" role="tab"
         aria-controls="business" aria-selected="false"><span class="text-info font-italic">Business</span></button>
-      <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#fixed_asset" type="button"
+      <button class="nav-link" id="nav-fixed-asset-tab" data-toggle="tab" data-target="#fixed_asset" type="button"
         role="tab" aria-controls="fixed_asset" aria-selected="false"><span class="text-info font-italic">Fixed
           Asset</span></button>
-      <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#liabilities" type="button"
+      <button class="nav-link" id="nav-liabilities-tab" data-toggle="tab" data-target="#liabilities" type="button"
         role="tab" aria-controls="liabilities" aria-selected="false"><span class="dark-purple font-italic">
           Liability</span>
+        </button>
+
+      <button class="nav-link" id="nav-outlook-tab" data-toggle="tab" data-target="#outlook" type="button"
+        role="tab" aria-controls="outlook" aria-selected="false"><span class="text-primary font-italic">
+          Outlook</span>
         </button>
     </div>
   </nav>
 
   <div class="tab-content" id="nav-tabContent">
 
-    <div class="tab-pane fade show active" id="savings" role="tabpanel" aria-labelledby="nav-home-tab">
+    <div class="tab-pane fade show active" id="savings" role="tabpanel" aria-labelledby="nav-savings-tab">
       <div class="row justify-content-center mt-3 shadow">
         <div class="col-sm-12">
 
@@ -212,7 +217,7 @@
       </div>
     </div>
 
-    <div class="tab-pane fade" id="investment" role="tabpanel" aria-labelledby="nav-profile-tab">
+    <div class="tab-pane fade" id="investment" role="tabpanel" aria-labelledby="nav-investment-tab">
       <div class="row justify-content-center mt-3 shadow">
         <div class="col-sm-12">
           <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Investment ({{investments.count}})</h5>
@@ -272,7 +277,7 @@
 
     </div>
 
-    <div class="tab-pane fade" id="stock" role="tabpanel" aria-labelledby="nav-contact-tab">
+    <div class="tab-pane fade" id="stock" role="tabpanel" aria-labelledby="nav-stock-tab">
       <div id="stock" class="row justify-content-center mt-3 shadow">
         <div class="col-sm-12">
           <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Stock ({{stocks.count}})</h5>
@@ -324,7 +329,7 @@
       </div>
     </div>
 
-    <div class="tab-pane fade" id="business" role="tabpanel" aria-labelledby="nav-contact-tab">
+    <div class="tab-pane fade" id="business" role="tabpanel" aria-labelledby="nav-business-tab">
       <div id="stock" class="row justify-content-center mt-3 shadow">
         <div class="col-sm-12">
           <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Business ({{business.count}})</h5>
@@ -374,7 +379,7 @@
       </div>
     </div>
 
-    <div class="tab-pane fade" id="fixed_asset" role="tabpanel" aria-labelledby="nav-contact-tab">
+    <div class="tab-pane fade" id="fixed_asset" role="tabpanel" aria-labelledby="nav-fixed-asset-tab">
       <div id="stock" class="row justify-content-center mt-3 shadow">
         <div class="col-sm-12">
           <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Fixed Asset ({{fixed_asset.count}})</h5>
@@ -422,7 +427,7 @@
       </div>
     </div>
 
-    <div class="tab-pane fade" id="liabilities" role="tabpanel" aria-labelledby="nav-contact-tab">
+    <div class="tab-pane fade" id="liabilities" role="tabpanel" aria-labelledby="nav-liabilities-tab">
       <div id="stock" class="row justify-content-center mt-3 shadow">
         <div class="col-sm-12">
           <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Liabilities ({{liabilities.count}})</h5>
@@ -467,6 +472,23 @@
             {% endif %}
           </div>
 
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane fade" id="outlook" role="tabpanel" aria-labelledby="nav-outlook-tab">
+      <div id="stock" class="row justify-content-center mt-3 shadow">
+        <div class="col-sm-12">
+          <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Outlook</h5>
+          <div class="row mb-3">
+              <div class="col">
+                <ul class="list-group">
+                  <li class="list-group-item">{{currency_pair.local}} : {{currency_pair.usd}}, equilibrium @ {{currency_pair.equilibrium}}</li>
+                  <li class="list-group-item">Number of Active Instruments: <span class="float-right">{{number_of_instruments|first}}({{number_of_instruments|last}})</span></li>
+                </ul>
+              </div>
+              <div class="col"></div>
+          </div>
         </div>
       </div>
     </div>

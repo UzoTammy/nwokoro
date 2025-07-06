@@ -351,11 +351,61 @@ def recent_transactions(*transactions):
      
     bucket = list()   
     for transaction in transactions:
-        qs = transaction.objects.all()
+        qs = transaction.objects.only('timestamp', 'amount_currency', 'amount')
         action = qs.model.__name__[:-11]
-        qs = qs.annotate(action=Value(action)).values_list('action', 'timestamp', 'amount')
-        bucket.append(qs)
+        qss = qs.annotate(action=Value(action)).values_list('action', 'timestamp__date', 'amount_currency', 'amount')
+        qss = list((item[0], item[1], f'{item[2]}{item[3]}') for item in qss)
+        bucket.append(qss)
     chained_bucket = chain(*bucket)
     sorted_bucket = sorted(chained_bucket, key=lambda x:x[1], reverse=True)
-    return sorted_bucket[:5]
+    sorted_bucket = sorted_bucket[:6]
+    
+    return sorted_bucket
 
+
+def currency_pair(currency, host_country):
+    """
+        To compare networth in a country's local currency to the networth
+        in US dollars in the same country.
+    """
+    result = list()
+    for cur in (currency, 'USD'):
+        saving = Saving.objects.filter(host_country=host_country).filter(value_currency=cur)
+        total_value = saving.aggregate(Sum('value'))['value__sum'] if saving.exists() else Decimal('0')
+        stack = [total_value]
+
+        fixed = FixedAsset.objects.filter(host_country=host_country).filter(value_currency=cur)
+        total_value = fixed.aggregate(Sum('value'))['value__sum'] if fixed.exists() else Decimal('0')
+        stack.append(total_value)
+
+        invest = Investment.objects.filter(host_country=host_country).filter(principal_currency=cur)
+        total_value = invest.aggregate(Sum('principal'))['principal__sum'] if invest.exists() else Decimal('0')
+        stack.append(total_value)
+
+        biz = Business.objects.filter(host_country=host_country).filter(unit_cost_currency=cur)
+        total_value = biz.annotate(val=F('shares')*F('unit_cost')).aggregate(Sum('val'))['val__sum'] if biz.exists() else Decimal('0')
+        stack.append(total_value)
+
+        stock = Stock.objects.filter(host_country=host_country).filter(unit_cost_currency=cur)
+        total_value = stock.annotate(val=F('units')*F('unit_cost')).aggregate(Sum('val'))['val__sum'] if stock.exists() else Decimal('0')
+        stack.append(total_value)
+
+        total_value = sum(stack)
+        result.append(total_value)
+        exchange_rate = ExchangeRate.objects.get(target_currency=currency).rate
+    result[0] = Money(round(result[0]/Decimal(exchange_rate), 2), 'USD')
+    result[1] = Money(round(result[1], 2), 'USD')
+    result.append(result[0]/result[1])
+    return {'local': result[0], 'usd': result[1], 'equilibrium': round(result[2], 2)}
+
+def number_of_instruments(username):
+    "Assets with potentials to generate wealth"
+    fixed = FixedAsset.objects.filter(owner__username=username).filter(value__gt=0).count()
+    invest = Investment.objects.filter(owner__username=username).filter(is_active=True).count()
+    biz = Business.objects.filter(owner__username=username).filter(is_active=True).count()
+    stock = Stock.objects.filter(owner__username=username).filter(units__gt=0).count()
+    return fixed+invest+biz+stock
+
+def number_of_assets(username):
+    savings = Saving.objects.filter(owner__username=username).filter(value__gt=0).count()
+    return savings + number_of_instruments(username)

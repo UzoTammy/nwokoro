@@ -19,16 +19,15 @@ from django_weasyprint import WeasyTemplateResponseMixin
 from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm, StockUpdateForm, SavingForm, SavingFormUpdate,
                     InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm, 
                     FixedAssetCreateForm, FixedAssetUpdateForm, FixedAssetRentForm, FixedAssetCollectRentForm,
-                    SavingsCounterTransferForm, BusinessPlowBackForm,
-                    BusinessLiquidateForm,
-                    BorrowedFundForm, ConversionForm, RewardFundForm, InjectFundForm, LiabilityRepayForm)
+                    SavingsCounterTransferForm, BusinessPlowBackForm, BusinessLiquidateForm,BorrowedFundForm, 
+                    ConversionForm, RewardFundForm, InjectFundForm, LiabilityRepayForm)
 from .models import (Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, Rent,
                      RewardFund, InjectFund, BorrowedFund, SavingsTransaction, InvestmentTransaction,
                      BusinessTransaction, BorrowedFundTransaction, StockTransaction, FixedAssetTransaction)
 
 from .plots import bar_chart, donut_chart
-from .tools import (get_value, naira_valuation, ytd_roi, investments_by_holder, recent_transactions,
-                )
+from .tools import (get_value, naira_valuation, ytd_roi, investments_by_holder, 
+                    recent_transactions, currency_pair, number_of_instruments, number_of_assets)
 
 
 def is_homogenous(value: list):
@@ -97,11 +96,12 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         context['year_roi'] = ytd_roi(self.request.user, datetime.date.today().year)
 
-        
         transactions = [SavingsTransaction, InvestmentTransaction,BusinessTransaction, StockTransaction, 
                         BorrowedFundTransaction, FixedAssetTransaction]
 
         context['recent_transactions'] = recent_transactions(*transactions)
+        context['currency_pair'] = currency_pair('NGN', 'NG')
+        context['number_of_instruments'] = (number_of_instruments(self.request.user.username), number_of_assets(self.request.user.username))
         return context
 
 class DashboardView(LoginRequiredMixin, TemplateView):
