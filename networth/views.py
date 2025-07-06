@@ -146,8 +146,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             min_worth = financials.aggregate(Min('worth'))['worth__min']
             recent_days = [ date.strftime('%m/%d') for date in financials.values_list('date', flat=True) ]
             recent_networth = [ financial.networth().amount for financial in financials ]
-            # context['networth_image'] = plot(recent_days, recent_networth, 'USD($)', 'Days', 'Networth', y_min=4*min_worth/5)
-            bar_chart(recent_days, recent_networth, 'USD($)', 'Days', 'Networth', y_min=4*min_worth/5)
+            context['networth_image'] = plot(recent_days, recent_networth, 'USD($)', 'Days', 'Networth', y_min=4*min_worth/5)
+            # bar_chart(recent_days, recent_networth, 'USD($)', 'Days', 'Networth', y_min=4*min_worth/5)
 
             min_roi = financials.aggregate(Min('daily_roi'))['daily_roi__min']
             recent_daily_roi = financials.values_list('daily_roi', flat=True)
