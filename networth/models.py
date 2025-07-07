@@ -5,8 +5,8 @@ from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 from account.models import User
 from django.utils import timezone
-from datetime import date, datetime, time, timedelta
-import calendar
+from datetime import date, datetime, time
+
 
 class ExchangeRate(models.Model):
     base_currency = models.CharField(max_length=3)
@@ -638,7 +638,6 @@ class Liability(models.Model):
     class Meta:
         verbose_name = 'Liability'
 
-    
 # External Objects
 class BorrowedFund(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -851,6 +850,3 @@ class FinancialData(models.Model):
         self.exchange_rate = result
         super().save(*args, **kwargs)
         
-        
-
-    

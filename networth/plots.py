@@ -68,4 +68,4 @@ def plot(x_axis, y_axis, Y='Y', X='X', title='Bar Chart', y_min=None):
     # plt.show()
     return _plot(plt)
 
-# plot([0, 10, 20, 30], [0, 20, 40, 60], X='X', Y='Y', title='XY', y_min=None)
+

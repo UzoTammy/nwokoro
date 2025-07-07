@@ -1,13 +1,10 @@
 import datetime
-from decimal import Decimal
-from itertools import chain
 from zoneinfo import ZoneInfo
 
-from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
-from django.db.models.aggregates import Sum, Min, Max
+from django.db.models.aggregates import Max
 from django.db.models import F
 from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView, RedirectView)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -21,14 +18,15 @@ from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm,
                     FixedAssetCreateForm, FixedAssetUpdateForm, FixedAssetRentForm, FixedAssetCollectRentForm,
                     SavingsCounterTransferForm, BusinessPlowBackForm, BusinessLiquidateForm,BorrowedFundForm, 
                     ConversionForm, RewardFundForm, InjectFundForm, LiabilityRepayForm)
-from .models import (Saving, Stock, Investment, ExchangeRate, Business, FinancialData, FixedAsset, Rent,
+
+from .models import (Saving, Stock, Investment, Business, FinancialData, FixedAsset, Rent,
                      RewardFund, InjectFund, BorrowedFund, SavingsTransaction, InvestmentTransaction,
                      BusinessTransaction, BorrowedFundTransaction, StockTransaction, FixedAssetTransaction)
 
 from .plots import bar_chart, donut_chart, plot
-from .tools import (get_value, naira_valuation, ytd_roi, investments_by_holder, last_3_month_roi,
-                    recent_transactions, currency_pair, number_of_instruments, number_of_assets)
-
+from .tools import (get_value, valuation, ytd_roi, investments_by_holder, last_3_month_roi,
+                    recent_transactions, currency_pair, number_of_instruments, number_of_assets, 
+                    exchange_rate, get_assets_liabilities, set_roi)
 
 def is_homogenous(value: list):
     if not value:
@@ -46,7 +44,6 @@ def highest_occurring_item(value: list):
         result.append((item, value.count(item)))
     return max(result, key=lambda x: x[1])[0]
 
-        
 # Create your views here.
 class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/home.html'
@@ -63,21 +60,22 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         if financial_data.exists():
             context['fd'] = financial_data.latest('date')
 
-        # exchange rate
-        canada = ExchangeRate.objects.get(target_currency='CAD')
-        nigeria = ExchangeRate.objects.get(target_currency="NGN")
-        rate = Money(nigeria.rate/canada.rate, 'NGN')
-        context['exchange'] = f'{rate}/CA$ on {canada.updated_at.strftime("%A %d-%b-%Y")}'
-        comment = f"Naira have {naira_valuation()[1]} {naira_valuation()[0]} since {naira_valuation()[2]}"
-        context['naira_value_comment'] = comment
+        # exchange
+        exch = exchange_rate('NGN', 'CAD')
+        rate = exch[0]
+        context['exchange'] = f'{rate}/CA$ on {exch[1].strftime("%A %d-%b-%Y")}'
+
+        # naira valuation
+        naira_valuation = valuation('NGN')
+        context['naira_value_comment'] = f"Naira have {naira_valuation[1]} {naira_valuation[0]} since {naira_valuation[2]}"
         
-        # queryset of assets
-        investments = Investment.objects.filter(is_active=True).filter(owner=self.request.user)
-        stocks = Stock.objects.filter(owner=self.request.user)
-        savings = Saving.objects.filter(owner=self.request.user)
-        business = Business.objects.filter(owner=self.request.user).filter(is_active=True)
-        fixed_asset = FixedAsset.objects.filter(owner=self.request.user)
-        liabilities = BorrowedFund.objects.filter(owner=self.request.user)
+        # fetch assets of current logged-in user
+        investments = get_assets_liabilities(owner=self.request.user)['investments']
+        savings = get_assets_liabilities(owner=self.request.user)['savings']
+        stocks = get_assets_liabilities(owner=self.request.user)['stocks']
+        business = get_assets_liabilities(owner=self.request.user)['business']
+        fixed_asset = get_assets_liabilities(owner=self.request.user)['fixed_asset']
+        liabilities = get_assets_liabilities(owner=self.request.user)['liabilities']
 
         context['investments'] = investments.order_by('host_country')
         context['savings'] = savings.order_by('value_currency')
@@ -104,6 +102,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['currency_pair'] = currency_pair('NGN', 'NG')
         context['number_of_instruments'] = (number_of_instruments(self.request.user.username), number_of_assets(self.request.user.username))
         context['last_3_months_bar'] = bar_chart(last_3_month_roi()[0], last_3_month_roi()[1], Y='ROI', X='Month', title='3 months ROI')
+        
         return context
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -119,7 +118,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             
             obj = qs.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else qs.first()
             base_networth = obj.networth()
-            daily_roi = 1.2 * obj.daily_roi # 20% above the start roi of the year
+            daily_roi = set_roi(Money(100_000.00, 'USD'))
 
             context['financials'] = {
                 'base_networth': base_networth,
@@ -415,7 +414,6 @@ class BusinessLiquidateView(LoginRequiredMixin, FormView):
         messages.success(self.request, "Liquidation completed successfully !!!")
         return super().form_valid(form)
     
-
 # Fixed Asset
 class FixedAssetCreateView(LoginRequiredMixin, FormView):
     success_url = reverse_lazy('networth-home')
@@ -575,7 +573,6 @@ class LiabilityRepayView(LoginRequiredMixin, FormView):
         messages.success(self.request, f"Repayment made from {form.cleaned_data['savings_account']}")
         return super().form_valid(form)
     
-
 # External Funds
 class ExternalFundHome(LoginRequiredMixin, ListView):
     model = Saving

@@ -1,4 +1,5 @@
 import datetime
+import calendar
 from decimal import Decimal
 from itertools import chain
 from typing import Optional, List
@@ -186,6 +187,30 @@ class FinancialReport:
             networth_by_country=self.country_networth()
         )
 
+def exchange_rate(of:str, to:str=None):
+    target = ExchangeRate.objects.filter(target_currency=of)
+    if to is None:
+        to = 'USD'
+    if target.exists():
+        target_rate = target.get().rate
+        base = ExchangeRate.objects.filter(target_currency=to)
+        if not base.exists():
+            return None
+        base_rate = base.get().rate
+        rate = target_rate/base_rate
+        return Money(rate, of), target.get().updated_at
+
+def get_assets_liabilities(owner):
+    """queryset of active assets of current logged-in user"""
+    investments = Investment.objects.filter(is_active=True).filter(owner=owner)
+    stocks = Stock.objects.filter(owner=owner)
+    savings = Saving.objects.filter(owner=owner)
+    business = Business.objects.filter(owner=owner).filter(is_active=True)
+    fixed_asset = FixedAsset.objects.filter(owner=owner)
+    liabilities = BorrowedFund.objects.filter(owner=owner)
+    return {'investments': investments, 'stocks': stocks, 'savings': savings, 'business': business,
+            'fixed_asset': fixed_asset, 'liabilities': liabilities}
+
 def get_user_finances(username: str)->Optional[FinancialReport]:
     savings = Saving.objects.filter(owner__username=username)
     if savings.exists():
@@ -278,15 +303,15 @@ def get_USD_value(instrument:QuerySet, _type:Optional[str]):
             
         return Money(total, 'USD')
 
-def naira_valuation():
+def valuation(currency):
     """
-        The devaluation of naira since beginning of the year
+        Currency valuation since beginning of the year
     """
     fd = FinancialData.objects.exclude(exchange_rate=None)
     date = fd.earliest('date').date
-    value = fd.earliest('date').exchange_rate['NGN'] - fd.latest('date').exchange_rate['NGN']
+    value = fd.earliest('date').exchange_rate[currency] - fd.latest('date').exchange_rate[currency]
     tag = 'lost' if value < 0 else 'gained'
-    return Money(round(abs(value), 2), 'NGN'), tag, date.strftime('%d %b, %Y') #{'old_value': fd.earliest('date').exchange_rate['NGN'], 'new_value': fd.latest('date').exchange_rate['NGN']}
+    return Money(round(abs(value), 2), currency), tag, date.strftime('%d %b, %Y') #{'old_value': fd.earliest('date').exchange_rate['NGN'], 'new_value': fd.latest('date').exchange_rate['NGN']}
 
 def ytd_roi(owner, year:Optional[int]=None)->List[dict]:
     """
@@ -428,3 +453,9 @@ def number_of_instruments(username):
 def number_of_assets(username):
     savings = Saving.objects.filter(owner__username=username).filter(value__gt=0).count()
     return savings + number_of_instruments(username)
+
+def set_roi(target: Money):
+    year = datetime.date.today().year
+    days = 366 if calendar.isleap(year) else 365
+    daily = target.amount/days
+    return Money(daily, 'USD')
