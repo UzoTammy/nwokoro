@@ -26,7 +26,7 @@ from .models import (Saving, Stock, Investment, ExchangeRate, Business, Financia
                      BusinessTransaction, BorrowedFundTransaction, StockTransaction, FixedAssetTransaction)
 
 from .plots import bar_chart, donut_chart, plot
-from .tools import (get_value, naira_valuation, ytd_roi, investments_by_holder, 
+from .tools import (get_value, naira_valuation, ytd_roi, investments_by_holder, last_3_month_roi,
                     recent_transactions, currency_pair, number_of_instruments, number_of_assets)
 
 
@@ -103,6 +103,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         
         context['currency_pair'] = currency_pair('NGN', 'NG')
         context['number_of_instruments'] = (number_of_instruments(self.request.user.username), number_of_assets(self.request.user.username))
+        context['last_3_months_bar'] = bar_chart(last_3_month_roi()[0], last_3_month_roi()[1], Y='ROI', X='Month', title='3 months ROI')
         return context
 
 class DashboardView(LoginRequiredMixin, TemplateView):

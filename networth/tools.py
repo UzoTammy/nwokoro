@@ -2,9 +2,10 @@ import datetime
 from decimal import Decimal
 from itertools import chain
 from typing import Optional, List
+from dateutil.relativedelta import relativedelta
 
 from django.core.mail import EmailMultiAlternatives
-from django.db.models import F, QuerySet, Value
+from django.db.models import F, QuerySet, Value, Avg
 from django.db.models.aggregates import Sum
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -319,6 +320,22 @@ def ytd_roi(owner, year:Optional[int]=None)->List[dict]:
         else:
             stack[currency] = {'principal': Money(0, currency), 'roi': Money(0, currency), 'percent': 0.0} 
     return stack
+
+def last_3_month_roi():
+    today = datetime.date.today()
+    date = datetime.date(today.year, today.month, 1)
+    dates = (
+        date - relativedelta(months=3),
+        date - relativedelta(months=2),
+        date - relativedelta(months=1)
+    )
+    y_axis, x_axis = list(), list()
+    for date in dates:
+        financial = FinancialData.objects.filter(date__year=date.year).filter(date__month=date.month)
+        financial = financial.aggregate(Avg('roi'))['roi__avg'] if financial.exists() else Decimal('0')
+        y_axis.append(financial)
+        x_axis.append(date.strftime('%b'))
+    return x_axis, y_axis
 
 def investments_by_holder(owner):
     stack = list()
