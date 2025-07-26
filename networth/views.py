@@ -26,7 +26,7 @@ from .models import (Saving, Stock, Investment, Business, FinancialData, FixedAs
 from .plots import bar_chart, donut_chart, plot
 from .tools import (get_value, valuation, ytd_roi, investments_by_holder, last_3_month_roi,
                     recent_transactions, currency_pair, number_of_instruments, number_of_assets, 
-                    exchange_rate, get_assets_liabilities, set_roi)
+                    exchange_rate, get_assets_liabilities, set_roi, get_year_financial)
 
 def is_homogenous(value: list):
     if not value:
@@ -110,24 +110,26 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
         # get the record of the first date of the current year
         current_year = datetime.date.today().year
-        qs = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year).order_by('date')
+        qs = get_year_financial(self.request.user)
 
         if qs.exists():
             
             obj = qs.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else qs.first()
             base_networth = obj.networth()
-            daily_roi = set_roi(Money(100_000.00, 'USD'))
+            target = Money(100_000, 'USD')
+            daily_roi = set_roi(target)
 
             context['financials'] = {
                 'base_networth': base_networth,
                 'base_daily_roi': daily_roi,
-                'EYEV': 365 * daily_roi + base_networth,
-                'EYEP':  format_percent(round((365 * daily_roi)/base_networth, 4), decimal_quantization=False, locale='en_US')
+                'EYEV': target + base_networth,
+                'EYEP':  format_percent(round(target/base_networth, 4), decimal_quantization=False, locale='en_US')
             }
             
-            qs = qs.annotate(f_networth = F('worth')-F('liability'))
+            qs = qs.annotate(f_networth = F('worth') - F('liability'))
             max_networth = qs.aggregate(Max('f_networth'))['f_networth__max']
             context['max_networth'] = Money(max_networth, 'USD')
             context['date_max_networth'] = qs.filter(f_networth=max_networth).first().date.date
@@ -635,7 +637,6 @@ class InjectFundView(LoginRequiredMixin, FormView):
         form.instance.save()
         return super().form_valid(form)
         
-
 class BorrowedFundView(LoginRequiredMixin, FormView):
     model = BorrowedFund
     template_name = 'networth/borrow_form.html'
@@ -710,9 +711,10 @@ class PDFNetworthReport(WeasyTemplateResponseMixin, UserPassesTestMixin, Templat
         record = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
         first_record = record.earliest('date') if current_year != 2025 else record.filter(date__date=datetime.date(2025, 2, 1)).first()
         first_worth = first_record.networth()
-        base_daily_roi = 1.2 * first_record.daily_roi # 20% above the first roi of the year
+        target_roi = Money(100000, 'USD')
+        base_daily_roi = set_roi(target_roi)  # 20% above the first roi of the year
         first_date = datetime.date(year=current_year, month=1, day=1).strftime("%d %b, %Y")
-        target_roi = base_daily_roi * 365 
+        
         fd = record.latest('date')
         growth_percent = format_percent(round((fd.networth() - first_worth)/first_worth, 4), decimal_quantization=False, locale='en_US')
         expected_growth_rate = format_percent(round((target_roi)/first_worth, 4), decimal_quantization=False, locale='en_US')

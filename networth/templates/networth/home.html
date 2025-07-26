@@ -130,12 +130,13 @@
         role="tab" aria-controls="fixed_asset" aria-selected="false"><span class="text-info font-italic">Fixed
           Asset</span></button>
       <button class="nav-link" id="nav-liabilities-tab" data-toggle="tab" data-target="#liabilities" type="button"
-        role="tab" aria-controls="liabilities" aria-selected="false"><span class="dark-purple font-italic">
-          Liability</span>
+        role="tab" aria-controls="liabilities" aria-selected="false">
+        <i class="fa fa-minus text-danger"></i>
+        <span class="text-info font-italic">Liability</span>
         </button>
 
       <button class="nav-link" id="nav-outlook-tab" data-toggle="tab" data-target="#outlook" type="button"
-        role="tab" aria-controls="outlook" aria-selected="false"><span class="text-primary font-italic">
+        role="tab" aria-controls="outlook" aria-selected="false"><span class="text-info font-italic">
           Outlook</span>
         </button>
     </div>
@@ -153,21 +154,24 @@
             </div>
             <div class="col float-right">
               <ul class="list-group list-group-horizontal list-group-flush">
-                  <a class="list-group-item list-group-item-action" href="{% url 'networth-saving-create' %}">
-                    <i class="fa fa-plus text-success"></i> Add
+                  <a class="list-group-item list-group-item-action text-center" href="{% url 'networth-saving-create' %}">
+                        <i class="fa fa-plus text-success"></i> 
+                        <p class="text-primary">New</p>
                   </a>
                 
-                <a class="list-group-item list-group-item-action" href="{% url 'networth-external-fund-home' %}">
-                    <i class="fa fa-arrow-right text-success"></i>
-                    <i class="fas fa-external-link-alt text-success"></i> Ext
+                <a class="list-group-item list-group-item-action text-center" href="{% url 'networth-external-fund-home' %}">
+                      <i class="fas fa-external-link-alt text-success"></i> 
+                      <i class="fa fa-arrow-right text-success"></i>
+                      <p class="text-primary">Withdraw</p>
                   </a>
                 
-                  <a class="list-group-item list-group-item-action" href="{% url 'saving-counter-transfer' %}">
+                  <a class="list-group-item list-group-item-action text-center" href="{% url 'saving-counter-transfer' %}">
                     <i class="fa fa-arrow-right text-success"></i><i class="fa fa-arrow-left text-danger"></i>
-                    Xfer
+                    <p class="text-primary">Transfer</p>
                   </a>
-                  <a class="list-group-item list-group-item-action" href="{% url 'saving-conversion' %}">
-                    <i class="fa fa-arrows-alt text-success"></i> Conv
+                  <a class="list-group-item list-group-item-action text-center" href="{% url 'saving-conversion' %}">
+                    <i class="fa fa-arrows-alt text-success"></i> 
+                    <p class="text-primary">Convert</p>
                   </a>
               </ul>
             </div>
@@ -487,7 +491,7 @@
     <div class="tab-pane fade" id="outlook" role="tabpanel" aria-labelledby="nav-outlook-tab">
       <div id="stock" class="row justify-content-center mt-3 shadow">
         <div class="col-sm-12">
-          <h5 class="font-italic"><i class="fa fa-paperclip text-primary"></i> Outlook</h5>
+          <h5 class="font-italic"><i class="fa fa-paperclip text-info"></i> Outlook</h5>
           <div class="row mb-3">
               <div class="col">
                 <ul class="list-group">

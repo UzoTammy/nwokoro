@@ -40,8 +40,6 @@
     .bg-grey {
         background-color: grey;
     }
-
-    
 </style>
 {% endblock %}
 
@@ -51,66 +49,36 @@
         <div class="row">
             <div class="col-sm-6 intro-box">
                 <div class="card mb-3">
-                    <h4 class="text-center mt-3" style="font-size: 40px;">Uzo Tammy Nwokoro</h4>
+                    <h4 class="text-center mt-3" style="font-size: 40px;"></h4>
                     <div class="row no-gutters">
-                      <div class="col-md-4 d-flex ">
-                        <img width="100%" class="thumbnail" src="{% static 'tammy.jpeg' %}" alt="">
-                      </div>
-                      <div class="col-md-8">
-                        <div class="card-body">
-                            <h5 class="first-letter">
-                                I had an undergraduate chemical engineering training. With over a decade experience in business operation,
-                                sales and redistribution in the FMCG sector.
-                            </h5>
-                            <h5 class="first-letter">
-                                Currently, I am working towards establishing a career in IT; backend development, web
-                                developement, task automation, building API and a little bit of Cybersecurity training.
-                            </h5>
-                            <h5 class="first-letter">
-                                My interest is to help businesses increase value with technology.
-                            </h5>
-                            <a class="btn btn-outline-dark" href="{% url 'me-home' %}">Me</a>
+                        <div class="col-md-4 pt-5">
+                            <img width="100%" height="50%" class="rounded-lg" src="{% static 'tammy.jpeg' %}" alt="">
+                            <div class="p-3 rounded bg-secondary">
+                                <h4 class="text-white first-letter"> Uzo</h4>
+                                <h4 class="text-white first-letter">Tammy</h4>
+                                <h4 class="text-white first-letter">Nwokoro</h4>
+                            </div>
                         </div>
-                      </div>
-                    </div>
-                </div>
-                <h5>I work with</h5>
-                <div class="row mt-3">
-                    <div class="col-sm-4">
-                        <i class="fab fa-python text-warning"></i> Python
-                    </div>
-                    <div class="col-sm-4">
-                        <i class="fab fa-java text-primary"></i> Java
-                    </div>
-                    <div class="col-sm-4">
-                        <i class="fab fa-js text-warning"></i> Javascript
-                    </div>
-                    <div class="col-sm-4 mt-3">
-                        <i class="fab fa-github text-secondary"></i> Git
-                    </div>
-                    <div class="col-sm-4 mt-3">
-                        <i class="fab fa-bootstrap text-dark"></i> Bootstrap
-                    </div>
-                    <div class="col-sm-4 mt-3">
-                        <i class="fab fa-react text-info"></i> React
-                    </div>
-                    <div class="col-sm-4 mt-3">
-                        <i class="fab fa-microsoft"></i> Django
-                    </div>
-                    <div class="col-sm-4 mt-3">
-                        <i class="fas fa-flask text-primary"></i> Flask
-                    </div>
-                    <div class="col-sm-4 mt-3">
-                        <i class="fab fa-html5 text-info"></i> HTML5
-                    </div>
-                    <div class="col-sm-4 mt-3">
-                        <i class="fab fa-microsoft text-warning"></i> Typescript
-                    </div>
-                    <div class="col-sm-4 mt-3">
-                        <i class="fab fa-node text-dark"></i> Node
-                    </div>
-                    <div class="col-sm-4 mt-3">
-                        <i class="fab fa-microsoft text-info"></i> Chakra
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="first-letter">
+                                    Graduated as a Chemical Engineer. With over a decade experience
+                                    in business management and operations,
+                                    sales and redistribution in the FMCG sector.
+                                </h5>
+                                <h5 class="first-letter">
+                                    Currently, aspiring to establishing a career in IT; backend development,
+                                    web
+                                    developement, task automation, building API and a little bit of Cybersecurity
+                                    training and an interest in AI programming.
+                                </h5>
+                                <h5 class="first-letter">
+                                    My expectation is to be able to help businesses leverage of information technology for 
+                                    optimal and efficient operations and management.
+                                </h5>
+                                <a class="btn btn-outline-dark" href="{% url 'me-home' %}">Me</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -121,67 +89,61 @@
                         <small class="text-muted ml-1">
                             I am relentless in finding solutions,
                             staying on it no matter how long it takes.
-                        </small>  
+                        </small>
                     </p>
                     <p class="first-letter">Analytical -
                         <small class="text-muted ml-1">
-                            I believe in data-driven decisions, 
-                            using analysis and critical thinking to gain 
+                            I believe in data-driven decisions,
+                            using analysis and critical thinking to gain
                             insights and drive impactful outcomes.
                         </small>
                     </p>
                     <p class="first-letter">Committed -
-                        <small class="text-muted ml-1">True commitment means never accepting payment 
-                            without delivering fully—because integrity is the foundation of every meaningful relationship.
+                        <small class="text-muted ml-1">True commitment means never accepting payment
+                            without delivering fully—because integrity is the foundation of every meaningful
+                            relationship.
                         </small>
                     </p>
                     <p class="first-letter">Team Player -
                         <small class="text-muted ml-1">
                             I thrive in collaborative environment; working together helps me become more productive.
-                        </small></p>
-                    <p class="first-letter">Always Learning - <small class="text-muted ml-1">I am continuously learning</small></p>
+                        </small>
+                    </p>
+                    <p class="first-letter">Always Learning - <small class="text-muted ml-1">I am continuously
+                            learning</small></p>
                 </div>
-                
-                <!-- <div class="rounded-pill mb-3">
-                    <ul class="list-group">
-                        <li class="list-group-item list-group-item-primary">
-                            On-going Courses 
-                            <small class="float-right">Complete</small> 
-                        </li>
-                        <li class="list-group-item">GIT <sup class="rounded-circle bg-dark text-white p-1">R</sup> 
-                            <span class="badge badge-primary float-right">25%</span>
-                        </li>
-                        <li class="list-group-item">React 
-                            <span class="badge badge-primary float-right">5%</span>
-                        </li>
-                    </ul>
-
-                </div> -->
             </div>
 
             <div class="col-sm-3 intro-box">
                 <h3 class="mt-3">Portfolio</h3>
                 <ul class="list-group">
-                    <li class="list-group-item"><a class="text-decoration-none stretched-link" href="{% url 'portfolio-scush' %}">SCusH</a>: A custom web application for a business</li>
-                    <li class="list-group-item"><a class="text-decoration-none" href="{% url 'portfolio-finuel' %}">Finuel</a>: Financial management application for non-profit
+                    <li class="list-group-item"><a class="text-decoration-none stretched-link"
+                            href="{% url 'portfolio-scush' %}">SCusH</a>: A custom web application for a business</li>
+                    <li class="list-group-item"><a class="text-decoration-none"
+                            href="{% url 'portfolio-finuel' %}">Finuel</a>: Financial management application for
+                        non-profit
                         organisation</li>
-                    <li class="list-group-item"><a class="text-decoration-none" href="{% url 'chore-home' %}">Chores</a>: Get young dependants to earn money doing chores at home </li>
-                    <li class="list-group-item"><a class="text-decoration-none" href="{% url 'networth-home' %}">Networth</a>: Aggregating assets and liabilities of a user </li>
-                    <li class="list-group-item"><a class="text-decoration-none" href="{% url 'tinyproject-home' %}">Hands-on Projects</a>: Projects
+                    <li class="list-group-item"><a class="text-decoration-none"
+                            href="{% url 'chore-home' %}">Chores</a>: Get young dependants to earn money doing chores at
+                        home </li>
+                    <li class="list-group-item"><a class="text-decoration-none"
+                            href="{% url 'networth-home' %}">Networth</a>: Aggregating assets and liabilities of a user
+                    </li>
+                    <li class="list-group-item"><a class="text-decoration-none"
+                            href="{% url 'tinyproject-home' %}">Hands-on Projects</a>: Projects
                         that emphasizes specific concept(s)</li>
                     <li class="list-group-item">
                         {% if user.is_authenticated %}
                         <div class="row">
                             <div class="col">
-                                <form method="post"  action="{% url 'logout' %}">
+                                <form method="post" action="{% url 'logout' %}">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-outline-dark btn-sm">Logout</button>
-                                </form>        
+                                </form>
                             </div>
                             {% if user.is_superuser %}
                             <div class="col">
-                                <a  class="btn btn-outline-dark btn-sm" 
-                                    href="{% url 'activate-registration' %}">
+                                <a class="btn btn-outline-dark btn-sm" href="{% url 'activate-registration' %}">
 
                                     {% if activate_registration %}
                                     <i class="fa fa-toggle-on text-success"></i>
@@ -200,8 +162,33 @@
                 </ul>
             </div>
         </div>
+        <div class="mt-3 mb-0">
+            <h5 class="flex-fill bd-highlight text-danger">Familiar Technologies: </h5>
+        </div>
+        <div class="row mt-3">
+            <div class="col-sm-4 d-flex bg-highlight mt-3">
+                <div class="p-2 flex-fill bd-highlight"><i class="fab fa-python text-warning"></i> Python</div>
+                <div class="p-2 flex-fill bd-highlight"><i class="fab fa-java text-primary"></i> Java</div>
+                <div class="p-2 flex-fill bd-highlight"><i class="fab fa-js text-warning"></i> Javascript</div>
+            </div>
+            <div class="col-sm-4 d-flex bg-highlight mt-3">
+                <div class="p-2 flex-fill bg-highlight"><i class="fab fa-github text-secondary"></i> Git</div>
+                <div class="p-2 flex-fill bg-highlight"><i class="fab fa-bootstrap text-dark"></i> Bootstrap</div>
+                <div class="p-2 flex-fill bg-highlight"><i class="fab fa-react text-info"></i> React</div>
+            </div>
+            <div class="col-sm-4 d-flex bg-highlight mt-3">
+                <div class="p-2 flex-fill bg-highlight"><i class="fa bg-success text-white">Dj </i> Django </div>
+                <div class="p-2 flex-fill bg-highlight"><i class="fas fa-flask text-primary"></i> Flask</div>
+                <div class="p-2 flex-fill bg-highlight"><i class="fab fa-html5 text-info"></i> HTML/CSS</div>
+            </div>
+            <div class="col-sm-4 d-flex bg-highlight mt-3">
+                <div class="p-2 flex-fill bg-highlight"><i class="fab fa-typescript bg-primary text-white">TS</i> Typescript</div>
+                <div class="p-2 flex-fill bg-highlight"><i class="fab fa-node text-dark"></i> Node</div>
+                <div class="p-2 flex-fill bg-highlight"><i class="fab fa bg-info text-white rounded">CK</i> Chakra</div>
+            </div>
+        </div>
     </div>
-    <div class="rows-black p-0">
+    <div class="nav-light p-0">
         <div class="row bg-white m-0">
             <div class="col-sm">
                 <a target="_blank"
@@ -214,21 +201,19 @@
                         class="fab fa-tiktok"></i></a> TikTok</div>
             <div class="col-sm"><a target="_blank" href="https://www.x.com/UzoTammy"><i
                         class="fab fa-twitter text-primary"></i></a> Twitter</div>
-            <div class="col-sm"><a target="_blank"
-                    href="https://youtube.com/channel/UCrrUKGko2XorgKxa1iTrOFA"><i
+            <div class="col-sm"><a target="_blank" href="https://youtube.com/channel/UCrrUKGko2XorgKxa1iTrOFA"><i
                         class="fab fa-youtube text-danger"></i></a> YouTube</div>
             <div class="col-sm"><a target="_blank"
                     href="https://www.facebook.com/share/9TNh9xdWhoE6iJE3/?mibextid=qi2Omg"><i
                         class="fab fa-facebook text-primary"></i></a> Facebook</div>
             <div class="col-sm"> <a class="" href="mailto:uzo.tammy@gmail.com"><i class="fa fa-envelope text-muted">
-                        uzo.tammy@gmail.com</i></a>
-
+                uzo.tammy@gmail.com</i></a>
             </div>
         </div>
         {% if user.is_authenticated %}
-        <a class="ml-2" href="{% url 'preference' %}"><i class="fa fa-cog"></i></a>
+        <a class="ml-2" href="{% url 'preference' %}"><i class="fa fa-cog">Settings</i></a>
         {% endif %}
-        <a class="m-2 mt-2" href="https://doc.uzonwokoro.com"><i class="fa fa-newspaper"></i> Documentation</a>
+        <a class="m-2" href="https://doc.uzonwokoro.com" target="_blank"><i class="fa fa-newspaper"></i> Documentation</a>
     </div>
 </div>
 

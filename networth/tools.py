@@ -14,6 +14,7 @@ from django.template.loader import render_to_string
 from djmoney.money import Money
 from babel.numbers import format_currency
 
+from account.models import User
 from .models import (ExchangeRate, Investment, Saving, Stock, Business, FixedAsset, BorrowedFund, FinancialData)
 
 class Tax:
@@ -459,3 +460,9 @@ def set_roi(target: Money):
     days = 366 if calendar.isleap(year) else 365
     daily = target.amount/days
     return Money(daily, 'USD')
+
+def get_year_financial(owner:User, year:int=None):
+    if year is None:
+        year = datetime.date.today().year
+    qs = FinancialData.objects.filter(owner=owner).filter(date__year=year).order_by('date')
+    return qs

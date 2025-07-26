@@ -53,10 +53,10 @@
   }
 
   .profile-picture img {
-    border-radius: 100% 80% 60% 40%;
+    border-radius: 10%;
     width: 200px;
     height: 200px;
-    object-fit: cover;
+    object-fit: 'cover';
   }
 
   .my-name {
@@ -157,8 +157,8 @@
 <!-- Profile Picture -->
 <div class="container ">
   <div class="row">
-    <div class="col-sm-4 profile-picture">
-      <img src="{% static 'tammy.jpeg' %}" alt="Profile Picture">
+    <div class="col-sm-4">
+      <img class="profile-picture" src="{% static 'tammy.jpeg' %}" alt="Profile Picture">
       <div class="my-name">Uzo Tammy Nwokoro
       </div>
       <ul class="horizontal-list">
