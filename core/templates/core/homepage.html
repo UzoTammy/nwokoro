@@ -66,17 +66,18 @@
                                     in business management and operations,
                                     sales and redistribution in the FMCG sector.
                                 </h5>
-                                <h5 class="first-letter">
-                                    Currently, aspiring to establishing a career in IT; backend development,
-                                    web
-                                    developement, task automation, building API and a little bit of Cybersecurity
-                                    training and an interest in AI programming.
-                                </h5>
-                                <h5 class="first-letter">
-                                    My expectation is to be able to help businesses leverage of information technology for 
-                                    optimal and efficient operations and management.
-                                </h5>
-                                <a class="btn btn-outline-dark" href="{% url 'me-home' %}">Me</a>
+                    <h5 class="first-letter">
+                        Currently, aspiring to establishing a career in IT; backend development,
+                        web
+                        developement, task automation, building API and a little bit of Cybersecurity
+                        training and an interest in AI programming.
+                    </h5>
+                    <h5 class="first-letter">
+                        My expectation is to be able to help businesses leverage of information technology
+                        for
+                        optimal and efficient operations and management.
+                    </h5>
+                    <a class="btn btn-outline-dark" href="{% url 'me-home' %}">Me</a>
                             </div>
                         </div>
                     </div>
@@ -134,15 +135,15 @@
                         that emphasizes specific concept(s)</li>
                     <li class="list-group-item">
                         {% if user.is_authenticated %}
-                        <div class="row">
-                            <div class="col">
+                        <div class="d-flex justify-content-between">
+                            <div>
                                 <form method="post" action="{% url 'logout' %}">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-outline-dark btn-sm">Logout</button>
                                 </form>
                             </div>
                             {% if user.is_superuser %}
-                            <div class="col">
+                            <div>
                                 <a class="btn btn-outline-dark btn-sm" href="{% url 'activate-registration' %}">
 
                                     {% if activate_registration %}
@@ -182,38 +183,41 @@
                 <div class="p-2 flex-fill bg-highlight"><i class="fab fa-html5 text-info"></i> HTML/CSS</div>
             </div>
             <div class="col-sm-4 d-flex bg-highlight mt-3">
-                <div class="p-2 flex-fill bg-highlight"><i class="fab fa-typescript bg-primary text-white">TS</i> Typescript</div>
+                <div class="p-2 flex-fill bg-highlight"><i class="fab fa-typescript bg-primary text-white">TS</i>
+                    Typescript</div>
                 <div class="p-2 flex-fill bg-highlight"><i class="fab fa-node text-dark"></i> Node</div>
                 <div class="p-2 flex-fill bg-highlight"><i class="fab fa bg-info text-white rounded">CK</i> Chakra</div>
             </div>
         </div>
     </div>
     <div class="nav-light p-0">
-        <div class="row bg-white m-0">
-            <div class="col-sm">
+        <div class="d-flex justify-content-between bg-white p-2">
+            <div class="">
                 <a target="_blank"
                     href="https://www.linkedin.com/in/uzo-nwokoro-96013a55?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3B1JdwKRxdQQqAKMvwHuqEKQ%3D%3D">
                     <i class="fab fa-linkedin text-primary"></i>
                 </a> LinkedIn
             </div>
-            <div class="col-sm"><a target="_blank"
+            <div class=""><a target="_blank"
                     href="https://www.tiktok.com/@uzotammy?is_from_webapp=1&sender_device=pc"><i
                         class="fab fa-tiktok"></i></a> TikTok</div>
-            <div class="col-sm"><a target="_blank" href="https://www.x.com/UzoTammy"><i
+            <div class=""><a target="_blank" href="https://www.x.com/UzoTammy"><i
                         class="fab fa-twitter text-primary"></i></a> Twitter</div>
-            <div class="col-sm"><a target="_blank" href="https://youtube.com/channel/UCrrUKGko2XorgKxa1iTrOFA"><i
+            <div class=""><a target="_blank" href="https://youtube.com/channel/UCrrUKGko2XorgKxa1iTrOFA"><i
                         class="fab fa-youtube text-danger"></i></a> YouTube</div>
-            <div class="col-sm"><a target="_blank"
-                    href="https://www.facebook.com/share/9TNh9xdWhoE6iJE3/?mibextid=qi2Omg"><i
+            <div class=""><a target="_blank" href="https://www.facebook.com/share/9TNh9xdWhoE6iJE3/?mibextid=qi2Omg"><i
                         class="fab fa-facebook text-primary"></i></a> Facebook</div>
-            <div class="col-sm"> <a class="" href="mailto:uzo.tammy@gmail.com"><i class="fa fa-envelope text-muted">
-                uzo.tammy@gmail.com</i></a>
+            <div class=""> <a class="" href="mailto:uzo.tammy@gmail.com"><i class="fa fa-envelope text-muted">
+                        uzo.tammy@gmail.com</i></a>
             </div>
         </div>
-        {% if user.is_authenticated %}
-        <a class="ml-2" href="{% url 'preference' %}"><i class="fa fa-cog">Settings</i></a>
-        {% endif %}
-        <a class="m-2" href="https://doc.uzonwokoro.com" target="_blank"><i class="fa fa-newspaper"></i> Documentation</a>
+        <div class="d-flex justify-content-between p-2">
+            {% if user.is_authenticated %}
+            <a class="" href="{% url 'preference' %}"><i class="fa fa-cog">Settings</i></a>
+            {% endif %}
+            <a class="" href="https://doc.uzonwokoro.com" target="_blank"><i class="fa fa-newspaper"></i>
+                Documentation</a>
+        </div>
     </div>
 </div>
 
