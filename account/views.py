@@ -1,8 +1,8 @@
 import os
 from django.shortcuts import render, redirect
 from django.views.generic import CreateView, DetailView, UpdateView, TemplateView
-from .forms import SignUpForm, EditProfileForm, PasswordResetForm
-from .models import User, Transaction, Preference
+from .forms import SignUpForm, EditProfileForm
+from .models import User, Transaction
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
 from django.urls import reverse_lazy
