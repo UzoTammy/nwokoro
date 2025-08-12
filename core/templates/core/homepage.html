@@ -37,12 +37,10 @@
     }
 
     .name-font {
-            font-size: 1.2rem;
-            font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-            color: maroon;
-        }
-    
-
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        color: maroon;
+        font-size:larger;
+    }
 </style>
 {% endblock %}
 
@@ -54,11 +52,33 @@
                 <div class="card border-light mb-3">
                     <div class="row no-gutters">
                         <div class="col-md-4">
-                            <img width="100%" height="50%" class="rounded-lg" src="{% static 'tammy.jpeg' %}" alt="My Picture">
-                            <div class="p-3 rounded">
+                            <img width="100%" height="50%" class="rounded-lg" src="{% static 'tammy.jpeg' %}"
+                                alt="My Picture">
+                            <div class="p-3 rounded text-center">
                                 <a href="{% url 'me-home' %}" class="name-font">Uzo Tammy Nwokoro</a>
                             </div>
-                            
+                            <div class="text-center">
+                                <a class="m-1" target="_blank"
+                                    href="https://www.linkedin.com/in/uzo-nwokoro-96013a55?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3B1JdwKRxdQQqAKMvwHuqEKQ%3D%3D">
+                                    <i class="fab fa-linkedin text-primary"></i>
+                                </a>
+                                <a class="m-1" target="_blank"
+                                    href="https://www.tiktok.com/@uzotammy?is_from_webapp=1&sender_device=pc"><i
+                                        class="fab fa-tiktok"></i></a>
+                                <a class="m-1" target="_blank" href="https://www.x.com/UzoTammy"><i
+                                        class="fab fa-twitter text-primary"></i></a>
+                                <a class="m-1" target="_blank"
+                                    href="https://youtube.com/channel/UCrrUKGko2XorgKxa1iTrOFA"><i
+                                        class="fab fa-youtube text-danger"></i></a>
+                                <a class="m-1" target="_blank"
+                                    href="https://www.facebook.com/share/9TNh9xdWhoE6iJE3/?mibextid=qi2Omg"><i
+                                        class="fab fa-facebook text-primary"></i></a>
+                                <a class="m-1" href="mailto:uzo.tammy@gmail.com">
+                                    <i class="fa fa-envelope text-info"></i>
+                                </a>
+                            </div>
+
+
                         </div>
                         <div class="col-md-8">
                             <div class="list-group list-group-flush">
@@ -192,30 +212,12 @@
         </div>
     </div>
     <div class="nav-light p-2">
-        
+
         <div class="d-flex justify-content-between p-2">
             {% if user.is_authenticated %}
             <a class="" href="{% url 'preference' %}"><i class="fa fa-cog">Settings</i></a>
             {% endif %}
-            <div class="">
-                <a class="m-1" target="_blank"
-                    href="https://www.linkedin.com/in/uzo-nwokoro-96013a55?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3B1JdwKRxdQQqAKMvwHuqEKQ%3D%3D">
-                    <i class="fab fa-linkedin text-primary"></i>
-                </a>
-                <a class="m-1" target="_blank"
-                    href="https://www.tiktok.com/@uzotammy?is_from_webapp=1&sender_device=pc"><i
-                        class="fab fa-tiktok"></i></a>
-                <a class="m-1" target="_blank" href="https://www.x.com/UzoTammy"><i
-                        class="fab fa-twitter text-primary"></i></a>
-                <a class="m-1" target="_blank" href="https://youtube.com/channel/UCrrUKGko2XorgKxa1iTrOFA"><i
-                        class="fab fa-youtube text-danger"></i></a>
-                <a class="m-1" target="_blank" href="https://www.facebook.com/share/9TNh9xdWhoE6iJE3/?mibextid=qi2Omg"><i
-                        class="fab fa-facebook text-primary"></i></a>
-                <a class="m-1" href="mailto:uzo.tammy@gmail.com">
-                    <i class="fa fa-envelope text-info"></i>
-                </a>
-            </div>
-            
+
             <a class="" href="https://doc.uzonwokoro.com" target="_blank"><i class="fa fa-newspaper"></i>
                 Documentation
             </a>
