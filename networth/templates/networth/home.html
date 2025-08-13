@@ -6,73 +6,119 @@
     background-color: rgb(204, 220, 234);
     border-radius: 10% 10% 3% 3%;
   }
+
+  .space {
+    background-color: rgb(211, 224, 235);
+    border-radius: 10% 10% 5% 5%;
+    width: 100%;
+    height: 100%;
+  }
 </style>
 {% endblock %}
 {% block content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">Networth</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-link active" href="{% url 'index' %}">Home <span class="sr-only">(current)</span></a>
+      <a class="nav-link" href="#"><i class="fa fa-user text-primary"></i> {{user.username}}</a>
+      <a class="nav-link" href="{% url 'networth-dashboard' %}"><i class="fa fa-tachometer-alt text-info"></i></a>
+      <a class="nav-link" href="{% url 'pdf-networth' %}"><i class="fa fa-file-pdf text-danger"></i></a>
+      <a class="nav-link" href="{% url 'institution-report' %}"><i class="fa fa-table text-primary"></i></a>
+    </div>
+  </div>
+</nav>
 <div class="container mt-3">
-  {% if fd %}
-  <div class="jumbotron jumbotron-fluid jumbotron-beige">
-    <div class="container">
-      <h4 class="font-italics float-right mr-2">Owner: {{user.username}}</h4>
-      <h1 class="display-4">Networth</h1>
-      <small class="ml-3">As at {{fd.date}}</small>
-      <a class="float-right mr-3" href="{% url 'networth-dashboard' %}"><i class="fa fa-tachometer-alt"></i>
-      </a>
-      <a class="float-right mr-3 text-info" href="{% url 'pdf-networth' %}"><i class="fa fa-file-pdf"></i></a>
-      <a class="float-right mr-3" href="{% url 'institution-report' %}"><i class="fa fa-table"></i>
-      </a>
-      </small>
-      <div class="row">
-        <div class="col-sm-4">
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item list-group-item-info">Networth <span class="float-right">{{fd.worth}}</span></li>
-            <li class="list-group-item list-group-item-primary">Earnable <span class="float-right">{{fd.roi}}</span>
-            </li>
-            <li class="list-group-item list-group-item-primary">Current Earning <span
-                class="float-right">{{fd.present_roi}}</span></li>
-            <li class="list-group-item list-group-item-primary">Daily ROI<span
-                class="float-right">{{fd.daily_roi}}</span></li>
-          </ul>
-        </div>
-
-        <div class="col-sm-4">
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item list-group-item-primary">Saving <span class="float-right">{{fd.savings}}</span>
-            </li>
-            <li class="list-group-item list-group-item-primary">Investment
-              <span class="float-right">{{fd.investment}}</span>
-            </li>
-            <li class="list-group-item list-group-item-primary">Stock <span class="float-right">{{fd.stock}}</span></li>
-            <li class="list-group-item list-group-item-primary">Business <span
-                class="float-right">{{fd.business}}</span></li>
-          </ul>
-        </div>
-
-        <div class="col-sm-4">
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item list-group-item-primary">Fixed Asset <span
-                class="float-right">{{fd.fixed_asset}}</span></li>
-            <li class="list-group-item list-group-item-danger">Liability <span
-                class="float-right">{{fd.liability}}</span></li>
-            {% for country, worth in fd.networth_by_country.items %}
-            <li class="list-group-item list-group-item-primary">Networth ({{country}}) <span
-                class="float-right">${{worth|floatformat:'2g'}}</span></li>
-            {% endfor %}
-          </ul>
-        </div>
-      </div>
-
-    </div>
-  </div>
-  <div class="row">
+  <div class="row mt-2">
     <div class="col">
-      <small class="text-muted ml-2">{{exchange}}.
-        {{naira_value_comment}}
-      </small>
+        <small class="text-monospace text-muted">{{exchange}}. {{naira_value_comment}}</small>
+    </div>
+  </div>
+  {% if fd %}
+  <div class="row mt-2">
+    <div class="col-sm-4">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">Networth <span class="float-right">{{fd.worth}}</span></li>
+        <li class="list-group-item font-weight-lighter">Saving <span class="float-right text-success">{{fd.savings}}</span></li>
+        <li class="list-group-item font-weight-lighter">Investment<span class="float-right text-success">{{fd.investment}}</span></li>  
+        <li class="list-group-item font-weight-lighter">Stock <span class="float-right text-success">{{fd.stock}}</span></li>  
+        <li class="list-group-item font-weight-lighter">Business<span class="float-right text-success">{{fd.business}}</span></li>  
+        <li class="list-group-item font-weight-lighter">Fixed Asset <span class="float-right text-success">{{fd.fixed_asset}}</span></li>  
+        <li class="list-group-item font-weight-lighter">Liability <span class="float-right text-danger">{{fd.liability}}</span></li>  
+      </ul>
+    </div>
+    <div class="col-sm-4">
+      <div class="space"></div>
+    </div>
+    <div class="col-sm-4">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item list-group-item-light">Networth by country</li>
+          {% for country, worth in fd.networth_by_country.items %}
+            <li class="list-group-item font-weight-lighter">{{country}} <span
+                class="float-right">${{worth|floatformat:'2g'}}</span></li>
+          {% endfor %}
+          <li class="list-group-item list-group-item-light">Networth by currency (in usd)</li>
+          {% for country, worth in fd.networth_by_country.items %}
+            <li class="list-group-item font-weight-lighter">{{country}} <span
+                class="float-right">${{worth|floatformat:'2g'}}</span></li>
+          {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-sm-4">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item list-group-item-light">Other parameters</li>
+          <li class="list-group-item font-weight-lighter">Earnable <span class="float-right">{{fd.roi}}</span>
+            </li>
+            <li class="list-group-item font-weight-lighter">Current Earning <span
+                class="float-right">{{fd.present_roi}}</span></li>
+            <li class="list-group-item font-weight-lighter">Daily ROI<span
+                class="float-right">{{fd.daily_roi}}</span></li>
+        </ul>
+    </div>
+    <div class="col-sm-4">
+      <div class="">
+        <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ last_3_months_bar|safe }}"
+        alt="Bar Chart">
+      </div>
     </div>
 
+    <div class="col-sm-4">
+      <table class="table table-sm table-light table-striped font-weight-lighter" data-toggle="table">
+        <legend class="font-weight-lighter">Recent Transactions</legend>
+        <thead>
+          <tr>
+            <td>Transaction</td>
+            <td>Date</td>
+            <td class="text-right">Value</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for transaction in recent_transactions %}
+          <tr>
+            {% for param in transaction %}
+            {% if forloop.counter == 3 %}
+            <td class=" text-right">{{param}}</td>
+            {% else %}
+            <td>{{param}}</td>
+            {% endif %}
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
+
   {% else %}
+  
+  
   <div class="row mt-3">
     <div class="col">
       <h4>Hello {{user.username}}</h4>
@@ -83,45 +129,15 @@
   </div>
   {% endif %}
 
-  <div class="row mt-3">
-    <div class="col-sm-6">
-      <table class="table table-sm table-light table-striped" data-toggle="table">
-        <legend class="text-italic">Recent Transactions</legend>
-        <thead>
-          <tr>
-            <th>Transaction</th>
-            <th>Date</th>
-            <th class="text-right">Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for transaction in recent_transactions %}
-          <tr>
-            {% for param in transaction %}
-              {% if forloop.counter == 3 %}
-              <td class=" text-right">{{param}}</td>
-              {% else %}
-              <td>{{param}}</td>
-               {% endif %}
-            {% endfor %}
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col-sm-6">
-      <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ last_3_months_bar|safe }}"
-                alt="Bar Chart">
-    </div>
-  </div>
-
+  
   <nav>
     <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
       <button class="nav-link active" id="nav-savings-tab" data-toggle="tab" data-target="#savings" type="button"
         role="tab" aria-controls="savings" aria-selected="true"><span
           class="text-info font-italic">Savings</span></button>
-      <button class="nav-link" id="nav-investment-tab" data-toggle="tab" data-target="#investment" type="button" role="tab"
-        aria-controls="investment" aria-selected="false"><span class="text-info font-italic">Investment</span></button>
+      <button class="nav-link" id="nav-investment-tab" data-toggle="tab" data-target="#investment" type="button"
+        role="tab" aria-controls="investment" aria-selected="false"><span
+          class="text-info font-italic">Investment</span></button>
       <button class="nav-link" id="nav-stock-tab" data-toggle="tab" data-target="#stock" type="button" role="tab"
         aria-controls="stock" aria-selected="false"><span class="text-info font-italic">Stock</span></button>
       <button class="nav-link" id="nav-business-tab" data-toggle="tab" data-target="#business" type="button" role="tab"
@@ -133,12 +149,12 @@
         role="tab" aria-controls="liabilities" aria-selected="false">
         <i class="fa fa-minus text-danger"></i>
         <span class="text-info font-italic">Liability</span>
-        </button>
+      </button>
 
-      <button class="nav-link" id="nav-outlook-tab" data-toggle="tab" data-target="#outlook" type="button"
-        role="tab" aria-controls="outlook" aria-selected="false"><span class="text-info font-italic">
+      <button class="nav-link" id="nav-outlook-tab" data-toggle="tab" data-target="#outlook" type="button" role="tab"
+        aria-controls="outlook" aria-selected="false"><span class="text-info font-italic">
           Outlook</span>
-        </button>
+      </button>
     </div>
   </nav>
 
@@ -154,25 +170,27 @@
             </div>
             <div class="col float-right">
               <ul class="list-group list-group-horizontal list-group-flush">
-                  <a class="list-group-item list-group-item-action text-center" href="{% url 'networth-saving-create' %}">
-                        <i class="fa fa-plus text-success"></i> 
-                        <p class="text-primary">New</p>
-                  </a>
-                
-                <a class="list-group-item list-group-item-action text-center" href="{% url 'networth-external-fund-home' %}">
-                      <i class="fas fa-external-link-alt text-success"></i> 
-                      <i class="fa fa-arrow-right text-success"></i>
-                      <p class="text-primary">Withdraw</p>
-                  </a>
-                
-                  <a class="list-group-item list-group-item-action text-center" href="{% url 'saving-counter-transfer' %}">
-                    <i class="fa fa-arrow-right text-success"></i><i class="fa fa-arrow-left text-danger"></i>
-                    <p class="text-primary">Transfer</p>
-                  </a>
-                  <a class="list-group-item list-group-item-action text-center" href="{% url 'saving-conversion' %}">
-                    <i class="fa fa-arrows-alt text-success"></i> 
-                    <p class="text-primary">Convert</p>
-                  </a>
+                <a class="list-group-item list-group-item-action text-center" href="{% url 'networth-saving-create' %}">
+                  <i class="fa fa-plus text-success"></i>
+                  <p class="text-primary">New</p>
+                </a>
+
+                <a class="list-group-item list-group-item-action text-center"
+                  href="{% url 'networth-external-fund-home' %}">
+                  <i class="fas fa-external-link-alt text-success"></i>
+                  <i class="fa fa-arrow-right text-success"></i>
+                  <p class="text-primary">Withdraw</p>
+                </a>
+
+                <a class="list-group-item list-group-item-action text-center"
+                  href="{% url 'saving-counter-transfer' %}">
+                  <i class="fa fa-arrow-right text-success"></i><i class="fa fa-arrow-left text-danger"></i>
+                  <p class="text-primary">Transfer</p>
+                </a>
+                <a class="list-group-item list-group-item-action text-center" href="{% url 'saving-conversion' %}">
+                  <i class="fa fa-arrows-alt text-success"></i>
+                  <p class="text-primary">Convert</p>
+                </a>
               </ul>
             </div>
           </div>
@@ -476,7 +494,7 @@
                   </li>
                   {% endfor %}
                 </ul>
-                
+
               </div>
             </div>
             {% else %}
@@ -493,19 +511,20 @@
         <div class="col-sm-12">
           <h5 class="font-italic"><i class="fa fa-paperclip text-info"></i> Outlook</h5>
           <div class="row mb-3">
-              <div class="col">
-                <ul class="list-group">
-                  <li class="list-group-item">
-                    {% if currency_pair %}
-                      {{currency_pair.local}} : {{currency_pair.usd}}, equilibrium @ {{currency_pair.equilibrium}}
-                    {% else %}
-                      No US dollar asset in the chosen country
-                    {% endif %}
-                  </li>
-                  <li class="list-group-item">Number of instruments are {{number_of_instruments|first}} out of {{number_of_instruments|last}} Assets</li>
-                </ul>
-              </div>
-              <div class="col"></div>
+            <div class="col">
+              <ul class="list-group">
+                <li class="list-group-item">
+                  {% if currency_pair %}
+                  {{currency_pair.local}} : {{currency_pair.usd}}, equilibrium @ {{currency_pair.equilibrium}}
+                  {% else %}
+                  No US dollar asset in the chosen country
+                  {% endif %}
+                </li>
+                <li class="list-group-item">Number of instruments are {{number_of_instruments|first}} out of
+                  {{number_of_instruments|last}} Assets</li>
+              </ul>
+            </div>
+            <div class="col"></div>
           </div>
         </div>
       </div>
