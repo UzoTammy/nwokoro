@@ -1,4 +1,5 @@
 import datetime
+import decimal
 from zoneinfo import ZoneInfo
 
 from django.shortcuts import redirect
@@ -58,7 +59,8 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         # for financial report summanry
         financial_data = FinancialData.objects.filter(owner=self.request.user)
         if financial_data.exists():
-            context['fd'] = financial_data.latest('date')
+            fd = financial_data.latest('date')
+            context['fd'] = fd
 
         # exchange
         exch = exchange_rate('NGN', 'CAD')
@@ -102,8 +104,94 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['currency_pair'] = currency_pair('NGN', 'NG')
         context['number_of_instruments'] = (number_of_instruments(self.request.user.username), number_of_assets(self.request.user.username))
         context['last_3_months_bar'] = bar_chart(last_3_month_roi()[0], last_3_month_roi()[1], Y='ROI', X='Month', title='3 months ROI')
-        
+        context['donot_networth'] = donut_chart(
+            ['Business', 'Fixed Asset', 'Investment', 'Saving', 'Stock'], 
+            [fd.business.amount,
+             fd.fixed_asset.amount,
+             fd.investment.amount,
+             fd.savings.amount,
+             fd.stock.amount])
         return context
+
+
+class SavingListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/saving_list.html'
+
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        return False
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # for financial report summanry
+        financial_data = FinancialData.objects.filter(owner=self.request.user)
+        if financial_data.exists():
+            fd = financial_data.latest('date')
+            context['fd'] = fd
+
+        savings = get_assets_liabilities(owner=self.request.user)['savings']
+        context['savings'] = savings.order_by('value_currency')
+        context['savings_total'] = get_value(savings, 'saving')
+        
+        holders = savings.values_list('holder', flat=True).distinct()
+        savings_summary = list()
+        for holder in holders:
+            qs = savings.filter(holder=holder)
+            value = decimal.Decimal('0')
+            for obj in qs:
+                if obj.value.currency != 'USD':
+                    value += obj.value.amount/exchange_rate(obj.value.currency)[0].amount 
+                else:
+                    value += obj.value.amount
+            savings_summary.append({
+                'holder': obj.holder,
+                'usd_value': Money(value, 'USD')
+            })
+        context['savings_summary'] = savings_summary
+
+        return context
+
+class InvestmentListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/investment_list.html'
+
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        return False
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # for financial report summanry
+        financial_data = FinancialData.objects.filter(owner=self.request.user)
+        if financial_data.exists():
+            fd = financial_data.latest('date')
+            context['fd'] = fd
+
+        investments = get_assets_liabilities(owner=self.request.user)['investments']
+        context['investments'] = investments.order_by('principal')
+        context['investment_total'] = get_value(investments, 'investment')
+
+        holders = investments.values_list('holder', flat=True).distinct()
+        investments_summary = list()
+        for holder in holders:
+            value = decimal.Decimal('0')
+            qs = investments.filter(holder=holder)
+            for obj in qs:
+                if obj.principal.currency != 'USD':
+                    value += obj.principal.amount/exchange_rate(obj.principal.currency)[0].amount 
+                else:
+                    value += obj.principal.amount
+            investments_summary.append({
+                'holder': obj.holder,
+                'value': Money(value, 'USD')
+            })
+        context['investments_summary'] = investments_summary
+        
+        context['year_roi'] = ytd_roi(self.request.user, datetime.date.today().year)
+
+        return context
+    
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'networth/dashboard.html'

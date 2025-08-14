@@ -6,17 +6,10 @@
     background-color: rgb(204, 220, 234);
     border-radius: 10% 10% 3% 3%;
   }
-
-  .space {
-    background-color: rgb(211, 224, 235);
-    border-radius: 10% 10% 5% 5%;
-    width: 100%;
-    height: 100%;
-  }
 </style>
 {% endblock %}
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
   <a class="navbar-brand" href="#">Networth</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
     aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,6 +23,7 @@
       <a class="nav-link" href="{% url 'pdf-networth' %}"><i class="fa fa-file-pdf text-danger"></i></a>
       <a class="nav-link" href="{% url 'institution-report' %}"><i class="fa fa-table text-primary"></i></a>
     </div>
+    
   </div>
 </nav>
 <div class="container mt-3">
@@ -43,16 +37,19 @@
     <div class="col-sm-4">
       <ul class="list-group list-group-flush">
         <li class="list-group-item">Networth <span class="float-right">{{fd.worth}}</span></li>
-        <li class="list-group-item font-weight-lighter">Saving <span class="float-right text-success">{{fd.savings}}</span></li>
-        <li class="list-group-item font-weight-lighter">Investment<span class="float-right text-success">{{fd.investment}}</span></li>  
-        <li class="list-group-item font-weight-lighter">Stock <span class="float-right text-success">{{fd.stock}}</span></li>  
-        <li class="list-group-item font-weight-lighter">Business<span class="float-right text-success">{{fd.business}}</span></li>  
-        <li class="list-group-item font-weight-lighter">Fixed Asset <span class="float-right text-success">{{fd.fixed_asset}}</span></li>  
-        <li class="list-group-item font-weight-lighter">Liability <span class="float-right text-danger">{{fd.liability}}</span></li>  
+        <li class="list-group-item font-weight-lighter"><a href="{% url 'savings-list' %}">Saving</a> <span class="float-right text-success">{{fd.savings}}</span></li>
+        <li class="list-group-item font-weight-lighter"><a href="{% url 'investment-list' %}">Investment</a><span class="float-right text-success">{{fd.investment}}</span></li>  
+        <li class="list-group-item font-weight-lighter"><a href="">Stock</a> <span class="float-right text-success">{{fd.stock}}</span></li>  
+        <li class="list-group-item font-weight-lighter"><a href="">Business</a><span class="float-right text-success">{{fd.business}}</span></li>  
+        <li class="list-group-item font-weight-lighter"><a href="">Fixed Asset</a> <span class="float-right text-success">{{fd.fixed_asset}}</span></li>  
+        <li class="list-group-item font-weight-lighter"><a href="">Liability</a> <span class="float-right text-danger">{{fd.liability}}</span></li>  
       </ul>
     </div>
     <div class="col-sm-4">
-      <div class="space"></div>
+      <div class="">
+        <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ donot_networth|safe }}"
+        alt="Networth distribution donot plot">
+      </div>
     </div>
     <div class="col-sm-4">
       <ul class="list-group list-group-flush">
@@ -88,7 +85,6 @@
         alt="Bar Chart">
       </div>
     </div>
-
     <div class="col-sm-4">
       <table class="table table-sm table-light table-striped font-weight-lighter" data-toggle="table">
         <legend class="font-weight-lighter">Recent Transactions</legend>
@@ -130,7 +126,7 @@
   {% endif %}
 
   
-  <nav>
+  <nav class="">
     <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
       <button class="nav-link active" id="nav-savings-tab" data-toggle="tab" data-target="#savings" type="button"
         role="tab" aria-controls="savings" aria-selected="true"><span

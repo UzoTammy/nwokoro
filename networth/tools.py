@@ -342,9 +342,9 @@ def ytd_roi(owner, year:Optional[int]=None)->List[dict]:
             for investment in qs:
                 principal += investment.principal
                 roi += investment.roi()
-            stack[currency] = {'principal': principal, 'roi': roi, 'percent': round(100*roi/principal, 2)}
+            stack[currency] = {'principal': principal, 'roi': roi, 'percent': round(100*roi/principal, 2), 'roi_usd': Money(roi.amount/exchange_rate(roi.currency)[0].amount, 'USD')}
         else:
-            stack[currency] = {'principal': Money(0, currency), 'roi': Money(0, currency), 'percent': 0.0} 
+            stack[currency] = {'principal': Money(0, currency), 'roi': Money(0, currency), 'percent': 0.0, 'roi_usd': Money(0, 'USD')} 
     return stack
 
 def last_3_month_roi():
