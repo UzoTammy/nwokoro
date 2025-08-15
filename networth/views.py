@@ -199,6 +199,103 @@ class InvestmentListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         return context
     
+class StockListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/stock_list.html'
+
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        return False
+    
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # for financial report summanry
+        financial_data = FinancialData.objects.filter(owner=self.request.user)
+        if financial_data.exists():
+            fd = financial_data.latest('date')
+            context['fd'] = fd
+
+        
+        # fetch assets of current logged-in user
+        stocks = get_assets_liabilities(owner=self.request.user)['stocks']
+        
+        context['stocks'] = stocks.order_by('unit_cost_currency')
+        
+        # Asset total
+        context['stock_total'] = get_value(stocks, 'stock')
+        
+        return context
+
+class BusinessListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/business_list.html'
+
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        return False
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # for financial report summanry
+        financial_data = FinancialData.objects.filter(owner=self.request.user)
+        if financial_data.exists():
+            fd = financial_data.latest('date')
+            context['fd'] = fd
+
+        business = get_assets_liabilities(owner=self.request.user)['business']
+        context['business'] = business.order_by('unit_cost_currency')
+        
+        context['business_total'] = get_value(business, 'business')
+        
+        
+        return context
+
+class FixedAssetListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/fixed_asset_list.html' 
+
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        return False
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # for financial report summanry
+        financial_data = FinancialData.objects.filter(owner=self.request.user)
+        if financial_data.exists():
+            fd = financial_data.latest('date')
+            context['fd'] = fd
+
+        fixed_asset = get_assets_liabilities(owner=self.request.user)['fixed_asset']
+        context['fixed_asset'] = fixed_asset.order_by('value_currency')
+        
+        context['fixed_asset_total'] = get_value(fixed_asset, 'asset')
+        
+        return context
+
+class LiabilityListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/liability_list.html'   
+
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        return False
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # for financial report summanry
+        financial_data = FinancialData.objects.filter(owner=self.request.user)
+        if financial_data.exists():
+            fd = financial_data.latest('date')
+            context['fd'] = fd
+
+        liabilities = get_assets_liabilities(owner=self.request.user)['liabilities']
+        context['liabilities'] = liabilities.order_by('host_country')
+        context['liabilities_total'] = get_value(liabilities, 'liability')
+
+        return context
+
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'networth/dashboard.html'

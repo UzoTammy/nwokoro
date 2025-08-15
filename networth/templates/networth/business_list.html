@@ -1,0 +1,63 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row mt-1">
+        <div class="col">
+            <h1 class="font-weight-lighter">Business</h1>
+        </div>
+    </div>
+    <div class="row mb-3">
+        {% if business %}
+        <div class="col-sm-8 font-weight-lighter">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Holder</th>
+                        <th class="text-center"># of shares</th>
+                        <th class="text-center">Cost</th>
+                        <th class="text-center">Capital</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for object in business %}
+                    <tr>
+                        <td><a href="{% url 'networth-business-detail' object.pk %}">{{object.name}}</a></td>
+                        <td class="text-center">{{object.shares}}</td>
+                        <td class="text-right">{{object.unit_cost}}</td>
+                        <td class="text-right">{{object.capital}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-home'%}"> <i
+                            class="fa fa-door-open text-danger"></i> Close</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-4 font-weight-lighter">
+
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item list-group-item-primary text-center">Summary</li>
+                <li class="list-group-item">Count <span class="float-right badge badge-info">{{business.count}}</span>
+                </li>
+                {% for object in business_total %}
+                <li class="list-group-item"> {{object.currency}}
+                    <span class="float-right">{{object}}</span>
+                </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+        {% else %}
+        <p class="font-italic ml-2">No Business available</p>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock content %}

@@ -4,17 +4,19 @@ from .views import (NetworthHomeView, DashboardView, InvestmentListView,
                     InvestmentCreateView, InvestmentDetailView,
                     InvestmentRolloverView, InvestmentUpdateView,
                     InvestmentTerminationView,
-                    StockCreateView, StockDetailView, StockUpdateView,
+                    StockListView,StockCreateView, StockDetailView, StockUpdateView,
                     SavingListView,
                     SavingCreateView, SavingDetailView, SavingUpdateView,
                     SavingsConversionView,
-                    BusinessCreateView, BusinessDetailView, BusinessUpdateView, BusinessPlowBackView,
+                    BusinessListView, BusinessCreateView, BusinessDetailView, BusinessUpdateView, BusinessPlowBackView,
                     BusinessLiquidateView,
+                    FixedAssetListView,
                     FixedAssetCreateView, FixedAssetDetailView, FixedAssetUpdateView,FixedAssetRentView,
                     FixedAssetCollectRentView, FixedAssetStopRentView, FixedAssetRestoreRentView,
                     FixedAssetUpdateRentView,
                     ExternalFundHome, RewardFundView, InjectFundView, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView,
-                    PDFNetworthReport, LiabilityDetailView, LiabilityUpdateView, LiabilityRepayView)
+                    PDFNetworthReport, 
+                    LiabilityListView, LiabilityDetailView, LiabilityUpdateView, LiabilityRepayView)
 
 
 urlpatterns = [
@@ -32,6 +34,7 @@ urlpatterns = [
     path('investment/<int:pk>/terminate/', InvestmentTerminationView.as_view(),
          name='networth-investment-terminate'),
 
+    path('stock/list/', StockListView.as_view(), name='stock-list'),
     path('stock/<int:pk>/create/', StockCreateView.as_view(),
          name='networth-stock-create'),
     path('stock/<int:pk>/detail/', StockDetailView.as_view(),
@@ -49,6 +52,7 @@ urlpatterns = [
     path('saving/conversion/', SavingsConversionView.as_view(),
          name='saving-conversion'),
 
+    path('business/list/', BusinessListView.as_view(), name='business-list'),
     path('business/<int:pk>/create/', BusinessCreateView.as_view(),
          name='networth-business-create'),
     path('business/<int:pk>/detail/', BusinessDetailView.as_view(),
@@ -59,8 +63,10 @@ urlpatterns = [
          name='networth-business-plow-back'),
      path('business/<int:pk>/liquate/', BusinessLiquidateView.as_view(),
          name='networth-business-liquidate'),
-     
+
+    path('fixed-asset/list/', FixedAssetListView.as_view(), name='fixed-asset-list'), 
     path('fixed-asset/<int:pk>/create/', FixedAssetCreateView.as_view(),
+     
          name='networth-fixed-asset-create'),
     path('fixed-asset/<int:pk>/detail/', FixedAssetDetailView.as_view(),
          name='networth-fixed-asset-detail'),
@@ -78,6 +84,7 @@ urlpatterns = [
          name='networth-fixed-asset-rent-update'),
 
      #liability
+    path('liability/list', LiabilityListView.as_view(), name='liability-list'), 
     path('liability/<int:pk>/detail/', LiabilityDetailView.as_view(),
          name='networth-liability-detail'),
     path('liability/<int:pk>/update/', LiabilityUpdateView.as_view(),

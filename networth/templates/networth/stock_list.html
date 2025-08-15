@@ -1,0 +1,64 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+<div class="container mt-3">
+    <div class="row mt-1">
+        <div class="col">
+            <h1 class="font-weight-lighter">Stock</h1>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        {% if stocks %}
+        <div class="col-sm-8 font-weight-lighter">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Holder</th>
+                        <th>Date</th>
+                        <th class="text-center"># of units</th>
+                        <th class="text-center">Cost</th>
+                        <th class="text-center">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in stocks %}
+                    <tr>
+                        <td><a href="{% url 'networth-stock-detail' stock.pk %}">{{stock.holder}}</a></td>
+                        <td>{{stock.date_bought.date}}</td>
+                        <td class="text-center">{{stock.units}}</td>
+                        <td class="text-right">{{stock.unit_cost}}</td>
+                        <td class="text-right">{{stock.value}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-home'%}"><i class="fa fa-door-open text-danger"></i> Close</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-4 font-weight-lighter">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item list-group-item-primary text-center">Summary</li>
+                <li class="list-group-item">Count <span class="float-right badge badge-info">{{stocks.count}}</span></li>
+                {% for stock in stock_total %}
+                <li class="list-group-item"> {{stock.currency}}
+                    <span class="float-right">{{stock}}</span>
+                </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+        {% else %}
+        <p class="font-italic ml-2">No Stock investment</p>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock content %}

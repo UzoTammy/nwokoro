@@ -1,0 +1,57 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row mt-1">
+        <div class="col">
+            <h1 class="font-weight-lighter">Liability</h1>
+        </div>
+    </div>
+    <div class="row mb-3">
+        {% if liabilities %}
+        <div class="col-sm-8 font-weight-lighter">
+            <table class="table" data-toggle="table">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th class="text-center">Borrowed Value</th>
+                        <th class="text-center float-right">Settlement Value</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    {% for object in liabilities %}
+                    <tr>
+                        <td><a href="{% url 'networth-liability-detail' object.pk %}">{{object.source}}</a></td>
+                        <td class="text-center">{{object.borrowed_amount}}</td>
+                        <td class="text-right">{{object.settlement_amount}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-home'%}"><i class="fa fa-door-open text-danger"></i> Close</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-4 font-weight-lighter">
+            <ul class="list-group list-group-flush">
+                {% for object in liabilities_total %}
+                <li class="list-group-item"> {{object.currency}}
+                    <span class="float-right">{{object}}</span>
+                </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+        {% else %}
+        <p class="font-italic ml-2">No Liabilities available</p>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock content %}
