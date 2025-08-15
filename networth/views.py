@@ -102,7 +102,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         context['recent_transactions'] = recent_transactions(*transactions)
         
-        context['currency_pair'] = currency_pair('NGN', 'NG')
+        context['currency_pair'] = currency_pair('NGN', 'NG', self.request.user)
         context['number_of_instruments'] = (number_of_instruments(self.request.user.username), number_of_assets(self.request.user.username))
         
         # context['donot_networth'] = donut_chart(

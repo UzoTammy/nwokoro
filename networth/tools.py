@@ -6,9 +6,8 @@ from typing import Optional, List
 from dateutil.relativedelta import relativedelta
 
 from django.core.mail import EmailMultiAlternatives
-from django.db.models import F, QuerySet, Value, Avg, ExpressionWrapper
+from django.db.models import F, QuerySet, Value, Avg
 from django.db.models.aggregates import Sum
-from django.db.models.fields import DateField
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 
@@ -370,7 +369,7 @@ def current_year_roi(owner):
     year = today.year
     month = today.month
 
-    completed_investments = InvestmentTransaction.objects.filter(investment__owner=owner).filter(transaction_type='CR').filter(timestamp__year=year)
+    completed_investments = InvestmentTransaction.objects.filter(investment__owner=owner).filter(transaction_type='DR').filter(timestamp__year=year)
     if completed_investments.exists():
         data = list()
         for i in range(1, month+1):
@@ -426,43 +425,45 @@ def recent_transactions(*transactions):
     
     return sorted_bucket
 
-def currency_pair(currency, host_country):
+def currency_pair(currency, host_country, owner):
     """
         To compare networth in a country's local currency to the networth
         in US dollars in the same country.
     """
     result = list()
     for cur in (currency, 'USD'):
-        saving = Saving.objects.filter(host_country=host_country).filter(value_currency=cur)
+        saving = Saving.objects.filter(owner=owner).filter(host_country=host_country).filter(value_currency=cur)
         total_value = saving.aggregate(Sum('value'))['value__sum'] if saving.exists() else Decimal('0')
         stack = [total_value]
 
-        fixed = FixedAsset.objects.filter(host_country=host_country).filter(value_currency=cur)
+        fixed = FixedAsset.objects.filter(owner=owner).filter(host_country=host_country).filter(value_currency=cur)
         total_value = fixed.aggregate(Sum('value'))['value__sum'] if fixed.exists() else Decimal('0')
         stack.append(total_value)
 
-        invest = Investment.objects.filter(host_country=host_country).filter(principal_currency=cur)
+        invest = Investment.objects.filter(owner=owner).filter(host_country=host_country).filter(principal_currency=cur)
         total_value = invest.aggregate(Sum('principal'))['principal__sum'] if invest.exists() else Decimal('0')
         stack.append(total_value)
 
-        biz = Business.objects.filter(host_country=host_country).filter(unit_cost_currency=cur)
+        biz = Business.objects.filter(owner=owner).filter(host_country=host_country).filter(unit_cost_currency=cur)
         total_value = biz.annotate(val=F('shares')*F('unit_cost')).aggregate(Sum('val'))['val__sum'] if biz.exists() else Decimal('0')
         stack.append(total_value)
 
-        stock = Stock.objects.filter(host_country=host_country).filter(unit_cost_currency=cur)
+        stock = Stock.objects.filter(owner=owner).filter(host_country=host_country).filter(unit_cost_currency=cur)
         total_value = stock.annotate(val=F('units')*F('unit_cost')).aggregate(Sum('val'))['val__sum'] if stock.exists() else Decimal('0')
         stack.append(total_value)
 
         total_value = sum(stack)
         result.append(total_value)
+
         exchange_rate = ExchangeRate.objects.get(target_currency=currency).rate
+        
     result[0] = Money(round(result[0]/Decimal(exchange_rate), 2), 'USD')
     result[1] = Money(round(result[1], 2), 'USD')
     try:
         result.append(result[0]/result[1])
     except ZeroDivisionError('No networth in US dollars'):
         return
-    return {'local': result[0], 'usd': result[1], 'equilibrium': round(result[2], 2)}
+    return {'country': host_country, 'local': result[0], 'usd': result[1], 'equilibrium': round(result[2], 2)}
 
 def number_of_instruments(username):
     "Assets with potentials to generate wealth"

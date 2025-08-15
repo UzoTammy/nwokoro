@@ -142,9 +142,9 @@
         </li>
         <li class="list-group-item">
           {% if currency_pair %}
-          {{currency_pair.local}} : {{currency_pair.usd}}, equilibrium @ {{currency_pair.equilibrium}}
+            {{currency_pair.country}} CR: {{currency_pair.local}} : {{currency_pair.usd}},(i.e. {{currency_pair.equilibrium}} to 1) 
           {% else %}
-          No US dollar asset in the chosen country
+            No US dollar asset in the chosen country
           {% endif %}
         </li>
         <li class="list-group-item">Number of instruments are {{number_of_instruments|first}} out of
