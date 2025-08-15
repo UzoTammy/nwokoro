@@ -16,7 +16,7 @@ def _plot(plt):
     buffer.close()
     return image_base64
   
-def bar_chart(x_axis, y_axis, Y='Y', X='X', title='Bar Chart', y_min=None):
+def bar_chart(x_axis:list, y_axis:list, Y='Y', X='X', title='Bar Chart', y_min=None):
     
     # Create a bar chart
     plt.switch_backend('AGG')

@@ -114,10 +114,9 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         #      fd.stock.amount]
         # )
         
-        
-        # months = list(d['month'] for d in current_year_roi(self.request.user))
-        # values = list(d['amount'] for d in current_year_roi(self.request.user))
-        # context['plot_investment_earnings'] = bar_chart(months, values)
+        months = list(d['month'] for d in current_year_roi(self.request.user))
+        values = list(d['amount'].amount for d in current_year_roi(self.request.user))
+        context['plot_investment_earnings'] = bar_chart(months, values, X='Months', Y='Earnings', title='Earnings per month')
         return context
 
 
