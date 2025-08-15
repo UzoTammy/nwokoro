@@ -6,8 +6,9 @@ from typing import Optional, List
 from dateutil.relativedelta import relativedelta
 
 from django.core.mail import EmailMultiAlternatives
-from django.db.models import F, QuerySet, Value, Avg
+from django.db.models import F, QuerySet, Value, Avg, ExpressionWrapper
 from django.db.models.aggregates import Sum
+from django.db.models.fields import DateField
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 
@@ -15,7 +16,7 @@ from djmoney.money import Money
 from babel.numbers import format_currency
 
 from account.models import User
-from .models import (ExchangeRate, Investment, Saving, Stock, Business, FixedAsset, BorrowedFund, FinancialData)
+from .models import (ExchangeRate, Investment, Saving, Stock, Business, FixedAsset, BorrowedFund, FinancialData, InvestmentTransaction)
 
 class Tax:
     nta2025_bands = [(800_000, 0), (2_200_000, .15), (9_000_000, .18), (13_000_000, .21), (25_000_000, .23), (50_000_0000, .25)]
@@ -362,6 +363,26 @@ def last_3_month_roi():
         y_axis.append(financial)
         x_axis.append(date.strftime('%b'))
     return x_axis, y_axis
+
+def current_year_roi(owner):
+
+    today = datetime.date.today()
+    year = today.year
+    month = today.month
+
+    completed_investments = InvestmentTransaction.objects.filter(investment__owner=owner).filter(transaction_type='CR').filter(timestamp__year=year)
+    if completed_investments.exists():
+        data = list()
+        for i in range(1, month+1):
+            investments = completed_investments.filter(timestamp__month=i)
+            if investments.exists():
+                total = Money(0, 'USD')
+                for transaction in investments:
+                    earned = transaction.amount - transaction.investment.principal
+                    earned_usd = Money(earned/exchange_rate(earned.currency)[0], 'USD')
+                    total += earned_usd
+                data.append({'month': calendar.month_name[i], 'amount': total})
+    return data
 
 def investments_by_holder(owner):
     stack = list()

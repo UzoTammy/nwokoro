@@ -1,5 +1,7 @@
 {% extends 'core/base.html' %}
 
+{% load custom_tag %}
+
 {% block head %}
 <style>
   .jumbotron {
@@ -9,6 +11,7 @@
 </style>
 {% endblock %}
 {% block content %}
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
   <a class="navbar-brand" href="#">Networth</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
@@ -17,19 +20,22 @@
   </button>
   <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
     <div class="navbar-nav">
-      <a class="nav-link active" href="{% url 'index' %}">Home <span class="sr-only">(current)</span></a>
+      <a class="nav-link active" href="{% url 'index' %}"><i class="fa fa-home text-info"></i> Home <span
+          class="sr-only">(current)</span></a>
       <a class="nav-link" href="#"><i class="fa fa-user text-primary"></i> {{user.username}}</a>
       <a class="nav-link" href="{% url 'networth-dashboard' %}"><i class="fa fa-tachometer-alt text-info"></i></a>
-      <a class="nav-link" href="{% url 'pdf-networth' %}"><i class="fa fa-file-pdf text-danger"></i></a>
-      <a class="nav-link" href="{% url 'institution-report' %}"><i class="fa fa-table text-primary"></i></a>
+      <a class="nav-link" href="{% url 'pdf-networth' %}"><i class="fa fa-file-pdf text-danger"></i> PDF</a>
+      <a class="nav-link" href="{% url 'institution-report' %}"><i class="fa fa-table text-primary"></i> Report</a>
     </div>
-    
+
   </div>
 </nav>
-<div class="container mt-3">
+
+
+<div class="container mt-5">
   <div class="row mt-2">
     <div class="col">
-        <small class="text-monospace text-muted">{{exchange}}. {{naira_value_comment}}</small>
+      <small class="text-monospace text-muted">{{exchange}}. {{naira_value_comment}}</small>
     </div>
   </div>
   {% if fd %}
@@ -37,52 +43,70 @@
     <div class="col-sm-4">
       <ul class="list-group list-group-flush">
         <li class="list-group-item">Networth <span class="float-right">{{fd.worth}}</span></li>
-        <li class="list-group-item font-weight-lighter"><a href="{% url 'savings-list' %}">Saving</a> <span class="float-right text-success">{{fd.savings}}</span></li>
-        <li class="list-group-item font-weight-lighter"><a href="{% url 'investment-list' %}">Investment</a><span class="float-right text-success">{{fd.investment}}</span></li>  
-        <li class="list-group-item font-weight-lighter"><a href="">Stock</a> <span class="float-right text-success">{{fd.stock}}</span></li>  
-        <li class="list-group-item font-weight-lighter"><a href="">Business</a><span class="float-right text-success">{{fd.business}}</span></li>  
-        <li class="list-group-item font-weight-lighter"><a href="">Fixed Asset</a> <span class="float-right text-success">{{fd.fixed_asset}}</span></li>  
-        <li class="list-group-item font-weight-lighter"><a href="">Liability</a> <span class="float-right text-danger">{{fd.liability}}</span></li>  
+        <li class="list-group-item font-weight-lighter"><a href="{% url 'savings-list' %}">Saving</a> <span
+            class="float-right text-success">{{fd.savings}}</span></li>
+        <li class="list-group-item font-weight-lighter"><a href="{% url 'investment-list' %}">Investment</a><span
+            class="float-right text-success">{{fd.investment}}</span></li>
+        <li class="list-group-item font-weight-lighter"><a href="">Stock</a> <span
+            class="float-right text-success">{{fd.stock}}</span></li>
+        <li class="list-group-item font-weight-lighter"><a href="">Business</a><span
+            class="float-right text-success">{{fd.business}}</span></li>
+        <li class="list-group-item font-weight-lighter"><a href="">Fixed Asset</a> <span
+            class="float-right text-success">{{fd.fixed_asset}}</span></li>
+        <li class="list-group-item font-weight-lighter"><a href="">Liability</a> <span
+            class="float-right text-danger">{{fd.liability}}</span></li>
       </ul>
     </div>
     <div class="col-sm-4">
       <div class="">
-        <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ donot_networth|safe }}"
-        alt="Networth distribution donot plot">
+          <!-- <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ donot_networth|safe }}" alt="Networth distribution donot plot"> -->
       </div>
     </div>
     <div class="col-sm-4">
       <ul class="list-group list-group-flush">
         <li class="list-group-item list-group-item-light">Networth by country</li>
-          {% for country, worth in fd.networth_by_country.items %}
-            <li class="list-group-item font-weight-lighter">{{country}} <span
-                class="float-right">${{worth|floatformat:'2g'}}</span></li>
-          {% endfor %}
-          <li class="list-group-item list-group-item-light">Networth by currency (in usd)</li>
-          {% for country, worth in fd.networth_by_country.items %}
-            <li class="list-group-item font-weight-lighter">{{country}} <span
-                class="float-right">${{worth|floatformat:'2g'}}</span></li>
-          {% endfor %}
+        {% for country, worth in fd.networth_by_country.items %}
+        <li class="list-group-item font-weight-lighter">{{country}} <span
+            class="float-right">${{worth|floatformat:'2g'}}</span></li>
+        {% endfor %}
+        <li class="list-group-item list-group-item-light">Networth by currency (in usd)</li>
+        {% for country, worth in fd.networth_by_country.items %}
+        <li class="list-group-item font-weight-lighter">{{country}} <span
+            class="float-right">${{worth|floatformat:'2g'}}</span></li>
+        {% endfor %}
       </ul>
     </div>
   </div>
 
   <div class="row mt-2">
     <div class="col-sm-4">
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item list-group-item-light">Other parameters</li>
-          <li class="list-group-item font-weight-lighter">Earnable <span class="float-right">{{fd.roi}}</span>
-            </li>
-            <li class="list-group-item font-weight-lighter">Current Earning <span
-                class="float-right">{{fd.present_roi}}</span></li>
-            <li class="list-group-item font-weight-lighter">Daily ROI<span
-                class="float-right">{{fd.daily_roi}}</span></li>
-        </ul>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item list-group-item-light">Active investment parameters</li>
+        <li class="list-group-item font-weight-lighter">Earnable
+          <a class="badge badge-info" data-toggle="tooltip" data-html="true"
+            title='Possible earnings from active investment(s). What you could earn if all current investments are to run completely'
+            href=""><i class="fa fa-info fa-sm"></i>
+          </a>
+          <span class="float-right">{{fd.roi}}</span>
+
+        </li>
+        <li class="list-group-item font-weight-lighter">Earning
+
+          <a class="badge badge-info" data-toggle="tooltip" data-html="true"
+            title='Present accrued earnings from active investments. What you have earned as of today' href=""><i
+              class="fa fa-info fa-sm"></i>
+          </a>
+
+          <span class="float-right">{{fd.present_roi}}</span>
+        </li>
+        <li class="list-group-item font-weight-lighter">Daily ROI<span class="float-right">{{fd.daily_roi}}</span></li>
+        <li class="list-group-item font-weight-lighter">Lifespan<span class="float-right">{{fd.roi|divide:fd.daily_roi}}
+            days</span></li>
+      </ul>
     </div>
     <div class="col-sm-4">
       <div class="">
-        <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ last_3_months_bar|safe }}"
-        alt="Bar Chart">
+        <!-- <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ plot_investment_earnings|safe }}" alt="Year earnings"> -->
       </div>
     </div>
     <div class="col-sm-4">
@@ -113,8 +137,8 @@
   </div>
 
   {% else %}
-  
-  
+
+
   <div class="row mt-3">
     <div class="col">
       <h4>Hello {{user.username}}</h4>
@@ -125,7 +149,7 @@
   </div>
   {% endif %}
 
-  
+
   <nav class="">
     <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
       <button class="nav-link active" id="nav-savings-tab" data-toggle="tab" data-target="#savings" type="button"
@@ -535,4 +559,7 @@
   </div>
 </div>
 
+
 {% endblock %}
+
+

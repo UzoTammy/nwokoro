@@ -11,14 +11,13 @@
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
 
-            <a class="nav-link" href="{% url 'networth-home'%}"><i class="fa fa-door-closed text-danger"></i> Close</a>
+            <a class="nav-link" href="{% url 'networth-home'%}"><i class="fa fa-door-open text-danger"></i> Close</a>
         </div>
 
     </div>
 </nav>
 
 <div class="container mt-5">
-
     <div class="row mt-4">
         {% if investments %}
         <div class="col-sm-8">
@@ -54,7 +53,7 @@
 
             <div class="row mt-5">
                 <div class="col">
-                    <h3 class="font-weight-lighter">YTD Achievement</h3>
+                    <h3 class="font-weight-lighter">Current Year Achievable</h3>
                     <hr>
                     <h5 class="font-weight-lighter">By Currency</h5>
                     <table class="table mt-3" data-toggle="table">

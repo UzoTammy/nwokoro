@@ -25,9 +25,9 @@ from .models import (Saving, Stock, Investment, Business, FinancialData, FixedAs
                      BusinessTransaction, BorrowedFundTransaction, StockTransaction, FixedAssetTransaction)
 
 from .plots import bar_chart, donut_chart, plot
-from .tools import (get_value, valuation, ytd_roi, investments_by_holder, last_3_month_roi,
+from .tools import (get_value, valuation, ytd_roi, investments_by_holder,
                     recent_transactions, currency_pair, number_of_instruments, number_of_assets, 
-                    exchange_rate, get_assets_liabilities, set_roi, get_year_financial)
+                    exchange_rate, get_assets_liabilities, set_roi, get_year_financial, current_year_roi)
 
 def is_homogenous(value: list):
     if not value:
@@ -53,6 +53,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         if self.request.user.is_staff:
             return True
         return False
+    
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -103,14 +104,20 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         
         context['currency_pair'] = currency_pair('NGN', 'NG')
         context['number_of_instruments'] = (number_of_instruments(self.request.user.username), number_of_assets(self.request.user.username))
-        context['last_3_months_bar'] = bar_chart(last_3_month_roi()[0], last_3_month_roi()[1], Y='ROI', X='Month', title='3 months ROI')
-        context['donot_networth'] = donut_chart(
-            ['Business', 'Fixed Asset', 'Investment', 'Saving', 'Stock'], 
-            [fd.business.amount,
-             fd.fixed_asset.amount,
-             fd.investment.amount,
-             fd.savings.amount,
-             fd.stock.amount])
+        
+        # context['donot_networth'] = donut_chart(
+        #     ['Business', 'Fixed Asset', 'Investment', 'Saving', 'Stock'], 
+        #     [fd.business.amount,
+        #      fd.fixed_asset.amount,
+        #      fd.investment.amount,
+        #      fd.savings.amount,
+        #      fd.stock.amount]
+        # )
+        
+        
+        # months = list(d['month'] for d in current_year_roi(self.request.user))
+        # values = list(d['amount'] for d in current_year_roi(self.request.user))
+        # context['plot_investment_earnings'] = bar_chart(months, values)
         return context
 
 

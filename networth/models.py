@@ -764,7 +764,6 @@ class LiabilityTransaction(models.Model):
         return f"{self.user.username}:{self.amount}>>{self.transaction_type}"
 
 class InvestmentTransaction(models.Model):
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_investment_transactions")
     investment = models.ForeignKey(Investment, on_delete=models.CASCADE, related_name='investment_transactions')
     amount = MoneyField(max_digits=12, decimal_places=2)
