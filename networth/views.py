@@ -105,14 +105,14 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['currency_pair'] = currency_pair('NGN', 'NG', self.request.user)
         context['number_of_instruments'] = (number_of_instruments(self.request.user.username), number_of_assets(self.request.user.username))
         
-        # context['donot_networth'] = donut_chart(
-        #     ['Business', 'Fixed Asset', 'Investment', 'Saving', 'Stock'], 
-        #     [fd.business.amount,
-        #      fd.fixed_asset.amount,
-        #      fd.investment.amount,
-        #      fd.savings.amount,
-        #      fd.stock.amount]
-        # )
+        context['donot_networth'] = donut_chart(
+            ['Business', 'Fixed Asset', 'Investment', 'Saving', 'Stock'], 
+            [fd.business.amount,
+             fd.fixed_asset.amount,
+             fd.investment.amount,
+             fd.savings.amount,
+             fd.stock.amount]
+        )
         
         months = list(d['month'] for d in current_year_roi(self.request.user))
         values = list(d['amount'].amount for d in current_year_roi(self.request.user))

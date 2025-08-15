@@ -34,7 +34,7 @@ def bar_chart(x_axis:list, y_axis:list, Y='Y', X='X', title='Bar Chart', y_min=N
     return _plot(plt)
 
 def donut_chart(labels:list, sizes:list):
-
+    plt.switch_backend('AGG')
     colors = ['#ff9999', '#66b3ff', '#99ff99', '#ffcc99', '#ce868c', '#5a59a5', '#848e31']
 
     if len(labels) == len(sizes): 

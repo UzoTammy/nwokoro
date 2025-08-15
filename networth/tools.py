@@ -440,11 +440,11 @@ def currency_pair(currency, host_country, owner):
         total_value = fixed.aggregate(Sum('value'))['value__sum'] if fixed.exists() else Decimal('0')
         stack.append(total_value)
 
-        invest = Investment.objects.filter(owner=owner).filter(host_country=host_country).filter(principal_currency=cur)
+        invest = Investment.objects.filter(owner=owner).filter(host_country=host_country).filter(principal_currency=cur).filter(is_active=True)
         total_value = invest.aggregate(Sum('principal'))['principal__sum'] if invest.exists() else Decimal('0')
         stack.append(total_value)
 
-        biz = Business.objects.filter(owner=owner).filter(host_country=host_country).filter(unit_cost_currency=cur)
+        biz = Business.objects.filter(owner=owner).filter(host_country=host_country).filter(unit_cost_currency=cur).filter(is_active=True)
         total_value = biz.annotate(val=F('shares')*F('unit_cost')).aggregate(Sum('val'))['val__sum'] if biz.exists() else Decimal('0')
         stack.append(total_value)
 
@@ -456,7 +456,7 @@ def currency_pair(currency, host_country, owner):
         result.append(total_value)
 
         exchange_rate = ExchangeRate.objects.get(target_currency=currency).rate
-        
+
     result[0] = Money(round(result[0]/Decimal(exchange_rate), 2), 'USD')
     result[1] = Money(round(result[1], 2), 'USD')
     try:
@@ -471,7 +471,7 @@ def number_of_instruments(username):
     invest = Investment.objects.filter(owner__username=username).filter(is_active=True).count()
     biz = Business.objects.filter(owner__username=username).filter(is_active=True).count()
     stock = Stock.objects.filter(owner__username=username).filter(units__gt=0).count()
-    return fixed+invest+biz+stock
+    return sum([fixed, invest, biz, stock])
 
 def number_of_assets(username):
     savings = Saving.objects.filter(owner__username=username).filter(value__gt=0).count()

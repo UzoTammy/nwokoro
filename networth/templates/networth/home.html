@@ -57,7 +57,13 @@
     </div>
     <div class="col-sm-4">
       <div class="">
-        <!-- <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ donot_networth|safe }}" alt="Networth distribution donot plot"> -->
+        <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ donot_networth|safe }}" alt="Networth distribution donot plot">
+
+        <ul class="list-group list-group-flush font-weight-lighter">
+          <li class="list-group-item">{{number_of_instruments|first}} instruments out of
+          {{number_of_instruments|last}} Assets</li>
+        </ul>
+        
       </div>
     </div>
     <div class="col-sm-4">
@@ -135,10 +141,10 @@
   </div>
 
   <div class="row mb-3">
-    <div class="col font-weight-lighter">
+    <div class="col-sm-6 font-weight-lighter">
       <ul class="list-group list-group-flush">
         <li class="list-group-item">
-          <h5 class="font-italic"><i class="fa fa-paperclip text-info"></i> Outlook</h5>
+          <h5 class="font-italic"><i class="fa fa-paperclip text-info"></i> Currency Ratio</h5>
         </li>
         <li class="list-group-item">
           {% if currency_pair %}
@@ -147,11 +153,9 @@
             No US dollar asset in the chosen country
           {% endif %}
         </li>
-        <li class="list-group-item">Number of instruments are {{number_of_instruments|first}} out of
-          {{number_of_instruments|last}} Assets</li>
       </ul>
     </div>
-    <div class="col"></div>
+    
   </div>
   {% else %}
 
