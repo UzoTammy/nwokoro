@@ -25,7 +25,7 @@ from .models import (Saving, Stock, Investment, Business, FinancialData, FixedAs
                      BusinessTransaction, BorrowedFundTransaction, StockTransaction, FixedAssetTransaction)
 
 from .plots import bar_chart, donut_chart, plot
-from .tools import (get_value, valuation, ytd_roi, investments_by_holder,
+from .tools import (get_value, valuation, ytd_roi, investments_by_holder,networth_by_currency, currency_list,
                     recent_transactions, currency_pair, number_of_instruments, number_of_assets, 
                     exchange_rate, get_assets_liabilities, set_roi, get_year_financial, current_year_roi)
 
@@ -117,6 +117,25 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         months = list(d['month'] for d in current_year_roi(self.request.user))
         values = list(d['amount'].amount for d in current_year_roi(self.request.user))
         context['plot_investment_earnings'] = bar_chart(months, values, X='Months', Y='Earnings', title='Earnings per month')
+
+
+        rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=datetime.date.today().year)
+        if rewards.exists():
+            reward_value = sum(Money(reward.amount.amount/exchange_rate(reward.amount.currency)[0].amount, 'USD') for reward in rewards)
+            context['reward'] = reward_value
+
+        networth_currency = list()
+
+        for currency in currency_list(self.request.user):
+            value = networth_by_currency(currency, self.request.user)
+            networth_currency.append(
+                {
+                    'currency': currency,
+                    'value': Money(value, currency),
+                    'value_usd': Money(value/exchange_rate(currency)[0].amount, 'USD')
+                }
+            )
+        context['networth_by_currency'] = networth_currency
         return context
 
 

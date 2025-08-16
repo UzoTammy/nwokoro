@@ -62,6 +62,9 @@
         <ul class="list-group list-group-flush font-weight-lighter">
           <li class="list-group-item">{{number_of_instruments|first}} instruments out of
           {{number_of_instruments|last}} Assets</li>
+          {% if reward %}
+          <li class="list-group-item">YTD Reward <span class="float-right">{{reward}}</span></li>
+          {% endif %}
         </ul>
         
       </div>
@@ -74,10 +77,11 @@
             class="float-right">${{worth|floatformat:'2g'}}</span></li>
         {% endfor %}
         <li class="list-group-item list-group-item-light">Networth by currency (in usd)</li>
-        {% for country, worth in fd.networth_by_country.items %}
-        <li class="list-group-item font-weight-lighter">{{country}} <span
-            class="float-right">${{worth|floatformat:'2g'}}</span></li>
+        {% for worth in networth_by_currency %}
+        <li class="list-group-item font-weight-lighter">{{worth.currency}} <span
+            class="float-right">{{worth.value_usd}}</span></li>
         {% endfor %}
+        
       </ul>
     </div>
   </div>

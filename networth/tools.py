@@ -488,3 +488,33 @@ def get_year_financial(owner:User, year:int=None):
         year = datetime.date.today().year
     qs = FinancialData.objects.filter(owner=owner).filter(date__year=year).order_by('date')
     return qs
+
+def networth_by_currency(currency, owner):
+    """
+        User's networth by currency
+    """
+    
+    # filter the database for the queryset
+    savings = Saving.objects.filter(owner=owner).filter(value_currency=currency)
+    investments = Investment.objects.filter(owner=owner).filter(is_active=True).filter(principal_currency=currency)
+    stocks = Stock.objects.filter(owner=owner).filter(unit_cost_currency=currency)
+    business = Business.objects.filter(owner=owner).filter(unit_cost_currency=currency).filter(is_active=True)
+    fixed_asset = FixedAsset.objects.filter(owner=owner).filter(value_currency=currency)
+    liability = BorrowedFund.objects.filter(owner=owner).filter(settlement_amount_currency=currency).filter(is_active=True)
+    
+    # get the aggregate
+    saving_amount = savings.aggregate(Sum('value'))['value__sum'] if savings.exists() else Decimal('0')
+    investment_amount = investments.aggregate(Sum('principal'))['principal__sum'] if investments.exists() else Decimal('0')
+    stock_amount = stocks.annotate(value=F('unit_cost')*F('units')).aggregate(Sum('value'))['value__sum'] if stocks.exists() else Decimal('0')      
+    business_amount = business.annotate(value=F('unit_cost')*F('shares')).aggregate(Sum('value'))['value__sum'] if business.exists() else Decimal('0')
+    fixed_asset_amount = fixed_asset.aggregate(Sum('value'))['value__sum'] if fixed_asset.exists() else Decimal('0')
+    liability_amount = liability.aggregate(Sum('settlement_amount'))['settlement_amount__sum'] if liability.exists() else Decimal('0')
+
+    total = saving_amount + investment_amount + stock_amount + business_amount + fixed_asset_amount - liability_amount
+
+    return total
+
+def currency_list(owner):
+    # filter the database for the queryset
+    currencies = Saving.objects.filter(owner=owner).values_list('value_currency', flat=True).distinct()
+    return currencies
