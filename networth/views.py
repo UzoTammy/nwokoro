@@ -191,7 +191,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
             dates = [ date.strftime('%m/%d') for date in qs.values_list('date', flat=True) ]
             y_axes = list()
-            currency_pair = currency_list(self.request.user)
+            currency_pair = list(currency_list(self.request.user))
+            currency_pair.remove('USD')
             
             # you need currency pair factor
             factor = 1000
