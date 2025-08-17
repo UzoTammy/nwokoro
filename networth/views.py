@@ -139,6 +139,68 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         return context
 
 
+class DashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'networth/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # get the record of the first date of the current year
+        current_year = datetime.date.today().year
+        qs = get_year_financial(self.request.user)
+
+        if qs.exists():
+            
+            obj = qs.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else qs.first()
+            base_networth = obj.networth()
+            target = Money(100_000, 'USD')
+            daily_roi = set_roi(target)
+
+            context['financials'] = {
+                'base_networth': base_networth,
+                'base_daily_roi': daily_roi,
+                'EYEV': target + base_networth,
+                'EYEP':  format_percent(round(target/base_networth, 4), decimal_quantization=False, locale='en_US')
+            }
+            
+            qs = qs.annotate(f_networth = F('worth') - F('liability'))
+            max_networth = qs.aggregate(Max('f_networth'))['f_networth__max']
+            context['max_networth'] = Money(max_networth, 'USD')
+            context['date_max_networth'] = qs.filter(f_networth=max_networth).first().date.date
+            context['max_rate'] = ('NGN', max([r[0]['NGN'] for r in qs.values_list('exchange_rate') if r[0] is not None]))
+            context['present_growth'] = format_percent(round((qs.latest('date').networth() - base_networth)/base_networth, 5), decimal_quantization=False, locale='en_US')
+            
+            context['ytd_roi'] = ytd_roi(self.request.user, current_year)
+            context['ytd_roi_prev'] = ytd_roi(self.request.user, current_year-1)
+            context['ytd_roi_next'] = ytd_roi(self.request.user, current_year+1)
+
+        start_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7)
+        financials = FinancialData.objects.filter(owner=self.request.user).filter(date__gte=start_date).order_by('date')
+
+        if not financials.exists():
+            financials = FinancialData.objects.filter(owner=self.request.user)
+        
+        # get the minimum worth
+        if financials.exists():
+            
+            recent_days = [ date.strftime('%m/%d') for date in financials.values_list('date', flat=True) ]
+            recent_networth = [ financial.worth.amount for financial in financials ]
+            context['networth_image'] = plot(recent_days, recent_networth, 'USD($)', 'Days', 'Networth')
+            
+            recent_daily_roi = financials.values_list('daily_roi', flat=True)
+            context['daily_roi_image'] = plot(recent_days, recent_daily_roi, 'USD($)', 'Days', 'Daily ROI')
+            
+            latest = financials.latest('date')
+            labels = ['saving', 'investment', 'stock', 'fixed asset', 'business']
+            sizes = [latest.savings.amount, latest.investment.amount, latest.stock.amount, latest.fixed_asset.amount, latest.business.amount]
+            context['asset_distribution'] = donut_chart(labels=labels, sizes=sizes)
+            labels = latest.networth_by_country.keys()
+            sizes = latest.networth_by_country.values()
+            
+            context['asset_location'] = donut_chart(labels, sizes)
+            
+        return context
+
 class SavingListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/saving_list.html'
 
@@ -314,67 +376,6 @@ class LiabilityListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         return context
 
-
-class DashboardView(LoginRequiredMixin, TemplateView):
-    template_name = 'networth/dashboard.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # get the record of the first date of the current year
-        current_year = datetime.date.today().year
-        qs = get_year_financial(self.request.user)
-
-        if qs.exists():
-            
-            obj = qs.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else qs.first()
-            base_networth = obj.networth()
-            target = Money(100_000, 'USD')
-            daily_roi = set_roi(target)
-
-            context['financials'] = {
-                'base_networth': base_networth,
-                'base_daily_roi': daily_roi,
-                'EYEV': target + base_networth,
-                'EYEP':  format_percent(round(target/base_networth, 4), decimal_quantization=False, locale='en_US')
-            }
-            
-            qs = qs.annotate(f_networth = F('worth') - F('liability'))
-            max_networth = qs.aggregate(Max('f_networth'))['f_networth__max']
-            context['max_networth'] = Money(max_networth, 'USD')
-            context['date_max_networth'] = qs.filter(f_networth=max_networth).first().date.date
-            context['max_rate'] = ('NGN', max([r[0]['NGN'] for r in qs.values_list('exchange_rate') if r[0] is not None]))
-            context['present_growth'] = format_percent(round((qs.latest('date').networth() - base_networth)/base_networth, 5), decimal_quantization=False, locale='en_US')
-            
-            context['ytd_roi'] = ytd_roi(self.request.user, current_year)
-            context['ytd_roi_prev'] = ytd_roi(self.request.user, current_year-1)
-            context['ytd_roi_next'] = ytd_roi(self.request.user, current_year+1)
-
-        cut_off_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7)
-        financials = FinancialData.objects.filter(owner=self.request.user).filter(date__gte=cut_off_date).order_by('date')
-        
-        # get the minimum worth
-        if financials:
-            # min_worth = financials.aggregate(Min('worth'))['worth__min']
-            recent_days = [ date.strftime('%m/%d') for date in financials.values_list('date', flat=True) ]
-            recent_networth = [ financial.networth().amount for financial in financials ]
-            context['networth_image'] = plot(recent_days, recent_networth, 'USD($)', 'Days', 'Networth')
-            # bar_chart(recent_days, recent_networth, 'USD($)', 'Days', 'Networth', y_min=4*min_worth/5)
-
-            # min_roi = financials.aggregate(Min('daily_roi'))['daily_roi__min']
-            recent_daily_roi = financials.values_list('daily_roi', flat=True)
-            context['daily_roi_image'] = plot(recent_days, recent_daily_roi, 'USD($)', 'Days', 'Daily ROI')
-            # context['scipy'] = scipy_bar()
-            latest = financials.latest('date')
-            labels = ['saving', 'investment', 'stock', 'fixed asset', 'business']
-            sizes = [latest.savings.amount, latest.investment.amount, latest.stock.amount, latest.fixed_asset.amount, latest.business.amount]
-            context['asset_distribution'] = donut_chart(labels=labels, sizes=sizes)
-            labels = latest.networth_by_country.keys()
-            sizes = latest.networth_by_country.values()
-            
-            context['asset_location'] = donut_chart(labels, sizes)
-            
-        return context
 
 class InvestmentCreateView(LoginRequiredMixin, FormView):
     form_class = InvestmentCreateForm
