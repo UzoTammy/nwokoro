@@ -20,9 +20,7 @@
       <a class="nav-link active" href="{% url 'index' %}"><i class="fa fa-home text-info"></i> Home <span
           class="sr-only">(current)</span></a>
       <a class="nav-link" href="#"><i class="fa fa-user text-primary"></i> {{user.username}}</a>
-      <a class="nav-link" href="{% url 'networth-dashboard' %}"><i class="fa fa-tachometer-alt text-info"></i></a>
       <a class="nav-link" href="{% url 'pdf-networth' %}"><i class="fa fa-file-pdf text-danger"></i> PDF</a>
-      <a class="nav-link" href="{% url 'institution-report' %}"><i class="fa fa-table text-primary"></i> Report</a>
     </div>
 
   </div>
@@ -160,6 +158,12 @@
       </ul>
     </div>
     
+  </div>
+
+  <div class="row mb-3">
+    <div class="col ml-2 font-weight-lighter">
+      <a href="{% url 'networth-dashboard' %}">Click here to view more analysis <i class="fa fa-tachometer-alt"></i> </a>
+    </div>
   </div>
   {% else %}
 

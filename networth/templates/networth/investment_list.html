@@ -106,6 +106,7 @@
                     <span class="float-right">{{investment}}</span>
                 </li>
                 {% endfor %}
+                <li class="list-group-item list-group-item-info">Holders <span class="float-right"><a href="{% url 'institution-report' %}">Click for details</a></span></li>
                 {% for investment in investments_summary %}
                 <li class="list-group-item">
                     {{investment.holder}}

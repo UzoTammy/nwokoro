@@ -6,10 +6,10 @@
 </style>
 {% endblock %}
 {% block content %}
-<div class="container mt-3">
+<div class="container mt-3 font-weight-lighter">
     <div class="row justify-content-center">
         <div class="col-sm-6">
-            <ul class="list-group">
+            <ul class="list-group list-group-flush">
                 <li class="list-group-item">Base Networth <span class="float-right">{{financials.base_networth}}</span>
                 </li>
                 <li class="list-group-item">Base Daily ROI <span
@@ -21,7 +21,7 @@
             </ul>
         </div>
         <div class="col-sm-6">
-            <ul class="list-group">
+            <ul class="list-group list-group-flush">
                 <li class="list-group-item">Max Networth <span class="float-right">{{max_networth}}</span></li>
                 <li class="list-group-item">Date of Max Networth <span class="float-right">{{date_max_networth}}</span></li>
                 <li class="list-group-item">Worst Rate <span class="float-right">{{max_rate|first}}{{max_rate|last}}/$</span></li>
@@ -32,21 +32,19 @@
     <div class="row mt-3">
         <div class="col">
             <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ networth_image|safe }}"
-                alt="Bar Chart">
+                alt="Networth trend line plot">
         </div>
         <div class="col">
             <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ daily_roi_image|safe }}"
-                alt="Bar Chart">
+                alt="Daily ROI trend line plot">
         </div>
     </div>
     <div class="row mt-3">
-        <div class="col">
-            <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ asset_distribution|safe }}"
-                alt="Bar Chart">
-        </div>
+        <div class="col"></div>
+        
         <div class="col">
             <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ asset_location|safe }}"
-                alt="Bar Chart">
+                alt="Networth distribution by country donut chart">
         </div>
     </div>
     <div class="row mt-3">

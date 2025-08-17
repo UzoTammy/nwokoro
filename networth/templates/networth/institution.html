@@ -1,6 +1,15 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'networth-home' %}">Networth</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'investment-list' %}">Investment</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Holder's Details</li>
+  </ol>
+</nav>
+
 <div class="container mt-3">
     {% if institutions %}
     <div class="row">
@@ -52,8 +61,6 @@
     <h3>No institutional Report available</h3>
     {% endif %}
 
-    <div class="row mb-3">
-        <div class="col"><a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Home</a></div>
-    </div>
+    
 </div>
 {% endblock %}
