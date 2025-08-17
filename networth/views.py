@@ -185,11 +185,24 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             
             recent_days = [ date.strftime('%m/%d') for date in financials.values_list('date', flat=True) ]
             recent_networth = [ financial.worth.amount for financial in financials ]
-            context['networth_image'] = plot(recent_days, recent_networth, 'USD($)', 'Days', 'Networth')
+            context['networth_image'] = plot(recent_days, recent_networth, Y1='USD($)', X='Days', title='Weekly Networth Trend')
             
-            recent_daily_roi = financials.values_list('daily_roi', flat=True)
-            context['daily_roi_image'] = plot(recent_days, recent_daily_roi, 'USD($)', 'Days', 'Daily ROI')
+            qs = financials.exclude(exchange_rate=None)
+
+            dates = [ date.strftime('%m/%d') for date in qs.values_list('date', flat=True) ]
+            y_axes = list()
+            currency_pair = currency_list(self.request.user)
             
+            # you need currency pair factor
+            factor = 1000
+            for currency in currency_pair:
+                if currency == 'NGN':
+                    y_axes.append([f[currency]/factor for f in qs.values_list('exchange_rate', flat=True)])
+                else:
+                    y_axes.append([f[currency] for f in qs.values_list('exchange_rate', flat=True)])
+              
+            context['daily_roi_image'] = plot(dates, y_axis1=y_axes[0], y_axis2=y_axes[1], Y1=f'{currency_pair[0]}/$', Y2=f'x{factor}{currency_pair[1]}/$', X='Days', title='One week exchange rate trend')
+
             latest = financials.latest('date')
             labels = ['saving', 'investment', 'stock', 'fixed asset', 'business']
             sizes = [latest.savings.amount, latest.investment.amount, latest.stock.amount, latest.fixed_asset.amount, latest.business.amount]
