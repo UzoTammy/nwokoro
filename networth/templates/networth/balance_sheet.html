@@ -1,0 +1,58 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5 mb-3 font-weight-lighter">
+    <div class="row justify-content-center">
+        <h3>Balance Sheet as at {% now 'd-M-Y' %}</h1>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-sm-6">
+            <ul class="list-group">
+                <li class="list-group-item">Networth Brought Forward <span class="float-right">{{balance_brought_forward}}</span></li>
+                
+                <li class="list-group-item">
+                    <table class="table" data-toggle="table">
+                        <thead class="text-right">
+                            <tr>
+                                <th>Instrument</th>
+                                <th>Turnover</th>
+                                <th>Earnings</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-right">
+                            <tr>
+                                <td>Investment</td>
+                                <td>{{turnover.investment|first}}</td>
+                                <td>{{turnover.investment|last}}</td>
+                            </tr>
+                            <tr>
+                                <td>Fixed Asset</td>
+                                <td>{{turnover.fixed_asset|first}}</td>
+                                <td>{{turnover.fixed_asset|last}}</td>
+                            </tr>
+                            <tr>
+                                <td>Business</td>
+                                <td>{{turnover.business|first}}</td>
+                                <td>{{turnover.business|last}}</td>
+                            </tr>
+                            <tr>
+                                <td>Stock</td>
+                                <td>{{turnover.stock}}</td>
+                                <td>{{turnover.stock}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </li>
+                <li class="list-group-item">Total Earnings <span class="float-right">XXX.XX</span></li>
+                <li class="list-group-item text-danger">Balance <span class="float-right">XXX.XX</span></li>
+                <li class="list-group-item">Reward <span class="float-right">XXX.XX</span></li>
+                <li class="list-group-item">Current Networth <span class="float-right">XXX.XX</span></li>
+                <li class="list-group-item text-danger">Balance <span class="float-right">XXX.XX</span></li>
+            </ul>
+
+            <div class="float-right mt-3 mb-3"><a href="{% url 'networth-home' %}"><i class="fa fa-door-open text-danger"></i>Close</a></div>
+        </div>
+    </div>
+    
+</div>
+{% endblock%}

@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (Saving, Investment, ExchangeRate, Stock, SavingsTransaction, Business,
                      InvestmentTransaction, StockTransaction, FinancialData, BusinessTransaction,
                      FixedAsset, FixedAssetTransaction, RewardFund, InjectFund,
-                     BorrowedFund, BorrowedFundTransaction)
+                     BorrowedFund, BorrowedFundTransaction, Rent)
 
 # Register your models here.
 admin.site.register(Saving)
@@ -14,6 +14,8 @@ admin.site.register(FixedAsset)
 admin.site.register(BorrowedFund)
 admin.site.register(RewardFund)
 admin.site.register(InjectFund)
+
+admin.site.register(Rent)
 
 admin.site.register(SavingsTransaction)
 admin.site.register(InvestmentTransaction)

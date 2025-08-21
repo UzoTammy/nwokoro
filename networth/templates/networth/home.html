@@ -21,15 +21,17 @@
           class="sr-only">(current)</span></a>
       <a class="nav-link" href="#"><i class="fa fa-user text-primary"></i> {{user.username}}</a>
       <a class="nav-link" href="{% url 'pdf-networth' %}" target="_blank"><i class="fa fa-file-pdf text-danger"></i> PDF</a>
+      <a class="nav-link" href="{% url 'balance-sheet' %}"><i class="fa fa-balance-scale text-primary"></i> BS</a>
+      
     </div>
 
   </div>
 </nav>
 
 
-<div class="container mt-5">
+<div class="container mt-5 font-weight-lighter">
   <div class="row p-2">
-    <div class="col font-weight-lighter">
+    <div class="col">
       <small class="text-monospace text-muted">{{exchange}}. {{naira_value_comment}}</small>
     </div>
   </div>
@@ -39,17 +41,17 @@
     <div class="col-sm-4">
       <ul class="list-group list-group-flush">
         <li class="list-group-item">Networth <span class="float-right">{{fd.worth}}</span></li>
-        <li class="list-group-item font-weight-lighter"><a href="{% url 'savings-list' %}">Saving</a> <span
+        <li class="list-group-item"><a href="{% url 'savings-list' %}">Saving</a> <span
             class="float-right text-success">{{fd.savings}}</span></li>
-        <li class="list-group-item font-weight-lighter"><a href="{% url 'investment-list' %}">Investment</a><span
+        <li class="list-group-item"><a href="{% url 'investment-list' %}">Investment</a><span
             class="float-right text-success">{{fd.investment}}</span></li>
-        <li class="list-group-item font-weight-lighter"><a href="{% url 'stock-list' %}">Stock</a> <span
+        <li class="list-group-item"><a href="{% url 'stock-list' %}">Stock</a> <span
             class="float-right text-success">{{fd.stock}}</span></li>
-        <li class="list-group-item font-weight-lighter"><a href="{% url 'business-list' %}">Business</a><span
+        <li class="list-group-item"><a href="{% url 'business-list' %}">Business</a><span
             class="float-right text-success">{{fd.business}}</span></li>
-        <li class="list-group-item font-weight-lighter"><a href="{% url 'fixed-asset-list' %}">Fixed Asset</a> <span
+        <li class="list-group-item"><a href="{% url 'fixed-asset-list' %}">Fixed Asset</a> <span
             class="float-right text-success">{{fd.fixed_asset}}</span></li>
-        <li class="list-group-item font-weight-lighter"><a href="{% url 'liability-list' %}">Liability</a> <span
+        <li class="list-group-item"><a href="{% url 'liability-list' %}">Liability</a> <span
             class="float-right text-danger">{{fd.liability}}</span></li>
       </ul>
     </div>
@@ -57,7 +59,7 @@
       <div class="">
         <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ donot_networth|safe }}" alt="Networth distribution donot plot">
 
-        <ul class="list-group list-group-flush font-weight-lighter">
+        <ul class="list-group list-group-flush">
           <li class="list-group-item">{{number_of_instruments|first}} instruments out of
           {{number_of_instruments|last}} Assets</li>
           {% if reward %}
@@ -71,12 +73,12 @@
       <ul class="list-group list-group-flush">
         <li class="list-group-item list-group-item-light">Networth by country</li>
         {% for country, worth in fd.networth_by_country.items %}
-        <li class="list-group-item font-weight-lighter">{{country}} <span
+        <li class="list-group-item">{{country}} <span
             class="float-right">${{worth|floatformat:'2g'}}</span></li>
         {% endfor %}
         <li class="list-group-item list-group-item-light">Networth by currency (in usd)</li>
         {% for worth in networth_by_currency %}
-        <li class="list-group-item font-weight-lighter">{{worth.currency}} <span
+        <li class="list-group-item">{{worth.currency}} <span
             class="float-right">{{worth.value_usd}}</span></li>
         {% endfor %}
         
@@ -88,7 +90,7 @@
     <div class="col-sm-4">
       <ul class="list-group list-group-flush">
         <li class="list-group-item list-group-item-light">Active investment parameters</li>
-        <li class="list-group-item font-weight-lighter">Earnable
+        <li class="list-group-item">Earnable
           <a class="badge badge-info" data-toggle="tooltip" data-html="true"
             title='Possible earnings from active investment(s). What you could earn if all current investments are to run completely'
             href=""><i class="fa fa-info fa-sm"></i>
@@ -96,7 +98,7 @@
           <span class="float-right">{{fd.roi}}</span>
 
         </li>
-        <li class="list-group-item font-weight-lighter">Earning
+        <li class="list-group-item">Earning
 
           <a class="badge badge-info" data-toggle="tooltip" data-html="true"
             title='Present accrued earnings from active investments. What you have earned as of today' href=""><i
@@ -105,8 +107,8 @@
 
           <span class="float-right">{{fd.present_roi}}</span>
         </li>
-        <li class="list-group-item font-weight-lighter">Daily ROI<span class="float-right">{{fd.daily_roi}}</span></li>
-        <li class="list-group-item font-weight-lighter">Lifespan<span class="float-right">{{fd.roi|divide:fd.daily_roi}}
+        <li class="list-group-item">Daily ROI<span class="float-right">{{fd.daily_roi}}</span></li>
+        <li class="list-group-item">Lifespan<span class="float-right">{{fd.roi|divide:fd.daily_roi}}
             days</span></li>
       </ul>
     </div>
@@ -116,8 +118,8 @@
       </div>
     </div>
     <div class="col-sm-4">
-      <table class="table table-sm table-light table-striped font-weight-lighter" data-toggle="table">
-        <legend class="font-weight-lighter">Recent Transactions</legend>
+      <table class="table table-sm table-light table-striped" data-toggle="table">
+        <legend>Recent Transactions</legend>
         <thead>
           <tr>
             <td>Transaction</td>
@@ -139,6 +141,7 @@
           {% endfor %}
         </tbody>
       </table>
+      <a href="">View all current year transactions</a>
     </div>
   </div>
 
@@ -146,13 +149,13 @@
     <div class="col-sm-6 font-weight-lighter">
       <ul class="list-group list-group-flush">
         <li class="list-group-item">
-          <h5 class="font-italic"><i class="fa fa-paperclip text-info"></i> Currency Ratio</h5>
+          <h5 class="font-italic"><i class="fa fa-paperclip text-info"></i> Asset Ratio</h5>
         </li>
         <li class="list-group-item">
-          {% if currency_pair %}
-            {{currency_pair.country}} CR: {{currency_pair.local}} : {{currency_pair.usd}},(i.e. {{currency_pair.equilibrium}} to 1) 
+          {% if 'currency' in asset_ratio %}
+            AR in {{asset_ratio.country}} - {{asset_ratio.currency}} : {{asset_ratio.base}} ({{asset_ratio.ratio}} : 1) 
           {% else %}
-            No US dollar asset in the chosen country
+            No US dollar asset in {{asset_ratio.country}}
           {% endif %}
         </li>
       </ul>

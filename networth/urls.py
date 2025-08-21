@@ -1,6 +1,6 @@
 
 from django.urls import path
-from .views import (NetworthHomeView, DashboardView, InvestmentListView,
+from .views import (NetworthHomeView, DashboardView, BalanceSheetView, InvestmentListView,
                     InvestmentCreateView, InvestmentDetailView,
                     InvestmentRolloverView, InvestmentUpdateView,
                     InvestmentTerminationView,
@@ -22,6 +22,7 @@ from .views import (NetworthHomeView, DashboardView, InvestmentListView,
 urlpatterns = [
     path('', NetworthHomeView.as_view(), name='networth-home'),
     path('dashboard/', DashboardView.as_view(), name='networth-dashboard'),
+    path('balance/sheet/', BalanceSheetView.as_view(), name='balance-sheet'),
     path('investment/list/', InvestmentListView.as_view(), name='investment-list'),
     path('investment/<int:pk>/create/', InvestmentCreateView.as_view(),
          name='networth-investment-create'),

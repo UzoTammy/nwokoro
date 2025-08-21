@@ -284,8 +284,12 @@ class Investment(models.Model):
     def daily_roi(self):
         return (self.principal * Decimal(self.rate/100) ) / Decimal((365))
     
-    def roi(self):
-        return self.daily_roi() * Decimal(self.duration)
+    def roi(self, date=None):
+        if date is None or date > self.maturity():
+            duration = self.duration
+        else:
+            duration = self.duration - (self.maturity() - date).days
+        return self.daily_roi() * Decimal(duration)
     
     def present_roi(self):
         if self.due_in_days() <= 0:
@@ -465,6 +469,13 @@ class Stock(models.Model):
         holders = Stock.objects.filter(owner=self.owner).values_list('holder', flat=True).distinct()
         self.owner.preference.stock_holders = list(holders)
         self.owner.preference.save()
+
+    def review(self):
+        pass
+        """End of financial year review to conform to current state.
+        It will create a Stock Transaction which can be used to reflect on 
+        """
+
 
 class Business(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)

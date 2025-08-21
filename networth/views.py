@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.db.models.aggregates import Max
-from django.db.models import F
+from django.db.models import F, Sum
 from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView, RedirectView)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
@@ -26,8 +26,9 @@ from .models import (Saving, Stock, Investment, Business, FinancialData, FixedAs
 
 from .plots import bar_chart, donut_chart, plot
 from .tools import (get_value, valuation, ytd_roi, investments_by_holder,networth_by_currency, currency_list,
-                    recent_transactions, currency_pair, number_of_instruments, number_of_assets, 
-                    exchange_rate, get_assets_liabilities, set_roi, get_year_financial, current_year_roi)
+                    recent_transactions, networth_ratio, number_of_instruments, number_of_assets, 
+                    exchange_rate, get_assets_liabilities, set_roi, get_year_financial, current_year_roi,
+                    TurnOver)
 
 def is_homogenous(value: list):
     if not value:
@@ -102,7 +103,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         context['recent_transactions'] = recent_transactions(*transactions)
         
-        context['currency_pair'] = currency_pair('NGN', 'NG', self.request.user)
+        context['asset_ratio'] = networth_ratio(self.request.user, 'NG', 'NGN')
         context['number_of_instruments'] = (number_of_instruments(self.request.user.username), number_of_assets(self.request.user.username))
         
         context['donot_networth'] = donut_chart(
@@ -138,7 +139,33 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['networth_by_currency'] = networth_currency
         return context
 
+class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/balance_sheet.html'
 
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        return False
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        current_year = datetime.date.today().year
+        first_fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year).first()
+        context['balance_brought_forward'] = first_fd.worth
+
+        turnover = TurnOver(current_year, self.request.user)
+
+                
+        context['turnover'] = {
+            'investment': turnover.investment(),
+            'fixed_asset': turnover.real_estate(),
+            'business': turnover.business(),
+            'stock': turnover.stock()
+        }
+
+        return context
+    
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'networth/dashboard.html'
 
@@ -192,8 +219,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             dates = [ date.strftime('%m/%d') for date in qs.values_list('date', flat=True) ]
             y_axes = list()
             currency_pair = list(currency_list(self.request.user))
-            currency_pair.remove('USD')
-            
+            if 'USD' in currency_pair:
+                currency_pair.remove('USD') 
+
             # you need currency pair factor
             factor = 1000
             for currency in currency_pair:
@@ -320,6 +348,7 @@ class StockListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['stock_total'] = get_value(stocks, 'stock')
         
         return context
+
 
 class BusinessListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/business_list.html'

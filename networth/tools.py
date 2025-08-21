@@ -2,7 +2,7 @@ import datetime
 import calendar
 from decimal import Decimal
 from itertools import chain
-from typing import Optional, List
+from typing import Optional, List, Literal
 from dateutil.relativedelta import relativedelta
 
 from django.core.mail import EmailMultiAlternatives
@@ -15,7 +15,9 @@ from djmoney.money import Money
 from babel.numbers import format_currency
 
 from account.models import User
-from .models import (ExchangeRate, Investment, Saving, Stock, Business, FixedAsset, BorrowedFund, FinancialData, InvestmentTransaction)
+from .models import (ExchangeRate, Investment, Saving, Stock, Business, FixedAsset, 
+                     BorrowedFund, FinancialData, InvestmentTransaction, BusinessTransaction,
+                     StockTransaction)
 
 class Tax:
     nta2025_bands = [(800_000, 0), (2_200_000, .15), (9_000_000, .18), (13_000_000, .21), (25_000_000, .23), (50_000_0000, .25)]
@@ -410,7 +412,7 @@ def investments_by_holder(owner):
         stack.append(holders_data)
     return stack
 
-def recent_transactions(*transactions):
+def recent_transactions(*transactions, period:Literal['recent''year''all']='recent'):
      
     bucket = list()   
     for transaction in transactions:
@@ -421,49 +423,53 @@ def recent_transactions(*transactions):
         bucket.append(qss)
     chained_bucket = chain(*bucket)
     sorted_bucket = sorted(chained_bucket, key=lambda x:x[1], reverse=True)
-    sorted_bucket = sorted_bucket[:6]
+    if period == 'recent':
+        sorted_bucket = sorted_bucket[:6]
+    elif period == 'year':
+        year = datetime.date.today().year
+        sorted_bucket = [ t for t in sorted_bucket if t[1].year==year ]
     
     return sorted_bucket
 
-def currency_pair(currency, host_country, owner):
+def networth_ratio(owner, country, currency, base_currency='USD'):
     """
         To compare networth in a country's local currency to the networth
         in US dollars in the same country.
     """
     result = list()
-    for cur in (currency, 'USD'):
-        saving = Saving.objects.filter(owner=owner).filter(host_country=host_country).filter(value_currency=cur)
+    for cur in (currency, base_currency):
+        saving = Saving.objects.filter(owner=owner).filter(host_country=country).filter(value_currency=cur)
         total_value = saving.aggregate(Sum('value'))['value__sum'] if saving.exists() else Decimal('0')
         stack = [total_value]
-
-        fixed = FixedAsset.objects.filter(owner=owner).filter(host_country=host_country).filter(value_currency=cur)
+        
+        fixed = FixedAsset.objects.filter(owner=owner).filter(host_country=country).filter(value_currency=cur)
         total_value = fixed.aggregate(Sum('value'))['value__sum'] if fixed.exists() else Decimal('0')
         stack.append(total_value)
 
-        invest = Investment.objects.filter(owner=owner).filter(host_country=host_country).filter(principal_currency=cur).filter(is_active=True)
+        invest = Investment.objects.filter(owner=owner).filter(host_country=country).filter(principal_currency=cur).filter(is_active=True)
         total_value = invest.aggregate(Sum('principal'))['principal__sum'] if invest.exists() else Decimal('0')
         stack.append(total_value)
 
-        biz = Business.objects.filter(owner=owner).filter(host_country=host_country).filter(unit_cost_currency=cur).filter(is_active=True)
+        biz = Business.objects.filter(owner=owner).filter(host_country=country).filter(unit_cost_currency=cur).filter(is_active=True)
         total_value = biz.annotate(val=F('shares')*F('unit_cost')).aggregate(Sum('val'))['val__sum'] if biz.exists() else Decimal('0')
         stack.append(total_value)
 
-        stock = Stock.objects.filter(owner=owner).filter(host_country=host_country).filter(unit_cost_currency=cur)
+        stock = Stock.objects.filter(owner=owner).filter(host_country=country).filter(unit_cost_currency=cur)
         total_value = stock.annotate(val=F('units')*F('unit_cost')).aggregate(Sum('val'))['val__sum'] if stock.exists() else Decimal('0')
         stack.append(total_value)
 
-        total_value = sum(stack)
+        total_value = sum(stack) 
         result.append(total_value)
 
         exchange_rate = ExchangeRate.objects.get(target_currency=currency).rate
 
-    result[0] = Money(round(result[0]/Decimal(exchange_rate), 2), 'USD')
-    result[1] = Money(round(result[1], 2), 'USD')
-    try:
+    result[0] = Money(round(result[0]/Decimal(exchange_rate), 2), base_currency)
+    result[1] = Money(round(result[1], 2), base_currency)
+    if result[1] > Money(0, base_currency):
         result.append(result[0]/result[1])
-    except ZeroDivisionError('No networth in US dollars'):
-        return
-    return {'country': host_country, 'local': result[0], 'usd': result[1], 'equilibrium': round(result[2], 2)}
+    else:
+        return {'country': country}
+    return {'country': country, 'currency': result[0], 'base_currency':base_currency ,'base_value': result[1], 'ratio': round(result[2], 2)}
 
 def number_of_instruments(username):
     "Assets with potentials to generate wealth"
@@ -518,3 +524,78 @@ def currency_list(owner):
     # filter the database for the queryset
     currencies = Saving.objects.filter(owner=owner).values_list('value_currency', flat=True).distinct()
     return currencies
+
+
+class TurnOver:
+    def __init__(self, year, owner):
+        self.year = year
+        self.owner = owner
+
+    def investment(self):
+        """All mature investment go through investment transaction of the type DR."""
+
+        # capture the queryset
+        investments = InvestmentTransaction.objects.filter(user=self.owner).filter(timestamp__year=self.year).filter(transaction_type='DR')
+        # trim the queryset
+        investment_volume = investments.values_list('investment__principal', 'amount_currency', 'amount')
+        # Sum
+        investments, earnings = list(), list()
+        investment_sum, earning_sum = Money(0, 'USD'), Money(0, 'USD')
+        for investment in investment_volume:
+            rate = exchange_rate(investment[1])[0].amount
+            investments.append(investment[0]/rate)
+            investment_sum = sum(investments)
+            earning = investment[2] - investment[0]
+            earnings.append(earning/rate)
+            earning_sum = sum(earnings)
+        return Money(investment_sum, 'USD'), Money(earning_sum, 'USD')
+
+
+    def real_estate(self):
+        # All rented real estate 
+        rentable_fixed_assets = FixedAsset.objects.filter(owner=self.owner).exclude(rent=None)
+        fixed_asset_sum, earning_sum = 0.0, 0.0
+        if rentable_fixed_assets.exists():
+            fixed_asset_volume = rentable_fixed_assets.filter(rent__is_active=True)
+            if fixed_asset_volume.exists():
+                fixed_asset_volume = fixed_asset_volume.values_list('value', 'value_currency', 'rent__amount')
+                fixed_assets, earnings = list(), list()
+                for asset in fixed_asset_volume:
+                    rate = exchange_rate(asset[1])[0].amount
+                    fixed_assets.append(asset[0]/rate)
+                    earnings.append(asset[2]/rate)
+                    fixed_asset_sum = sum(fixed_assets)
+                    earning_sum = sum(earnings)
+        return Money(fixed_asset_sum, 'USD'), Money(earning_sum, 'USD')
+    
+    def business(self):
+        # all businesses that are active with FY ending 31st December
+        business = BusinessTransaction.objects.filter(timestamp__year=self.year).filter(user=self.owner)
+        business_sum, earning_sum = 0.0, 0.0
+        if business.exists():
+            business_volume = business.annotate(value=F('business__shares')*F('business__unit_cost')).values_list('value', 'amount_currency', 'amount')
+            business, earnings = list(), list()
+            for biz in business_volume:
+                rate = exchange_rate(biz[1])[0].amount
+                business.append(biz[0]/rate)
+                earnings.append(biz[2]/rate)
+                business_sum = sum(business)
+                earning_sum = sum(earnings)
+        return Money(business_sum, 'USD'), Money(earning_sum, 'USD')
+    
+    def stock(self):
+    # stock transaction
+        stocks = StockTransaction.objects.filter(user=self.owner).filter(timestamp__year=self.year).filter(transaction_type='DR')
+        stock_volume = stocks.values_list('amount', 'amount_currency')
+        stock_sum = 0.0
+        if stock_volume.exists():
+            stocks = list()
+            for stock in stock_volume:
+                rate = exchange_rate(stock[1])[0].amount
+                stocks.append(stock[0]/rate)
+                stock_sum = sum(stocks)
+        return Money(stock_sum, 'USD')
+
+    
+
+
