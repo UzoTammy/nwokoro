@@ -37,17 +37,17 @@
                             </tr>
                             <tr>
                                 <td>Stock</td>
-                                <td>{{turnover.stock}}</td>
-                                <td>{{turnover.stock}}</td>
+                                <td>{{turnover.stock|first}}</td>
+                                <td>{{turnover.stock|last}}</td>
                             </tr>
                         </tbody>
                     </table>
                 </li>
-                <li class="list-group-item">Total Earnings <span class="float-right">XXX.XX</span></li>
-                <li class="list-group-item text-danger">Balance <span class="float-right">XXX.XX</span></li>
-                <li class="list-group-item">Reward <span class="float-right">XXX.XX</span></li>
-                <li class="list-group-item">Current Networth <span class="float-right">XXX.XX</span></li>
-                <li class="list-group-item text-danger">Balance <span class="float-right">XXX.XX</span></li>
+                <li class="list-group-item">Total Earnings <span class="float-right">{{earnings_total}}</span></li>
+                <li class="list-group-item text-danger">Balance <span class="float-right">{{balance_1}}</span></li>
+                <li class="list-group-item">Reward <span class="float-right">{{reward}}</span></li>
+                <li class="list-group-item">Current Networth <span class="float-right">{{current_networth}}</span></li>
+                <li class="list-group-item text-danger">Balance <span class="float-right">{{balance_2}}</span></li>
             </ul>
 
             <div class="float-right mt-3 mb-3"><a href="{% url 'networth-home' %}"><i class="fa fa-door-open text-danger"></i>Close</a></div>

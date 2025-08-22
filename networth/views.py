@@ -155,15 +155,27 @@ class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['balance_brought_forward'] = first_fd.worth
 
         turnover = TurnOver(current_year, self.request.user)
-
+        all_assets = [turnover.investment(), turnover.real_estate(), turnover.business(), turnover.stock()]
                 
         context['turnover'] = {
-            'investment': turnover.investment(),
-            'fixed_asset': turnover.real_estate(),
-            'business': turnover.business(),
-            'stock': turnover.stock()
+            'investment': all_assets[0],
+            'fixed_asset': all_assets[1],
+            'business': all_assets[2],
+            'stock': all_assets[3]
         }
 
+        all_asset_total = all_assets[0][1] + all_assets[1][1] + all_assets[2][1] + all_assets[3][1]
+        context['earnings_total'] = all_asset_total
+        context['balance_1'] = first_fd.worth + all_asset_total
+
+        rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=datetime.date.today().year)
+        reward_value = Money(0, 'USD')
+        if rewards.exists():
+            reward_value = sum(Money(reward.amount.amount/exchange_rate(reward.amount.currency)[0].amount, 'USD') for reward in rewards)
+        context['reward'] = reward_value
+        second_fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year).last()
+        context['current_networth'] = second_fd.worth
+        context['balance_2'] = reward_value + second_fd.worth
         return context
     
 class DashboardView(LoginRequiredMixin, TemplateView):

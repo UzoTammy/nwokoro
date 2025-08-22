@@ -568,9 +568,10 @@ class TurnOver:
                     earning_sum = sum(earnings)
         return Money(fixed_asset_sum, 'USD'), Money(earning_sum, 'USD')
     
+
     def business(self):
         # all businesses that are active with FY ending 31st December
-        business = BusinessTransaction.objects.filter(timestamp__year=self.year).filter(user=self.owner)
+        business = BusinessTransaction.objects.filter(timestamp__year=self.year).filter(user=self.owner).filter(transaction_type='DR')
         business_sum, earning_sum = 0.0, 0.0
         if business.exists():
             business_volume = business.annotate(value=F('business__shares')*F('business__unit_cost')).values_list('value', 'amount_currency', 'amount')
@@ -578,23 +579,27 @@ class TurnOver:
             for biz in business_volume:
                 rate = exchange_rate(biz[1])[0].amount
                 business.append(biz[0]/rate)
-                earnings.append(biz[2]/rate)
+
+                earnings.append((biz[2]-biz[0])/rate)
                 business_sum = sum(business)
                 earning_sum = sum(earnings)
         return Money(business_sum, 'USD'), Money(earning_sum, 'USD')
     
+
     def stock(self):
     # stock transaction
         stocks = StockTransaction.objects.filter(user=self.owner).filter(timestamp__year=self.year).filter(transaction_type='DR')
         stock_volume = stocks.values_list('amount', 'amount_currency')
-        stock_sum = 0.0
+        stock_sum, earning_sum = 0.0, 0.0
         if stock_volume.exists():
-            stocks = list()
+            stocks, earnings = list(), list()
             for stock in stock_volume:
                 rate = exchange_rate(stock[1])[0].amount
                 stocks.append(stock[0]/rate)
+                earnings.append((stock[1]- stock[0])/rate)
                 stock_sum = sum(stocks)
-        return Money(stock_sum, 'USD')
+                earning_sum = sum(earnings)
+        return Money(stock_sum, 'USD'), Money(earning_sum, 'USD')
 
     
 
