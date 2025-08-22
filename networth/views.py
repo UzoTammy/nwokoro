@@ -151,7 +151,9 @@ class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         
         current_year = datetime.date.today().year
-        first_fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year).first()
+        first_fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
+        first_fd = first_fd.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else first_fd.first()
+            
         context['balance_brought_forward'] = first_fd.worth
 
         turnover = TurnOver(current_year, self.request.user)
