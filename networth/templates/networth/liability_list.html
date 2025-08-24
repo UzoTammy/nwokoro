@@ -13,21 +13,27 @@
         <div class="col-sm-8 font-weight-lighter">
             <table class="table" data-toggle="table">
                 <thead>
-                    <tr>
-                        <th>Source</th>
-                        <th class="text-center">Borrowed Value</th>
-                        <th class="text-center float-right">Settlement Value</th>
+                    <tr class="text-right">
+                        <th class="text-left">Source</th>
+                        <th>Borrowed Value</th>
+                        <th>Settlement Value</th>
+                        <th>To USD</th>
                     </tr>
 
                 </thead>
                 <tbody>
                     {% for object in liabilities %}
-                    <tr>
-                        <td><a href="{% url 'networth-liability-detail' object.pk %}">{{object.source}}</a></td>
-                        <td class="text-center">{{object.borrowed_amount}}</td>
-                        <td class="text-right">{{object.settlement_amount}}</td>
+                    <tr class="text-right">
+                        <td class="text-left"><a href="{% url 'networth-liability-detail' object.pk %}">{{object.source}}</a></td>
+                        <td>{{object.borrowed_amount}}</td>
+                        <td>{{object.settlement_amount}}</td>
+                        <td>{{object.to_usd}}</td>
                     </tr>
                     {% endfor %}
+                    <tr>
+                        <td colspan="3">Total in USD</td>
+                        <td class="text-right">{{to_usd_total}}</td>
+                    </tr>
                 </tbody>
             </table>
             <div class="row">

@@ -17,6 +17,7 @@
                         <th>Name</th>
                         <th class="text-center">Valuation Date</th>
                         <th class="text-center">Value</th>
+                        <th class="text-center">To USD</th>
                     </tr>
 
                 </thead>
@@ -26,8 +27,13 @@
                         <td><a href="{% url 'networth-fixed-asset-detail' object.pk %}">{{object.name}}</a></td>
                         <td class="text-center">{{object.date}}</td>
                         <td class="text-right">{{object.value}}</td>
+                        <td class="text-right">{{object.to_usd}}</td>
                     </tr>
                     {% endfor %}
+                    <tr>
+                        <td colspan="3">Total in USD</td>
+                        <td class="text-right">{{to_usd_total}}</td>
+                    </tr>
                 </tbody>
             </table>
             <div class="row">

@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.db.models.aggregates import Max
-from django.db.models import F, Sum
+from django.db.models import F, Sum, Value
 from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView, RedirectView)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
@@ -118,7 +118,6 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         months = list(d['month'] for d in current_year_roi(self.request.user))
         values = list(d['amount'].amount for d in current_year_roi(self.request.user))
         context['plot_investment_earnings'] = bar_chart(months, values, X='Months', Y='Earnings', title='Earnings per month')
-
 
         rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=datetime.date.today().year)
         if rewards.exists():
@@ -274,9 +273,11 @@ class SavingListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             context['fd'] = fd
 
         savings = get_assets_liabilities(owner=self.request.user)['savings']
+        
         context['savings'] = savings.order_by('value_currency')
         context['savings_total'] = get_value(savings, 'saving')
-        
+        context['to_usd_total'] = sum(saving.to_usd() for saving in savings)
+
         holders = savings.values_list('holder', flat=True).distinct()
         savings_summary = list()
         for holder in holders:
@@ -292,7 +293,7 @@ class SavingListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                 'usd_value': Money(value, 'USD')
             })
         context['savings_summary'] = savings_summary
-
+        
         return context
 
 class InvestmentListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -314,6 +315,7 @@ class InvestmentListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         investments = get_assets_liabilities(owner=self.request.user)['investments']
         context['investments'] = investments.order_by('principal')
         context['investment_total'] = get_value(investments, 'investment')
+        context['to_usd_total'] = sum(investment.to_usd() for investment in investments)
 
         holders = investments.values_list('holder', flat=True).distinct()
         investments_summary = list()
@@ -360,7 +362,7 @@ class StockListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         
         # Asset total
         context['stock_total'] = get_value(stocks, 'stock')
-        
+        context['to_usd_total'] = sum(stock.to_usd() for stock in stocks)
         return context
 
 
@@ -384,7 +386,7 @@ class BusinessListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['business'] = business.order_by('unit_cost_currency')
         
         context['business_total'] = get_value(business, 'business')
-        
+        context['to_usd_total'] = sum(biz.to_usd() for biz in business)
         
         return context
 
@@ -408,7 +410,7 @@ class FixedAssetListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['fixed_asset'] = fixed_asset.order_by('value_currency')
         
         context['fixed_asset_total'] = get_value(fixed_asset, 'asset')
-        
+        context['to_usd_total'] = sum(fa.to_usd() for fa in fixed_asset)
         return context
 
 class LiabilityListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -430,7 +432,7 @@ class LiabilityListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         liabilities = get_assets_liabilities(owner=self.request.user)['liabilities']
         context['liabilities'] = liabilities.order_by('host_country')
         context['liabilities_total'] = get_value(liabilities, 'liability')
-
+        context['to_usd_total'] = sum(liability.to_usd() for liability in liabilities)
         return context
 
 

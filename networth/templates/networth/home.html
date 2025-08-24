@@ -153,7 +153,7 @@
         </li>
         <li class="list-group-item">
           {% if 'currency' in asset_ratio %}
-            AR in {{asset_ratio.country}} - {{asset_ratio.currency}} : {{asset_ratio.base}} ({{asset_ratio.ratio}} : 1) 
+            AR in {{asset_ratio.country}} - {{asset_ratio.currency}} : {{asset_ratio.base_currency}} ({{asset_ratio.ratio}} : 1) 
           {% else %}
             No US dollar asset in {{asset_ratio.country}}
           {% endif %}

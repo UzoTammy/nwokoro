@@ -30,6 +30,12 @@ class Saving(models.Model):
 
     def __str__(self):
         return f'Savings: {self.value}'
+    
+    def to_usd(self):
+        exchange_rate_qs = ExchangeRate.objects.all()
+        value = self.value / exchange_rate_qs.get(target_currency=self.value_currency).rate
+        return Money(value.amount, 'USD')
+    
 
     def create_investment(self, holder, principal, rate, start_date: datetime, duration, category):
     
@@ -270,6 +276,12 @@ class Investment(models.Model):
     def __str__(self):
         return f'I: {self.principal}-{self.holder}-{self.duration} days'
     
+    def to_usd(self):
+        exchange_rate_qs = ExchangeRate.objects.all()
+        principal = self.principal / exchange_rate_qs.get(target_currency=self.principal_currency).rate
+        return Money(principal.amount, 'USD')
+
+    
     def maturity(self)->date:
         return self.start_date + timezone.timedelta(days=self.duration)
 
@@ -278,6 +290,7 @@ class Investment(models.Model):
             return True
         return False
     
+
     def due_in_days(self)->int:
         return (self.maturity() - date.today()).days
     
@@ -407,6 +420,7 @@ class Investment(models.Model):
         self.owner.preference.investment_holders = list(holders)
         self.owner.preference.save()
 
+
 class Stock(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_stocks")
     holder = models.CharField(max_length=30)
@@ -436,6 +450,11 @@ class Stock(models.Model):
     def value(self):
         return self.unit_cost * self.units
     
+    def to_usd(self):
+        exchange_rate_qs = ExchangeRate.objects.all()
+        value = self.value() / exchange_rate_qs.get(target_currency=self.unit_cost_currency).rate
+        return Money(value.amount, 'USD')
+
     def current_worth(self):
         return self.unit_price * self.units
     
@@ -497,6 +516,12 @@ class Business(models.Model):
     def capital(self)->Money:
         return self.shares * self.unit_cost
     
+    def to_usd(self):
+        exchange_rate_qs = ExchangeRate.objects.all()
+        value = self.capital() / exchange_rate_qs.get(target_currency=self.unit_cost_currency).rate
+        return Money(value.amount, 'USD')
+
+    
     def update_holders(self):
         # get all holders in savings
         holders = Business.objects.filter(owner=self.owner).values_list('name', flat=True).distinct()
@@ -554,7 +579,8 @@ class Business(models.Model):
             timestamp=form_data['timestamp'],
             transaction_type='CR'
         )
-        
+
+
 class Rent(models.Model):
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     date = models.DateField()
@@ -574,6 +600,7 @@ class Rent(models.Model):
             year, month = self.date.year+self.duration, self.date.month
 
         return date(year, month, self.date.day)
+
 
 class FixedAsset(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -632,7 +659,13 @@ class FixedAsset(models.Model):
         self.rent.save()
     
         # self.rent = None
-        
+
+    def to_usd(self):
+        exchange_rate_qs = ExchangeRate.objects.all()
+        value = self.value / exchange_rate_qs.get(target_currency=self.value_currency).rate
+        return Money(value.amount, 'USD')
+
+
 class Liability(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
@@ -665,6 +698,11 @@ class BorrowedFund(models.Model):
     def __str__(self):
         return f'Borrow {self.source}: {self.borrowed_amount}'
     
+    def to_usd(self):
+        exchange_rate_qs = ExchangeRate.objects.all()
+        value = self.borrowed_amount / exchange_rate_qs.get(target_currency=self.borrowed_amount_currency).rate
+        return Money(value.amount, 'USD')
+        
     def repay(self, amount, description, timestamp, savings_account):
 
         BorrowedFundTransaction.objects.create(
@@ -712,6 +750,7 @@ class RewardFund(models.Model):
         )
         self.savings_account.value -= self.amount
         self.savings_account.save()
+
 
 class InjectFund(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -25,7 +25,7 @@
         </div>
     <div class="row mt-4">
         {% if investments %}
-        <div class="col-sm-8">
+        <div class="col-sm-8 font-weight-lighter">
             <table class="table" data-toggle="table">
                 <thead>
                     <tr>
@@ -34,11 +34,13 @@
                         <th class="">Due</th>
                         <th class="text-center">Principal</th>
                         <th class="text-center">Accrued ROI</th>
+                        <th class="text-center">Principal(USD)</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
                     {% for investment in investments %}
-                    <tr class="font-weight-lighter">
+                    <tr>
                         <td><a href="{% url 'networth-investment-detail' investment.pk %}">{{investment.holder}}</a>
                         </td>
                         <td>{{investment.maturity}}</td>
@@ -50,9 +52,13 @@
                         </td>
                         <td class="text-right">{{investment.principal}}</td>
                         <td class="text-right">{{investment.present_roi}}</td>
-
+                        <td class="text-right">{{investment.to_usd}}</td>
                     </tr>
                     {% endfor %}
+                    <tr>
+                        <td colspan="5">Total in USD</td>
+                        <td class="text-right">{{to_usd_total}}</td>
+                    </tr>
                 </tbody>
             </table>
 
@@ -115,6 +121,7 @@
                 {% endfor %}
             </ul>
 
+            <a class="float-right mt-3" href="{% url 'networth-home'%}"><i class="fa fa-door-open text-danger"></i> Close</a>
         </div>
         {% else %}
         <div class="row">

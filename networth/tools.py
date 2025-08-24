@@ -372,8 +372,8 @@ def current_year_roi(owner):
     month = today.month
 
     completed_investments = InvestmentTransaction.objects.filter(investment__owner=owner).filter(transaction_type='DR').filter(timestamp__year=year)
+    data = list()
     if completed_investments.exists():
-        data = list()
         for i in range(1, month+1):
             investments = completed_investments.filter(timestamp__month=i)
             if investments.exists():
@@ -469,7 +469,7 @@ def networth_ratio(owner, country, currency, base_currency='USD'):
         result.append(result[0]/result[1])
     else:
         return {'country': country}
-    return {'country': country, 'currency': result[0], 'base_currency':base_currency ,'base_value': result[1], 'ratio': round(result[2], 2)}
+    return {'country': country, 'currency': result[0], 'base_currency': base_currency ,'base_value': result[1], 'ratio': round(result[2], 2)}
 
 def number_of_instruments(username):
     "Assets with potentials to generate wealth"

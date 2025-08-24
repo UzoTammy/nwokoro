@@ -20,18 +20,24 @@
                         <th class="text-center"># of units</th>
                         <th class="text-center">Cost</th>
                         <th class="text-center">Value</th>
+                        <th class="text-center">To USD</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for stock in stocks %}
-                    <tr>
-                        <td><a href="{% url 'networth-stock-detail' stock.pk %}">{{stock.holder}}</a></td>
-                        <td>{{stock.date_bought.date}}</td>
-                        <td class="text-center">{{stock.units}}</td>
-                        <td class="text-right">{{stock.unit_cost}}</td>
-                        <td class="text-right">{{stock.value}}</td>
-                    </tr>
-                    {% endfor %}
+                        {% for stock in stocks %}
+                        <tr>
+                            <td><a href="{% url 'networth-stock-detail' stock.pk %}">{{stock.holder}}</a></td>
+                            <td>{{stock.date_bought.date}}</td>
+                            <td class="text-center">{{stock.units}}</td>
+                            <td class="text-right">{{stock.unit_cost}}</td>
+                            <td class="text-right">{{stock.value}}</td>
+                            <td class="text-right">{{stock.to_usd}}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="5">Total in USD</td>
+                            <td class="text-right">{{to_usd_total}}</td>
+                        </tr>
                 </tbody>
             </table>
 
@@ -52,7 +58,6 @@
                 </li>
                 {% endfor %}
             </ul>
-
         </div>
         {% else %}
         <p class="font-italic ml-2">No Stock investment</p>
