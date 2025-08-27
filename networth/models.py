@@ -521,7 +521,6 @@ class Business(models.Model):
         value = self.capital() / exchange_rate_qs.get(target_currency=self.unit_cost_currency).rate
         return Money(value.amount, 'USD')
 
-    
     def update_holders(self):
         # get all holders in savings
         holders = Business.objects.filter(owner=self.owner).values_list('name', flat=True).distinct()
@@ -556,7 +555,7 @@ class Business(models.Model):
         )
 
     def liquidate(self, **form_data):
-        amount = form_data['number_of_shares'] * self.unit_cost
+        amount = form_data['value'] + self.capital()
         
         BusinessTransaction.objects.create(
             user=self.owner,
@@ -566,11 +565,6 @@ class Business(models.Model):
             transaction_type='DR'         
         )
 
-        self.shares -= form_data['number_of_shares']
-        if self.shares == 0:
-            self.is_active = False
-        self.save()
-
         SavingsTransaction.objects.create(
             user=self.owner,
             savings=form_data['savings_account'],
@@ -579,7 +573,57 @@ class Business(models.Model):
             timestamp=form_data['timestamp'],
             transaction_type='CR'
         )
+        
+    def re_capitalize(self, **form_data):
+        """
+            Creates a new business from this business using the capital from 
+            the selected savings account. 
+        """
+        capital = Money(form_data['capital'], form_data['savings'].value.currency)
+        timestamp = timezone.now()
 
+        # convert decimal form value to shares
+        unit_cost = self.unit_cost.amount
+        shares = int(form_data['capital']/unit_cost)
+        
+        # Create business from source with new capitalization
+        new_business = Business.objects.create(
+            owner = self.owner,
+            name = self.name,
+            date = self.date.replace(year=self.date.year+1),
+            shares = shares,
+            unit_cost = self.cost,
+            host_country = self.host_country,
+            description = f'Re-capitalized from {self.name} of {self.date}',
+        )
+
+        BusinessTransaction.objects.create(
+            user = self.owner,
+            business = new_business,
+            savings = form_data['savings'],
+            amount = capital,
+            description = f'Recapitalization of {self.name}',
+            timestamp = timestamp,
+            transaction_type = 'CR'
+        )
+
+        SavingsTransaction.objects.create(
+            user = self.owner,
+            savings = form_data['savings'],
+            amount = capital,
+            description = f'Recapitalization of {self.name}',
+            timestamp = timestamp,
+            transaction_type = 'DR' 
+        )
+
+        form_data['savings'].value -= capital
+        form_data['savings'].save()
+
+        # deactivate source business
+        self.is_active = False
+        self.save()
+        
+        
 
 class Rent(models.Model):
     amount = models.DecimalField(max_digits=12, decimal_places=2)

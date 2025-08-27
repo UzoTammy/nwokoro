@@ -455,32 +455,32 @@ class BusinessUpdateForm(forms.ModelForm):
         model = Stock
         fields = ['name', 'host_country', 'stock_type', 'unit_cost']
 
-class BusinessPlowBackForm(forms.Form):
-    profit = forms.DecimalField(max_digits=12, decimal_places=2)
-    plow_back_type = forms.ChoiceField(
-        choices=[('P', 'Price'), ('S', 'Share'), ('B', 'Both')])
-    price_units = forms.ChoiceField(
-        label='Ratio(price:shares)', choices=[('1', '1'), ('1:1', '1:1'), ('1:2', '1:2'),('2:1', '2:1'), ('2:3', '2:3'), ('3:2', '3:2')])
+# class BusinessPlowBackForm(forms.Form):
+#     profit = forms.DecimalField(max_digits=12, decimal_places=2)
+#     plow_back_type = forms.ChoiceField(
+#         choices=[('P', 'Price'), ('S', 'Share'), ('B', 'Both')])
+#     price_units = forms.ChoiceField(
+#         label='Ratio(price:shares)', choices=[('1', '1'), ('1:1', '1:1'), ('1:2', '1:2'),('2:1', '2:1'), ('2:3', '2:3'), ('3:2', '3:2')])
         
-    def clean(self):
-        if self.cleaned_data['plow_back_type'] == 'B' and self.cleaned_data['price_units'] == '1':
-            raise ValidationError('Plow back type and ratio do not match')
-        if (self.cleaned_data['plow_back_type'] == 'P' or self.cleaned_data['plow_back_type'] == 'S') and self.cleaned_data['price_units'] != '1':
-            raise ValidationError('Plow back type and ratio do not match X')
+#     def clean(self):
+#         if self.cleaned_data['plow_back_type'] == 'B' and self.cleaned_data['price_units'] == '1':
+#             raise ValidationError('Plow back type and ratio do not match')
+#         if (self.cleaned_data['plow_back_type'] == 'P' or self.cleaned_data['plow_back_type'] == 'S') and self.cleaned_data['price_units'] != '1':
+#             raise ValidationError('Plow back type and ratio do not match X')
         
-        if self.cleaned_data['price_units'] != '1':
-            price_ratio, units_ratio = self.cleaned_data['price_units'].strip().split(':')
-            price_ratio, units_ratio = Decimal(price_ratio), Decimal(units_ratio)
-            total = price_ratio+units_ratio
-            price_amount, units_amount = price_ratio/total * self.cleaned_data['profit'], units_ratio/total * self.cleaned_data['profit']
-            self.cleaned_data['price_amount'], self.cleaned_data['units_amount'] = price_amount, units_amount
-        else:
-            if self.cleaned_data['plow_back_type'] == 'P':
-                self.cleaned_data['price_amount'] = self.cleaned_data['profit']
-                self.cleaned_data['units_amount'] = Decimal('0.0')
-            else:
-               self.cleaned_data['price_amount'] =  Decimal('0.0')
-               self.cleaned_data['units_amount'] = self.cleaned_data['profit']
+#         if self.cleaned_data['price_units'] != '1':
+#             price_ratio, units_ratio = self.cleaned_data['price_units'].strip().split(':')
+#             price_ratio, units_ratio = Decimal(price_ratio), Decimal(units_ratio)
+#             total = price_ratio+units_ratio
+#             price_amount, units_amount = price_ratio/total * self.cleaned_data['profit'], units_ratio/total * self.cleaned_data['profit']
+#             self.cleaned_data['price_amount'], self.cleaned_data['units_amount'] = price_amount, units_amount
+#         else:
+#             if self.cleaned_data['plow_back_type'] == 'P':
+#                 self.cleaned_data['price_amount'] = self.cleaned_data['profit']
+#                 self.cleaned_data['units_amount'] = Decimal('0.0')
+#             else:
+#                self.cleaned_data['price_amount'] =  Decimal('0.0')
+#                self.cleaned_data['units_amount'] = self.cleaned_data['profit']
         
 class BusinessLiquidateForm(forms.Form):
     savings_account = forms.ModelChoiceField(queryset=Saving.objects.none(), label='Drop into')
@@ -488,8 +488,8 @@ class BusinessLiquidateForm(forms.Form):
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         initial=timezone.now
     )
-    liquidation_type = forms.ChoiceField(choices=[('P', 'Partial'), ('C', 'Complete')])
-    number_of_shares = forms.IntegerField(required=False, widget=forms.NumberInput())
+    return_type = forms.ChoiceField(choices=[('P', 'Profit'), ('L', 'Loss')], label='Profit/Loss')
+    value =  forms.DecimalField(required=False, widget=forms.NumberInput(), decimal_places=2, label='Profit Value')
     
     def __init__(self, *args, **kwargs):
         self.pk = kwargs.pop('pk', None)
@@ -498,17 +498,43 @@ class BusinessLiquidateForm(forms.Form):
         if self.pk:
             savings = Saving.objects.all()
             self.business = Business.objects.get(pk=self.pk)
-            currency = self.business.unit_cost.currency
-            qs = savings.filter(value_currency=currency)
+            self.currency = self.business.unit_cost.currency
+            qs = savings.filter(value_currency=self.currency)
             self.fields['savings_account'].queryset = qs
             self.fields['savings_account'].initial = qs.first()
-    
+            
     def clean(self):
-        if self.cleaned_data['number_of_shares'] is None:
-            self.cleaned_data['number_of_shares'] = self.business.shares
+        
+        if self.cleaned_data['value'] is None:
+            self.cleaned_data['value'] = Money(0.0, self.currency)
+
+        elif self.cleaned_data['value'] < 0.0:
+                raise ValidationError('Value cannot take a negative value, choose "Loss" from Profit/Loss')
         else:
-            if self.cleaned_data['number_of_shares'] >= self.business.shares:
-                raise ValidationError("All/excess shares can't be taken with partial option")
+            self.cleaned_data['value'] = Money(self.cleaned_data['value'], self.currency)
+
+class ReCapitalizeForm(forms.Form):
+    savings = forms.ModelChoiceField(queryset=Saving.objects.none(), label='From')
+    capital = forms.DecimalField(max_digits=12, decimal_places=2, widget=forms.NumberInput(), min_value=0.0)
+    
+
+    def __init__(self, *args, **kwargs):
+        self.pk = kwargs.pop('pk', None)
+        super().__init__(*args, **kwargs)
+
+        if self.pk:
+            # savings = Saving.objects.all()
+            business = Business.objects.get(pk=self.pk)
+            currency = business.unit_cost.currency
+            qs = Saving.objects.filter(value_currency=currency)
+            self.fields['savings'].queryset = qs
+
+    
+    def clean_capital(self):
+        if self.cleaned_data['capital'] > self.cleaned_data['savings'].value.amount:
+            raise ValidationError("Insufficient fund for recapitalization")
+        return self.cleaned_data['capital']            
+ 
 
 class BorrowedFundForm(forms.ModelForm):
     savings_account = forms.ModelChoiceField(queryset=Saving.objects.none())
@@ -665,3 +691,4 @@ class SavingsCounterTransferForm(forms.Form):
             raise ValidationError(message='Host country of both accounts must be the same')
         if self.cleaned_data['donor_account'].value.amount < self.cleaned_data['amount']:
             raise ValidationError(message='Insufficient fund in Donor Account')
+

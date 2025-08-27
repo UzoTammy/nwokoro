@@ -17,7 +17,10 @@ from django_weasyprint import WeasyTemplateResponseMixin
 from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm, StockUpdateForm, SavingForm, SavingFormUpdate,
                     InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm, 
                     FixedAssetCreateForm, FixedAssetUpdateForm, FixedAssetRentForm, FixedAssetCollectRentForm,
-                    SavingsCounterTransferForm, BusinessPlowBackForm, BusinessLiquidateForm,BorrowedFundForm, 
+                    SavingsCounterTransferForm, 
+                    #BusinessPlowBackForm, 
+                    BusinessLiquidateForm,BorrowedFundForm, 
+                    ReCapitalizeForm,
                     ConversionForm, RewardFundForm, InjectFundForm, LiabilityRepayForm)
 
 from .models import (Saving, Stock, Investment, Business, FinancialData, FixedAsset, Rent,
@@ -435,7 +438,7 @@ class LiabilityListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['to_usd_total'] = sum(liability.to_usd() for liability in liabilities)
         return context
 
-
+#Investment
 class InvestmentCreateView(LoginRequiredMixin, FormView):
     form_class = InvestmentCreateForm
     template_name = 'networth/investment_form.html'
@@ -626,6 +629,11 @@ class BusinessCreateView(LoginRequiredMixin, FormView):
     form_class = BusinessCreateForm
     template_name = 'networth/business_form.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Establish a Business'
+        return context
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['pk'] = self.kwargs.get('pk')
@@ -654,19 +662,19 @@ class BusinessUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('networth-home')
     form_class = BusinessUpdateForm
 
-class BusinessPlowBackView(LoginRequiredMixin, FormView):
-    template_name = 'networth/plow_back_form.html'
-    form_class = BusinessPlowBackForm
+# class BusinessPlowBackView(LoginRequiredMixin, FormView):
+#     template_name = 'networth/plow_back_form.html'
+#     form_class = BusinessPlowBackForm
     
-    def get_success_url(self):
-        return reverse('networth-business-detail', kwargs={'pk': self.kwargs['pk']})
+#     def get_success_url(self):
+#         return reverse('networth-business-detail', kwargs={'pk': self.kwargs['pk']})
     
-    def form_valid(self, form):
-        business = Business.objects.get(pk=self.kwargs['pk'])
+#     def form_valid(self, form):
+#         business = Business.objects.get(pk=self.kwargs['pk'])
 
-        business.plow_back(**form.cleaned_data)
-        messages.success(self.request, 'Profit plowed back successfully !!!')
-        return super().form_valid(form)
+#         business.plow_back(**form.cleaned_data)
+#         messages.success(self.request, 'Profit plowed back successfully !!!')
+#         return super().form_valid(form)
 
 class BusinessLiquidateView(LoginRequiredMixin, FormView):
     template_name = 'networth/liquidate_form.html'
@@ -683,7 +691,31 @@ class BusinessLiquidateView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         business = Business.objects.get(pk=self.kwargs['pk'])
         business.liquidate(**form.cleaned_data)
-        messages.success(self.request, "Liquidation completed successfully !!!")
+        messages.success(self.request, "Liquidation complete, proceed to re-establish !!!")
+        return super().form_valid(form)
+
+class BusinessReCapitalizeView(LoginRequiredMixin, FormView):
+    template_name = 'networth/business_form.html'
+    form_class = ReCapitalizeForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Business Recapitalization'
+        context['business'] = Business.objects.get(pk=self.kwargs['pk'])
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('networth-home')
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['pk'] = self.kwargs.get('pk')
+        return kwargs
+    
+    def form_valid(self, form):
+        business = Business.objects.get(pk=self.kwargs['pk'])
+        business.re_capitalize(**form.cleaned_data)
+        
         return super().form_valid(form)
     
 # Fixed Asset
