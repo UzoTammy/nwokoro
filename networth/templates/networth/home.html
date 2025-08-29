@@ -92,7 +92,7 @@
         <li class="list-group-item list-group-item-light">Active investment parameters</li>
         <li class="list-group-item">Earnable
           <a class="badge badge-info" data-toggle="tooltip" data-html="true"
-            title='Possible earnings from active investment(s). What you could earn if all current investments are to run completely'
+            title='Possible earnings from active investment(s). Earnings from current investment(s) running through their tenure'
             href=""><i class="fa fa-info fa-sm"></i>
           </a>
           <span class="float-right">{{fd.roi}}</span>
@@ -101,12 +101,13 @@
         <li class="list-group-item">Earning
 
           <a class="badge badge-info" data-toggle="tooltip" data-html="true"
-            title='Present accrued earnings from active investments. What you have earned as of today' href=""><i
+            title='Present accrued earnings from active investments. Earnings from current investment(s) as at today.' href=""><i
               class="fa fa-info fa-sm"></i>
           </a>
-
           <span class="float-right">{{fd.present_roi}}</span>
         </li>
+        <li class="list-group-item">Earned(this year) <span class="float-right">{{past_investment_this_year}}</span></li>
+        <li class="list-group-item">Earned <span class="float-right">{{past_investment}}</span></li>
         <li class="list-group-item">Daily ROI<span class="float-right">{{fd.daily_roi}}</span></li>
         <li class="list-group-item">Lifespan<span class="float-right">{{fd.roi|divide:fd.daily_roi}}
             days</span></li>

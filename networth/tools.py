@@ -525,6 +525,18 @@ def currency_list(owner):
     currencies = Saving.objects.filter(owner=owner).values_list('value_currency', flat=True).distinct()
     return currencies
 
+def past_investment(queryset: QuerySet)-> Money:
+    """Getting the total value in USD of past investment transactions"""
+    sum_total = Decimal(0)
+    for transaction in queryset:
+        principal = transaction.investment.principal
+        value = transaction.amount
+        currency = value.currency
+        rate = exchange_rate(currency)[0]
+        value = (value.amount - principal.amount)/rate.amount
+        sum_total += value
+    return Money(sum_total, 'USD')
+        
 
 class TurnOver:
     def __init__(self, year, owner):

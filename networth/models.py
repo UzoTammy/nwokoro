@@ -555,7 +555,11 @@ class Business(models.Model):
         )
 
     def liquidate(self, **form_data):
-        amount = form_data['value'] + self.capital()
+
+        if form_data['return_type'] == 'P':
+            amount = self.capital() + form_data['value']
+        else:
+            amount = self.capital() - form_data['value']
         
         BusinessTransaction.objects.create(
             user=self.owner,
@@ -573,6 +577,10 @@ class Business(models.Model):
             timestamp=form_data['timestamp'],
             transaction_type='CR'
         )
+
+        form_data['savings_account'].value += amount
+        form_data['savings_account'].save()
+
         
     def re_capitalize(self, **form_data):
         """
@@ -592,7 +600,7 @@ class Business(models.Model):
             name = self.name,
             date = self.date.replace(year=self.date.year+1),
             shares = shares,
-            unit_cost = self.cost,
+            unit_cost = self.unit_cost,
             host_country = self.host_country,
             description = f'Re-capitalized from {self.name} of {self.date}',
         )
@@ -600,7 +608,6 @@ class Business(models.Model):
         BusinessTransaction.objects.create(
             user = self.owner,
             business = new_business,
-            savings = form_data['savings'],
             amount = capital,
             description = f'Recapitalization of {self.name}',
             timestamp = timestamp,

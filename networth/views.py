@@ -2,6 +2,7 @@ import datetime
 import decimal
 from zoneinfo import ZoneInfo
 
+from django.utils import timezone
 from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
@@ -30,7 +31,7 @@ from .models import (Saving, Stock, Investment, Business, FinancialData, FixedAs
 from .plots import bar_chart, donut_chart, plot
 from .tools import (get_value, valuation, ytd_roi, investments_by_holder,networth_by_currency, currency_list,
                     recent_transactions, networth_ratio, number_of_instruments, number_of_assets, 
-                    exchange_rate, get_assets_liabilities, set_roi, get_year_financial, current_year_roi,
+                    exchange_rate, get_assets_liabilities, set_roi, get_year_financial, current_year_roi,past_investment,
                     TurnOver)
 
 def is_homogenous(value: list):
@@ -57,7 +58,6 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         if self.request.user.is_staff:
             return True
         return False
-    
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -139,6 +139,13 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                 }
             )
         context['networth_by_currency'] = networth_currency
+
+        # past investment transactions
+        transactions = InvestmentTransaction.objects.filter(transaction_type='DR')
+        past_transactions_this_year = transactions.filter(timestamp__year=timezone.now().year)
+
+        context['past_investment'] = past_investment(transactions)
+        context['past_investment_this_year'] = past_investment(past_transactions_this_year)
         return context
 
 class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -662,20 +669,6 @@ class BusinessUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('networth-home')
     form_class = BusinessUpdateForm
 
-# class BusinessPlowBackView(LoginRequiredMixin, FormView):
-#     template_name = 'networth/plow_back_form.html'
-#     form_class = BusinessPlowBackForm
-    
-#     def get_success_url(self):
-#         return reverse('networth-business-detail', kwargs={'pk': self.kwargs['pk']})
-    
-#     def form_valid(self, form):
-#         business = Business.objects.get(pk=self.kwargs['pk'])
-
-#         business.plow_back(**form.cleaned_data)
-#         messages.success(self.request, 'Profit plowed back successfully !!!')
-#         return super().form_valid(form)
-
 class BusinessLiquidateView(LoginRequiredMixin, FormView):
     template_name = 'networth/liquidate_form.html'
     form_class = BusinessLiquidateForm
@@ -691,7 +684,7 @@ class BusinessLiquidateView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         business = Business.objects.get(pk=self.kwargs['pk'])
         business.liquidate(**form.cleaned_data)
-        messages.success(self.request, "Liquidation complete, proceed to re-establish !!!")
+        messages.success(self.request, "Liquidation complete, proceed to recapitalize !!!")
         return super().form_valid(form)
 
 class BusinessReCapitalizeView(LoginRequiredMixin, FormView):
