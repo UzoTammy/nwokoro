@@ -41,6 +41,10 @@
                                 <td>{{turnover.stock|first}}</td>
                                 <td>{{turnover.stock|last}}</td>
                             </tr>
+                            <tr class="text-danger">
+                                <td colspan="2" class="text-left">Reward</td>
+                                <td>{{income_change.reward}}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </li>
@@ -116,22 +120,24 @@
                                     {% endif %}
                                 </td>
                             </tr>
-                            <tr>
-                                <td>Reward</td>
-                                <td class="text-right">
-                                    {{income_change.reward}}
-                                    
-                                </td>
-                            </tr>
+                            
                         </tbody>
                     </table>
                 </li>
                 <li class="list-group-item text-info">Stream changes total 
                     <span class="float-right">{{stream_changes_total}}</span>
                 </li>
-                <li class="list-group-item text-success">Balance 
+                <li class="list-group-item text-success">Gross Networth 
+                    <span class="float-right">{{balance_1|add:income_change.reward}}</span>
+                </li>
+                <li class="list-group-item text-danger">Less Reward 
+                    <span class="float-right">{{income_change.reward}}</span>
+                </li>
+                
+                <li class="list-group-item text-success">Net Networth 
                     <span class="float-right">{{balance_1}}</span>
                 </li>
+                
                 <li class="list-group-item">Current Networth <span class="float-right">{{current_networth}}</span></li>
             </ul>
 

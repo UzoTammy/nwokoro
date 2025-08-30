@@ -180,7 +180,6 @@ class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         reward_value = Money(0, 'USD')
         if rewards.exists():
             reward_value = sum(Money(reward.amount.amount/exchange_rate(reward.amount.currency)[0].amount, 'USD') for reward in rewards)
-        # context['reward'] = reward_value
         
         stream_changes = {
             'savings': last_fd.savings - first_fd.savings,
@@ -193,9 +192,9 @@ class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         }
         context['income_change'] = stream_changes
         
-        all_asset_total = all_assets[0][1] + all_assets[1][1] + all_assets[2][1] + all_assets[3][1]
+        all_asset_total = all_assets[0][1] + all_assets[1][1] + all_assets[2][1] + all_assets[3][1] - stream_changes['reward']
         changes_total = sum([stream_changes['savings'], stream_changes['investment'], stream_changes['fixed_asset'], stream_changes['business'], 
-                            stream_changes['stock'], -stream_changes['liability'], -stream_changes['reward']])
+                            stream_changes['stock'], -stream_changes['liability']])
         context['stream_changes_total'] = changes_total
         context['earnings_total'] = all_asset_total
         context['balance_1'] = first_fd.worth + all_asset_total + changes_total
