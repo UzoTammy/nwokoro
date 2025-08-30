@@ -188,6 +188,7 @@ class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             'business': last_fd.business - first_fd.business - all_assets[2][1],
             'stock': last_fd.stock - first_fd.stock - all_assets[3][1],
             'liability': last_fd.liability - first_fd.liability,
+            'reward': reward_value
         }
         context['income_change'] = stream_changes
         
