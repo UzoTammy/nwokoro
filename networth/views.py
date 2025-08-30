@@ -188,11 +188,10 @@ class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             'business': last_fd.business - first_fd.business - all_assets[2][1],
             'stock': last_fd.stock - first_fd.stock - all_assets[3][1],
             'liability': last_fd.liability - first_fd.liability,
-            'reward': reward_value
         }
         context['income_change'] = stream_changes
         
-        all_asset_total = all_assets[0][1] + all_assets[1][1] + all_assets[2][1] + all_assets[3][1] - stream_changes['reward']
+        all_asset_total = all_assets[0][1] + all_assets[1][1] + all_assets[2][1] + all_assets[3][1]
         changes_total = sum([stream_changes['savings'], stream_changes['investment'], stream_changes['fixed_asset'], stream_changes['business'], 
                             stream_changes['stock'], -stream_changes['liability']])
         context['stream_changes_total'] = changes_total
