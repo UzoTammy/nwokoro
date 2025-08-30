@@ -160,8 +160,9 @@ class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         
         current_year = datetime.date.today().year
-        first_fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
-        first_fd = first_fd.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else first_fd.first()
+        fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
+        first_fd = fd.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else fd.first()
+        last_fd = fd.latest('date')
             
         context['balance_brought_forward'] = first_fd.worth
 
@@ -174,10 +175,20 @@ class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             'business': all_assets[2],
             'stock': all_assets[3]
         }
-
+        stream_changes = {
+            'savings': last_fd.savings - first_fd.savings,
+            'investment': last_fd.investment - first_fd.investment - all_assets[0][1],
+            'fixed_asset': last_fd.fixed_asset - first_fd.fixed_asset - all_assets[1][1],
+            'business': last_fd.business - first_fd.business - all_assets[2][1],
+            'stock': last_fd.stock - first_fd.stock - all_assets[3][1],
+        }
+        context['income_change'] = stream_changes
+        
         all_asset_total = all_assets[0][1] + all_assets[1][1] + all_assets[2][1] + all_assets[3][1]
+        changes_total = stream_changes['savings'] + stream_changes['investment'] + stream_changes['fixed_asset'] + stream_changes['business'] + stream_changes['stock']
+        context['stream_changes_total'] = changes_total
         context['earnings_total'] = all_asset_total
-        context['balance_1'] = first_fd.worth + all_asset_total
+        context['balance_1'] = first_fd.worth + all_asset_total + changes_total
 
         rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=datetime.date.today().year)
         reward_value = Money(0, 'USD')

@@ -17,5 +17,3 @@ def divide(numerator, denominator):
     except (ValueError, TypeError, ZeroDivisionError):
         return None
 
-
-

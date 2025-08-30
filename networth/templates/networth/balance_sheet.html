@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load custom_tag %}
 
 {% block content %}
 <div class="container mt-5 mb-3 font-weight-lighter">
@@ -14,40 +15,109 @@
                     <table class="table" data-toggle="table">
                         <thead class="text-right">
                             <tr>
-                                <th>Instrument</th>
+                                <th class="text-left">Stream</th>
                                 <th>Turnover</th>
                                 <th>Earnings</th>
                             </tr>
                         </thead>
                         <tbody class="text-right">
                             <tr>
-                                <td>Investment</td>
+                                <td class="text-left">Investment</td>
                                 <td>{{turnover.investment|first}}</td>
                                 <td>{{turnover.investment|last}}</td>
                             </tr>
                             <tr>
-                                <td>Fixed Asset</td>
+                                <td class="text-left">Fixed Asset</td>
                                 <td>{{turnover.fixed_asset|first}}</td>
                                 <td>{{turnover.fixed_asset|last}}</td>
                             </tr>
                             <tr>
-                                <td>Business</td>
+                                <td class="text-left">Business</td>
                                 <td>{{turnover.business|first}}</td>
                                 <td>{{turnover.business|last}}</td>
                             </tr>
                             <tr>
-                                <td>Stock</td>
+                                <td class="text-left">Stock</td>
                                 <td>{{turnover.stock|first}}</td>
                                 <td>{{turnover.stock|last}}</td>
                             </tr>
                         </tbody>
                     </table>
                 </li>
-                <li class="list-group-item">Total Earnings <span class="float-right">{{earnings_total}}</span></li>
-                <li class="list-group-item text-danger">Balance <span class="float-right">{{balance_1}}</span></li>
+                <li class="list-group-item text-info">Total Earnings <span class="float-right">{{earnings_total}}</span></li>
+                
+                <li class="list-group-item">
+                    <table class="table" data-toggle="table">
+                        <thead>
+                            <tr>
+                                <th>Stream</th>
+                                <th class="text-right">Changes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Savings</td>
+                                <td class="text-right">
+                                    {% if income_change.savings.amount < 0 %}
+                                    <span class="text-danger">{{income_change.savings|scalar_value}}</span>
+                                    {% else %}
+                                    {{income_change.savings}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Investment</td>
+                                <td class="text-right">
+                                    {% if income_change.investment.amount < 0 %}
+                                    <span class="text-danger">{{income_change.investment|scalar_value}}</span>
+                                    {% else %}
+                                    {{income_change.investment}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Fixed Asset</td>
+                                <td class="text-right">
+                                    {% if income_change.fixed_asset.amount < 0 %}
+                                    <span class="text-danger">{{income_change.fixed_asset|scalar_value}}</span>
+                                    {% else %}
+                                    {{income_change.fixed_asset}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Business</td>
+                                <td class="text-right">
+                                    {% if income_change.business.amount < 0 %}
+                                    <span class="text-danger">{{income_change.business|scalar_value}}</span>
+                                    {% else %}
+                                    
+                                    {{income_change.business}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Stock</td>
+                                <td class="text-right">
+                                    {% if income_change.stock.amount < 0 %}
+                                    <span class="text-danger">{{income_change.stock|scalar_value}}</span>
+                                    {% else %}
+                                    {{income_change.stock}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </li>
+                <li class="list-group-item text-info">Stream changes total 
+                    <span class="float-right">{{stream_changes_total}}</span>
+                </li>
+                <li class="list-group-item text-success">Balance 
+                    <span class="float-right">{{balance_1}}</span>
+                </li>
                 <li class="list-group-item">Reward <span class="float-right">{{reward}}</span></li>
                 <li class="list-group-item">Current Networth <span class="float-right">{{current_networth}}</span></li>
-                <li class="list-group-item text-danger">Balance <span class="float-right">{{balance_2}}</span></li>
+                <li class="list-group-item text-success">Balance <span class="float-right">{{balance_2}}</span></li>
             </ul>
 
             <div class="float-right mt-3 mb-3"><a href="{% url 'networth-home' %}"><i class="fa fa-door-open text-danger"></i>Close</a></div>
