@@ -106,6 +106,23 @@
                                     {% endif %}
                                 </td>
                             </tr>
+                            <tr>
+                                <td>Liability</td>
+                                <td class="text-right">
+                                    {% if income_change.liability.amount < 0 %}
+                                    <span class="text-danger">{{income_change.liability|scalar_value}}</span>
+                                    {% else %}
+                                    {{income_change.liability}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Reward</td>
+                                <td class="text-right">
+                                    {{income_change.reward}}
+                                    
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </li>
@@ -115,9 +132,7 @@
                 <li class="list-group-item text-success">Balance 
                     <span class="float-right">{{balance_1}}</span>
                 </li>
-                <li class="list-group-item">Reward <span class="float-right">{{reward}}</span></li>
                 <li class="list-group-item">Current Networth <span class="float-right">{{current_networth}}</span></li>
-                <li class="list-group-item text-success">Balance <span class="float-right">{{balance_2}}</span></li>
             </ul>
 
             <div class="float-right mt-3 mb-3"><a href="{% url 'networth-home' %}"><i class="fa fa-door-open text-danger"></i>Close</a></div>
