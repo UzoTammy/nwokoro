@@ -51,6 +51,15 @@ def highest_occurring_item(value: list):
         result.append((item, value.count(item)))
     return max(result, key=lambda x: x[1])[0]
 
+def get_ytd_roi_total(user, year):
+    data = ytd_roi(user, year)
+    cad_p, ngn_p, usd_p = data['CAD']['principal'], data['NGN']['principal'], data['USD']['principal']
+    cad_roi, ngn_roi, usd_roi = data['CAD']['roi'], data['NGN']['roi'], data['USD']['roi']
+
+    ytd_roi_principal_total = cad_p/exchange_rate('CAD')[0]+ngn_p/exchange_rate('NGN')[0]+usd_p.amount
+    ytd_roi_total = cad_roi/exchange_rate('CAD')[0]+ngn_roi/exchange_rate('NGN')[0]+usd_roi.amount
+    return {'principal': ytd_roi_principal_total, 'roi': ytd_roi_total, 'percent': 100*ytd_roi_total/ytd_roi_principal_total}
+    
 # Create your views here.
 class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/home.html'
@@ -239,6 +248,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             context['ytd_roi_prev'] = ytd_roi(self.request.user, current_year-1)
             context['ytd_roi_next'] = ytd_roi(self.request.user, current_year+1)
 
+            # total of investments
+            context['ytd_roi_total_current_year'] = get_ytd_roi_total(self.request.user, current_year)
+            context['ytd_roi_total_prev_year'] = get_ytd_roi_total(self.request.user, current_year-1)
+            context['ytd_roi_total_next_year'] = get_ytd_roi_total(self.request.user, current_year+1)
+            
         start_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7)
         financials = FinancialData.objects.filter(owner=self.request.user).filter(date__gte=start_date).order_by('date')
 
