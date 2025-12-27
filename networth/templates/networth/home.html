@@ -90,7 +90,7 @@
     <div class="col-sm-4">
       <ul class="list-group list-group-flush">
         <li class="list-group-item list-group-item-light">Investment parameters</li>
-        <li class="list-group-item">Earnable
+        <li class="list-group-item">Expected Earnings
           <a class="badge badge-info" data-toggle="tooltip" data-html="true"
             title='Possible earnings from active investment(s). Earnings from current investment(s) running through their tenure'
             href=""><i class="fa fa-info fa-sm"></i>
@@ -98,7 +98,7 @@
           <span class="float-right">{{fd.roi}}</span>
 
         </li>
-        <li class="list-group-item">Earning
+        <li class="list-group-item">Accrued Earnings
 
           <a class="badge badge-info" data-toggle="tooltip" data-html="true"
             title='Present accrued earnings from active investments. Earnings from current investment(s) as at today.' href=""><i
@@ -106,8 +106,8 @@
           </a>
           <span class="float-right">{{fd.present_roi}}</span>
         </li>
-        <li class="list-group-item">Earned(this year) <span class="float-right">{{past_investment_this_year}}</span></li>
-        <li class="list-group-item">Earned <span class="float-right">{{past_investment}}</span></li>
+        <li class="list-group-item">Earned YTD <span class="float-right">{{past_investment_this_year}}</span></li>
+        <li class="list-group-item">All-time Earnings <span class="float-right">{{past_investment}}</span></li>
         <li class="list-group-item">Daily ROI<span class="float-right">{{fd.daily_roi}}</span></li>
         <li class="list-group-item">Lifespan<span class="float-right">{{fd.roi|divide:fd.daily_roi}}
             days</span></li>

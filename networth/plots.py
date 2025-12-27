@@ -25,6 +25,7 @@ def bar_chart(x_axis:list, y_axis:list, Y='Y', X='X', title='Bar Chart', y_min=N
     plt.xlabel(X)
     plt.ylabel(Y)
     plt.title(title)
+    plt.xticks(rotation=45)
     plt.tight_layout()
     plt.grid(True, linestyle='--', alpha=0.6)
     if y_min:
