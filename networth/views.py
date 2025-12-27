@@ -58,7 +58,9 @@ def get_ytd_roi_total(user, year):
 
     ytd_roi_principal_total = cad_p/exchange_rate('CAD')[0]+ngn_p/exchange_rate('NGN')[0]+usd_p.amount
     ytd_roi_total = cad_roi/exchange_rate('CAD')[0]+ngn_roi/exchange_rate('NGN')[0]+usd_roi.amount
-    return {'principal': ytd_roi_principal_total, 'roi': ytd_roi_total, 'percent': 100*ytd_roi_total/ytd_roi_principal_total}
+    
+    return {'principal': ytd_roi_principal_total, 'roi': ytd_roi_total, 
+            'percent': 100*ytd_roi_total/ytd_roi_principal_total if ytd_roi_principal_total else 0}
     
 # Create your views here.
 class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
