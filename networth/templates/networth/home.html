@@ -4,38 +4,45 @@
 
 {% block head %}
 <style>
-  
+
 </style>
 {% endblock %}
 {% block content %}
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top ">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top ">
   <a class="navbar-brand" href="#">Networth</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
     aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-    <div class="navbar-nav">
+    <div class="navbar-nav mr-auto">
       <a class="nav-link active" href="{% url 'index' %}"><i class="fa fa-home text-info"></i> Home <span
           class="sr-only">(current)</span></a>
+      <a class="nav-link" href="{% url 'pdf-networth' %}" target="_blank"><i class="fa fa-file-pdf text-danger"></i>
+        PDF</a>
+      <a class="nav-link" href="{% url 'balance-sheet' %}"><i class="fa fa-balance-scale text-primary"></i> Annual
+        Report</a>
+
+      <a class="nav-link" href="{% url 'networth-dashboard' %}"><i class="fa fa-tachometer-alt text-primary"></i>
+        Dashboard </a>
+    </div>
+    <div class="navbar-nav">
       <a class="nav-link" href="#"><i class="fa fa-user text-primary"></i> {{user.username}}</a>
-      <a class="nav-link" href="{% url 'pdf-networth' %}" target="_blank"><i class="fa fa-file-pdf text-danger"></i> PDF</a>
-      <a class="nav-link" href="{% url 'balance-sheet' %}"><i class="fa fa-balance-scale text-primary"></i> BS</a>
-      
+      <!-- <a  class="nav-link mr-2" href="">Preference</a> -->
+
     </div>
 
   </div>
 </nav>
 
-
 <div class="container mt-5 font-weight-lighter">
   <div class="row p-2">
-    <div class="col">
+    <div class="col mt-2">
       <small class="text-monospace text-muted">{{exchange}}. {{naira_value_comment}}</small>
     </div>
   </div>
-
+<hr>
   {% if fd %}
   <div class="row mt-2">
     <div class="col-sm-4">
@@ -56,56 +63,44 @@
       </ul>
     </div>
     <div class="col-sm-4">
-      <div class="">
-        <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ donot_networth|safe }}" alt="Networth distribution donot plot">
-
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item">{{number_of_instruments|first}} instruments out of
-          {{number_of_instruments|last}} Assets</li>
-          {% if reward %}
-          <li class="list-group-item">YTD Reward <span class="float-right">{{reward}}</span></li>
-          {% endif %}
-        </ul>
-        
+      <div class="card border-0" style="width: 24rem;">
+        <img class="card-img-top" src="data:image/png;base64,{{ donot_networth|safe }}"
+          alt="Networth distribution donot plot">
+        <div class="card-body">
+          <p class="card-text">Networth Distribution</p>
+        </div>
       </div>
+
     </div>
     <div class="col-sm-4">
       <ul class="list-group list-group-flush">
         <li class="list-group-item list-group-item-light">Networth by country</li>
         {% for country, worth in fd.networth_by_country.items %}
-        <li class="list-group-item">{{country}} <span
-            class="float-right">${{worth|floatformat:'2g'}}</span></li>
+        <li class="list-group-item">{{country}} <span class="float-right">${{worth|floatformat:'2g'}}</span></li>
         {% endfor %}
         <li class="list-group-item list-group-item-light">Networth by currency (in usd)</li>
         {% for worth in networth_by_currency %}
-        <li class="list-group-item">{{worth.currency}} <span
-            class="float-right">{{worth.value_usd}}</span></li>
+        <li class="list-group-item">{{worth.currency}} <span class="float-right">{{worth.value_usd}}</span></li>
         {% endfor %}
-        
+
       </ul>
     </div>
   </div>
-
+  <hr>
   <div class="row mt-2">
     <div class="col-sm-4">
       <ul class="list-group list-group-flush">
-        <li class="list-group-item list-group-item-light">Investment parameters</li>
-        <li class="list-group-item">Expected Earnings
-          <a class="badge badge-info" data-toggle="tooltip" data-html="true"
-            title='Possible earnings from active investment(s). Earnings from current investment(s) running through their tenure'
+        <li class="list-group-item list-group-item-light">Investment Score</li>
+        <li class="list-group-item">Current ROI
+          <a class="badge badge-light" data-toggle="tooltip" data-html="false"
+            title='Current ROI out of ROI at full maturity of all investments'
             href=""><i class="fa fa-info fa-sm"></i>
           </a>
-          <span class="float-right">{{fd.roi}}</span>
-
+          <div class="float-right text-wrap" style="width: 6rem;"> 
+            <span class="font-italic">{{fd.present_roi}} out of {{fd.roi}}</span>
+          </div>
         </li>
-        <li class="list-group-item">Accrued Earnings
-
-          <a class="badge badge-info" data-toggle="tooltip" data-html="true"
-            title='Present accrued earnings from active investments. Earnings from current investment(s) as at today.' href=""><i
-              class="fa fa-info fa-sm"></i>
-          </a>
-          <span class="float-right">{{fd.present_roi}}</span>
-        </li>
+        
         <li class="list-group-item">Earned YTD <span class="float-right">{{past_investment_this_year}}</span></li>
         <li class="list-group-item">All-time Earnings <span class="float-right">{{past_investment}}</span></li>
         <li class="list-group-item">Daily ROI<span class="float-right">{{fd.daily_roi}}</span></li>
@@ -113,11 +108,17 @@
             days</span></li>
       </ul>
     </div>
+    
     <div class="col-sm-4">
-      <div class="">
-        <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ plot_investment_earnings|safe }}" alt="Year earnings">
+      <div class="card border-0" style="width: 22rem;">
+        <div class="card-body">
+          <p class="card-text">ROI on investment period</p>
+        </div>
+        <img class="" src="data:image/png;base64,{{ plot_investment_earnings|safe }}"
+          alt="Year earnings">
       </div>
     </div>
+
     <div class="col-sm-4">
       <table class="table table-sm table-light table-striped" data-toggle="table">
         <legend>Recent Transactions</legend>
@@ -142,45 +143,56 @@
           {% endfor %}
         </tbody>
       </table>
-      <a href="">View all current year transactions</a>
+      <a class="ml-2" href="">More</a>
     </div>
   </div>
-
+<hr>
   <div class="row mb-3">
-    <div class="col-sm-6 font-weight-lighter">
+    <div class="col-sm-4">
       <ul class="list-group list-group-flush">
         <li class="list-group-item">
-          <h5 class="font-italic"><i class="fa fa-paperclip text-info"></i> Asset Ratio</h5>
+          <span class="font-italic"><i class="fa fa-paperclip text-info"></i> {{ asset_ratio.country }} Asset
+            Ratio</span>
         </li>
         <li class="list-group-item">
           {% if 'currency' in asset_ratio %}
-            AR in {{asset_ratio.country}} - {{asset_ratio.currency}} : {{asset_ratio.base_value}} x{{asset_ratio.ratio}}
+          AR in {{asset_ratio.country}} - {{asset_ratio.currency}} : {{asset_ratio.base_value}} x{{asset_ratio.ratio}}
           {% else %}
-            No US dollar asset in {{asset_ratio.country}}
+          No US dollar asset in {{asset_ratio.country}}
           {% endif %}
         </li>
       </ul>
     </div>
-    
-  </div>
+    <div class="col-sm-4">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item"><span>
+            {{number_of_instruments|first}} instruments out of
+            {{number_of_instruments|last}} Assets
+          </span>
 
-  <div class="row mb-3">
-    <div class="col ml-3 font-weight-lighter">
-      <a href="{% url 'networth-dashboard' %}">Continue to view more analysis <i class="fa fa-tachometer-alt"></i> </a>
+        </li>
+        {% if reward %}
+        <li class="list-group-item">YTD Reward <span class="float-right">{{reward}}</span></li>
+        {% endif %}
+      </ul>
+
     </div>
+
   </div>
-  {% else %}
+
+</div>
+{% else %}
 
 
-  <div class="row mt-3">
-    <div class="col">
-      <h4>Hello {{user.username}}</h4>
-      <h1 class="font-italic">You have no Financial Record</h1>
-      <p class="text-muted">Note: if you create or update an asset, you will not notice the change until end of the day.
-      </p>
-    </div>
+<div class="row mt-3">
+  <div class="col">
+    <h4>Hello {{user.username}}</h4>
+    <h1 class="font-italic">You have no Financial Record</h1>
+    <p class="text-muted">Note: if you create or update an asset, you will not notice the change until end of the day.
+    </p>
   </div>
-  {% endif %}
+</div>
+{% endif %}
 
 
 {% endblock %}

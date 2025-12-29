@@ -71,6 +71,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             return True
         return False
     
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # for financial report summanry

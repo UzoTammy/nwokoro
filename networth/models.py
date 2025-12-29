@@ -272,7 +272,6 @@ class Investment(models.Model):
     is_active = models.BooleanField(default=True)
     description = models.CharField(max_length=250, default='')
 
-
     def __str__(self):
         return f'I: {self.principal}-{self.holder}-{self.duration} days'
     
@@ -281,7 +280,6 @@ class Investment(models.Model):
         principal = self.principal / exchange_rate_qs.get(target_currency=self.principal_currency).rate
         return Money(principal.amount, 'USD')
 
-    
     def maturity(self)->date:
         return self.start_date + timezone.timedelta(days=self.duration)
 
@@ -295,7 +293,7 @@ class Investment(models.Model):
         return (self.maturity() - date.today()).days
     
     def daily_roi(self):
-        return (self.principal * Decimal(self.rate/100) ) / Decimal((365))
+        return (self.principal * Decimal(self.rate/100) ) / Decimal((365.25))
     
     def roi(self, date=None):
         if date is None or date > self.maturity():
@@ -631,7 +629,6 @@ class Business(models.Model):
         self.save()
         
         
-
 class Rent(models.Model):
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     date = models.DateField()
@@ -661,6 +658,7 @@ class FixedAsset(models.Model):
     host_country = models.CharField(max_length=2)
     description = models.CharField(max_length=250, default='')
     rent = models.ForeignKey(Rent, on_delete=models.CASCADE, default=None, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name

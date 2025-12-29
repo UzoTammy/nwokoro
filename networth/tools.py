@@ -187,8 +187,8 @@ class FinancialReport:
             roi=self.get_roi(),
             daily_roi=self.get_daily_roi(),
             present_roi=self.get_present_roi(),
-            networth_by_country=self.country_networth()
-        )
+            networth_by_country=self.country_networth())
+    
 
 def exchange_rate(of:str, to:str=None):
     target = ExchangeRate.objects.filter(target_currency=of)
@@ -215,15 +215,18 @@ def get_assets_liabilities(owner):
             'fixed_asset': fixed_asset, 'liabilities': liabilities}
 
 def get_user_finances(username: str)->Optional[FinancialReport]:
-    savings = Saving.objects.filter(owner__username=username)
+    savings = Saving.objects.filter(owner__username=username).filter(value__gt=0)
     if savings.exists():
+        # investments that are active
         investments = Investment.objects.filter(is_active=True).filter(owner__username=username)
-        stocks = Stock.objects.filter(owner__username=username)
-        business = Business.objects.filter(owner__username=username)
-        fixed_asset = FixedAsset.objects.filter(owner__username=username)
-        liability = BorrowedFund.objects.filter(owner__username=username)
-        fr = FinancialReport(savings, investments, stocks, business, fixed_asset, liability)
-        return fr
+        # Stock that exist and not sold: units > 0 or do not exist
+        stocks = Stock.objects.filter(owner__username=username).filter(units__gt=0)
+        business = Business.objects.filter(owner__username=username).filter(is_active=True)
+        fixed_asset = FixedAsset.objects.filter(owner__username=username).filter(is_active=True)
+        # when balance amount is 
+        liability = BorrowedFund.objects.filter(owner__username=username).filter(balance_amount__gt=0)
+        networth = FinancialReport(savings, investments, stocks, business, fixed_asset, liability)
+        return networth
     
 def get_value(instrument:QuerySet, _type:Optional[str]):
 
