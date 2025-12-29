@@ -9,9 +9,10 @@
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav mr-auto">
+        </div>
         <div class="navbar-nav">
-
-            <a class="nav-link" href="{% url 'networth-home'%}"><i class="fa fa-door-open text-danger"></i> Close</a>
+            <a class="nav-link" href="{% url 'networth-home'%}"><i class="fa fa-times text-danger"></i></a>
         </div>
 
     </div>
@@ -121,7 +122,6 @@
                 {% endfor %}
             </ul>
 
-            <a class="float-right mt-3" href="{% url 'networth-home'%}"><i class="fa fa-door-open text-danger"></i> Close</a>
         </div>
         {% else %}
         <div class="row">

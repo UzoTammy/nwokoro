@@ -6,6 +6,23 @@
 </style>
 {% endblock %}
 {% block content %}
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav mr-auto">
+        </div>
+        <div class="navbar-nav">
+            <a class="nav-link" href="{% url 'networth-home'%}"><i class="fa fa-times text-danger"></i></a>
+        </div>
+
+    </div>
+</nav>
+
 <div class="container mt-3 font-weight-lighter">
     <div class="row justify-content-center">
         <div class="col-sm-6">
@@ -37,14 +54,6 @@
         <div class="col">
             <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ daily_roi_image|safe }}"
                 alt="Daily ROI trend line plot">
-        </div>
-    </div>
-    <div class="row mt-3">
-        <div class="col"></div>
-        
-        <div class="col">
-            <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ asset_location|safe }}"
-                alt="Networth distribution by country donut chart">
         </div>
     </div>
     <div class="row mt-3">
@@ -119,11 +128,14 @@
             </table>
         </div>
     </div>
+    
     <div class="row mt-3">
         <div class="col">
-            <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>
+            <img class="img-fluid img-thumbnail w-60 border-0" src="data:image/png;base64,{{ asset_location|safe }}"
+                alt="Networth distribution by country donut chart">
         </div>
     </div>
+    
 </div>
 </div>
 {% endblock %}
