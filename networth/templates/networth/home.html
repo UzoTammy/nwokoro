@@ -101,11 +101,10 @@
           </div>
         </li>
         
-        <li class="list-group-item">Earned YTD <span class="float-right">{{past_investment_this_year}}</span></li>
-        <li class="list-group-item">All-time Earnings <span class="float-right">{{past_investment}}</span></li>
-        <li class="list-group-item">Daily ROI<span class="float-right">{{fd.daily_roi}}</span></li>
-        <li class="list-group-item">Lifespan<span class="float-right">{{fd.roi|divide:fd.daily_roi}}
-            days</span></li>
+        <li class="list-group-item">Earned YTD <span class="float-right">{{mature_investment_current_year_roi}}</span></li>
+        <li class="list-group-item">All Earnings <span class="float-right">{{mature_investment_roi}}</span></li>
+        <li class="list-group-item">Turnover YTD<span class="float-right">{{mature_investment_current_year_turnover}}</span></li>
+        <li class="list-group-item">Turnover<span class="float-right">{{mature_investment_turnover}}</span></li>
       </ul>
     </div>
     

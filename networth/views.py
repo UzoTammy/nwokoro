@@ -1,7 +1,6 @@
 import datetime
 import decimal
 from zoneinfo import ZoneInfo
-import pandas as pd
 
 from django.utils import timezone
 from django.shortcuts import redirect
@@ -33,7 +32,7 @@ from .plots import bar_chart, donut_chart, plot
 from .tools import (get_value, valuation, ytd_roi, investments_by_holder,networth_by_currency, currency_list,
                     recent_transactions, networth_ratio, number_of_instruments, number_of_assets, 
                     exchange_rate, get_assets_liabilities, set_roi, get_year_financial, current_year_roi,past_investment,
-                    TurnOver)
+                    AggregatedAsset)
 
 def is_homogenous(value: list):
     if not value:
@@ -154,11 +153,22 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['networth_by_currency'] = networth_currency
 
         # past investment transactions
-        transactions = InvestmentTransaction.objects.filter(transaction_type='DR')
-        past_transactions_this_year = transactions.filter(timestamp__year=timezone.now().year)
+        # transactions = InvestmentTransaction.objects.filter(transaction_type='DR')
+        # past_transactions_this_year = transactions.filter(timestamp__year=timezone.now().year)
+        
+        # Investment Score Section
+        year = timezone.now().year
+        current_year_asset = AggregatedAsset(self.request.user, year)
+        investments = Investment.objects.filter(owner=current_year_asset.owner).filter(is_active=False)
+        
+        mature_investment_current_year = current_year_asset.investments(investments)
+        context['mature_investment_current_year_roi'] = mature_investment_current_year[1] 
+        context['mature_investment_current_year_turnover'] = mature_investment_current_year[0]
 
-        context['past_investment'] = past_investment(transactions)
-        context['past_investment_this_year'] = past_investment(past_transactions_this_year)
+        all_asset = AggregatedAsset(self.request.user)
+        mature_investment = all_asset.investments(investments)
+        context['mature_investment_roi'] = mature_investment[1]
+        context['mature_investment_turnover'] = mature_investment[0]
         return context
 
 class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -179,7 +189,7 @@ class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             
         context['balance_brought_forward'] = first_fd.worth
 
-        turnover = TurnOver(current_year, self.request.user)
+        turnover = AggregatedAsset(current_year, self.request.user)
         all_assets = [turnover.investment(), turnover.real_estate(), turnover.business(), turnover.stock()]
                 
         context['turnover'] = {

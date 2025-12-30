@@ -542,10 +542,10 @@ def past_investment(queryset: QuerySet)-> Money:
     return Money(sum_total, 'USD')
         
 
-class TurnOver:
-    def __init__(self, year, owner):
-        self.year = year
+class AggregatedAsset:
+    def __init__(self, owner:User, year:int|None=None):
         self.owner = owner
+        self.year = year
 
     def investment(self):
         """All mature investment go through investment transaction of the type DR."""
@@ -565,7 +565,25 @@ class TurnOver:
             earnings.append(earning/rate)
             earning_sum = sum(earnings)
         return Money(investment_sum, 'USD'), Money(earning_sum, 'USD')
+    
+    def investments(self, investments:QuerySet):
+        """A user's investment aggregates within a specified year"""
+        # investments = Investment.objects.filter(owner=self.owner).filter(is_active=False)
+        if investments.none():
+            return Money(0, 'USD'), Money(0, 'USD')
 
+        principals, rois = [], []
+        for investment in investments:
+            if self.year is not None:
+                if investment.maturity().year == self.year:
+                    principals.append(investment.principal.amount/Decimal(ExchangeRate.objects.get(target_currency=investment.principal.currency).rate))
+                    rois.append(investment.roi().amount/Decimal(ExchangeRate.objects.get(target_currency=investment.principal.currency).rate))
+            else:
+                principals.append(investment.principal.amount/Decimal(ExchangeRate.objects.get(target_currency=investment.principal.currency).rate))
+                rois.append(investment.roi().amount/Decimal(ExchangeRate.objects.get(target_currency=investment.principal.currency).rate))
+        principal_sum = Money(sum(principals), 'USD')
+        rois_sum = Money(sum(rois), 'USD')
+        return principal_sum, rois_sum
 
     def real_estate(self):
         # All rented real estate 
