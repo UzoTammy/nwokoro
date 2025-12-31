@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 
+{% load custom_tag %}
 {% block head %}
 <style>
 
@@ -7,8 +8,7 @@
 {% endblock %}
 {% block content %}
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-
+<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
         aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -27,36 +27,58 @@
     <div class="row justify-content-center">
         <div class="col-sm-6">
             <ul class="list-group list-group-flush">
-                <li class="list-group-item">Base Networth <span class="float-right">{{financials.base_networth}}</span>
-                </li>
-                <li class="list-group-item">Base Daily ROI <span
-                        class="float-right">{{financials.base_daily_roi}}</span></li>
-                <li class="list-group-item">Expected Year-End Networth <span
-                        class="float-right">{{financials.EYEV}}</span></li>
-                <li class="list-group-item">Expected Year-End Growth <span
-                        class="float-right">{{financials.EYEP}}</span></li>
+                <li class="list-group-item">Base Networth <span class="float-right">{{base_networth}}</span></li>
+                <li class="list-group-item">Base Daily ROI <span class="float-right">{{base_daily_roi}}</span></li>
+                <li class="list-group-item">Projected Networth <span class="float-right">{{projected_networth}}</span></li>
+                <li class="list-group-item">Projected Growth <span class="float-right">{{projected_growth}}</span></li>
             </ul>
         </div>
         <div class="col-sm-6">
             <ul class="list-group list-group-flush">
-                <li class="list-group-item">Max Networth <span class="float-right">{{max_networth}}</span></li>
-                <li class="list-group-item">Date of Max Networth <span class="float-right">{{date_max_networth}}</span></li>
-                <li class="list-group-item">Worst Rate <span class="float-right">{{max_rate|first}}{{max_rate|last}}/$</span></li>
-                <li class="list-group-item">Present Growth Rate <span class="float-right">{{present_growth}}</span></li>
+                <li class="list-group-item">Actual Networth <span class="float-right">{{year_end_networth}}</span></li>
+                {% if growth.amount > 0 %} <li class="list-group-item">Growth <span
+                        class="float-right">{{growth}}</span></li>
+                    <li class="list-group-item">Growth Rate <span class="float-right">{{growth_rate}}%</span></li>
+                    {% else %}
+                    <li class="list-group-item text-danger">Loss <span
+                            class="float-right">{{growth|scalar_value}}</span></li>
+                    <li class="list-group-item">Loss Rate <span class="float-right">{{growth_rate|scalar_value}}%</span>
+                    </li>
+                    {% endif %}
             </ul>
         </div>
     </div>
     <div class="row mt-3">
-        <div class="col">
-            <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ networth_image|safe }}"
-                alt="Weekly Networth trend line plot">
+        <div class="col-sm-4">
+            <div>
+                <img class="img-fluid w-60" src="data:image/png;base64,{{ networth_image|safe }}"
+                    alt="Weekly Networth trend line plot">
+            </div>
+            <div>
+                <p class="card-text">Daily Networth Trend</p>
+            </div>
         </div>
-        <div class="col">
-            <img class="img-fluid img-thumbnail w-60" src="data:image/png;base64,{{ daily_roi_image|safe }}"
+        <div class="col-sm-4">
+            <div>
+                <img class="img-fluid w-60" src="data:image/png;base64,{{ asset_location|safe }}"
+                    alt="Networth distribution by country donut chart">
+                <div>
+                    <p class="card-text">Networth Distribution By Country</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="">
+                <img class="img-fluid w-60" src="data:image/png;base64,{{ daily_roi_image|safe }}"
                 alt="Daily ROI trend line plot">
+                <div class="">
+                    <p>Exchage Rates trend</p>
+                </div>
+            </div>
         </div>
     </div>
     <div class="row mt-3">
+
         <div class="col">
             <table class="table table-bordered" data-toggle="table">
                 <legend>ROI Yearly Outlook in various currencies</legend>
@@ -78,7 +100,6 @@
                         <th>Invest.($)</th>
                         <th>ROI</th>
                         <th>%</th>
-                        
                     </tr>
                 </thead>
                 <tbody>
@@ -89,12 +110,12 @@
                         <td>{{investment.principal.amount|floatformat:2}}</td>
                         <td>{{investment.roi.amount|floatformat:2}}</td>
                         <td>{{investment.percent}}</td>
-                        
                         {% endfor %}
+
                         <td>{{ytd_roi_total_next_year.principal|floatformat:'2g'}}</td>
                         <td>{{ytd_roi_total_next_year.roi|floatformat:'2g'}}</td>
                         <td>{{ytd_roi_total_next_year.percent|floatformat:'2g'}}</td>
-                        
+
                     </tr>
                     {% endif %}
                     <tr>
@@ -107,7 +128,7 @@
                         <td>{{ytd_roi_total_current_year.principal|floatformat:'2g'}}</td>
                         <td>{{ytd_roi_total_current_year.roi|floatformat:'2g'}}</td>
                         <td>{{ytd_roi_total_current_year.percent|floatformat:'2g'}}</td>
-                        
+
                     </tr>
                     {% if ytd_roi_prev %}
                     <tr>
@@ -120,22 +141,14 @@
                         <td>{{ytd_roi_total_prev_year.principal|floatformat:'2g'}}</td>
                         <td>{{ytd_roi_total_prev_year.roi|floatformat:'2g'}}</td>
                         <td>{{ytd_roi_total_prev_year.percent|floatformat:'2g'}}</td>
-                        
+
                     </tr>
                     {% endif %}
-                    
+
                 </tbody>
             </table>
         </div>
+
     </div>
-    
-    <div class="row mt-3">
-        <div class="col">
-            <img class="img-fluid img-thumbnail w-60 border-0" src="data:image/png;base64,{{ asset_location|safe }}"
-                alt="Networth distribution by country donut chart">
-        </div>
-    </div>
-    
-</div>
 </div>
 {% endblock %}

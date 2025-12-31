@@ -547,29 +547,29 @@ class AggregatedAsset:
         self.owner = owner
         self.year = year
 
-    def investment(self):
-        """All mature investment go through investment transaction of the type DR."""
+    # def investment(self):
+    #     """All mature investment go through investment transaction of the type DR."""
 
-        # capture the queryset
-        investments = InvestmentTransaction.objects.filter(user=self.owner).filter(timestamp__year=self.year).filter(transaction_type='DR')
-        # trim the queryset
-        investment_volume = investments.values_list('investment__principal', 'amount_currency', 'amount')
-        # Sum
-        investments, earnings = list(), list()
-        investment_sum, earning_sum = Money(0, 'USD'), Money(0, 'USD')
-        for investment in investment_volume:
-            rate = exchange_rate(investment[1])[0].amount
-            investments.append(investment[0]/rate)
-            investment_sum = sum(investments)
-            earning = investment[2] - investment[0]
-            earnings.append(earning/rate)
-            earning_sum = sum(earnings)
-        return Money(investment_sum, 'USD'), Money(earning_sum, 'USD')
+    #     # capture the queryset
+    #     investments = InvestmentTransaction.objects.filter(user=self.owner).filter(timestamp__year=self.year).filter(transaction_type='DR')
+    #     # trim the queryset
+    #     investment_volume = investments.values_list('investment__principal', 'amount_currency', 'amount')
+    #     # Sum
+    #     investments, earnings = list(), list()
+    #     investment_sum, earning_sum = Money(0, 'USD'), Money(0, 'USD')
+    #     for investment in investment_volume:
+    #         rate = exchange_rate(investment[1])[0].amount
+    #         investments.append(investment[0]/rate)
+    #         investment_sum = sum(investments)
+    #         earning = investment[2] - investment[0]
+    #         earnings.append(earning/rate)
+    #         earning_sum = sum(earnings)
+    #     return Money(investment_sum, 'USD'), Money(earning_sum, 'USD')
     
     def investments(self, investments:QuerySet):
         """A user's investment aggregates within a specified year"""
         # investments = Investment.objects.filter(owner=self.owner).filter(is_active=False)
-        if investments.none():
+        if not investments.exists():
             return Money(0, 'USD'), Money(0, 'USD')
 
         principals, rois = [], []
@@ -587,19 +587,26 @@ class AggregatedAsset:
 
     def real_estate(self):
         # All rented real estate 
-        rentable_fixed_assets = FixedAsset.objects.filter(owner=self.owner).exclude(rent=None)
+        rented_fixed_assets = FixedAsset.objects.filter(owner=self.owner).exclude(rent=None)
+        if self.year is not None:
+            rented_fixed_assets = rented_fixed_assets.filter(rent__date__year=self.year)
+        
         fixed_asset_sum, earning_sum = 0.0, 0.0
-        if rentable_fixed_assets.exists():
-            fixed_asset_volume = rentable_fixed_assets.filter(rent__is_active=True)
-            if fixed_asset_volume.exists():
-                fixed_asset_volume = fixed_asset_volume.values_list('value', 'value_currency', 'rent__amount')
-                fixed_assets, earnings = list(), list()
-                for asset in fixed_asset_volume:
-                    rate = exchange_rate(asset[1])[0].amount
-                    fixed_assets.append(asset[0]/rate)
-                    earnings.append(asset[2]/rate)
-                    fixed_asset_sum = sum(fixed_assets)
-                    earning_sum = sum(earnings)
+        if rented_fixed_assets.exists():
+            for estate in rented_fixed_assets:
+                fixed_asset_sum += estate.value.amount/Decimal(ExchangeRate.objects.get(target_currency=estate.value.currency).rate)
+                earning_sum += estate.rent.amount.amount/Decimal(ExchangeRate.objects.get(target_currency=estate.rent.amount.currency).rate)
+
+            # fixed_asset_volume = rentable_fixed_assets.filter(rent__is_active=True)
+            # if fixed_asset_volume.exists():
+            #     fixed_asset_volume = fixed_asset_volume.values_list('value', 'value_currency', 'rent__amount')
+            #     fixed_assets, earnings = list(), list()
+            #     for asset in fixed_asset_volume:
+            #         rate = exchange_rate(asset[1])[0].amount
+            #         fixed_assets.append(asset[0]/rate)
+            #         earnings.append(asset[2]/rate)
+            #         fixed_asset_sum = sum(fixed_assets)
+            #         earning_sum = sum(earnings)
         return Money(fixed_asset_sum, 'USD'), Money(earning_sum, 'USD')
     
 

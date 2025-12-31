@@ -34,6 +34,13 @@ from .tools import (get_value, valuation, ytd_roi, investments_by_holder,networt
                     exchange_rate, get_assets_liabilities, set_roi, get_year_financial, current_year_roi,past_investment,
                     AggregatedAsset)
 
+def get_target():
+    
+    return {
+        2025: Money(100_100, 'USD'),
+        2026: Money(100_100, 'USD')
+    }
+
 def is_homogenous(value: list):
     if not value:
         return False
@@ -73,12 +80,8 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # for financial report summanry
-        financial_data = FinancialData.objects.filter(owner=self.request.user)
-        if financial_data.exists():
-            fd = financial_data.latest('date')
-            context['fd'] = fd
 
+        # Section 1: Message box   
         # exchange
         exch = exchange_rate('NGN', 'CAD')
         rate = exch[0]
@@ -87,40 +90,14 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         # naira valuation
         naira_valuation = valuation('NGN')
         context['naira_value_comment'] = f"Naira have {naira_valuation[1]} {naira_valuation[0]} since {naira_valuation[2]}"
-        
-        # fetch assets of current logged-in user
-        investments = get_assets_liabilities(owner=self.request.user)['investments']
-        savings = get_assets_liabilities(owner=self.request.user)['savings']
-        stocks = get_assets_liabilities(owner=self.request.user)['stocks']
-        business = get_assets_liabilities(owner=self.request.user)['business']
-        fixed_asset = get_assets_liabilities(owner=self.request.user)['fixed_asset']
-        liabilities = get_assets_liabilities(owner=self.request.user)['liabilities']
 
-        context['investments'] = investments.order_by('host_country')
-        context['savings'] = savings.order_by('value_currency')
-        context['stocks'] = stocks.order_by('unit_cost_currency')
-        context['business'] = business.order_by('unit_cost_currency')
-        context['fixed_asset'] = fixed_asset.order_by('value_currency')
-        context['liabilities'] = liabilities.order_by('host_country')
-        
-        # Asset total
-        context['investment_total'] = get_value(investments, 'investment')
-        context['savings_total'] = get_value(savings, 'saving')
-        context['stock_total'] = get_value(stocks, 'stock')
-        context['business_total'] = get_value(business, 'business')
-        context['fixed_asset_total'] = get_value(fixed_asset, 'asset')
-        context['liabilities_total'] = get_value(liabilities, 'liability')
+        # Section 2: Networth 
+        financial_data = FinancialData.objects.filter(owner=self.request.user)
+        if financial_data.exists():
+            fd = financial_data.latest('date')
+            context['fd'] = fd 
 
-        context['year_roi'] = ytd_roi(self.request.user, datetime.date.today().year)
-
-        transactions = [SavingsTransaction, InvestmentTransaction,BusinessTransaction, StockTransaction, 
-                        BorrowedFundTransaction, FixedAssetTransaction]
-
-        context['recent_transactions'] = recent_transactions(*transactions)
-        
-        context['asset_ratio'] = networth_ratio(self.request.user, 'NG', 'NGN')
-        context['number_of_instruments'] = (number_of_instruments(self.request.user.username), number_of_assets(self.request.user.username))
-        
+        # Section 3: Networth Distribution
         context['donot_networth'] = donut_chart(
             ['Business', 'Fixed Asset', 'Investment', 'Saving', 'Stock'], 
             [fd.business.amount,
@@ -129,16 +106,8 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
              fd.savings.amount,
              fd.stock.amount]
         )
-        
-        months = list(d['month'] for d in current_year_roi(self.request.user))
-        values = list(d['amount'].amount for d in current_year_roi(self.request.user))
-        context['plot_investment_earnings'] = bar_chart(months, values, X='Months', Y='Earnings', title='Earnings per month')
 
-        rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=datetime.date.today().year)
-        if rewards.exists():
-            reward_value = sum(Money(reward.amount.amount/exchange_rate(reward.amount.currency)[0].amount, 'USD') for reward in rewards)
-            context['reward'] = reward_value
-
+        # Section 4: Networth by country and currency
         networth_currency = list()
 
         for currency in currency_list(self.request.user):
@@ -152,11 +121,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             )
         context['networth_by_currency'] = networth_currency
 
-        # past investment transactions
-        # transactions = InvestmentTransaction.objects.filter(transaction_type='DR')
-        # past_transactions_this_year = transactions.filter(timestamp__year=timezone.now().year)
-        
-        # Investment Score Section
+        # Section 5: Investment Score
         year = timezone.now().year
         current_year_asset = AggregatedAsset(self.request.user, year)
         investments = Investment.objects.filter(owner=current_year_asset.owner).filter(is_active=False)
@@ -169,8 +134,31 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         mature_investment = all_asset.investments(investments)
         context['mature_investment_roi'] = mature_investment[1]
         context['mature_investment_turnover'] = mature_investment[0]
-        return context
+        
+        # Section 6: Plot of investment ROI per month
+        months = list(d['month'] for d in current_year_roi(self.request.user))
+        values = list(d['amount'].amount for d in current_year_roi(self.request.user))
+        context['plot_investment_earnings'] = bar_chart(months, values, X='Months', Y='Earnings', title='Earnings per month')
 
+        # Section 7: Recent Transactions
+        transactions = [SavingsTransaction, InvestmentTransaction,BusinessTransaction, StockTransaction, 
+                        BorrowedFundTransaction, FixedAssetTransaction]
+        context['recent_transactions'] = recent_transactions(*transactions)
+        
+        # Section 8: Asset Ratio
+        context['asset_ratio'] = networth_ratio(self.request.user, 'NG', 'NGN')
+
+        # Section 9: Number of Instruments and YTD Reward
+            # instruments
+        context['number_of_instruments'] = (number_of_instruments(self.request.user.username), number_of_assets(self.request.user.username))
+            # Reward
+        rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=datetime.date.today().year)
+        if rewards.exists():
+            reward_value = sum(Money(reward.amount.amount/exchange_rate(reward.amount.currency)[0].amount, 'USD') for reward in rewards)
+            context['reward'] = reward_value
+
+        return context
+    
 class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/balance_sheet.html'
 
@@ -234,51 +222,47 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         
         # get the record of the first date of the current year
         current_year = datetime.date.today().year
-        qs = get_year_financial(self.request.user)
+        financial_data = get_year_financial(self.request.user)
 
-        if qs.exists():
+        if financial_data.exists():
             
-            obj = qs.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else qs.first()
+            obj = financial_data.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else financial_data.first()
             base_networth = obj.networth()
-            target = Money(100_000, 'USD')
+            target = get_target().get(datetime.date.today().year) # set target 
             daily_roi = set_roi(target)
 
-            context['financials'] = {
-                'base_networth': base_networth,
-                'base_daily_roi': daily_roi,
-                'EYEV': target + base_networth,
-                'EYEP':  format_percent(round(target/base_networth, 4), decimal_quantization=False, locale='en_US')
-            }
-            
-            qs = qs.annotate(f_networth = F('worth') - F('liability'))
-            max_networth = qs.aggregate(Max('f_networth'))['f_networth__max']
-            context['max_networth'] = Money(max_networth, 'USD')
-            context['date_max_networth'] = qs.filter(f_networth=max_networth).first().date.date
-            context['max_rate'] = ('NGN', max([r[0]['NGN'] for r in qs.values_list('exchange_rate') if r[0] is not None]))
-            context['present_growth'] = format_percent(round((qs.latest('date').networth() - base_networth)/base_networth, 5), decimal_quantization=False, locale='en_US')
-            
-            context['ytd_roi'] = ytd_roi(self.request.user, current_year)
-            context['ytd_roi_prev'] = ytd_roi(self.request.user, current_year-1)
-            context['ytd_roi_next'] = ytd_roi(self.request.user, current_year+1)
+            #Section 1: Base Networth and Projections
+            context['base_networth'] =  base_networth
+            context['base_daily_roi'] = daily_roi
+            context['projected_networth'] =  target + base_networth
+            context['projected_growth'] =  format_percent(round(target/base_networth, 4), decimal_quantization=False, locale='en_US')
 
-            # total of investments
-            context['ytd_roi_total_current_year'] = get_ytd_roi_total(self.request.user, current_year)
-            context['ytd_roi_total_prev_year'] = get_ytd_roi_total(self.request.user, current_year-1)
-            context['ytd_roi_total_next_year'] = get_ytd_roi_total(self.request.user, current_year+1)
+            # Section 2: Actual Networth and growth rate
+            current_year = timezone.now().year
+            fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
+            fd = fd.latest('date') if fd.exists() else None
+            year_end_networth = Money(0, 'USD') if fd is None else fd.networth()
+            context['year_end_networth'] = year_end_networth
+            context['growth'] = year_end_networth-base_networth
+            context['growth_rate'] = round(100*(year_end_networth-base_networth)/year_end_networth, 2)
             
-        start_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7)
-        financials = FinancialData.objects.filter(owner=self.request.user).filter(date__gte=start_date).order_by('date')
+            start_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7)
+            financials = FinancialData.objects.filter(owner=self.request.user).filter(date__gte=start_date).order_by('date')
 
-        if not financials.exists():
-            financials = FinancialData.objects.filter(owner=self.request.user)
+            if not financials.exists():
+                financials = FinancialData.objects.filter(owner=self.request.user)
+            
+            # get the minimum worth
+            if financials.exists():
+                recent_days = [ date.strftime('%m/%d') for date in financials.values_list('date', flat=True) ]
+                recent_networth = [ financial.worth.amount for financial in financials ]
+                context['networth_image'] = plot(recent_days, recent_networth, Y1='USD($)', X=f"mm/dd/{start_date.strftime('%Y')}", title='Networth Trend')
+
+                latest = financials.latest('date')
+                labels = latest.networth_by_country.keys()
+                sizes = latest.networth_by_country.values()
+                context['asset_location'] = donut_chart(labels, sizes)
         
-        # get the minimum worth
-        if financials.exists():
-            
-            recent_days = [ date.strftime('%m/%d') for date in financials.values_list('date', flat=True) ]
-            recent_networth = [ financial.worth.amount for financial in financials ]
-            context['networth_image'] = plot(recent_days, recent_networth, Y1='USD($)', X='Days', title='Weekly Networth Trend')
-            
             qs = financials.exclude(exchange_rate=None)
 
             dates = [ date.strftime('%m/%d') for date in qs.values_list('date', flat=True) ]
@@ -297,14 +281,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
               
             context['daily_roi_image'] = plot(dates, y_axis1=y_axes[0], y_axis2=y_axes[1], Y1=f'{currency_pair[0]}/$', Y2=f'x{factor}{currency_pair[1]}/$', X='Days', title='One week exchange rate trend')
 
-            latest = financials.latest('date')
-            labels = ['saving', 'investment', 'stock', 'fixed asset', 'business']
-            sizes = [latest.savings.amount, latest.investment.amount, latest.stock.amount, latest.fixed_asset.amount, latest.business.amount]
-            context['asset_distribution'] = donut_chart(labels=labels, sizes=sizes)
-            labels = latest.networth_by_country.keys()
-            sizes = latest.networth_by_country.values()
-            
-            context['asset_location'] = donut_chart(labels, sizes)
+            # Section: 
+            context['ytd_roi'] = ytd_roi(self.request.user, current_year)
+            context['ytd_roi_prev'] = ytd_roi(self.request.user, current_year-1)
+            context['ytd_roi_next'] = ytd_roi(self.request.user, current_year+1)
+            # total of investments
+            context['ytd_roi_total_current_year'] = get_ytd_roi_total(self.request.user, current_year)
+            context['ytd_roi_total_prev_year'] = get_ytd_roi_total(self.request.user, current_year-1)
+            context['ytd_roi_total_next_year'] = get_ytd_roi_total(self.request.user, current_year+1)
             
         return context
 
