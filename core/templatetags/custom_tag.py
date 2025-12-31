@@ -16,4 +16,13 @@ def divide(numerator, denominator):
         return int(numerator/denominator)
     except (ValueError, TypeError, ZeroDivisionError):
         return None
+    
+@register.filter
+def get_item(list_obj, index):
 
+    if type(list_obj) is not list:
+        list_obj = list(list_obj)
+    try:
+        return list_obj[index]
+    except (IndexError, TypeError):
+        return None

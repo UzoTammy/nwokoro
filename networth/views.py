@@ -37,8 +37,8 @@ from .tools import (get_value, valuation, ytd_roi, investments_by_holder,networt
 def get_target():
     
     return {
-        2025: Money(100_100, 'USD'),
-        2026: Money(100_100, 'USD')
+        2025: Money(100_000, 'USD'),
+        2026: Money(120_000, 'USD')
     }
 
 def is_homogenous(value: list):
