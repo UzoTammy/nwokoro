@@ -132,17 +132,17 @@
           {% for transaction in recent_transactions %}
           <tr>
             {% for param in transaction %}
-            {% if forloop.counter == 3 %}
-            <td class=" text-right">{{param}}</td>
-            {% else %}
-            <td>{{param}}</td>
-            {% endif %}
+              {% if forloop.counter == 3 %}
+              <td class=" text-right">{{param}}</td>
+              {% else %}
+              <td>{{param}}</td>
+              {% endif %}
             {% endfor %}
           </tr>
           {% endfor %}
         </tbody>
       </table>
-      <a class="ml-2" href="">More</a>
+      <a class="ml-2" href="{% url 'transaction-list' %}">More</a>
     </div>
   </div>
 <hr>
@@ -172,6 +172,8 @@
         </li>
         {% if reward %}
         <li class="list-group-item">YTD Reward <span class="float-right">{{reward}}</span></li>
+        {% else %}
+        <li class="list-group-item">No Reward Taken</li>
         {% endif %}
       </ul>
 
@@ -181,7 +183,6 @@
 
 </div>
 {% else %}
-
 
 <div class="row mt-3">
   <div class="col">

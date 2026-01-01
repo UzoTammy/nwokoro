@@ -2,7 +2,7 @@
 {% load custom_tag %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
 
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
         aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
@@ -12,7 +12,7 @@
         <div class="navbar-nav mr-auto">
         </div>
         <div class="navbar-nav">
-            <a class="nav-link" href="{% url 'networth-home'%}"><i class="fa fa-times text-danger"></i></a>
+            <a class="nav-link" href="{% url 'networth-home'%}"><i class="fa fa-times-circle text-danger"></i></a>
         </div>
 
     </div>
@@ -34,8 +34,8 @@
                         <th>Maturity</th>
                         <th class="">Due</th>
                         <th class="text-center">Principal</th>
-                        <th class="text-center">Accrued ROI</th>
                         <th class="text-center">Principal(USD)</th>
+                        <th class="text-center">Accrued ROI</th>
                         
                     </tr>
                 </thead>
@@ -52,14 +52,11 @@
                                 {% endif %}
                         </td>
                         <td class="text-right">{{investment.principal}}</td>
-                        <td class="text-right">{{investment.present_roi}}</td>
                         <td class="text-right">{{investment.to_usd}}</td>
+                        <td class="text-right">{{investment.present_roi}}</td>
                     </tr>
                     {% endfor %}
-                    <tr>
-                        <td colspan="5">Total in USD</td>
-                        <td class="text-right">{{to_usd_total}}</td>
-                    </tr>
+                    
                 </tbody>
             </table>
 
@@ -113,6 +110,10 @@
                     <span class="float-right">{{investment}}</span>
                 </li>
                 {% endfor %}
+                <li class="list-group-item bg-light"> Total (USD)
+                    <span class="float-right">{{to_usd_total}}</span>
+                </li>
+                
                 <li class="list-group-item list-group-item-info">Holders <span class="float-right"><a href="{% url 'institution-report' %}">Click for details</a></span></li>
                 {% for investment in investments_summary %}
                 <li class="list-group-item">

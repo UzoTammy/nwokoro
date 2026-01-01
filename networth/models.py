@@ -923,7 +923,6 @@ class FinancialData(models.Model):
     networth_by_country = models.JSONField(null=True) 
     exchange_rate = models.JSONField(null=True)
     
-
     def __str__(self):
         return f'{self.date}: {self.worth}'
     
@@ -937,7 +936,7 @@ class FinancialData(models.Model):
             'fixed_asset': format_percent(self.fixed_asset/self.worth)
         }
     
-    def networth(self):
+    def __networth(self):
         return self.worth - self.liability
     
     def save(self, *args, **kwargs):

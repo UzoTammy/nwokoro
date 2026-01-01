@@ -24,6 +24,11 @@
 </nav>
 
 <div class="container mt-5 font-weight-lighter">
+    {% if no_financial_data %}
+    <div class="row justify-content-center">
+        <h4 class="mt-3">Dashboard is not ready due to lack of finacial record </h4>
+    </div>
+    {% else %}
     <div class="row justify-content-center">
         <div class="col-sm-6">
             <ul class="list-group list-group-flush">
@@ -179,6 +184,6 @@
             </table>
         </div>
     </div>
-   
+   {% endif %}
 </div>
 {% endblock %}

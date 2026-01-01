@@ -30,7 +30,7 @@ from .models import (Saving, Stock, Investment, Business, FinancialData, FixedAs
 
 from .plots import bar_chart, donut_chart, plot
 from .tools import (get_value, valuation, ytd_roi, investments_by_holder,networth_by_currency, currency_list,
-                    recent_transactions, networth_ratio, number_of_instruments, number_of_assets, 
+                    get_transactions, networth_ratio, number_of_instruments, number_of_assets, 
                     exchange_rate, get_assets_liabilities, set_roi, get_year_financial, current_year_roi,past_investment,
                     AggregatedAsset)
 
@@ -38,7 +38,8 @@ def get_target():
     
     return {
         2025: Money(100_000, 'USD'),
-        2026: Money(120_000, 'USD')
+        2026: Money(120_000, 'USD'),
+        2027: Money(144_000, 'USD')
     }
 
 def is_homogenous(value: list):
@@ -91,7 +92,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         naira_valuation = valuation('NGN')
         context['naira_value_comment'] = f"Naira have {naira_valuation[1]} {naira_valuation[0]} since {naira_valuation[2]}"
 
-        # Section 2: Networth 
+        # Section 2: Networth and growth
         financial_data = FinancialData.objects.filter(owner=self.request.user)
         if financial_data.exists():
             fd = financial_data.latest('date')
@@ -139,11 +140,22 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         months = list(d['month'] for d in current_year_roi(self.request.user))
         values = list(d['amount'].amount for d in current_year_roi(self.request.user))
         context['plot_investment_earnings'] = bar_chart(months, values, X='Months', Y='Earnings', title='Earnings per month')
-
+        if not months:
+            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 3, 31))
+            q1 = obj.get().worth if obj.exists() else Money(1000000, 'USD').amount
+            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 6, 30))
+            q2 = obj.get().worth if obj.exists() else Money(1200000, 'USD').amount
+            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 9, 30))
+            q3 = obj.get().worth if obj.exists() else Money(1300000, 'USD').amount
+            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 12, 31))
+            q4 = obj.get().worth if obj.exists() else Money(1350000, 'USD').amount
+            context['plot_investment_earnings'] = bar_chart(['Q1', 'Q2', 'Q3', 'Q4'], [q1, q2, q3, q4], X=f'Quarters of {year-1}',
+                                                            Y='Networth', title='Quarter result')
+        
         # Section 7: Recent Transactions
         transactions = [SavingsTransaction, InvestmentTransaction,BusinessTransaction, StockTransaction, 
                         BorrowedFundTransaction, FixedAssetTransaction]
-        context['recent_transactions'] = recent_transactions(*transactions)
+        context['recent_transactions'] = get_transactions(*transactions)
         
         # Section 8: Asset Ratio
         context['asset_ratio'] = networth_ratio(self.request.user, 'NG', 'NGN')
@@ -170,48 +182,49 @@ class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        current_year = datetime.date.today().year
-        fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
-        first_fd = fd.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else fd.first()
-        last_fd = fd.latest('date')
+        # current_year = datetime.date.today().year
+        # fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
+        # first_fd = fd.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else fd.first()
+        # last_fd = fd.latest('date')
             
-        context['balance_brought_forward'] = first_fd.worth
+        # context['balance_brought_forward'] = first_fd.worth
 
-        turnover = AggregatedAsset(current_year, self.request.user)
-        all_assets = [turnover.investment(), turnover.real_estate(), turnover.business(), turnover.stock()]
+        # turnover = AggregatedAsset(current_year, self.request.user)
+        # investments = Investment.objects.filter(owner=turnover.owner).filter(is_active=False)
+        # all_assets = [turnover.investments(investments), turnover.real_estate(), turnover.business(), turnover.stock()]
                 
-        context['turnover'] = {
-            'investment': all_assets[0],
-            'fixed_asset': all_assets[1],
-            'business': all_assets[2],
-            'stock': all_assets[3]
-        }
+        # context['turnover'] = {
+        #     'investment': all_assets[0],
+        #     'fixed_asset': all_assets[1],
+        #     'business': all_assets[2],
+        #     'stock': all_assets[3]
+        # }
 
-        rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=datetime.date.today().year)
-        reward_value = Money(0, 'USD')
-        if rewards.exists():
-            reward_value = sum(Money(reward.amount.amount/exchange_rate(reward.amount.currency)[0].amount, 'USD') for reward in rewards)
+        # rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=datetime.date.today().year)
+        # reward_value = Money(0, 'USD')
+        # if rewards.exists():
+        #     reward_value = sum(Money(reward.amount.amount/exchange_rate(reward.amount.currency)[0].amount, 'USD') for reward in rewards)
         
-        stream_changes = {
-            'savings': last_fd.savings - first_fd.savings,
-            'investment': last_fd.investment - first_fd.investment - all_assets[0][1],
-            'fixed_asset': last_fd.fixed_asset - first_fd.fixed_asset - all_assets[1][1],
-            'business': last_fd.business - first_fd.business - all_assets[2][1],
-            'stock': last_fd.stock - first_fd.stock - all_assets[3][1],
-            'liability': last_fd.liability - first_fd.liability,
-            'reward': reward_value
-        }
-        context['income_change'] = stream_changes
+        # stream_changes = {
+        #     'savings': last_fd.savings - first_fd.savings,
+        #     'investment': last_fd.investment - first_fd.investment - all_assets[0][1],
+        #     'fixed_asset': last_fd.fixed_asset - first_fd.fixed_asset - all_assets[1][1],
+        #     'business': last_fd.business - first_fd.business - all_assets[2][1],
+        #     'stock': last_fd.stock - first_fd.stock - all_assets[3][1],
+        #     'liability': last_fd.liability - first_fd.liability,
+        #     'reward': reward_value
+        # }
+        # context['income_change'] = stream_changes
         
-        all_asset_total = all_assets[0][1] + all_assets[1][1] + all_assets[2][1] + all_assets[3][1]
-        changes_total = sum([stream_changes['savings'], stream_changes['investment'], stream_changes['fixed_asset'], stream_changes['business'], 
-                            stream_changes['stock'], -stream_changes['liability']])
-        context['stream_changes_total'] = changes_total
-        context['earnings_total'] = all_asset_total
-        context['balance_1'] = first_fd.worth + all_asset_total + changes_total
+        # all_asset_total = all_assets[0][1] + all_assets[1][1] + all_assets[2][1] + all_assets[3][1]
+        # changes_total = sum([stream_changes['savings'], stream_changes['investment'], stream_changes['fixed_asset'], stream_changes['business'], 
+        #                     stream_changes['stock'], -stream_changes['liability']])
+        # context['stream_changes_total'] = changes_total
+        # context['earnings_total'] = all_asset_total
+        # context['balance_1'] = first_fd.worth + all_asset_total + changes_total
 
-        second_fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year).last()
-        context['current_networth'] = second_fd.worth
+        # second_fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year).last()
+        # context['current_networth'] = second_fd.worth
         return context
     
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -221,32 +234,39 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         
         # get the record of the first date of the current year
-        current_year = datetime.date.today().year
-        financial_data = get_year_financial(self.request.user)
+        current_year = timezone.now().year
+        financial_data = get_year_financial(self.request.user, year=current_year)
+        # taken care of negative edge cases
+        if not financial_data.exists():
+            current_year -= 1
+            financial_data = get_year_financial(self.request.user, year=current_year)
+            if not financial_data.exists():
+                context['no_financial_data'] = True
+        # end of -ve edge cases
 
         if financial_data.exists():
             
             obj = financial_data.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else financial_data.first()
-            base_networth = obj.networth()
-            target = get_target().get(datetime.date.today().year) # set target 
+            base_networth = obj.worth
+            target = get_target().get(current_year) # set target 
             daily_roi = set_roi(target)
 
-            #Section 1: Base Networth and Projections
+            # Section 1: Base Networth and Projections
             context['base_networth'] =  base_networth
             context['base_daily_roi'] = daily_roi
             context['projected_networth'] =  target + base_networth
             context['projected_growth'] =  format_percent(round(target/base_networth, 4), decimal_quantization=False, locale='en_US')
 
             # Section 2: Actual Networth and growth rate
-            current_year = timezone.now().year
             fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
             fd = fd.latest('date') if fd.exists() else None
-            year_end_networth = Money(0, 'USD') if fd is None else fd.networth()
+            year_end_networth = Money(0, 'USD') if fd is None else fd.worth
             context['year_end_networth'] = year_end_networth
             context['growth'] = year_end_networth-base_networth
             context['growth_rate'] = round(100*(year_end_networth-base_networth)/year_end_networth, 2)
             
-            start_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7)
+            # Section 3, 4, 5: Visuals
+            start_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7) # 7 days ago
             financials = FinancialData.objects.filter(owner=self.request.user).filter(date__gte=start_date).order_by('date')
 
             if not financials.exists():
@@ -256,6 +276,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             if financials.exists():
                 recent_days = [ date.strftime('%m/%d') for date in financials.values_list('date', flat=True) ]
                 recent_networth = [ financial.worth.amount for financial in financials ]
+                # Section 3: 
                 context['networth_image'] = plot(recent_days, recent_networth, Y1='USD($)', X=f"mm/dd/{start_date.strftime('%Y')}", title='Networth Trend')
 
                 latest = financials.latest('date')
@@ -279,18 +300,40 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 else:
                     y_axes.append([f[currency] for f in qs.values_list('exchange_rate', flat=True)])
               
-            context['daily_roi_image'] = plot(dates, y_axis1=y_axes[0], y_axis2=y_axes[1], Y1=f'{currency_pair[0]}/$', Y2=f'x{factor}{currency_pair[1]}/$', X='Days', title='One week exchange rate trend')
+            context['daily_roi_image'] = plot(
+                dates, y_axis1=y_axes[0], y_axis2=y_axes[1], 
+                Y1=f'{currency_pair[0]}/$', Y2=f'x{factor}{currency_pair[1]}/$', 
+                X='Days', title='One week exchange rate trend')
 
             # Section: 
             context['ytd_roi'] = ytd_roi(self.request.user, current_year)
             context['ytd_roi_prev'] = ytd_roi(self.request.user, current_year-1)
             context['ytd_roi_next'] = ytd_roi(self.request.user, current_year+1)
+            
             # total of investments
             context['ytd_roi_total_current_year'] = get_ytd_roi_total(self.request.user, current_year)
             context['ytd_roi_total_prev_year'] = get_ytd_roi_total(self.request.user, current_year-1)
             context['ytd_roi_total_next_year'] = get_ytd_roi_total(self.request.user, current_year+1)
             
         return context
+
+class TransactionListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/transaction_list.html'
+
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        return False
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        transactions = [SavingsTransaction, InvestmentTransaction,BusinessTransaction, StockTransaction, 
+                        BorrowedFundTransaction, FixedAssetTransaction]
+        
+        context['transactions'] = get_transactions(*transactions)
+        return context
+
 
 class SavingListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/saving_list.html'
@@ -332,46 +375,6 @@ class SavingListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         
         return context
 
-class InvestmentListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = 'networth/investment_list.html'
-
-    def test_func(self):
-        if self.request.user.is_staff:
-            return True
-        return False
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # for financial report summanry
-        financial_data = FinancialData.objects.filter(owner=self.request.user)
-        if financial_data.exists():
-            fd = financial_data.latest('date')
-            context['fd'] = fd
-
-        investments = get_assets_liabilities(owner=self.request.user)['investments']
-        context['investments'] = investments.order_by('principal')
-        context['investment_total'] = get_value(investments, 'investment')
-        context['to_usd_total'] = sum(investment.to_usd() for investment in investments)
-
-        holders = investments.values_list('holder', flat=True).distinct()
-        investments_summary = list()
-        for holder in holders:
-            value = decimal.Decimal('0')
-            qs = investments.filter(holder=holder)
-            for obj in qs:
-                if obj.principal.currency != 'USD':
-                    value += obj.principal.amount/exchange_rate(obj.principal.currency)[0].amount 
-                else:
-                    value += obj.principal.amount
-            investments_summary.append({
-                'holder': obj.holder,
-                'value': Money(value, 'USD')
-            })
-        context['investments_summary'] = investments_summary
-        
-        context['year_roi'] = ytd_roi(self.request.user, datetime.date.today().year)
-
-        return context
     
 class StockListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/stock_list.html'
@@ -504,6 +507,47 @@ class InvestmentCreateView(LoginRequiredMixin, FormView):
         print(dt, aware_date)
         messages.success(self.request, 'Investment created successfully !!!')
         return super().form_valid(form)
+
+class InvestmentListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/investment_list.html'
+
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        return False
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # for financial report summanry
+        financial_data = FinancialData.objects.filter(owner=self.request.user)
+        if financial_data.exists():
+            fd = financial_data.latest('date')
+            context['fd'] = fd
+
+        investments = get_assets_liabilities(owner=self.request.user)['investments']
+        context['investments'] = investments.order_by('principal')
+        context['investment_total'] = get_value(investments, 'investment')
+        context['to_usd_total'] = sum(investment.to_usd() for investment in investments)
+
+        holders = investments.values_list('holder', flat=True).distinct()
+        investments_summary = list()
+        for holder in holders:
+            value = decimal.Decimal('0')
+            qs = investments.filter(holder=holder)
+            for obj in qs:
+                if obj.principal.currency != 'USD':
+                    value += obj.principal.amount/exchange_rate(obj.principal.currency)[0].amount 
+                else:
+                    value += obj.principal.amount
+            investments_summary.append({
+                'holder': obj.holder,
+                'value': Money(value, 'USD')
+            })
+        context['investments_summary'] = investments_summary
+        
+        context['year_roi'] = ytd_roi(self.request.user, datetime.date.today().year)
+
+        return context
 
 class InvestmentDetailView(LoginRequiredMixin, DetailView):
     model = Investment

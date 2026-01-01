@@ -416,7 +416,7 @@ def investments_by_holder(owner):
         stack.append(holders_data)
     return stack
 
-def recent_transactions(*transactions, period:Literal['recent''year''all']='recent'):
+def get_transactions(*transactions, period:Literal['recent','year','all']='recent'):
      
     bucket = list()   
     for transaction in transactions:

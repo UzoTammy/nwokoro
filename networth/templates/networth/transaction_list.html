@@ -1,0 +1,53 @@
+{% extends 'core/base.html' %}
+{% load custom_tag %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav mr-auto">
+        </div>
+        <div class="navbar-nav">
+            <a class="nav-link" href="{% url 'networth-home'%}"><i class="fa fa-times-circle text-danger"></i></a>
+        </div>
+
+    </div>
+</nav>
+
+<div class="container mt-3">
+    
+    <div class="row justify-content-center align-items-center vh-100">
+        {% if transactions %}
+        <div class="col-sm-8">
+            <table class="table table-sm table-striped table-bordered" data-toggle="table">
+                <legend>Transactions</legend>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th class="text-right">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{transaction|get_item:0}}</td>
+                        <td>{{transaction|get_item:1}}</td>
+                        <td class=" text-right">{{transaction|get_item:2}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+        <p class="font-italic ml-2">No Transactions Yet</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock content %}
