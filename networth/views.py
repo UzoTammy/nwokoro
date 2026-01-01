@@ -83,11 +83,8 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         # Section 1: Message box   
-        # exchange
         exch = exchange_rate('NGN', 'CAD')
-        rate = exch[0]
-        context['exchange'] = f'{rate}/CA$ on {exch[1].strftime("%A %d-%b-%Y")}'
-
+        context['exchange'] = f'{exch[0]}/CA$ on {exch[1].strftime("%A %d-%b-%Y")}' if exch else None
         # naira valuation
         naira_valuation = valuation('NGN')
         context['naira_value_comment'] = f"Naira have {naira_valuation[1]} {naira_valuation[0]} since {naira_valuation[2]}"
@@ -141,16 +138,12 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         values = list(d['amount'].amount for d in current_year_roi(self.request.user))
         context['plot_investment_earnings'] = bar_chart(months, values, X='Months', Y='Earnings', title='Earnings per month')
         if not months:
-            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 1, 30))
-            q1 = obj.last().worth.amount if obj.exists() else Money(1000000, 'USD').amount
-            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 2, 11))
-            q2 = obj.last().worth.amount if obj.exists() else Money(1200000, 'USD').amount
-            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 3, 25))
-            q3 = obj.last().worth.amount if obj.exists() else Money(1300000, 'USD').amount
-            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 6, 28))
-            q4 = obj.last().worth.amount if obj.exists() else Money(1350000, 'USD').amount
-            context['plot_investment_earnings'] = bar_chart(['Q1', 'Q2', 'Q3', 'Q4'], [q1, q2, q3, q4], X=f'Quarters of {year-1}',
-                                                            Y='Networth', title='Quarter result')
+            q1 = decimal.Decimal(0.25)*get_target()[year].amount
+            q2 = decimal.Decimal(0.5)*get_target()[year].amount
+            q3 = decimal.Decimal(0.75)*get_target()[year].amount
+            q4 = get_target()[year].amount
+            context['plot_investment_earnings'] = bar_chart(['Q1', 'Q2', 'Q3', 'Q4'], [q1, q2, q3, q4], X=f'Quarters of {year}',
+                                                            Y='Networth', title=f'Projected Quarterly ROI of {year}')
         
         # Section 7: Recent Transactions
         transactions = [SavingsTransaction, InvestmentTransaction,BusinessTransaction, StockTransaction, 

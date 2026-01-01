@@ -39,7 +39,7 @@
 <div class="container mt-5 font-weight-lighter">
   <div class="row p-2">
     <div class="col mt-2">
-      <small class="text-monospace text-muted">{{exchange}}. {{naira_value_comment}}</small>
+      <small class="text-monospace text-muted">{% if exchange %} {{exchange}}. {% endif %} {{naira_value_comment}}</small>
     </div>
   </div>
 <hr>
@@ -111,7 +111,7 @@
     <div class="col-sm-4">
       <div class="card border-0" style="width: 22rem;">
         <div class="card-body">
-          <p class="card-text">ROI on investment period</p>
+          <p class="card-text">ROI on investment</p>
         </div>
         <img class="" src="data:image/png;base64,{{ plot_investment_earnings|safe }}"
           alt="Year earnings">
