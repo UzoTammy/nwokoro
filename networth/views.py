@@ -141,14 +141,14 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         values = list(d['amount'].amount for d in current_year_roi(self.request.user))
         context['plot_investment_earnings'] = bar_chart(months, values, X='Months', Y='Earnings', title='Earnings per month')
         if not months:
-            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 3, 31))
-            q1 = obj.get().worth if obj.exists() else Money(1000000, 'USD').amount
-            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 6, 30))
-            q2 = obj.get().worth if obj.exists() else Money(1200000, 'USD').amount
-            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 9, 30))
-            q3 = obj.get().worth if obj.exists() else Money(1300000, 'USD').amount
-            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 12, 31))
-            q4 = obj.get().worth if obj.exists() else Money(1350000, 'USD').amount
+            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 1, 30))
+            q1 = obj.last().worth.amount if obj.exists() else Money(1000000, 'USD').amount
+            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 2, 11))
+            q2 = obj.last().worth.amount if obj.exists() else Money(1200000, 'USD').amount
+            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 3, 25))
+            q3 = obj.last().worth.amount if obj.exists() else Money(1300000, 'USD').amount
+            obj = FinancialData.objects.filter(date__date=datetime.date(year-1, 6, 28))
+            q4 = obj.last().worth.amount if obj.exists() else Money(1350000, 'USD').amount
             context['plot_investment_earnings'] = bar_chart(['Q1', 'Q2', 'Q3', 'Q4'], [q1, q2, q3, q4], X=f'Quarters of {year-1}',
                                                             Y='Networth', title='Quarter result')
         

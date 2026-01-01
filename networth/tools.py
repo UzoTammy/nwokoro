@@ -158,7 +158,7 @@ class FinancialReport:
             'daily_roi': self.get_daily_roi(),
             'present_roi': self.get_present_roi(),
             'prev_networth': fd.networth,
-            'change_in_networth': self.getNetworth() - fd.networth(),
+            'change_in_networth': self.getNetworth() - fd.__networth(),
             'exchange_rate': f"{format_currency(fd.exchange_rate['NGN']/fd.exchange_rate['CAD'], currency='NGN', locale='en_US')}/CA$"
         })
 
