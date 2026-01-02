@@ -122,14 +122,14 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         # Section 5: Investment Score
         year = timezone.now().year
         current_year_asset = AggregatedAsset(self.request.user, year)
-        investments = Investment.objects.filter(owner=current_year_asset.owner).filter(is_active=False)
+        # investments = Investment.objects.filter(owner=current_year_asset.owner).filter(is_active=False)
         
-        mature_investment_current_year = current_year_asset.investments(investments)
+        mature_investment_current_year = current_year_asset.investments()
         context['mature_investment_current_year_roi'] = mature_investment_current_year[1] 
         context['mature_investment_current_year_turnover'] = mature_investment_current_year[0]
 
         all_asset = AggregatedAsset(self.request.user)
-        mature_investment = all_asset.investments(investments)
+        mature_investment = all_asset.investments()
         context['mature_investment_roi'] = mature_investment[1]
         context['mature_investment_turnover'] = mature_investment[0]
         
