@@ -183,9 +183,8 @@ class AnnualReportView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['annum'] = str(current_year)
         context['balance_brought_forward'] = first_fd.worth
 
-        turnover = AggregatedAsset(current_year, self.request.user)
-        investments = Investment.objects.filter(owner=turnover.owner).filter(is_active=False)
-        all_assets = [turnover.investments(investments), turnover.real_estate(), turnover.business(), turnover.stock()]
+        turnover = AggregatedAsset(self.request.user, current_year)
+        all_assets = [turnover.investments(), turnover.real_estate(), turnover.business(), turnover.stock()]
                 
         context['turnover'] = {
             'investment': all_assets[0],
@@ -194,7 +193,7 @@ class AnnualReportView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             'stock': all_assets[3]
         }
 
-        rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=datetime.date.today().year)
+        rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=current_year)
         reward_value = Money(0, 'USD')
         if rewards.exists():
             reward_value = sum(Money(reward.amount.amount/exchange_rate(reward.amount.currency)[0].amount, 'USD') for reward in rewards)
@@ -212,7 +211,7 @@ class AnnualReportView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         
         all_asset_total = all_assets[0][1] + all_assets[1][1] + all_assets[2][1] + all_assets[3][1]
         changes_total = sum([stream_changes['savings'], stream_changes['investment'], stream_changes['fixed_asset'], stream_changes['business'], 
-                            stream_changes['stock'], -stream_changes['liability']])
+                            stream_changes['stock'], - stream_changes['liability']])
         context['stream_changes_total'] = changes_total
         context['earnings_total'] = all_asset_total
         context['balance_1'] = first_fd.worth + all_asset_total + changes_total
