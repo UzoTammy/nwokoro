@@ -187,9 +187,9 @@ class FinancialReport:
             roi=self.get_roi(),
             daily_roi=self.get_daily_roi(),
             present_roi=self.get_present_roi(),
-            networth_by_country=self.country_networth())
+            networth_by_country=self.country_networth()
+        )
     
-
 def exchange_rate(of:str, to:str=None):
     target = ExchangeRate.objects.filter(target_currency=of)
     if to is None:
@@ -541,31 +541,11 @@ def past_investment(queryset: QuerySet)-> Money:
         sum_total += value
     return Money(sum_total, 'USD')
         
-
 class AggregatedAsset:
     def __init__(self, owner:User, year:int|None=None):
         self.owner = owner
         self.year = year
 
-    # def investment(self):
-    #     """All mature investment go through investment transaction of the type DR."""
-
-    #     # capture the queryset
-    #     investments = InvestmentTransaction.objects.filter(user=self.owner).filter(timestamp__year=self.year).filter(transaction_type='DR')
-    #     # trim the queryset
-    #     investment_volume = investments.values_list('investment__principal', 'amount_currency', 'amount')
-    #     # Sum
-    #     investments, earnings = list(), list()
-    #     investment_sum, earning_sum = Money(0, 'USD'), Money(0, 'USD')
-    #     for investment in investment_volume:
-    #         rate = exchange_rate(investment[1])[0].amount
-    #         investments.append(investment[0]/rate)
-    #         investment_sum = sum(investments)
-    #         earning = investment[2] - investment[0]
-    #         earnings.append(earning/rate)
-    #         earning_sum = sum(earnings)
-    #     return Money(investment_sum, 'USD'), Money(earning_sum, 'USD')
-    
     def investments(self, investments:QuerySet):
         """A user's investment aggregates within a specified year"""
         # investments = Investment.objects.filter(owner=self.owner).filter(is_active=False)
@@ -587,59 +567,55 @@ class AggregatedAsset:
 
     def real_estate(self):
         # All rented real estate 
-        rented_fixed_assets = FixedAsset.objects.filter(owner=self.owner).exclude(rent=None)
-        if self.year is not None:
-            rented_fixed_assets = rented_fixed_assets.filter(rent__date__year=self.year)
-        
         fixed_asset_sum, earning_sum = 0.0, 0.0
+        rented_fixed_assets = FixedAsset.objects.filter(owner=self.owner).exclude(rent=None)
         if rented_fixed_assets.exists():
-            for estate in rented_fixed_assets:
-                fixed_asset_sum += estate.value.amount/Decimal(ExchangeRate.objects.get(target_currency=estate.value.currency).rate)
-                earning_sum += estate.rent.amount.amount/Decimal(ExchangeRate.objects.get(target_currency=estate.rent.amount.currency).rate)
-
-            # fixed_asset_volume = rentable_fixed_assets.filter(rent__is_active=True)
-            # if fixed_asset_volume.exists():
-            #     fixed_asset_volume = fixed_asset_volume.values_list('value', 'value_currency', 'rent__amount')
-            #     fixed_assets, earnings = list(), list()
-            #     for asset in fixed_asset_volume:
-            #         rate = exchange_rate(asset[1])[0].amount
-            #         fixed_assets.append(asset[0]/rate)
-            #         earnings.append(asset[2]/rate)
-            #         fixed_asset_sum = sum(fixed_assets)
-            #         earning_sum = sum(earnings)
+            if self.year is not None:
+                rented_fixed_assets = rented_fixed_assets.filter(rent__date__year=self.year)
+        
+                if rented_fixed_assets.exists():
+                    for estate in rented_fixed_assets:
+                        fixed_asset_sum += estate.value.amount/Decimal(ExchangeRate.objects.get(target_currency=estate.value.currency).rate)
+                        earning_sum += estate.rent.amount.amount/Decimal(ExchangeRate.objects.get(target_currency=estate.rent.amount.currency).rate)
         return Money(fixed_asset_sum, 'USD'), Money(earning_sum, 'USD')
     
 
     def business(self):
         # all businesses that are active with FY ending 31st December
-        business = BusinessTransaction.objects.filter(timestamp__year=self.year).filter(user=self.owner).filter(transaction_type='DR')
         business_sum, earning_sum = 0.0, 0.0
-        if business.exists():
-            business_volume = business.annotate(value=F('business__shares')*F('business__unit_cost')).values_list('value', 'amount_currency', 'amount')
-            business, earnings = list(), list()
-            for biz in business_volume:
-                rate = exchange_rate(biz[1])[0].amount
-                business.append(biz[0]/rate)
 
-                earnings.append((biz[2]-biz[0])/rate)
-                business_sum = sum(business)
-                earning_sum = sum(earnings)
+        business = BusinessTransaction.objects.filter(user=self.owner).filter(transaction_type='DR')
+        if business.exists():
+            if self.year is not None:
+                business = business.filter(timestamp__year=self.year)
+                
+                if business.exists():
+                    business_volume = business.annotate(value=F('business__shares')*F('business__unit_cost')).values_list('value', 'amount_currency', 'amount')
+                    for biz in business_volume:
+                        rate = exchange_rate(biz[1])[0].amount
+                        business_sum += biz[0]/rate
+                        earning_sum += (biz[2]-biz[0])/rate
         return Money(business_sum, 'USD'), Money(earning_sum, 'USD')
     
 
     def stock(self):
     # stock transaction
-        stocks = StockTransaction.objects.filter(user=self.owner).filter(timestamp__year=self.year).filter(transaction_type='DR')
-        stock_volume = stocks.values_list('amount', 'amount_currency')
         stock_sum, earning_sum = 0.0, 0.0
-        if stock_volume.exists():
-            stocks, earnings = list(), list()
-            for stock in stock_volume:
-                rate = exchange_rate(stock[1])[0].amount
-                stocks.append(stock[0]/rate)
-                earnings.append((stock[1]- stock[0])/rate)
-                stock_sum = sum(stocks)
-                earning_sum = sum(earnings)
+        stocks = StockTransaction.objects.filter(user=self.owner).filter(transaction_type='DR')
+        if stocks.exists():
+            if self.year is not None:
+                stocks = stocks.filter(timestamp__year=self.year)
+                # if stocks.exists():
+                    # stock_volume = stocks.annotate(value=F('stock__units')*F('stock__unit_cost')).values_list('value', 'amount_currency', 'amount')
+                stock_volume = stocks.values_list('amount', 'amount_currency')
+                if stock_volume.exists():
+                    stocks, earnings = list(), list()
+                    for stock in stock_volume:
+                        rate = exchange_rate(stock[1])[0].amount
+                        stocks.append(stock[0]/rate)
+                        earnings.append((stock[1]- stock[0])/rate)
+                        stock_sum = sum(stocks)
+                        earning_sum = sum(earnings)
         return Money(stock_sum, 'USD'), Money(earning_sum, 'USD')
 
     

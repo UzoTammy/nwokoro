@@ -164,7 +164,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         return context
     
-class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+class AnnualReportView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/balance_sheet.html'
 
     def test_func(self):
@@ -175,49 +175,50 @@ class BalanceSheetView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # current_year = datetime.date.today().year
-        # fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
-        # first_fd = fd.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else fd.first()
-        # last_fd = fd.latest('date')
-            
-        # context['balance_brought_forward'] = first_fd.worth
+        current_year = datetime.date.today().year - 1
+        fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
+        first_fd = fd.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else fd.first()
+        last_fd = fd.latest('date')
+        
+        context['annum'] = str(current_year)
+        context['balance_brought_forward'] = first_fd.worth
 
-        # turnover = AggregatedAsset(current_year, self.request.user)
-        # investments = Investment.objects.filter(owner=turnover.owner).filter(is_active=False)
-        # all_assets = [turnover.investments(investments), turnover.real_estate(), turnover.business(), turnover.stock()]
+        turnover = AggregatedAsset(current_year, self.request.user)
+        investments = Investment.objects.filter(owner=turnover.owner).filter(is_active=False)
+        all_assets = [turnover.investments(investments), turnover.real_estate(), turnover.business(), turnover.stock()]
                 
-        # context['turnover'] = {
-        #     'investment': all_assets[0],
-        #     'fixed_asset': all_assets[1],
-        #     'business': all_assets[2],
-        #     'stock': all_assets[3]
-        # }
+        context['turnover'] = {
+            'investment': all_assets[0],
+            'fixed_asset': all_assets[1],
+            'business': all_assets[2],
+            'stock': all_assets[3]
+        }
 
-        # rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=datetime.date.today().year)
-        # reward_value = Money(0, 'USD')
-        # if rewards.exists():
-        #     reward_value = sum(Money(reward.amount.amount/exchange_rate(reward.amount.currency)[0].amount, 'USD') for reward in rewards)
+        rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=datetime.date.today().year)
+        reward_value = Money(0, 'USD')
+        if rewards.exists():
+            reward_value = sum(Money(reward.amount.amount/exchange_rate(reward.amount.currency)[0].amount, 'USD') for reward in rewards)
         
-        # stream_changes = {
-        #     'savings': last_fd.savings - first_fd.savings,
-        #     'investment': last_fd.investment - first_fd.investment - all_assets[0][1],
-        #     'fixed_asset': last_fd.fixed_asset - first_fd.fixed_asset - all_assets[1][1],
-        #     'business': last_fd.business - first_fd.business - all_assets[2][1],
-        #     'stock': last_fd.stock - first_fd.stock - all_assets[3][1],
-        #     'liability': last_fd.liability - first_fd.liability,
-        #     'reward': reward_value
-        # }
-        # context['income_change'] = stream_changes
+        stream_changes = {
+            'savings': last_fd.savings - first_fd.savings,
+            'investment': last_fd.investment - first_fd.investment - all_assets[0][1],
+            'fixed_asset': last_fd.fixed_asset - first_fd.fixed_asset - all_assets[1][1],
+            'business': last_fd.business - first_fd.business - all_assets[2][1],
+            'stock': last_fd.stock - first_fd.stock - all_assets[3][1],
+            'liability': last_fd.liability - first_fd.liability,
+            'reward': reward_value
+        }
+        context['income_change'] = stream_changes
         
-        # all_asset_total = all_assets[0][1] + all_assets[1][1] + all_assets[2][1] + all_assets[3][1]
-        # changes_total = sum([stream_changes['savings'], stream_changes['investment'], stream_changes['fixed_asset'], stream_changes['business'], 
-        #                     stream_changes['stock'], -stream_changes['liability']])
-        # context['stream_changes_total'] = changes_total
-        # context['earnings_total'] = all_asset_total
-        # context['balance_1'] = first_fd.worth + all_asset_total + changes_total
+        all_asset_total = all_assets[0][1] + all_assets[1][1] + all_assets[2][1] + all_assets[3][1]
+        changes_total = sum([stream_changes['savings'], stream_changes['investment'], stream_changes['fixed_asset'], stream_changes['business'], 
+                            stream_changes['stock'], -stream_changes['liability']])
+        context['stream_changes_total'] = changes_total
+        context['earnings_total'] = all_asset_total
+        context['balance_1'] = first_fd.worth + all_asset_total + changes_total
 
-        # second_fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year).last()
-        # context['current_networth'] = second_fd.worth
+        second_fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year).last()
+        context['current_networth'] = second_fd.worth
         return context
     
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -327,7 +328,6 @@ class TransactionListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
         context['transactions'] = get_transactions(*transactions)
         return context
 
-
 class SavingListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/saving_list.html'
 
@@ -367,8 +367,7 @@ class SavingListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['savings_summary'] = savings_summary
         
         return context
-
-    
+   
 class StockListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/stock_list.html'
 

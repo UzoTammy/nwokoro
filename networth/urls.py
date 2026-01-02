@@ -1,29 +1,23 @@
 
 from django.urls import path
-from .views import (NetworthHomeView, DashboardView, BalanceSheetView, TransactionListView,
-                    InvestmentListView, InvestmentCreateView, InvestmentDetailView,
-                    InvestmentRolloverView, InvestmentUpdateView,
-                    InvestmentTerminationView,
-                    StockListView,StockCreateView, StockDetailView, StockUpdateView,
-                    SavingListView,
-                    SavingCreateView, SavingDetailView, SavingUpdateView,
-                    SavingsConversionView,
-                    BusinessListView, BusinessCreateView, BusinessDetailView, BusinessUpdateView,
-                     # BusinessPlowBackView,
-                    BusinessLiquidateView, BusinessReCapitalizeView,
-                    FixedAssetListView,
-                    FixedAssetCreateView, FixedAssetDetailView, FixedAssetUpdateView,FixedAssetRentView,
-                    FixedAssetCollectRentView, FixedAssetStopRentView, FixedAssetRestoreRentView,
-                    FixedAssetUpdateRentView,
-                    ExternalFundHome, RewardFundView, InjectFundView, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView,
-                    PDFNetworthReport, 
-                    LiabilityListView, LiabilityDetailView, LiabilityUpdateView, LiabilityRepayView)
+from .views import (
+    NetworthHomeView, DashboardView, AnnualReportView, TransactionListView,
+    InvestmentListView, InvestmentCreateView, InvestmentDetailView,
+    InvestmentRolloverView, InvestmentUpdateView,
+    InvestmentTerminationView, StockListView,StockCreateView, StockDetailView, StockUpdateView,
+    SavingListView, SavingCreateView, SavingDetailView, SavingUpdateView, SavingsConversionView,
+    BusinessListView, BusinessCreateView, BusinessDetailView, BusinessUpdateView, BusinessLiquidateView, BusinessReCapitalizeView,
+    FixedAssetListView, FixedAssetCreateView, FixedAssetDetailView, FixedAssetUpdateView,FixedAssetRentView,
+    FixedAssetCollectRentView, FixedAssetStopRentView, FixedAssetRestoreRentView, FixedAssetUpdateRentView,
+    ExternalFundHome, RewardFundView, InjectFundView, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView,
+                    PDFNetworthReport,
+     LiabilityListView, LiabilityDetailView, LiabilityUpdateView, LiabilityRepayView)
 
 
 urlpatterns = [
     path('', NetworthHomeView.as_view(), name='networth-home'),
     path('dashboard/', DashboardView.as_view(), name='networth-dashboard'),
-    path('balance/sheet/', BalanceSheetView.as_view(), name='balance-sheet'),
+    path('annual/report/', AnnualReportView.as_view(), name='annual-report'),
     path('transactions/', TransactionListView.as_view(), name='transaction-list'),
     path('investment/list/', InvestmentListView.as_view(), name='investment-list'),
     path('investment/<int:pk>/create/', InvestmentCreateView.as_view(),
