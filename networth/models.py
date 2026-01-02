@@ -736,8 +736,8 @@ class BorrowedFund(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     source = models.CharField(max_length=50)
     host_country = models.CharField(max_length=2, default='NG')
-    borrowed_amount = MoneyField(max_digits=12, decimal_places=2)
-    settlement_amount = MoneyField(max_digits=12, decimal_places=2)
+    borrowed_amount = MoneyField(max_digits=12, decimal_places=2) # principal
+    settlement_amount = MoneyField(max_digits=12, decimal_places=2) # principal + interest
     date = models.DateTimeField()
     savings_account = models.ForeignKey(Saving, on_delete=models.CASCADE)
     description = models.CharField(max_length=250, blank=True)

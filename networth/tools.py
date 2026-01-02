@@ -224,9 +224,10 @@ def get_user_finances(username: str)->Optional[FinancialReport]:
         business = Business.objects.filter(owner__username=username).filter(is_active=True)
         fixed_asset = FixedAsset.objects.filter(owner__username=username).filter(is_active=True)
         # when balance amount is 
-        liability = BorrowedFund.objects.filter(owner__username=username).filter(balance_amount__gt=0)
-        networth = FinancialReport(savings, investments, stocks, business, fixed_asset, liability)
-        return networth
+        liability = BorrowedFund.objects.filter(owner__username=username).filter(settlement_amount__gt=0)
+        
+        networth_obj = FinancialReport(savings, investments, stocks, business, fixed_asset, liability)
+        return networth_obj
     
 def get_value(instrument:QuerySet, _type:Optional[str]):
 
