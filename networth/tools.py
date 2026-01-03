@@ -139,10 +139,10 @@ class FinancialReport:
         return networth
 
     def send_email(self):
-        from_email = "no-reply@chores.com"
+        from_email = "noreply@uzonwokoro.com"
 
         subject = "Financial Data Saved to Database"
-        to_email = [self.get_owner().email]
+        to_email = ['uzo.nwokoro@ozonefl.com' if self.get_owner().email=='nwokorouzo77@gmail.com' else self.get_owner().email]
 
         fd = FinancialData.objects.order_by('-date')[1] # previous latest
 

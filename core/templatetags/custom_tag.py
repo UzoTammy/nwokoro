@@ -26,3 +26,15 @@ def get_item(list_obj, index):
         return list_obj[index]
     except (IndexError, TypeError):
         return None
+    
+@register.filter
+def to_usd(value):
+    from networth.tools import exchange_rate
+    rate_func = exchange_rate(value.currency) if value.currency != 'USD' else (1,)
+    try:
+        return f'${(value/rate_func[0]):,.2f}'
+    except (ValueError, TypeError, ZeroDivisionError):
+        return None
+    
+
+    

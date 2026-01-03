@@ -179,7 +179,7 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' if not DEBUG else "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' if DEBUG else "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = "EmailFileBased"
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587

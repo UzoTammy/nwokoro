@@ -34,6 +34,7 @@ from .tools import (get_value, valuation, ytd_roi, investments_by_holder,networt
                     exchange_rate, get_assets_liabilities, set_roi, get_year_financial, current_year_roi,past_investment,
                     AggregatedAsset)
 
+
 def get_target():
     
     return {
@@ -68,7 +69,9 @@ def get_ytd_roi_total(user, year):
     
     return {'principal': ytd_roi_principal_total, 'roi': ytd_roi_total, 
             'percent': 100*ytd_roi_total/ytd_roi_principal_total if ytd_roi_principal_total else 0}
-    
+
+
+
 # Create your views here.
 class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/home.html'
