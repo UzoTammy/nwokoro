@@ -327,7 +327,7 @@ class TransactionListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
         transactions = [SavingsTransaction, InvestmentTransaction,BusinessTransaction, StockTransaction, 
                         BorrowedFundTransaction, FixedAssetTransaction]
         
-        context['transactions'] = get_transactions(*transactions)
+        context['transactions'] = get_transactions(*transactions, period='year')
         return context
 
 class SavingListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -1073,32 +1073,33 @@ class PDFNetworthReport(WeasyTemplateResponseMixin, UserPassesTestMixin, Templat
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        current_year = datetime.date.today().year
+        current_year = datetime.date.today().year-1
         record = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
-        first_record = record.earliest('date') if current_year != 2025 else record.filter(date__date=datetime.date(2025, 2, 1)).first()
-        first_worth = first_record.networth()
-        target_roi = Money(100000, 'USD')
-        base_daily_roi = set_roi(target_roi)  # 20% above the first roi of the year
-        first_date = datetime.date(year=current_year, month=1, day=1).strftime("%d %b, %Y")
-        
-        fd = record.latest('date')
-        growth_percent = format_percent(round((fd.networth() - first_worth)/first_worth, 4), decimal_quantization=False, locale='en_US')
-        expected_growth_rate = format_percent(round((target_roi)/first_worth, 4), decimal_quantization=False, locale='en_US')
-        
-        context['fd_first'] = {'worth': first_worth, 'date': first_date, 'growth': fd.networth() - first_worth,
-                               'base_daily_roi': base_daily_roi, 'target_roi': target_roi, 'record': first_record,
-                               'growth_percent': growth_percent, 'expected_growth_rate': expected_growth_rate}
-        context['fd'] = fd
-        context['plot'] = bar_chart(['Fixed Asset', 'Stock', 'Investment', 'Savings',  'Business'], 
-                                    [fd.fixed_asset.amount, fd.stock.amount, fd.investment.amount, fd.savings.amount, fd.business.amount],
-                                    "Worth", "Instrument Type", "Worth Distribution")
-        can = fd.networth_by_country.get('CA', 0)
-        ngn = fd.networth_by_country.get('NG', 0)
-        usa = fd.networth_by_country.get('US', 0)
-        
-        context['donot'] = donut_chart(["CAN", "NGN", "USA"], 
-                                       [can, ngn, usa])
-        
+        if record.exists():
+            first_record = record.earliest('date') if current_year != 2025 else record.filter(date__date=datetime.date(2025, 2, 1)).first()
+            first_worth = first_record.worth
+            target_roi = get_target().get(2025)
+            base_daily_roi = set_roi(target_roi)  # 20% above the first roi of the year
+            first_date = datetime.date(year=current_year, month=1, day=1).strftime("%d %b, %Y")
+            
+            fd = record.latest('date')
+            growth_percent = format_percent(round((fd.worth - first_worth)/first_worth, 4), decimal_quantization=False, locale='en_US')
+            expected_growth_rate = format_percent(round((target_roi)/first_worth, 4), decimal_quantization=False, locale='en_US')
+            
+            context['fd_first'] = {'worth': first_worth, 'date': first_date, 'growth': fd.worth - first_worth,
+                                'base_daily_roi': base_daily_roi, 'target_roi': target_roi, 'record': first_record,
+                                'growth_percent': growth_percent, 'expected_growth_rate': expected_growth_rate}
+            context['fd'] = fd
+            context['plot'] = bar_chart(['Fixed Asset', 'Stock', 'Investment', 'Savings',  'Business'], 
+                                        [fd.fixed_asset.amount, fd.stock.amount, fd.investment.amount, fd.savings.amount, fd.business.amount],
+                                        "Worth", "Instrument Type", "Worth Distribution")
+            can = fd.networth_by_country.get('CA', 0)
+            ngn = fd.networth_by_country.get('NG', 0)
+            usa = fd.networth_by_country.get('US', 0)
+            
+            context['donot'] = donut_chart(["CAN", "NGN", "USA"], 
+                                        [can, ngn, usa])
+            
         return context
 
            
