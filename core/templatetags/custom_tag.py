@@ -37,4 +37,3 @@ def to_usd(value):
         return None
     
 
-    

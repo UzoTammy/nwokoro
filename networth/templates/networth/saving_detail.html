@@ -2,31 +2,69 @@
 {% load custom_tag %}
 
 {% block content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav mr-auto">
+            <a class="nav-link" href="{% url 'networth-saving-update' object.pk %}"><i
+                    class="fas fa-edit text-success"></i> Update <span class="sr-only">(current)</span></a>
+            <a class="nav-link" href="{% url 'networth-investment-create' object.pk %}"><i
+                    class="fas fa-percent text-success"></i> Invest</a>
+            <a class="nav-link" href="{% url 'networth-stock-create' object.pk %}"><i
+                    class="fas fa-cubes text-success"></i> Buy Stock</a>
+            <a class="nav-link" href="{% url 'networth-business-create' object.pk %}"><i
+                    class="fas fa-briefcase text-success"></i> Start Business</a>
+            <a class="nav-link" href="{% url 'networth-fixed-asset-create' object.pk %}"><i
+                    class="fas fa-sign text-success"></i> Buy Asset</a>
+        </div>
+        <div class="navbar-nav">
+            <a class="nav-link" href="{% url 'savings-list' %}"><i class="fa fa-times-circle text-danger"></i></a>
+        </div>
+
+    </div>
+</nav>
+
+
 <div class="container">
     <div class="row justify-content-center align-items-center vh-100">
+        
         <div class="col-sm-8">
-            <div class="row">
-                <div class="col">
-                    <a class="btn btn-outline-dark" href="{% url 'networth-saving-update' object.pk %}">Update</a>
-                    <a class="btn btn-outline-dark" href="{% url 'networth-investment-create' object.pk %}">Invest</a>
-                    <a class="btn btn-outline-dark" href="{% url 'networth-stock-create' object.pk %}">Buy Stock</a>
-                    <a class="btn btn-outline-dark" href="{% url 'networth-business-create' object.pk %}">Start Business</a>
-                    <a class="btn btn-outline-dark" href="{% url 'networth-fixed-asset-create' object.pk %}">Buy Asset</a>
-                    
-                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>
-                </div>
-            </div>
-            <hr>
-            <h3>{{object}}</h3>
+            <h4>Saving Account: {{object.holder}}</h4>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">Holder<span class="float-right">{{object.holder}}</span></li>
-                <li class="list-group-item">Value<span class="float-right">{{object.value}}</span></li>
+                <li class="list-group-item">Date<span class="float-right">{{object.date}}</span></li>
                 <li class="list-group-item">Host Country<span class="float-right">{{object.host_country}}</span></li>
                 <li class="list-group-item">Type<span class="float-right">{{object.category}}</span></li>
-                <li class="list-group-item">Date<span class="float-right">{{object.date}}</span></li>
+                <li class="list-group-item">Balance<span class="float-right">{{object.value}}</span></li>
                 <hr>
-              </ul>
-            
+            </ul>
+            {% if transactions %}
+            <h4>Transaction history</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th class="text-right">Amount</th>
+                        <th class="text-right">To USD</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{transaction.timestamp.date}}</td>
+                        <td>{{transaction.transaction_type}}</td>
+                        <td class="text-right">{{transaction.amount}}</td>
+                        <td class="text-right">{{transaction.amount|to_usd}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
         </div>
     </div>
 </div>

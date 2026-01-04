@@ -32,7 +32,7 @@
                         <th>Maturity</th>
                         <th class="">Due</th>
                         <th class="text-right">Principal</th>
-                        <th class="text-right">Principal(USD)</th>
+                        <th class="text-right">Principal($)</th>
                         <th class="text-right">Accrued ROI</th>
                         <th class="text-right">Accrued ROI($)</th>
                     </tr>
@@ -55,7 +55,9 @@
                         <td class="text-right">{{investment.present_roi|to_usd}}</td>
                     </tr>
                     {% endfor %}
-                    
+                    <tr>
+                        <td></td>
+                    </tr>
                 </tbody>
             </table>
 

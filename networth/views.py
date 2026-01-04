@@ -519,7 +519,7 @@ class InvestmentListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             context['fd'] = fd
 
         investments = get_assets_liabilities(owner=self.request.user)['investments']
-        context['investments'] = investments.order_by('principal')
+        context['investments'] = sorted([investment for investment in investments], key=lambda x: x.maturity())
         context['investment_total'] = get_value(investments, 'investment')
         context['to_usd_total'] = sum(investment.to_usd() for investment in investments)
 
@@ -546,6 +546,7 @@ class InvestmentListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 class InvestmentDetailView(LoginRequiredMixin, DetailView):
     model = Investment
 
+    
 class InvestmentUpdateView(LoginRequiredMixin, UpdateView):
     model = Investment
     success_url = reverse_lazy('networth-home')
@@ -659,6 +660,12 @@ class SavingCreateView(LoginRequiredMixin, CreateView):
 
 class SavingDetailView(LoginRequiredMixin, DetailView):
     model = Saving
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['transactions'] = SavingsTransaction.objects.filter(savings__id=self.object.pk).order_by('-timestamp')[:10]
+        return context
+
 
 class SavingUpdateView(LoginRequiredMixin, UpdateView):
     model = Saving
