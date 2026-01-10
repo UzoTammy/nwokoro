@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.db.models.aggregates import Max
-from django.db.models import F
+from django.db.models import F, ExpressionWrapper, DateField
 from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView, RedirectView)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
@@ -519,7 +519,9 @@ class InvestmentListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             context['fd'] = fd
 
         investments = get_assets_liabilities(owner=self.request.user)['investments']
+        
         context['investments'] = sorted([investment for investment in investments], key=lambda x: x.maturity())
+        context['investment_count'] = investments.count()
         context['investment_total'] = get_value(investments, 'investment')
         context['to_usd_total'] = sum(investment.to_usd() for investment in investments)
 

@@ -18,10 +18,11 @@
 
 <div class="container-fluid mt-5 p-3">
     <div class="row mt-1">
-            <div class="col">
-                <h1 class="font-weight-lighter">Investment</h1>
-            </div>
+        <div class="col">
+            <h1 class="font-weight-lighter">Investment</h1>
         </div>
+    </div>
+
     <div class="row mt-4">
         {% if investments %}
         <div class="col-sm-8 font-weight-lighter">
@@ -92,19 +93,13 @@
                 </div>
             </div>
 
-            <div class="row mt-3">
-                <div class="col">
-                    <h5 class="font-weight-lighter">By Country</h5>
-                    <p>Comming soon...</p>
-                </div>
-                
-            </div>
         </div>
+
         <div class="col-sm-4">
             <ul class="list-group list-group-flush font-weight-lighter">
                 <li class="list-group-item list-group-item-primary text-center">Summary</li>
                 <li class="list-group-item">Count <span
-                        class="float-right badge badge-info">{{investments.count}}</span>
+                        class="float-right badge badge-info">{{investment_count}}</span>
                 </li>
                 {% for investment in investment_total %}
                 <li class="list-group-item"> {{investment.currency}}
@@ -114,8 +109,9 @@
                 <li class="list-group-item bg-light"> Total (USD)
                     <span class="float-right">{{to_usd_total}}</span>
                 </li>
-                
-                <li class="list-group-item list-group-item-info">Holders <span class="float-right"><a href="{% url 'institution-report' %}">Click for details</a></span></li>
+
+                <li class="list-group-item list-group-item-info">Holders <span class="float-right"><a
+                            href="{% url 'institution-report' %}">Click for details</a></span></li>
                 {% for investment in investments_summary %}
                 <li class="list-group-item">
                     {{investment.holder}}
@@ -137,7 +133,6 @@
 
         {% endif %}
     </div>
-
 
 </div>
 

@@ -17,7 +17,7 @@ class ExchangeRate(models.Model):
     def __str__(self):
         return f"{self.base_currency} to {self.target_currency}: {self.rate}"
 
-# Internal Objects - Static.
+# Assets
 class Saving(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_savings")
     holder = models.CharField(max_length=50)
@@ -259,7 +259,7 @@ class Saving(models.Model):
             transaction_type = 'CR'
         )
 
-# Internal Objects - Instruments
+
 class Investment(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     holder = models.CharField(max_length=30)
@@ -628,7 +628,7 @@ class Business(models.Model):
         self.is_active = False
         self.save()
         
-        
+# Object needed for Fixed Asset     
 class Rent(models.Model):
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     date = models.DateField()
@@ -731,7 +731,7 @@ class Liability(models.Model):
     class Meta:
         verbose_name = 'Liability'
 
-# External Objects
+# Liability
 class BorrowedFund(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     source = models.CharField(max_length=50)
@@ -776,7 +776,7 @@ class BorrowedFund(models.Model):
         savings_account.value -= amount
         savings_account.save()
   
-# There is no need for Rewayd & Inject Trasaction objects
+# Fund pulled out from savings account
 class RewardFund(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(default=timezone.now)
@@ -800,7 +800,7 @@ class RewardFund(models.Model):
         self.savings_account.value -= self.amount
         self.savings_account.save()
 
-
+# Fund injected into savings account
 class InjectFund(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(default=timezone.now)
