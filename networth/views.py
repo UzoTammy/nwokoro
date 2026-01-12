@@ -88,7 +88,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         # Section 1: Message box   
         exch = exchange_rate('NGN', 'CAD')
         context['exchange'] = f'{exch[0]}/CA$ on {exch[1].strftime("%A %d-%b-%Y")}' if exch else None
-        # naira valuation
+            # naira valuation
         naira_valuation = valuation('NGN')
         context['naira_value_comment'] = f"Naira have {naira_valuation[1]} {naira_valuation[0]} since {naira_valuation[2]}"
 

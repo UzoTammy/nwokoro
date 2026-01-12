@@ -14,16 +14,16 @@
     <style>
         .container-grid-row {
             display: grid;
-            grid-template-rows: 8fr 1fr;
+            grid-template-rows: 11fr 1fr;
             gap: 1px;
             height: 100vh;
         }
 
         .rows-white {
-            background-color: rgb(255, 255, 255);
-            padding: 10px;
-            margin: 5px;
-            align-self: stretch;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: rgba(255, 255, 255, 1);
         }
 
         .rows-black {
