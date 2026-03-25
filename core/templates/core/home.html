@@ -2,9 +2,101 @@
 {% load static %}
 {% block head %}
 <style>
-  body {
-    font-family: 'Arial', sans-serif;
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
   }
+
+  body {
+    background: #110101;
+    color: #fff;
+    height: 100vh;
+    /* overflow-x: hidden;
+        overflow-y: auto; */
+  }
+
+  /* KPI CARDS */
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .card {
+    background: #0b0b0b;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #222;
+  }
+
+  .card h3 {
+    font-size: 16px;
+    color: #00c8ff;
+
+  }
+
+  .card p {
+    font-size: 28px;
+    margin-top: 10px;
+    color: #f6db0d;
+  }
+
+  /* CHART AREA */
+
+  .charts {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .chart-box {
+    background: #0b0b0b;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #222;
+    height: 300px;
+    position: relative;
+  }
+
+  /* TABLE */
+
+  .table-box {
+    background: #0b0b0b;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #222;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+
+  th,
+  td {
+    padding: 10px;
+    border-bottom: 1px solid #222;
+    text-align: left;
+  }
+
+  th {
+    color: #888;
+  }
+
+  tr:hover {
+    background: #111;
+  }
+
+/* end */
+  /* body { */
+    /* font-family: 'Arial', sans-serif; */
+  /* } */
 
   .navbar {
     margin-bottom: 30px;
@@ -71,32 +163,44 @@
     display: flex;
     gap: 1rem;
   }
-  
+
   .horizontal-list li::before {
     display: inline-block;
-    width: 1.5rem; /* Adjust to match the bullet size */
-    height: 1.5rem; /* Adjust to match the bullet size */
-    line-height: 1.5rem; /* Align the bullet vertically */
+    width: 1.5rem;
+    /* Adjust to match the bullet size */
+    height: 1.5rem;
+    /* Adjust to match the bullet size */
+    line-height: 1.5rem;
+    /* Align the bullet vertically */
     text-align: center;
     border-radius: 50%;
-    margin-right: 0.1rem; /* Space between bullet and text */
+    margin-right: 0.1rem;
+    /* Space between bullet and text */
   }
+
   .check-list {
     list-style-type: none;
     padding-left: 0;
   }
+
   .check-list li {
-      display: flex;
-      align-items: center;
-      font-size: 1.0rem; /* Adjust icon size */
-      margin-bottom: 0.5rem; /* Space between list items */
+    display: flex;
+    align-items: center;
+    font-size: 1.0rem;
+    /* Adjust icon size */
+    margin-bottom: 0.5rem;
+    /* Space between list items */
   }
+
   .check-list li::before {
-      content: '\f058'; /* Unicode for Font Awesome check mark */
-      font-family: 'Font Awesome 5 Free';
-      font-weight: 700;
-      color: #515a555d; /* Check mark color */
-      margin-right: 0.2rem; /* Space between check mark and text */
+    content: '\f058';
+    /* Unicode for Font Awesome check mark */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 700;
+    color: #515a555d;
+    /* Check mark color */
+    margin-right: 0.2rem;
+    /* Space between check mark and text */
   }
 </style>
 {% endblock %}
@@ -164,13 +268,13 @@
       <ul class="horizontal-list">
         <ul class="p-0">
           <li><i class="fa fa-check-circle text-success fa-sm"></i> Project Manager</li>
-          <li><i class="fa fa-check-circle text-success fa-sm"></i> Chemical Engineer</li>  
+          <li><i class="fa fa-check-circle text-success fa-sm"></i> Chemical Engineer</li>
         </ul>
         <ul>
           <li><i class="fa fa-check-circle text-success fa-sm"></i> Web Developer</li>
           <li><i class="fa fa-check-circle text-success fa-sm"></i> Business Manager</li>
         </ul>
-        
+
       </ul>
     </div>
     <div class="col justify-content-center">
@@ -215,7 +319,7 @@
     <div class="col-md-4">
       <h2>About Me</h2>
       <p>I never quit until mission is accomplished. Always analysing the process for continuous improvement,
-        excited to learn new skills and performes better when working with a team and determined to resolve issues. 
+        excited to learn new skills and performes better when working with a team and determined to resolve issues.
       </p>
       <a href="{% url 'new-aboutme' %}">click to read more</a>
     </div>
@@ -231,16 +335,17 @@
     </div>
     <div class="col-md-4">
       <h2>Contact</h2>
-      <i class="fa fa-envelope text-secondary"></i> <a class="" href="mailto:contact@uzonwokoro.com"> contact@uzonwokoro.com</a>
+      <i class="fa fa-envelope text-secondary"></i> <a class="" href="mailto:contact@uzonwokoro.com">
+        contact@uzonwokoro.com</a>
       <div class="container">
         <ul class="horizontal-list">
-            <li><i class="fab fa-linkedin text-primary"></i> LinkedIn</li>
-            <li><i class="fab fa-tiktok"></i> TikTok</li>
-            <li><i class="fab fa-twitter text-primary"></i> Twitter</li>
-            <li><i class="fab fa-youtube text-danger"></i> YouTube</li>
-            <li><i class="fab fa-facebook text-primary"></i> Facebook</li>
+          <li><i class="fab fa-linkedin text-primary"></i> LinkedIn</li>
+          <li><i class="fab fa-tiktok"></i> TikTok</li>
+          <li><i class="fab fa-twitter text-primary"></i> Twitter</li>
+          <li><i class="fab fa-youtube text-danger"></i> YouTube</li>
+          <li><i class="fab fa-facebook text-primary"></i> Facebook</li>
         </ul>
-    </div>
+      </div>
     </div>
   </div>
 </div>

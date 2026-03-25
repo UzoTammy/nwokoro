@@ -3,6 +3,169 @@
 
 {% block head %}
 <style>
+    :root {
+        --primary-bg: #0f172a;
+        --secondary-accent: #3d4b62;
+        --main-content: #f8fafc;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --white: #ffffff;
+    }
+
+    body {
+        background-color: var(--main-content);
+        color: var(--text-main);
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+    }
+
+    .sidebar {
+        background-color: var(--primary-bg);
+        color: var(--white);
+        width: 260px;
+        height: 100vh;
+        padding: 2rem;
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .card {
+        background-color: var(--white);
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+        background-color: var(--secondary-accent);
+        color: var(--white);
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+
+    .skill-bar-container {
+        width: 100%;
+        background-color: #e2e8f0;
+        border-radius: 4px;
+        height: 8px;
+        margin: 10px 0;
+    }
+
+    .skill-bar-fill {
+        background-color: var(--secondary-accent);
+        height: 100%;
+        border-radius: 4px;
+    }
+
+    /* end of main  styles */
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .profile-header {
+        text-align: center;
+        padding: 4rem 1rem;
+        background-color: var(--primary-bg);
+        color: white;
+    }
+
+    .avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 4px solid var(--secondary-accent);
+        margin-bottom: 1rem;
+    }
+
+    .portfolio-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .project-thumb {
+        width: 100%;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    .portfolio-wrapper {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .flank-side {
+        flex: 0 0 250px;
+        /* Fixed width for sidebars */
+        padding-top: 2rem;
+    }
+
+    .center-content {
+        flex: 1;
+        /* Grows to fill available space */
+        max-width: 800px;
+    }
+
+    .flank-side h3 {
+        color: var(--secondary-accent);
+        border-bottom: 2px solid var(--secondary-accent);
+        padding-bottom: 0.5rem;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .soft-skills-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .soft-skills-list li {
+        background: var(--white);
+        margin-bottom: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 6px;
+        border-left: 4px solid var(--secondary-accent);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 1024px) {
+        .portfolio-wrapper {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .flank-side {
+            width: 100%;
+            flex: none;
+        }
+    }
+
+    /* end of specific styles */
     .rows-sky {
         margin: 0;
         padding: 0;
@@ -35,9 +198,11 @@
     .bg-grey {
         background-color: grey;
     }
+
     .text-violet {
         color: rgb(255, 20, 255);
     }
+
     .name-font {
         font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
         color: maroon;
@@ -47,6 +212,146 @@
 {% endblock %}
 
 {% block content %}
+
+<header class="profile-header">
+    <!-- <img src="profile-pic.jpg" alt="Profile" class="avatar"> -->
+    <img class="avatar" src="{% static 'tammy.jpeg' %}" alt="My Picture">
+    <h1>Uzo Tammy Nwokoro</h1>
+    <p class="subtitle">AI Programmer | ML Student | Chemical Engineer | Entrepreneur</p>
+    <div class="social-links">
+        <a href="https://github.com/UzoTammy"><i class="fab fa-github text-primary"></i></a> |
+        <a class="m-1" target="_blank"
+            href="https://www.linkedin.com/in/uzo-nwokoro-96013a55?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3B1JdwKRxdQQqAKMvwHuqEKQ%3D%3D">
+            <i class="fab fa-linkedin text-primary"></i>
+        </a> | <a class="m-1" href="mailto:uzo.tammy@gmail.com">
+            <i class="fa fa-envelope text-info"></i></a>
+    </div>
+</header>
+
+<div class="portfolio-wrapper">
+
+    <aside class="flank-side">
+        <h3>Technologies</h3>
+        <div class="skill-item">
+            <span>Python & PyTorch</span>
+            <div class="skill-bar-container">
+                <div class="skill-bar-fill" style="width: 95%;"></div>
+            </div>
+        </div>
+        <div class="skill-item">
+            <span>PySpark & Dask</span>
+            <div class="skill-bar-container">
+                <div class="skill-bar-fill" style="width: 85%;"></div>
+            </div>
+        </div>
+        <div class="skill-item">
+            <span>Scikit-learn Pipelines</span>
+            <div class="skill-bar-container">
+                <div class="skill-bar-fill" style="width: 90%;"></div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col">
+                <div class="row row-cols-3 row-cols-md-4 row-cols-lg-6 g-2 g-lg-3">
+                    <div class="col"><i class="fab fa-python text-warning"></i> </div>
+                    <div class="col"><i class="fa bg-success text-white">Dj </i> </div>
+                    <div class="col"><i class="fab fa-bootstrap text-violet"></i> </div>
+                    <div class="col"><i class="fab fa-html5 text-info"></i> </div>
+                    <div class="col"><i class="fab fa-js text-warning"></i> </div>
+                    <div class="col"><i class="fab fa-github text-secondary"></i> </div>
+                    <div class="col"><i class="fab fa-react text-info"></i> </div>
+                    <div class="col"><i class="fas fa-flask text-primary"></i> </div>
+                    <div class="col"><i class="fab fa-typescript bg-primary text-white">TS</i> </div>
+                    <div class="col"><i class="fab fa-java text-primary"></i> </div>
+                    <div class="col"><i class="fab fa-node text-dark"></i> </div>
+                    <div class="col"><i class="fab fa bg-info text-white rounded">CK</i> </div>
+                </div>
+            </div>
+
+        </div>
+    </aside>
+
+    <section class="container">
+        <div class="card">
+            <h2>About Me</h2>
+            <div class="card">
+                <p class="first-letter">
+                    Graduated as a Chemical Engineer. With over a decade experience
+                    in business management and operations,
+                    sales and redistribution in the FMCG sector.
+                </p>
+                <p class="first-letter">
+                    Currently, aspiring to establishing a career in IT; backend development,
+                    web
+                    developement, task automation, building API and a little bit of Cybersecurity
+                    training and an interest in AI programming.
+                </p>
+                <p class="first-letter">
+                    My expectation is to be able to help businesses leverage on information technology
+                    for
+                    optimal and efficient operations and management.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <aside class="flank-side">
+        <h3>Soft Skills</h3>
+        <ul class="soft-skills-list">
+            <li>Project Management</li>
+            <li>AI Ethics & Governance</li>
+            <li>Technical Presentation</li>
+            <li>Analytical Problem Solving</li>
+            <li>Collaboration</li>
+        </ul>
+
+    </aside>
+</div>
+
+<div class="cards m-3">
+    <div class="Card">
+        <h2>Portfolio</h2>
+        <div class="portfolio-grid mt-2">
+            <div class="card">
+                <h3>SCusH</h3>
+                <p>A web application for managing and analyzing company performance.
+                    Useful for businesses looking to track key performance indicators (KPIs),
+                    analyze financial data, and make informed decisions to drive growth and profitability.
+                </p>
+                <a class="btn-primary text-center" href="{% url 'portfolio-scush' %}">See Project Page</a>
+                <!-- <button class="btn-primary"></button> -->
+            </div>
+            <div class="card">
+                <h3>Networths</h3>
+                <p>
+                    A web application for tracking personal net worth. Users input assets and liabilities,
+                    and it calculates net worth, providing financial insights.
+                    Ideal for individuals seeking to monitor and improve their financial health.
+                </p>
+                {% if not user.is_authenticated %}
+                <div class="">
+                    <small class="text-muted float-right mr-1">You need an account to access this site</small>
+                </div>
+                {% endif %}
+                <a class="btn-primary text-center" href="{% url 'networth-home' %}">Visit the Site</a>
+
+            </div>
+            <div class="card">
+                <h3>Resume Analyzer</h3>
+                <p>
+                    A web application for analyzing resumes and providing insights for job seekers.
+                    Users can upload their resumes, and the application offers feedback on content, structure, and
+                    keyword optimization.
+                </p>
+                <span>This is a team project.</span>
+                <a class="btn-primary text-center" href="#">Visit the Site</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
 
 <div class="container-grid-row">
     <div class="rows-white mt-3 m-2">
@@ -222,5 +527,3 @@
         </div>
     </div>
 </div>
-
-{% endblock %}

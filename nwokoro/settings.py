@@ -100,13 +100,24 @@ WSGI_APPLICATION = 'nwokoro.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {'sslmode': 'require' if not os.environ.get('DEBUG_VALUE') == 'True' else 'disable'},
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DATABASE_NAME'), # The name you used in heroku pg:pull
+        'USER': os.getenv('DATABASE_USER'),     # Often your computer username or 'postgres'
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'), # Leave as '' if you haven't set one
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -138,7 +149,7 @@ USE_I18N = True # internationalization
 
 USE_THOUSAND_SEPARATOR = True
 
-USE_TZ = True 
+USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -193,4 +204,3 @@ ADMINS = (('uzonwokoro.com', EMAIL_HOST_USER),)
 
 CURRENCIES = ('NGN', 'CAD', 'USD')
 DEFAULT_CURRENCY = 'CAD'
-
