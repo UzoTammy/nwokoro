@@ -1,22 +1,190 @@
 {% extends 'core/base.html' %}
 {% load crispy_forms_tags %}
 
+{% block head %}
+<style>
+    :root {
+        --primary-bg: #0f172a;
+        --secondary-accent: #3d4b62;
+        --main-content: #f8fafc;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --white: #ffffff;
+    }
+
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: var(--primary-bg);
+        /* Ghost White */
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 400px;
+        background-color: var(--white);
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+        /* Slate Navy shadow */
+        text-align: center;
+    }
+
+    .login-card h2 {
+        color: var(--primary-bg);
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .login-card p {
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+    }
+
+    .form-group {
+        text-align: left;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-main);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        background-color: #ffffff;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--secondary-accent);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn-login {
+        width: 100%;
+        padding: 0.8rem;
+        background-color: var(--secondary-accent);
+        color: var(--white);
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.1s;
+    }
+
+    .btn-login:active {
+        transform: scale(0.98);
+    }
+
+    .login-footer {
+        margin-top: 1.5rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .login-footer a {
+        color: var(--secondary-accent);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .return-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        transition: color 0.2s ease;
+        width: fit-content;
+    }
+
+    .return-btn:hover {
+        color: var(--secondary-accent);
+    }
+
+    .return-btn svg {
+        transition: transform 0.2s ease;
+    }
+
+    .return-btn:hover svg {
+        transform: translateX(-3px);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-3">
-    <div class="row justify-content-center align-items-center vh-100">
-        <div class="col-sm-6">
-            <h3>Login Page</h3>
-            <hr>
-            <form action="" method="post">
-                {% csrf_token %}
-                {{ form|crispy }}
-                <div class="">
-                    <button class="btn btn-outline-dark" type="submit">Login</button>
-                    <a class="btn btn-outline-dark float-right" href="{% url 'index' %}">Back</a>
+<div class="login-container">
+    <div class="login-card">
+        <!-- <div class="col-sm-6"> -->
+        <h2>Login</h2>
+        <p>Enter your credentials to access your networth</p>
+
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+
+
+            <div class="">
+                <button class="btn-login" type="submit">Login</button>
+                <a class="return-btn float-right mt-2" href="{% url 'index' %}">
+                    <svg width="16" 
+                            height="16" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                            stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                    Cancel
+                </a>
+
+                <div class="login-footer">
+                    Don't have an account? <a href="{% url 'chore-registration-message' %}">Request Access</a>
                 </div>
-            </form>
-            <small class="text-muted">If you don't have an account, <a href="{% url 'chore-registration-message' %}">register here</a></small>
-        </div>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
+
+<div class="login-container">
+    <div class="login-card">
+        <h2>Secure Login</h2>
+        <p>Enter your credentials to access your dashboard.</p>
+
+        <form>
+            <a href="#"
+                        style="font-size: 0.8rem; color: var(--secondary-accent); text-decoration: none;">Forgot?</a>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" class="form-input" placeholder="you@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between;">
+                    <label for="password">Password</label>
+                    <a href="#"
+                        style="font-size: 0.8rem; color: var(--secondary-accent); text-decoration: none;">Forgot?</a>
+                </div>
+                <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-login">Sign In</button>
+        </form>
+
+        
+    </div>
+</div>
+
