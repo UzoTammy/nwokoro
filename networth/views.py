@@ -96,17 +96,13 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         financial_data = FinancialData.objects.filter(owner=self.request.user)
         if financial_data.exists():
             fd = financial_data.latest('date')
-            context['fd'] = fd 
+            context['fd'] = fd
 
         # Section 3: Networth Distribution
-        context['donot_networth'] = donut_chart(
-            ['Business', 'Fixed Asset', 'Investment', 'Saving', 'Stock'], 
-            [fd.business.amount,
-             fd.fixed_asset.amount,
-             fd.investment.amount,
-             fd.savings.amount,
-             fd.stock.amount]
-        )
+        context['donot_networth'] = {
+            'labels':['Business', 'Fixed Asset', 'Investment', 'Saving', 'Stock'],
+            'values':[float(val) for val in [fd.business.amount,fd.fixed_asset.amount,
+                    fd.investment.amount,fd.savings.amount, fd.stock.amount]]}
 
         # Section 4: Networth by country and currency
         networth_currency = list()
@@ -125,8 +121,7 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         # Section 5: Investment Score
         year = timezone.now().year
         current_year_asset = AggregatedAsset(self.request.user, year)
-        # investments = Investment.objects.filter(owner=current_year_asset.owner).filter(is_active=False)
-        
+        # investments = Investment.objects.filter(owner=current_year_asset.owner).filter(is_active=False)     
         mature_investment_current_year = current_year_asset.investments()
         context['mature_investment_current_year_roi'] = mature_investment_current_year[1] 
         context['mature_investment_current_year_turnover'] = mature_investment_current_year[0]
@@ -134,20 +129,18 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         all_asset = AggregatedAsset(self.request.user)
         mature_investment = all_asset.investments()
         context['mature_investment_roi'] = mature_investment[1]
-        context['mature_investment_turnover'] = mature_investment[0]
-        
+        context['mature_investment_turnover'] = mature_investment[0]   
         # Section 6: Plot of investment ROI per month
         months = list(d['month'] for d in current_year_roi(self.request.user))
         values = list(d['amount'].amount for d in current_year_roi(self.request.user))
-        context['plot_investment_earnings'] = bar_chart(months, values, X='Months', Y='Earnings', title='Earnings per month')
+        # context['plot_investment_earnings'] = bar_chart(months, values, X='Months', Y='Earnings', title='Earnings per month')
+        context['investment_earnings'] = {'months': months, 'values': [float(val) for val in values]}
         if not months:
             q1 = decimal.Decimal(0.25)*get_target()[year].amount
             q2 = decimal.Decimal(0.5)*get_target()[year].amount
             q3 = decimal.Decimal(0.75)*get_target()[year].amount
             q4 = get_target()[year].amount
-            context['plot_investment_earnings'] = bar_chart(['Q1', 'Q2', 'Q3', 'Q4'], [q1, q2, q3, q4], X=f'Quarters of {year}',
-                                                            Y='Networth', title=f'Projected Quarterly ROI of {year}')
-        
+            context['investment_earnings'] = {'months': ['Q1', 'Q2', 'Q3', 'Q4'], 'values': [float(val) for val in [q1, q2, q3, q4]]}
         # Section 7: Recent Transactions
         transactions = [SavingsTransaction, InvestmentTransaction,BusinessTransaction, StockTransaction, 
                         BorrowedFundTransaction, FixedAssetTransaction]
