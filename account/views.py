@@ -1,17 +1,30 @@
+"""Views for the account app, handling user registration, profile management, and transactions."""
+
 import os
+
+from django.contrib.auth import logout
 from django.shortcuts import render, redirect
 from django.views.generic import CreateView, DetailView, UpdateView, TemplateView
-from .forms import SignUpForm, EditProfileForm
-from .models import User, Transaction
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
-from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.paginator import Paginator
-from chore.models import FinishedWork
 from django.db.models import Sum, Avg
 from django.utils.formats import number_format
 from django.core.exceptions import ValidationError
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.paginator import Paginator
+from django.urls import reverse_lazy
+
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
+
+from chore.models import FinishedWork
+from .forms import SignUpForm, EditProfileForm
+from .models import User, Transaction
+
+
+def logout_view(request):
+    """Logs out the user and redirects to the home page."""
+    logout(request)
+    # Redirect to a success page.
+    return redirect('index')
 
 class SignUpView(CreateView):
     model = User
@@ -35,8 +48,7 @@ class SignUpView(CreateView):
                 Submit('register', 'Register', css_class='btn btn-primary')
             )
         )
-    
-    
+
 class ProfileView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = User
     template_name = 'account/profile.html'
@@ -124,3 +136,4 @@ class StatementView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
 class ForbiddenView(TemplateView):
     template_name = 'account/403.html'
+

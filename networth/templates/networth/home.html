@@ -76,7 +76,20 @@
           pending <span class=" text-danger">{{pending_tasks_count}}</span>
         </span>
       </a>
-      <a class="nav-link" href="#"><i class="fa fa-user text-primary"></i> {{user.username}}</a>
+      
+
+      <div class="btn-group">
+        <button type="button" class="btn dropdown-toggle text-light" data-toggle="dropdown" aria-haspopup="true"
+          aria-expanded="false">
+          <i class="fa fa-user text-primary"></i> {{user.username}}
+        </button>
+        <div class="dropdown-menu dropdown-menu-right">
+          <button class="dropdown-item" type="button">Action</button>
+          <button class="dropdown-item" type="button">Another action</button>
+      
+          <a class="dropdown-item" href="{% url 'logout' %}">Sign Out</a>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -238,10 +251,10 @@
 
   const data = {
     labels: {{ investment_earnings.months | safe }},
-    datasets: [
-      {
-        label: 'Monthly Earnings',
-        data: {{ investment_earnings.values | safe }},
+  datasets: [
+    {
+      label: 'Monthly Earnings',
+      data: {{ investment_earnings.values | safe }},
     backgroundColor: [
       'rgba(255, 99, 132, 0.2)',
       'rgba(255, 159, 64, 0.2)',
@@ -283,20 +296,20 @@
   new Chart(ctxDonut, {
     type: 'doughnut',
     data: {
-      labels: {{donot_networth.labels | safe }},
-      datasets: [{
-        label: 'Networth Distribution',
-        data: {{donot_networth.values | safe }},
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(255, 159, 64, 0.6)',
-          'rgba(255, 205, 86, 0.6)',
-          'rgba(75, 192, 192, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(153, 102, 255, 0.6)',
-          'rgba(201, 203, 207, 0.6)'
-        ],
-        hoverOffset: 4
+      labels: {{ donot_networth.labels | safe }},
+    datasets: [{
+      label: 'Networth Distribution',
+      data: {{ donot_networth.values | safe }},
+    backgroundColor: [
+      'rgba(255, 99, 132, 0.6)',
+      'rgba(255, 159, 64, 0.6)',
+      'rgba(255, 205, 86, 0.6)',
+      'rgba(75, 192, 192, 0.6)',
+      'rgba(54, 162, 235, 0.6)',
+      'rgba(153, 102, 255, 0.6)',
+      'rgba(201, 203, 207, 0.6)'
+    ],
+    hoverOffset: 4
       }]
     }
   });
