@@ -48,6 +48,8 @@
     margin-top: 10px;
     color: var(--secondary-accent);
   }
+
+  
 </style>
 {% endblock %}
 {% block content %}
@@ -73,7 +75,7 @@
     <div class="navbar-nav">
       <a class="nav-link mr-2" href="">
         <span class="badge badge-light">
-          pending <span class=" text-danger">{{pending_tasks_count}}</span>
+           <span class=" text-danger">{{pending_tasks_count}}</span>
         </span>
       </a>
       
@@ -84,10 +86,10 @@
           <i class="fa fa-user text-primary"></i> {{user.username}}
         </button>
         <div class="dropdown-menu dropdown-menu-right">
-          <button class="dropdown-item" type="button">Action</button>
-          <button class="dropdown-item" type="button">Another action</button>
+          <button class="dropdown-item" type="button">Profile</button>
+          <button class="dropdown-item" type="button">Preference</button>
       
-          <a class="dropdown-item" href="{% url 'logout' %}">Sign Out</a>
+          <a class="dropdown-item" href="{% url 'logout' %}"><i class="fa fa-sign-out-alt fa-sm text-danger"></i> Sign Out</a>
         </div>
       </div>
     </div>
@@ -107,31 +109,31 @@
 {% if fd %}
 <div class="cards">
   <div class="card">
-    <h3>Networth</h3>
+    <h3><a href="#">Networth</a></h3>
     <p>{{fd.worth}}</p>
   </div>
   <div class="card">
-    <h3>Savings</h3>
+    <h3><a href="{% url 'savings-list' %}">Savings</a></h3>
     <p>{{fd.savings}}</p>
   </div>
   <div class="card">
-    <h3>Investment</h3>
+    <h3><a href="{% url 'investment-list' %}">Investment</a></h3>
     <p>{{fd.investment}}</p>
   </div>
   <div class="card">
-    <h3>Stock</h3>
+    <h3><a href="{% url 'stock-list' %}">Stock</a></h3>
     <p>{{fd.stock}}</p>
   </div>
   <div class="card">
-    <h3>Business</h3>
+    <h3><a href="{% url 'business-list' %}">Business</a></h3>
     <p>{{fd.business}}</p>
   </div>
   <div class="card">
-    <h3>Fixed Asset</h3>
+    <h3><a href="{% url 'fixed-asset-list' %}">Fixed Asset</a></h3>
     <p>{{fd.fixed_asset}}</p>
   </div>
   <div class="card">
-    <h3>Liability</h3>
+    <h3><a href="{% url 'liability-list' %}">Liability</a></h3>
     <p class="text-danger">{{fd.liability}}</p>
   </div>
 </div>
@@ -157,8 +159,14 @@
       <li class="list-group-item">Turnover<span class="float-right">{{mature_investment_turnover}}</span></li>
     </ul>
   </div>
-  <div class="card"><canvas id="monthlyEarningsBar"></canvas></div>
-  <div class="card"><canvas id="networthDonut"></canvas></div>
+  <div class="card">
+    <h3>Monthly Earnings</h3>
+    <canvas id="monthlyEarningsBar"></canvas>
+  </div>
+  <div class="card">
+    <h3>Networth Distribution</h3>
+    <canvas id="networthDonut"></canvas>
+  </div>
   <div class="card">
     <ul class="list-group list-group-flush">
       <li class="list-group-item list-group-item-light">Networth by country</li>
@@ -229,7 +237,6 @@
     </table>
     <a class="ml-2" href="{% url 'transaction-list' %}">More</a>
   </div>
-
 </div>
 
 {% else %}
@@ -244,10 +251,11 @@
 </div>
 {% endif %}
 
+<!-- Bar Chart -->
 <script>
+  
   const ctxBar = document.getElementById('monthlyEarningsBar');
-  const ctxDonut = document.getElementById('networthDonut');
-
+  
 
   const data = {
     labels: {{ investment_earnings.months | safe }},
@@ -282,37 +290,48 @@
     data: data,
     options: {
       indexAxis: 'y',
+      label: {
+        display: false
+      },
       scales: {
         y: {
           beginAtZero: true
         }
-      }
+      },
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
     },
   };
 
   new Chart(ctxBar, barConfig);
+  </script>
+  <!-- Pie Chart  -->
+  <script>
+    const ctxDonut = document.getElementById('networthDonut');
 
-
-  new Chart(ctxDonut, {
-    type: 'doughnut',
-    data: {
-      labels: {{ donot_networth.labels | safe }},
-    datasets: [{
-      label: 'Networth Distribution',
-      data: {{ donot_networth.values | safe }},
-    backgroundColor: [
-      'rgba(255, 99, 132, 0.6)',
-      'rgba(255, 159, 64, 0.6)',
-      'rgba(255, 205, 86, 0.6)',
-      'rgba(75, 192, 192, 0.6)',
-      'rgba(54, 162, 235, 0.6)',
-      'rgba(153, 102, 255, 0.6)',
-      'rgba(201, 203, 207, 0.6)'
-    ],
-    hoverOffset: 4
-      }]
-    }
-  });
+    new Chart(ctxDonut, {
+      type: 'doughnut',
+      data: {
+        labels: {{ donot_networth.labels | safe }},
+      datasets: [{
+        label: 'Networth Distribution',
+        data: {{ donot_networth.values | safe }},
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.6)',
+        'rgba(255, 159, 64, 0.6)',
+        'rgba(255, 205, 86, 0.6)',
+        'rgba(75, 192, 192, 0.6)',
+        'rgba(54, 162, 235, 0.6)',
+        'rgba(153, 102, 255, 0.6)',
+        'rgba(201, 203, 207, 0.6)'
+      ],
+      hoverOffset: 4
+        }]
+      }
+    });
 </script>
 
 {% endblock %}
