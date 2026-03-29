@@ -2,13 +2,72 @@
 
 {% load custom_tag %}
 {% block head %}
-<style>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    :root {
+        --primary-bg: #131b2e;
+        --secondary-accent: #33548a;
+        --main-content: #f8fafc;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --white: #ffffff;
+    }
+
+    body {
+        background-color: var(--primary-bg);
+        color: var(--text-main);
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .card {
+        background-color: var(--white);
+        color: var(--text-main);
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h3 {
+        font-size: 16px;
+        color: var(--primary-bg);
+    }
+
+    .card p {
+        font-size: 28px;
+        margin-top: 10px;
+        color: var(--secondary-accent);
+    }
+
+    .chart-wrapper {
+        position: relative;
+        width: 100%;
+        /* Spans the full width of your center column */
+        height: 25vh;
+        /* Or use a responsive height like 50vh */
+        margin: 2rem 0;
+    }
+
+    /* Ensure the canvas itself behaves */
+    canvas#ExchangeRateTrend {
+        width: 100% !important;
+        height: 100% !important;
+    }
 </style>
 {% endblock %}
 {% block content %}
 
-<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+<nav class="navbar navbar-expand-lg navbar-light bg-dark fixed-top">
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
         aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -29,57 +88,44 @@
         <h4 class="mt-3">Dashboard is not ready due to lack of finacial record </h4>
     </div>
     {% else %}
-    <div class="row justify-content-center">
-        <div class="col-sm-6">
+    <div class="cards justify-content-center">
+        <div class="card">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">Base Networth <span class="float-right">{{base_networth}}</span></li>
                 <li class="list-group-item">Base Daily ROI <span class="float-right">{{base_daily_roi}}</span></li>
-                <li class="list-group-item">Projected Networth <span class="float-right">{{projected_networth}}</span></li>
+                <li class="list-group-item">Projected Networth <span class="float-right">{{projected_networth}}</span>
+                </li>
                 <li class="list-group-item">Projected Growth <span class="float-right">{{projected_growth}}</span></li>
             </ul>
         </div>
-        <div class="col-sm-6">
+        <div class="card">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">Actual Networth <span class="float-right">{{year_end_networth}}</span></li>
                 {% if growth.amount > 0 %} <li class="list-group-item">Growth <span
                         class="float-right">{{growth}}</span></li>
-                    <li class="list-group-item">Growth Rate <span class="float-right">{{growth_rate}}%</span></li>
-                    {% else %}
-                    <li class="list-group-item text-danger">Loss <span
-                            class="float-right">{{growth|scalar_value}}</span></li>
-                    <li class="list-group-item">Loss Rate <span class="float-right">{{growth_rate|scalar_value}}%</span>
-                    </li>
-                    {% endif %}
+                <li class="list-group-item">Growth Rate <span class="float-right">{{growth_rate}}%</span></li>
+                {% else %}
+                <li class="list-group-item text-danger">Loss <span class="float-right">{{growth|scalar_value}}</span>
+                </li>
+                <li class="list-group-item">Loss Rate <span class="float-right">{{growth_rate|scalar_value}}%</span>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </div>
-    <div class="row mt-3">
-        <div class="col-sm-4">
-            <div>
-                <img class="img-fluid w-60" src="data:image/png;base64,{{ networth_image|safe }}"
-                    alt="Weekly Networth trend line plot">
-            </div>
-            <div>
-                <p class="card-text">Daily Networth Trend</p>
-            </div>
+    <div class="cards mt-3">
+        <div class="card">
+            <h3 class="card-text">Daily Networth Trend</h3>
+            <div class="chart-wrapper"><canvas id="networthTrendLine"></canvas></div>
+
         </div>
-        <div class="col-sm-4">
-            <div>
-                <img class="img-fluid w-60" src="data:image/png;base64,{{ asset_location|safe }}"
-                    alt="Networth distribution by country donut chart">
-                <div>
-                    <p class="card-text">Networth Distribution By Country</p>
-                </div>
-            </div>
+        <div class="card">
+            <h3 class="card-text">Networth Distribution By Country</h3>
+            <canvas id="networthByCountryDonut"></canvas>
         </div>
-        <div class="col-sm-4">
-            <div class="">
-                <img class="img-fluid w-60" src="data:image/png;base64,{{ daily_roi_image|safe }}"
-                alt="Daily ROI trend line plot">
-                <div class="">
-                    <p>Exchage Rates trend</p>
-                </div>
-            </div>
+        <div class="card">
+            <h3 class="card-text">Exchange Rate Trend</h3>
+            <div class="chart-wrapper"><canvas id="ExchangeRateTrend"></canvas></div>
         </div>
     </div>
 
@@ -87,9 +133,9 @@
     <div class="row mt-3">
 
         {% for item in ytd_roi.items %}
-        <div class="col-sm-6">
+        <div class="card col-sm-6">
             <table class="table table-striped table-sm">
-                
+
                 <thead class="">
                     <tr>
                         <th colspan="4" class="text-center">{{ytd_roi.keys|get_item:forloop.counter0}}</th>
@@ -106,48 +152,48 @@
                     <tr>
                         <td>Next year</td>
                         {% for key, investment in ytd_roi_next.items %}
-                            {% if key == ytd_roi_next.keys|get_item:forloop.parentloop.counter0 %}
-                            <td class="text-right">{{investment.principal.amount|floatformat:2}}</td>
-                            <td class="text-right">{{investment.roi.amount|floatformat:2}}</td>
-                            <td class="text-right">{{investment.percent}}</td>
-                            {% endif %}
+                        {% if key == ytd_roi_next.keys|get_item:forloop.parentloop.counter0 %}
+                        <td class="text-right">{{investment.principal.amount|floatformat:2}}</td>
+                        <td class="text-right">{{investment.roi.amount|floatformat:2}}</td>
+                        <td class="text-right">{{investment.percent}}</td>
+                        {% endif %}
                         {% endfor %}
                     <tr>
-                    {% endif %}
+                        {% endif %}
 
-                    {% if ytd_roi %}
+                        {% if ytd_roi %}
                     <tr>
                         <td>Current year</td>
                         {% for key, investment in ytd_roi.items %}
-                            {% if key == ytd_roi.keys|get_item:forloop.parentloop.counter0 %}
-                            <td class="text-right">{{investment.principal.amount|floatformat:2}}</td>
-                            <td class="text-right">{{investment.roi.amount|floatformat:2}}</td>
-                            <td class="text-right">{{investment.percent}}</td>
-                            {% endif %}
+                        {% if key == ytd_roi.keys|get_item:forloop.parentloop.counter0 %}
+                        <td class="text-right">{{investment.principal.amount|floatformat:2}}</td>
+                        <td class="text-right">{{investment.roi.amount|floatformat:2}}</td>
+                        <td class="text-right">{{investment.percent}}</td>
+                        {% endif %}
                         {% endfor %}
                     <tr>
-                    {% endif %}
-                    
-                    {% if ytd_roi_prev %}
+                        {% endif %}
+
+                        {% if ytd_roi_prev %}
                     <tr>
                         <td>Previous year</td>
                         {% for key, investment in ytd_roi_prev.items %}
-                            {% if key == ytd_roi_prev.keys|get_item:forloop.parentloop.counter0 %}
-                            <td class="text-right">{{investment.principal.amount|floatformat:2}}</td>
-                            <td class="text-right">{{investment.roi.amount|floatformat:2}}</td>
-                            <td class="text-right">{{investment.percent}}</td>
-                            {% endif %}
+                        {% if key == ytd_roi_prev.keys|get_item:forloop.parentloop.counter0 %}
+                        <td class="text-right">{{investment.principal.amount|floatformat:2}}</td>
+                        <td class="text-right">{{investment.roi.amount|floatformat:2}}</td>
+                        <td class="text-right">{{investment.percent}}</td>
+                        {% endif %}
                         {% endfor %}
                     <tr>
-                    {% endif %}
+                        {% endif %}
                 </tbody>
             </table>
         </div>
         {% endfor %}
-        <!-- Tital -->
-        <div class="col-sm-6">
+        <!-- Total -->
+        <div class="card col-sm-6">
             <table class="table table-striped table-sm">
-                
+
                 <thead>
                     <tr>
                         <th colspan="4" class="text-center">Total</th>
@@ -173,7 +219,7 @@
                         <td class="text-right">{{ytd_roi_total_current_year.roi|floatformat:'2g'}}</td>
                         <td class="text-right">{{ytd_roi_total_current_year.percent|floatformat:'2g'}}</td>
                     <tr>
-                    
+
                     <tr>
                         <td>Previous year</td>
                         <td class="text-right">{{ytd_roi_total_prev_year.principal|floatformat:'2g'}}</td>
@@ -184,6 +230,137 @@
             </table>
         </div>
     </div>
-   {% endif %}
+    {% endif %}
 </div>
+<!-- Chart 1: Networth Trend -->
+<script>
+    const ctxLine = document.getElementById('networthTrendLine');
+
+    const dataNetworth = {
+        labels: {{ networth_trend_for_chart.days | safe }},
+    datasets: [
+        {
+            label: 'Networth Trend',
+            data: {{ networth_trend_for_chart.networth | safe }},
+        fill: true,
+        borderColor: 'rgba(54, 162, 235, 0.6)',
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        tension: 0.1
+                }]
+        };
+
+    const LineConfig = {
+        type: 'line',
+        data: dataNetworth,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: false,
+                    text: 'Networth Trend'
+                }
+            },
+
+        }
+    };
+
+    new Chart(ctxLine, LineConfig);
+
+</script>
+
+<!-- Chart 2: Networth by Country -->
+<script>
+    const ctxDonut = document.getElementById('networthByCountryDonut');
+
+    new Chart(ctxDonut, {
+        type: 'doughnut',
+        data: {
+            labels: {{ networth_by_country.labels | safe }},
+
+        datasets: [{
+            label: 'Networth Distribution',
+            data: {{ networth_by_country.values | safe }},
+        backgroundColor: [
+            // 'rgba(255, 99, 132, 0.6)',
+            // 'rgba(255, 159, 64, 0.6)',
+            'rgba(255, 205, 86, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+            // 'rgba(201, 203, 207, 0.6)'
+        ],
+        hoverOffset: 4
+            }]
+        }
+    });
+
+</script>
+
+<!-- Chart 3: Exchange Rate Trend -->
+<script>
+    const ctxDoubleLine = document.getElementById('ExchangeRateTrend');
+
+    const config = {
+        type: 'line',
+        data: {
+            labels: {{ exchange_rate_trend.dates | safe}},
+    datasets: [
+        {
+            label: '{{exchange_rate_trend.labelY1}}',
+            data: {{ exchange_rate_trend.Y1 | safe }},
+        borderColor: 'rgba(255, 0, 0, 0.6)',
+        backgroundColor: 'rgba(255, 0, 0, 0.6)'
+            },
+        {
+            label: '{{exchange_rate_trend.labelY2}}',
+            data: {{ exchange_rate_trend.Y2 | safe }},
+        borderColor: 'rgba(59, 130, 246, 0.6)', // Using your secondary-accent blue
+        backgroundColor: 'rgba(59, 130, 246, 0.6)'
+            }
+    ]
+    }, // Closed 'data'
+    options: { // Now correctly inside 'config'
+        responsive: true,
+            plugins: {
+            tooltip: {
+                mode: 'index',
+                    intersect: false
+            },
+            title: {
+                display: false,
+                    text: 'One week exchange rate trend'
+            }
+        },
+        hover: {
+            mode: 'index',
+                intersect: false
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                        text: 'Date'
+                }
+            },
+            y: {
+                ticks: {
+                    stepSize: .3 // This forces the axis to count by 50s
+                },
+                title: {
+                    display: true,
+                        text: 'Exchange rate pair'
+                },
+                // min: 0, // Lowered to 0 to show the full trend accurately
+                // max: 2
+            }
+        }
+    }
+};
+
+    new Chart(ctxDoubleLine, config);
+</script>
+
 {% endblock %}
