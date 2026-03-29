@@ -266,13 +266,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 recent_days = [ date.strftime('%m/%d') for date in financials.values_list('date', flat=True) ]
                 recent_networth = [ financial.worth.amount for financial in financials ]
                 # Section 3: 
-                context['networth_image'] = plot(recent_days, recent_networth, Y1='USD($)', X=f"mm/dd/{start_date.strftime('%Y')}", title='Networth Trend')
-
+                context['networth_trend_for_chart'] = {'days': recent_days, 'networth': [float(val) for val in recent_networth]}
+                
                 latest = financials.latest('date')
                 labels = latest.networth_by_country.keys()
                 sizes = latest.networth_by_country.values()
-                context['asset_location'] = donut_chart(labels, sizes)
-        
+                # context['asset_location'] = donut_chart(labels, sizes)
+                context['networth_by_country'] = {'labels': list(labels), 'values': list(sizes)}
             qs = financials.exclude(exchange_rate=None)
 
             dates = [ date.strftime('%m/%d') for date in qs.values_list('date', flat=True) ]
@@ -285,15 +285,18 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             factor = 1000
             for currency in currency_pair:
                 if currency == 'NGN':
-                    y_axes.append([f[currency]/factor for f in qs.values_list('exchange_rate', flat=True)])
+                    y_axes.append([round(f[currency]/factor, 3) for f in qs.values_list('exchange_rate', flat=True)])
                 else:
-                    y_axes.append([f[currency] for f in qs.values_list('exchange_rate', flat=True)])
+                    y_axes.append([round(f[currency], 3) for f in qs.values_list('exchange_rate', flat=True)])
               
-            context['daily_roi_image'] = plot(
-                dates, y_axis1=y_axes[0], y_axis2=y_axes[1], 
-                Y1=f'{currency_pair[0]}/$', Y2=f'x{factor}{currency_pair[1]}/$', 
-                X='Days', title='One week exchange rate trend')
-
+            context['exchange_rate_trend'] = {
+                'dates': dates, 
+                'Y1': y_axes[0], 
+                'Y2': y_axes[1],
+                'labelY1': f'{currency_pair[0]}/$',
+                'labelY2': f'x{factor}{currency_pair[1]}/$'
+            }
+            
             # Section: 
             context['ytd_roi'] = ytd_roi(self.request.user, current_year)
             context['ytd_roi_prev'] = ytd_roi(self.request.user, current_year-1)
