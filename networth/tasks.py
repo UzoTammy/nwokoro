@@ -11,6 +11,7 @@ from account.models import User
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.http import HttpResponse
+from django.conf import settings
 
 
 @shared_task
@@ -62,7 +63,7 @@ def financial_report_email():
 
 def send_investment_email(investment: Investment):
     
-    from_email = "no-reply@chores.com"
+    from_email = settings.DEFAULT_FROM_EMAIL
 
     to_email = [investment.owner.email]
 
