@@ -166,7 +166,7 @@ class TinyProjectView(TemplateView):
     template_name = 'core/portfolio/root.html'
 
 class PortfolioScushView(TemplateView):
-    template_name = 'core/portfolio/scushproject.html'
+    template_name = 'core/portfolio/scush.html'
 
 class PortfolioFinuelView(TemplateView):
     template_name = 'core/portfolio/finuel.html'
