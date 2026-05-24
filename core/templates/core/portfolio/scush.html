@@ -1,217 +1,205 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-
 {% block head %}
 <style>
-    .fantasy-font {
-        font-family: Georgia, 'Times New Roman', Times, serif;
+    :root {
+        --ink-900: #0f172a;
+        --ink-700: #334155;
+        --ink-500: #64748b;
+        --line: #dbe3ee;
+        --paper: #ffffff;
+        --mist: #f3f6fb;
+        --brand: #1d4ed8;
+        --brand-dark: #1e40af;
     }
 
-    .pretty-font {
-        background-image: linear-gradient(to left, rgb(180, 130, 238), indigo, red, green, blue, orange, yellow);
-        -webkit-background-clip: text;
-        color: transparent;
-        /* font-size: 40px; */
-        font-weight: bold;
-        /* font-family: fantasy; */
-        font-size: 100px;
+    body {
+        margin: 0;
+        background:
+            radial-gradient(circle at 8% -10%, #dbeafe 0%, transparent 34%),
+            radial-gradient(circle at 92% 0%, #e2e8f0 0%, transparent 30%),
+            #f8fafc;
+        color: var(--ink-900);
+        font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    }
 
-        @media screen and (max-width: 768px) {
-            font-size: 80px;
+    .hero {
+        background: linear-gradient(140deg, #0f172a 0%, #1e293b 56%, #334155 100%);
+        color: #f8fafc;
+        border: 1px solid #1e293b;
+        border-radius: 0.9rem;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.22);
+    }
+
+    .hero h1 {
+        margin: 0 0 0.45rem;
+        font-size: 2rem;
+        letter-spacing: 0.02em;
+    }
+
+    .hero p {
+        margin: 0 0 0.95rem;
+        color: #dbeafe;
+        line-height: 1.55;
+        max-width: 820px;
+    }
+
+    a,
+    a:hover,
+    a:focus {
+        text-decoration: none;
+    }
+
+    .btn-brand,
+    .btn-brand:focus {
+        background: var(--brand);
+        color: #ffffff;
+        border-color: var(--brand);
+    }
+
+    .btn-brand:hover,
+    .btn-brand:active {
+        background: var(--brand-dark);
+        border-color: var(--brand-dark);
+        color: #ffffff;
+    }
+
+    .btn-ghost,
+    .btn-ghost:focus {
+        background: rgba(219, 234, 254, 0.12);
+        border-color: #93c5fd;
+        color: #dbeafe;
+    }
+
+    .btn-ghost:hover,
+    .btn-ghost:active {
+        background: rgba(147, 197, 253, 0.2);
+        color: #eff6ff;
+    }
+
+    .hero-actions .btn {
+        margin-bottom: 0.5rem;
+    }
+
+    .hero-actions .btn:not(:last-child) {
+        margin-right: 0.75rem;
+    }
+
+    .panel-card {
+        border: 1px solid var(--line);
+        border-radius: 0.8rem;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    }
+
+    .panel-soft {
+        background: var(--mist);
+        border-radius: 0.95rem !important;
+        border-color: #cfd9e8 !important;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+    }
+
+    .list-clean li {
+        color: var(--ink-700);
+        line-height: 1.45;
+        margin-bottom: 0.45rem;
+    }
+
+    .list-clean li:last-child {
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+        .hero h1 {
+            font-size: 1.55rem;
         }
     }
-
-    .greybox {
-        background-color: gray;
-
-    }
-
-    .plainbox {
-        background-color: whitesmoke;
-    }
 </style>
-
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-3">
-    <div class="row justify-content-center">
-        <div class="col-sm-10">
-            <h3 class="text-center pretty-font">Scush Web App</h3>
-            <p class="text-center">
-                <a href="https://www.scush.com.ng" target="_blank"><i class="fa fa-globe"></i> The Website</a>
-            </p>
-            <p class="first-letter text-muted">
-                Scush, a customized SaaS app, that streamlines administrative functions within a company, focusing on
-                three core areas: Stock,
-                Customers, and Human Resources—aptly reflected in its name, SCusH. Launched in June 2022, this dynamic
-                website has improved
-                operational efficiency. From processing payroll and tracking key performance indicators to documenting
-                policies and automating,
-                Scush has significantly reduced workloads and minimized chaos and conflict in the workplace. Moreover,
-                its
-                capabilities extend to financial analytics, offering insightful analysis of Profit and Loss statements
-                and balance sheets
-                from accounting software. This feature is pivotal in informing critical business decisions.
-                Scush has not only automated but also transformed administrative processes, proving to be an invaluable
-                asset for Ozone F & L
-                (The owner of the site).
-            </p>
-            <hr>
+<div class="container-fluid py-3 py-md-4">
+    <section class="hero p-4 p-md-5 mb-4">
+        <h1 class="h2 mb-2">SCusH Web App</h1>
+        <p class="mb-3">
+            SCusH was designed as a business operations platform to centralize Stock, Customer, and Human Resource
+            processes in one reliable system. The objective was to replace fragmented manual workflows with automation,
+            improve data quality, and provide leadership with timely operational and financial insights for stronger,
+            faster decisions.
+        </p>
+        <div class="d-flex flex-wrap hero-actions">
+            <a class="btn btn-brand" href="https://www.scush.com.ng" target="_blank" rel="noopener noreferrer">
+                <i class="fa fa-globe"></i> Visit Website
+            </a>
+            <a class="btn btn-ghost" href="{% url 'index' %}">
+                <i class="fa fa-reply"></i> Back to Portfolio
+            </a>
         </div>
-    </div>
-    <div class="row mt-3 justify-content-center">
-        <div class="col-sm-5 plainbox m-1">
-            <h4 class="first-letter">Technologies</h4>
-            <ul>
-                <li><b>Programming Language:</b> Python programming language and Javascript</li>
-                <li><b>Database:</b> Sqlite for developement and Postgres for production on heroku</li>
-                <li><b>Backend:</b> Django framework technology</li>
-                <li><b>Frontend:</b> Bootstrap CDN, HTML, and CSS</li>
-                <li><b>Storing Media Files:</b> Hosted on amazon S3 storage</li>
-                <li><b>Serving Static Files:</b> Whitenoise</li>
-                <li><b>Email Server:</b> Google gmail</li>
-                <li><b>Message Broker:</b> RabbitMq a heroku add-on</li>
-                <li><b>Domain Source:</b> Namecheap</li>
-                <li><b>Deployment:</b> Deployed on Heroku platform</li>
-                <li><b>Collaboration:</b> Git and GitHub</li>
-                <li><b>Icons:</b> Fontawesome</li>
-            </ul>
-        </div>
-        <div class="col-sm-6 plainbox m-1">
-            <h4 class="first-letter">Main Features</h4>
-            <ul>
-                <li><b>Sending Mails:</b> Able to send mails automatically upon updating or creating records</li>
-                <li><b>Creating PDF:</b> Produce a PDF document as a hard copy</li>
-                <li><b>Able to carryout scheduled tasks:</b> Send notification, mails and execute tasks</li>
-                <li><b>Present plots and graphs:</b> A pictorial presentation to aid understanding and analysis of data
-                </li>
-            </ul>
-        </div>
-    </div>
+    </section>
 
-    <h3 class="mt-3">Pages & Products of the website</h3>
-    <hr>
-    <div class="row row-cols-4 m-2">
-        <div class="col">
-            <div class="col plainbox">
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" width="100%" height="45%" src="{% static 'scush/indexpage.png' %}" alt="">
-                    <div class="card-body">
-                        <p class="card-text">The Index Page.</p>
+    <section class="card panel-card mb-4">
+        <div class="card-body p-3 p-md-4">
+            <h2 class="h4 mb-3">Project Overview</h2>
+            <div class="row g-3">
+                <article class="col-12 col-lg-4">
+                    <div class="panel-soft border rounded-3 p-3 h-100">
+                        <h3 class="h6 mb-2 text-dark">Problem</h3>
+                        <p class="mb-0 text-secondary">Critical operations such as stock tracking, customer records, payroll, and policy management were handled across disconnected tools, causing duplicate work, reporting delays, and frequent reconciliation errors.</p>
                     </div>
-                </div>
-            </div>    
-        </div>
-        
-        <div class="col">
-            <div class="col plainbox">
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" width="100%" height="45%" src="{% static 'scush/dashboard.png' %}" alt="">
-                    <div class="card-body">
-                        <p class="card-text">The Dashboard</p>
+                </article>
+                <article class="col-12 col-lg-4">
+                    <div class="panel-soft border rounded-3 p-3 h-100">
+                        <h3 class="h6 mb-2 text-dark">Solution</h3>
+                        <p class="mb-0 text-secondary">SCusH unified core administrative workflows into one platform and automated key tasks including payroll processing, KPI tracking, policy documentation, scheduled notifications, and financial report distribution.</p>
                     </div>
-                </div>
+                </article>
+                <article class="col-12 col-lg-4">
+                    <div class="panel-soft border rounded-3 p-3 h-100">
+                        <h3 class="h6 mb-2 text-dark">Impact</h3>
+                        <p class="mb-0 text-secondary">The business gained faster execution, fewer operational bottlenecks, and more reliable decision support through timely analytics, automated reporting, and improved visibility into financial and performance data.</p>
+                    </div>
+                </article>
             </div>
         </div>
-        <div class="col">
-            <div class="col plainbox">
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" width="100%" height="45%" src="{% static 'scush/loginpage.png' %}" alt="">
-                    <div class="card-body">
-                        <p class="card-text">The Login Page</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="col plainbox">
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" width="100%" height="45%" src="{% static 'scush/homepage.png' %}" alt="">
-                    <div class="card-body">
-                        <p class="card-text">The Home Page</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="col plainbox">
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" width="100%" height="45%" src="{% static 'scush/emailpandl.png' %}"
-                        alt="">
-                    <div class="card-body">
-                        <p class="card-text">Email of financial report. email is sent from the site and automated</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+    </section>
 
-        <div class="col">
-            <div class="col plainbox">
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" width="100%" height="45%" src="{% static 'scush/monthlysales.png' %}"
-                        alt="">
-                    <div class="card-body">
-                        <p class="card-text">The Sales Report</p>
-                    </div>
+    <section class="row g-3 g-md-4">
+        <article class="col-12 col-lg-6">
+            <div class="card panel-card h-100">
+                <div class="card-body p-3 p-md-4">
+                    <h2 class="h4 mb-3">Technologies</h2>
+                    <ul class="list-clean ps-3 mb-0">
+                        <li><b>Languages:</b> Python and JavaScript</li>
+                        <li><b>Database:</b> SQLite (development), PostgreSQL (production on Heroku)</li>
+                        <li><b>Backend:</b> Django</li>
+                        <li><b>Frontend:</b> Bootstrap, HTML, CSS</li>
+                        <li><b>Media Storage:</b> Amazon S3</li>
+                        <li><b>Static Files:</b> WhiteNoise</li>
+                        <li><b>Email Provider:</b> Gmail (Google)</li>
+                        <li><b>Message Broker:</b> RabbitMQ (Heroku add-on)</li>
+                        <li><b>Domain Provider:</b> Namecheap</li>
+                        <li><b>Deployment:</b> Heroku</li>
+                        <li><b>Collaboration:</b> Git and GitHub</li>
+                        <li><b>Icons:</b> Font Awesome</li>
+                    </ul>
                 </div>
             </div>
-        </div>
+        </article>
 
-        <div class="col">
-            <div class="col plainbox">
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" width="100%" height="45%" src="{% static 'scush/emailbalancesheet.png' %}"
-                        alt="">
-                    <div class="card-body">
-                        <p class="card-text">Financial Report Email</p>
-                    </div>
+        <article class="col-12 col-lg-6">
+            <div class="card panel-card h-100">
+                <div class="card-body p-3 p-md-4">
+                    <h2 class="h4 mb-3">Services and Add-ons</h2>
+                    <ul class="list-clean ps-3 mb-0">
+                        <li><b>Automated Email:</b> Sends emails when key records are created or updated.</li>
+                        <li><b>PDF Generation:</b> Produces printable documents such as payroll outputs.</li>
+                        <li><b>Scheduled Tasks:</b> Runs background jobs for notifications, emails, and recurring workflows.</li>
+                        <li><b>Visual Analytics:</b> Uses charts and plots to improve data interpretation and reporting.</li>
+                        <li><b>Financial Analysis:</b> Supports review of profit-and-loss and balance sheet insights.</li>
+                    </ul>
                 </div>
             </div>
-        </div>
-
-        <div class="col">
-            <div class="col plainbox">
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" width="100%" height="45%" src="{% static 'scush/pdfpayroll.png' %}"
-                        alt="">
-                    <div class="card-body">
-                        <p class="card-text">Payroll PDF</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="col plainbox">
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" width="100%" height="45%" src="{% static 'scush/stock.png' %}" alt="">
-                    <div class="card-body">
-                        <p class="card-text">The Stock Page</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="col plainbox">
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" width="100%" height="45%" src="{% static 'scush/payrollpage.png' %}"
-                        alt="">
-                    <div class="card-body">
-                        <p class="card-text">Payroll Page</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row m-3">
-        <div class="col">
-            <a class="btn btn-outline-dark float-right" href="{% url 'index' %}"> <i class="fa fa-reply"></i> Home Page</a>
-        </div>
-    </div>
+        </article>
+    </section>
 </div>
-
 {% endblock %}
