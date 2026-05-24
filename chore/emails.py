@@ -7,6 +7,7 @@ from .models import FinishedWork
 from django.db.models.aggregates import Sum
 from account.models import User
 from django.db.models.functions import TruncWeek
+from django.conf import settings
 
 class Email:
 
@@ -55,7 +56,7 @@ class Email:
         }
      
     def email_dashboard():
-        from_email = "no-reply@chores.com"
+        from_email = settings.DEFAULT_FROM_EMAIL
 
         # Load the HTML content
         workers = User.objects.filter(is_staff=False)
@@ -81,7 +82,7 @@ class Email:
     def delegate_send_email(request, form):
         """Send email when work is delegated"""
         subject = f"Delegated Job for {form.instance.schedule}"
-        from_email = "no-reply@chores.com"
+        from_email = settings.DEFAULT_FROM_EMAIL
         to_email = [request.user.email, form.instance.assigned.email]
 
         
@@ -107,7 +108,7 @@ class Email:
     def initiate_send_email(request, form):
         """Send email when work is initiated"""
         subject = f"Initiated Job by {form.instance.worker.username} - {form.instance.pk}"
-        from_email = "no-reply@chores.com"
+        from_email = settings.DEFAULT_FROM_EMAIL
         to_email = [request.user.email, form.instance.worker.email]
 
         # Load the HTML content
@@ -128,7 +129,7 @@ class Email:
     def approve_send_email(request, form):
         """Send email when work is approved"""
         subject = f"Initiated Job by {form.instance.worker.username} - {form.instance.pk}"
-        from_email = "no-reply@chores.com"
+        from_email = settings.DEFAULT_FROM_EMAIL
         to_email = [request.user.email, form.instance.worker.email]
 
         # Generate the URL dynamically

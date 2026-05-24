@@ -91,21 +91,9 @@ TEMPLATES = [
             ],
         },
     },
-
 ]
 
 WSGI_APPLICATION = 'nwokoro.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 
 DATABASES = {
     'default': {
@@ -190,7 +178,7 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' if DEBUG else "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend" if DEBUG else "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_FILE_PATH = "EmailFileBased"
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -198,7 +186,7 @@ EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')  # Your Gmail address
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')     # Your Gmail password or app-specific password
-DEFAULT_FROM_EMAIL = "noreply@chores.com"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or "noreply@chores.com"
 ADMINS = (('uzonwokoro.com', EMAIL_HOST_USER),)
 
 
