@@ -1,162 +1,348 @@
 {% extends 'core/base.html' %}
 {% load custom_tag %}
 
+{% block head %}
+<style>
+  :root {
+    --primary-bg: #131b2e;
+    --secondary-accent: #33548a;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --white: #ffffff;
+  }
+
+  body {
+    background-color: var(--primary-bg);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background-color: var(--white);
+    color: var(--text-main);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .card h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .card .value {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--secondary-accent);
+  }
+
+  .card small {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .card-full { grid-column: 1 / -1; }
+
+  .section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .report-table { width: 100%; border-collapse: collapse; }
+  .report-table th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding: 8px 10px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .report-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+  }
+  .report-table tr:last-child td { border-bottom: none; }
+  .report-table .total-row td {
+    font-weight: 600;
+    border-top: 2px solid #e2e8f0;
+    border-bottom: none;
+    background-color: #f8fafc;
+  }
+
+  .text-right { text-align: right; }
+  .text-positive { color: #16a34a; }
+  .text-negative { color: #dc2626; }
+  .text-accent { color: var(--secondary-accent); font-weight: 600; }
+
+  .year-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .year-nav a {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 18px;
+    line-height: 1;
+  }
+  .year-nav a:hover { color: var(--white); }
+  .year-nav .year-label {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .year-nav .nav-disabled {
+    color: #334155;
+    font-size: 18px;
+  }
+  .no-data-text {
+    font-size: 16px;
+    color: var(--text-muted);
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
 
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        <div class="navbar-nav mr-auto">
-        </div>
-        <div class="navbar-nav">
-            <a class="nav-link" href="{% url 'networth-home'%}"><i class="fa fa-times-circle text-danger"></i></a>
-        </div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav mr-auto ml-2">
+      <div class="year-nav">
+        {% if prev_year %}
+        <a href="?year={{ prev_year }}" title="Previous year"><i class="fa fa-chevron-left"></i></a>
+        {% else %}
+        <span class="nav-disabled"><i class="fa fa-chevron-left"></i></span>
+        {% endif %}
 
+        <span class="year-label">Annual Report {{ annum }}</span>
+
+        {% if next_year %}
+        <a href="?year={{ next_year }}" title="Next year"><i class="fa fa-chevron-right"></i></a>
+        {% else %}
+        <span class="nav-disabled"><i class="fa fa-chevron-right"></i></span>
+        {% endif %}
+      </div>
     </div>
+    <div class="navbar-nav">
+      <a class="nav-link" href="{% url 'networth-home' %}" title="Back to Home">
+        <i class="fa fa-times-circle text-danger"></i>
+      </a>
+    </div>
+  </div>
 </nav>
-    
-<div class="container mt-5 mb-3 font-weight-lighter">
-    <div class="row justify-content-center">
-        <h3 class="mt-3">Annual Report - {{ annum }}</h1>
-    </div>
-    <div class="row justify-content-center">
-        <div class="col-sm-8">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">Networth Brought Forward <span class="float-right">{{balance_brought_forward}}</span></li>
-                
-                <li class="list-group-item">
-                    <table class="table" data-toggle="table">
-                        <thead class="text-right">
-                            <tr>
-                                <th class="text-left">Asset</th>
-                                <th>Turnover</th>
-                                <th>Earnings</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-right">
-                            <tr>
-                                <td class="text-left">Investment</td>
-                                <td>{{turnover.investment|first}}</td>
-                                <td>{{turnover.investment|last}}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-left">Fixed Asset</td>
-                                <td>{{turnover.fixed_asset|first}}</td>
-                                <td>{{turnover.fixed_asset|last}}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-left">Business</td>
-                                <td>{{turnover.business|first}}</td>
-                                <td>{{turnover.business|last}}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-left">Stock</td>
-                                <td>{{turnover.stock|first}}</td>
-                                <td>{{turnover.stock|last}}</td>
-                            </tr>
-                            
-                        </tbody>
-                    </table>
-                </li>
 
-                <li class="list-group-item text-info">Total Earnings <span class="float-right">{{earnings_total}}</span></li>
-                
-                <li class="list-group-item">
-                    <table class="table" data-toggle="table">
-                        <thead>
-                            <tr>
-                                <th>Asset & Liability</th>
-                                <th class="text-right">Changes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Savings</td>
-                                <td class="text-right">
-                                    {% if income_change.savings.amount < 0 %}
-                                    <span class="text-danger">{{income_change.savings|scalar_value}}</span>
-                                    {% else %}
-                                    {{income_change.savings}}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Investment</td>
-                                <td class="text-right">
-                                    {% if income_change.investment.amount < 0 %}
-                                    <span class="text-danger">{{income_change.investment|scalar_value}}</span>
-                                    {% else %}
-                                    {{income_change.investment}}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Fixed Asset</td>
-                                <td class="text-right">
-                                    {% if income_change.fixed_asset.amount < 0 %}
-                                    <span class="text-danger">{{income_change.fixed_asset|scalar_value}}</span>
-                                    {% else %}
-                                    {{income_change.fixed_asset}}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Business</td>
-                                <td class="text-right">
-                                    {% if income_change.business.amount < 0 %}
-                                    <span class="text-danger">{{income_change.business|scalar_value}}</span>
-                                    {% else %}
-                                    
-                                    {{income_change.business}}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Stock</td>
-                                <td class="text-right">
-                                    {% if income_change.stock.amount < 0 %}
-                                    <span class="text-danger">{{income_change.stock|scalar_value}}</span>
-                                    {% else %}
-                                    {{income_change.stock}}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Liability</td>
-                                <td class="text-right">
-                                    {% if income_change.liability.amount < 0 %}
-                                    <span class="text-danger">{{income_change.liability|scalar_value}}</span>
-                                    {% else %}
-                                    {{income_change.liability}}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            
-                        </tbody>
-                    </table>
-                </li>
-                <li class="list-group-item text-info">Total 
-                    <span class="float-right">{{stream_changes_total}}</span>
-                </li>
-                <li class="list-group-item text-success">Gross Networth 
-                    <span class="float-right">{{balance_1_income_change.reward}}</span>
-                </li>
-                <li class="list-group-item text-danger">Less Reward 
-                    <span class="float-right">{{income_change.reward}}</span>
-                </li>
-                
-                <li class="list-group-item text-success">Net Networth 
-                    <span class="float-right">{{balance_1}}</span>
-                </li>
-                
-                <li class="list-group-item">Current Networth <span class="float-right">{{current_networth}}</span></li>
-            </ul>
-        </div>
+<div class="mt-5 pt-4 px-3">
+
+  {% if no_data %}
+  <div class="cards">
+    <div class="card">
+      <h3>No Data</h3>
+      <p class="no-data-text">No financial records for {{ annum }}.</p>
     </div>
-    
+  </div>
+
+  {% else %}
+
+  <!-- Opening & Closing -->
+  <div class="cards">
+    <div class="card">
+      <h3>Opening Networth</h3>
+      <div class="value">{{ balance_brought_forward }}</div>
+      <small>{{ opening_date|date:"d M Y" }}</small>
+    </div>
+    <div class="card">
+      <h3>Total Earnings</h3>
+      <div class="value text-positive">{{ earnings_total }}</div>
+      <small>Investment, Fixed Asset, Business, Stock</small>
+    </div>
+    <div class="card">
+      <h3>Net Asset Changes</h3>
+      <div class="value {% if stream_changes_total.amount >= 0 %}text-positive{% else %}text-negative{% endif %}">
+        {{ stream_changes_total }}
+      </div>
+      <small>Across all asset classes</small>
+    </div>
+    <div class="card">
+      <h3>Closing Networth</h3>
+      <div class="value">{{ current_networth }}</div>
+      <small>{{ closing_date|date:"d M Y" }}</small>
+    </div>
+  </div>
+
+  <!-- Earnings breakdown -->
+  <div class="cards">
+    <div class="card card-full">
+      <div class="section-title">Earnings Breakdown</div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th class="text-left">Asset Class</th>
+            <th class="text-right">Turnover</th>
+            <th class="text-right">Earnings</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Investment</td>
+            <td class="text-right">{{ turnover.investment|first }}</td>
+            <td class="text-right text-positive">{{ turnover.investment|last }}</td>
+          </tr>
+          <tr>
+            <td>Fixed Asset</td>
+            <td class="text-right">{{ turnover.fixed_asset|first }}</td>
+            <td class="text-right text-positive">{{ turnover.fixed_asset|last }}</td>
+          </tr>
+          <tr>
+            <td>Business</td>
+            <td class="text-right">{{ turnover.business|first }}</td>
+            <td class="text-right text-positive">{{ turnover.business|last }}</td>
+          </tr>
+          <tr>
+            <td>Stock</td>
+            <td class="text-right">{{ turnover.stock|first }}</td>
+            <td class="text-right text-positive">{{ turnover.stock|last }}</td>
+          </tr>
+          <tr class="total-row">
+            <td>Total Earnings</td>
+            <td></td>
+            <td class="text-right text-accent">{{ earnings_total }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Asset & Liability changes -->
+  <div class="cards">
+    <div class="card card-full">
+      <div class="section-title">Asset &amp; Liability Changes</div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th class="text-left">Category</th>
+            <th class="text-right">Change</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% with s=income_change.savings %}
+          <tr>
+            <td>Savings</td>
+            <td class="text-right {% if s.amount < 0 %}text-negative{% else %}text-positive{% endif %}">
+              {% if s.amount < 0 %}{{ s|scalar_value }}{% else %}{{ s }}{% endif %}
+            </td>
+          </tr>
+          {% endwith %}
+          {% with s=income_change.investment %}
+          <tr>
+            <td>Investment</td>
+            <td class="text-right {% if s.amount < 0 %}text-negative{% else %}text-positive{% endif %}">
+              {% if s.amount < 0 %}{{ s|scalar_value }}{% else %}{{ s }}{% endif %}
+            </td>
+          </tr>
+          {% endwith %}
+          {% with s=income_change.fixed_asset %}
+          <tr>
+            <td>Fixed Asset</td>
+            <td class="text-right {% if s.amount < 0 %}text-negative{% else %}text-positive{% endif %}">
+              {% if s.amount < 0 %}{{ s|scalar_value }}{% else %}{{ s }}{% endif %}
+            </td>
+          </tr>
+          {% endwith %}
+          {% with s=income_change.business %}
+          <tr>
+            <td>Business</td>
+            <td class="text-right {% if s.amount < 0 %}text-negative{% else %}text-positive{% endif %}">
+              {% if s.amount < 0 %}{{ s|scalar_value }}{% else %}{{ s }}{% endif %}
+            </td>
+          </tr>
+          {% endwith %}
+          {% with s=income_change.stock %}
+          <tr>
+            <td>Stock</td>
+            <td class="text-right {% if s.amount < 0 %}text-negative{% else %}text-positive{% endif %}">
+              {% if s.amount < 0 %}{{ s|scalar_value }}{% else %}{{ s }}{% endif %}
+            </td>
+          </tr>
+          {% endwith %}
+          {% with s=income_change.liability %}
+          <tr>
+            <td>Liability</td>
+            <td class="text-right {% if s.amount < 0 %}text-negative{% else %}text-positive{% endif %}">
+              {% if s.amount < 0 %}{{ s|scalar_value }}{% else %}{{ s }}{% endif %}
+            </td>
+          </tr>
+          {% endwith %}
+          <tr class="total-row">
+            <td>Net Change</td>
+            <td class="text-right {% if stream_changes_total.amount < 0 %}text-negative{% else %}text-positive{% endif %}">
+              {{ stream_changes_total }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Reconciliation -->
+  <div class="cards">
+    <div class="card card-full">
+      <div class="section-title">Reconciliation</div>
+      <table class="report-table">
+        <tbody>
+          <tr>
+            <td>Opening Networth</td>
+            <td class="text-right">{{ balance_brought_forward }}</td>
+          </tr>
+          <tr>
+            <td>Add: Total Earnings</td>
+            <td class="text-right text-positive">{{ earnings_total }}</td>
+          </tr>
+          <tr>
+            <td>Add: Net Asset Changes</td>
+            <td class="text-right {% if stream_changes_total.amount < 0 %}text-negative{% else %}text-positive{% endif %}">
+              {{ stream_changes_total }}
+            </td>
+          </tr>
+          <tr class="total-row">
+            <td>Gross Networth</td>
+            <td class="text-right text-accent">{{ gross_networth }}</td>
+          </tr>
+          <tr>
+            <td>Less: Reward Withdrawn</td>
+            <td class="text-right text-negative">{{ less_reward }}</td>
+          </tr>
+          <tr class="total-row">
+            <td>Net Networth (Computed)</td>
+            <td class="text-right text-accent">{{ net_networth }}</td>
+          </tr>
+          <tr>
+            <td>Actual Closing Networth</td>
+            <td class="text-right">{{ current_networth }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% endif %}
 </div>
 
-{% endblock%}
+{% endblock %}

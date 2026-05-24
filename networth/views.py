@@ -160,60 +160,137 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         return context
     
+class NetworthHistoryView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/networth_history.html'
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        records = FinancialData.objects.filter(owner=self.request.user).filter(
+            date__date__gte=datetime.date(2025, 1, 29)
+        ).order_by('date')
+        if not records.exists():
+            context['no_data'] = True
+            return context
+
+        dates = [r.date.strftime('%d %b %Y') for r in records]
+        worths = [float(r.worth.amount) for r in records]
+        context['chart_data'] = {'dates': dates, 'worths': worths}
+
+        latest = records.latest('date')
+        earliest = records.earliest('date')
+        peak = max(records, key=lambda r: r.worth.amount)
+
+        context['latest'] = latest
+        context['earliest'] = earliest
+        context['peak'] = peak
+        context['record_count'] = records.count()
+        context['growth'] = latest.worth - earliest.worth
+
+        seen = set()
+        quarterly = []
+        for r in records.order_by('-date'):
+            q_num = (r.date.month - 1) // 3 + 1
+            key = (r.date.year, q_num)
+            if key not in seen:
+                seen.add(key)
+                quarterly.append({'record': r, 'label': f'Q{q_num} {r.date.year}'})
+        context['quarterly_records'] = quarterly
+
+        return context
+
+
 class AnnualReportView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'networth/balance_sheet.html'
 
     def test_func(self):
-        if self.request.user.is_staff:
-            return True
-        return False
-    
+        return self.request.user.is_staff
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        current_year = datetime.date.today().year - 1
-        fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
-        first_fd = fd.filter(date__date=datetime.date(2025, 2, 1)).first() if current_year == 2025 else fd.first()
-        last_fd = fd.latest('date')
-        
+
+        default_year = datetime.date.today().year - 1
+        current_year = int(self.request.GET.get('year', default_year))
         context['annum'] = str(current_year)
+
+        fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
+        if not fd.exists():
+            context['no_data'] = True
+            return context
+
+        if current_year == 2025:
+            first_fd = fd.filter(date__date=datetime.date(2025, 1, 29)).first() or fd.earliest('date')
+        else:
+            first_fd = fd.earliest('date')
+        last_fd = fd.latest('date')
+
         context['balance_brought_forward'] = first_fd.worth
+        context['opening_date'] = first_fd.date
+        context['closing_date'] = last_fd.date
 
         turnover = AggregatedAsset(self.request.user, current_year)
         all_assets = [turnover.investments(), turnover.real_estate(), turnover.business(), turnover.stock()]
-                
+
         context['turnover'] = {
             'investment': all_assets[0],
             'fixed_asset': all_assets[1],
             'business': all_assets[2],
-            'stock': all_assets[3]
+            'stock': all_assets[3],
         }
 
         rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=current_year)
         reward_value = Money(0, 'USD')
         if rewards.exists():
-            reward_value = sum(Money(reward.amount.amount/exchange_rate(reward.amount.currency)[0].amount, 'USD') for reward in rewards)
-        
+            reward_value = sum(
+                Money(r.amount.amount / exchange_rate(r.amount.currency)[0].amount, 'USD')
+                for r in rewards
+            )
+
         stream_changes = {
-            'savings': last_fd.savings - first_fd.savings,
-            'investment': last_fd.investment - first_fd.investment - all_assets[0][1],
+            # Add reward_value back to neutralise its silent deduction from savings.
+            # Reward already reduced Saving.value (and therefore last_fd.savings), so
+            # without this correction it would be counted twice — once here and once
+            # as the explicit "Less Reward" line in the reconciliation.
+            'savings':     last_fd.savings     - first_fd.savings + reward_value,
+            'investment':  last_fd.investment  - first_fd.investment  - all_assets[0][1],
             'fixed_asset': last_fd.fixed_asset - first_fd.fixed_asset - all_assets[1][1],
-            'business': last_fd.business - first_fd.business - all_assets[2][1],
-            'stock': last_fd.stock - first_fd.stock - all_assets[3][1],
-            'liability': last_fd.liability - first_fd.liability,
-            'reward': reward_value
+            'business':    last_fd.business    - first_fd.business    - all_assets[2][1],
+            'stock':       last_fd.stock       - first_fd.stock       - all_assets[3][1],
+            'liability':   last_fd.liability   - first_fd.liability,
+            'reward':      reward_value,
         }
         context['income_change'] = stream_changes
-        
-        all_asset_total = all_assets[0][1] + all_assets[1][1] + all_assets[2][1] + all_assets[3][1]
-        changes_total = sum([stream_changes['savings'], stream_changes['investment'], stream_changes['fixed_asset'], stream_changes['business'], 
-                            stream_changes['stock'], - stream_changes['liability']])
-        context['stream_changes_total'] = changes_total
-        context['earnings_total'] = all_asset_total
-        context['balance_1'] = first_fd.worth + all_asset_total + changes_total
 
-        second_fd = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year).last()
-        context['current_networth'] = second_fd.worth
+        all_asset_total = sum(a[1] for a in all_assets)
+        changes_total = sum([
+            stream_changes['savings'],
+            stream_changes['investment'],
+            stream_changes['fixed_asset'],
+            stream_changes['business'],
+            stream_changes['stock'],
+            -stream_changes['liability'],
+        ])
+        context['earnings_total'] = all_asset_total
+        context['stream_changes_total'] = changes_total
+
+        gross_networth = first_fd.worth + all_asset_total + changes_total
+        context['gross_networth'] = gross_networth
+        context['less_reward'] = reward_value
+        context['net_networth'] = gross_networth - reward_value
+        context['current_networth'] = last_fd.worth
+
+        # Year navigation
+        available_years = sorted({
+            d.year for d in FinancialData.objects.filter(owner=self.request.user).dates('date', 'year')
+        }, reverse=True)
+        context['available_years'] = available_years
+        context['current_year_val'] = current_year
+        context['prev_year'] = str(current_year - 1) if (current_year - 1) in available_years else None
+        context['next_year'] = str(current_year + 1) if (current_year + 1) in available_years else None
+
         return context
     
 class DashboardView(LoginRequiredMixin, TemplateView):

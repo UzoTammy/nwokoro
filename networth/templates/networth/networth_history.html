@@ -1,0 +1,201 @@
+{% extends 'core/base.html' %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  :root {
+    --primary-bg: #131b2e;
+    --secondary-accent: #33548a;
+    --main-content: #f8fafc;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --white: #ffffff;
+  }
+
+  body {
+    background-color: var(--primary-bg);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .card {
+    background-color: var(--white);
+    color: var(--text-main);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .card h3 {
+    font-size: 16px;
+    color: var(--primary-bg);
+  }
+
+  .card p {
+    font-size: 28px;
+    margin-top: 10px;
+    color: var(--secondary-accent);
+  }
+
+  .card small {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .card-full {
+    grid-column: 1 / -1;
+  }
+
+  .card p.growth-positive { color: #16a34a; }
+  .card p.growth-negative { color: #dc2626; }
+
+  .no-data-text {
+    font-size: 16px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  #networthLine {
+    max-height: 300px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav mr-auto">
+      <span class="navbar-text font-weight-bold ml-2 text-light">Networth History</span>
+    </div>
+    <div class="navbar-nav">
+      <a class="nav-link" href="{% url 'networth-home' %}" title="Back to Home"><i class="fa fa-times-circle text-danger"></i></a>
+    </div>
+  </div>
+</nav>
+
+<div class="mt-5 pt-4 px-3">
+
+  {% if no_data %}
+  <div class="cards">
+    <div class="card">
+      <h3>No Records</h3>
+      <p class="no-data-text">No financial records found.</p>
+    </div>
+  </div>
+  {% else %}
+
+  <!-- Summary cards -->
+  <div class="cards">
+    <div class="card">
+      <h3>Current Networth</h3>
+      <p>{{ latest.worth }}</p>
+      <small>{{ latest.date|date:"d M Y" }}</small>
+    </div>
+    <div class="card">
+      <h3>Starting Networth</h3>
+      <p>{{ earliest.worth }}</p>
+      <small>{{ earliest.date|date:"d M Y" }}</small>
+    </div>
+    <div class="card">
+      <h3>All-time Peak</h3>
+      <p>{{ peak.worth }}</p>
+      <small>{{ peak.date|date:"d M Y" }}</small>
+    </div>
+    <div class="card">
+      <h3>Total Growth</h3>
+      <p class="growth-positive">{{ growth }}</p>
+      <small>over {{ record_count }} records</small>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="cards">
+    <div class="card card-full">
+      <h3>Networth Over Time</h3>
+      <canvas id="networthLine"></canvas>
+    </div>
+  </div>
+
+  <!-- Quarterly table -->
+  <div class="cards">
+    <div class="card card-full">
+      <h3>Quarterly Snapshot</h3>
+      <div class="table-responsive mt-3">
+        <table class="table table-sm table-striped table-bordered">
+          <thead class="thead-light">
+            <tr>
+              <th>Quarter</th>
+              <th>As At</th>
+              <th class="text-right">Networth</th>
+              <th class="text-right">Savings</th>
+              <th class="text-right">Investment</th>
+              <th class="text-right">Stock</th>
+              <th class="text-right">Business</th>
+              <th class="text-right">Fixed Asset</th>
+              <th class="text-right">Liability</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in quarterly_records %}
+            <tr>
+              <td class="font-weight-bold">{{ entry.label }}</td>
+              <td class="text-muted">{{ entry.record.date|date:"d M Y" }}</td>
+              <td class="text-right font-weight-bold">{{ entry.record.worth }}</td>
+              <td class="text-right">{{ entry.record.savings }}</td>
+              <td class="text-right">{{ entry.record.investment }}</td>
+              <td class="text-right">{{ entry.record.stock }}</td>
+              <td class="text-right">{{ entry.record.business }}</td>
+              <td class="text-right">{{ entry.record.fixed_asset }}</td>
+              <td class="text-right text-danger">{{ entry.record.liability }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+
+<script>
+  const ctx = document.getElementById('networthLine');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ chart_data.dates | safe }},
+      datasets: [{
+        label: 'Networth',
+        data: {{ chart_data.worths | safe }},
+        borderColor: 'rgba(54, 162, 235, 1)',
+        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+        borderWidth: 2,
+        pointRadius: 3,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: false }
+      }
+    }
+  });
+</script>
+
+{% endblock %}
