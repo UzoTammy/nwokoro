@@ -11,7 +11,8 @@ from .views import (
     FixedAssetCollectRentView, FixedAssetStopRentView, FixedAssetRestoreRentView, FixedAssetUpdateRentView,
     ExternalFundHome, RewardFundView, InjectFundView, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView,
                     PDFNetworthReport,
-     LiabilityListView, LiabilityDetailView, LiabilityUpdateView, LiabilityRepayView)
+     LiabilityListView, LiabilityDetailView, LiabilityUpdateView, LiabilityRepayView,
+     email_report_preview)
 
 
 urlpatterns = [
@@ -112,5 +113,8 @@ urlpatterns = [
     path('institution-report', InstitutionReportView.as_view(),
          name='institution-report'),
 
-    path('pdf/networth', PDFNetworthReport.as_view(), name='pdf-networth')
+    path('pdf/networth', PDFNetworthReport.as_view(), name='pdf-networth'),
+
+    # dev preview — only accessible when DEBUG=True
+    path('dev/email-preview/', email_report_preview, name='email-report-preview'),
 ]

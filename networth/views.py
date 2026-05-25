@@ -1287,4 +1287,33 @@ class PDFNetworthReport(WeasyTemplateResponseMixin, UserPassesTestMixin, Templat
 
         return context
 
-           
+
+# ── DEV ONLY: email preview ──────────────────────────────────────────────────
+from django.conf import settings
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+
+def email_report_preview(request):
+    if not settings.DEBUG:
+        from django.http import Http404
+        raise Http404
+
+    ctx = {
+        'owner': request.user if request.user.is_authenticated else 'John Doe',
+        'networth':          Money(142_850.00, 'USD'),
+        'savings':           Money(28_500.00,  'USD'),
+        'investments':       Money(55_200.00,  'USD'),
+        'stocks':            Money(19_750.00,  'USD'),
+        'business':          Money(24_400.00,  'USD'),
+        'fixed_asset':       Money(32_000.00,  'USD'),
+        'liability':         Money(17_000.00,  'USD'),
+        'roi':               Money(6_340.00,   'USD'),
+        'daily_roi':         Money(17.37,       'USD'),
+        'present_roi':       Money(2_210.50,   'USD'),
+        'prev_networth':     Money(139_620.00, 'USD'),
+        'change_in_networth':Money(3_230.00,   'USD'),
+        'is_gain':           True,
+        'exchange_rate':     'NGN 1,620.00/CA$',
+    }
+    html = render_to_string('networth/mails/financial_report.html', ctx, request=request)
+    return HttpResponse(html)

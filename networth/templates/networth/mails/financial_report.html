@@ -1,117 +1,326 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-
-    .list-group {
-      max-width: 400px;
-      margin: 0 auto;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      background-color: #f9f9f9;
-    }
-
-    .styled-list {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .styled-list li {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 5px;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .styled-list li:last-child {
-      border-bottom: none;
-    }
-
-    .list-group-item {
-      font-weight: normal;
-      color: #555;
-    }
-
-    .item-value {
-      text-align: right;
-      color: #007bff;
-    }
-  </style>
-  <title>Personal email</title>
+  <title>Daily Financial Report</title>
 </head>
+<body style="margin:0;padding:0;background-color:#eef2f7;font-family:Arial,Helvetica,sans-serif;">
 
-<body>
-  <div class="list-group">
-    <h4>
-      Daily Financial Report Summary
-    </h4>
-    <table style="width: 100%; border-collapse: collapse;">
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Networth</td>
-        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{networth}}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Savings</td>
-        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{savings}}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Investments</td>
-        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{investments}}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Stocks</td>
-        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{stocks}}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Business</td>
-        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{business}}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Fixed Asset</td>
-        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{fixed_asset}}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Liability</td>
-        <td style="text-align: right; color: #ee5d2c; padding: 15px 10px;">{{liability}}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="font-weight: bold; color: #555; padding: 15px 10px;">ROI</td>
-        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{roi}}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Daily ROI</td>
-        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{daily_roi}}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Present ROI</td>
-        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{present_roi}}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Previous Networth</td>
-        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{prev_networth}}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Change in Networth</td>
-        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{change_in_networth}}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="font-weight: bold; color: #555; padding: 15px 10px;">Exchange Rate</td>
-        <td style="text-align: right; color: #007bff; padding: 15px 10px;">{{exchange_rate}}</td>
-      </tr>
-    </table>
-  </div>
-  <div class="">
-    <a href="https://uzonwokoro.com/networth">Visit the site</a>
-  </div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eef2f7">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+          <!-- ── HEADER ───────────────────────────────────────────── -->
+          <tr>
+            <td bgcolor="#0f172a" style="border-radius:14px 14px 0 0;padding:36px 40px 24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="vertical-align:middle;">
+                    <p style="margin:0 0 4px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#64748b;">Personal Finance</p>
+                    <h1 style="margin:0;font-size:24px;font-weight:700;color:#ffffff;line-height:1.2;">Daily Financial Report</h1>
+                    <p style="margin:10px 0 0;font-size:13px;color:#94a3b8;">{% now "l, F j, Y" %} &nbsp;&bull;&nbsp; {{owner}}</p>
+                  </td>
+                  <td width="56" style="vertical-align:middle;padding-left:16px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td bgcolor="#1e293b" style="width:52px;height:52px;border-radius:50%;text-align:center;vertical-align:middle;font-size:24px;">
+                          &#128202;
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ── NET WORTH HERO ────────────────────────────────────── -->
+          <tr>
+            <td bgcolor="#0a0f1e" style="padding:24px 40px 36px;">
+              <p style="margin:0 0 8px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#475569;">Total Net Worth</p>
+              <p style="margin:0 0 16px;font-size:44px;font-weight:700;color:#f59e0b;line-height:1;">{{networth}}</p>
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  {% if is_gain %}
+                  <td bgcolor="#052e16" style="border-radius:20px;padding:7px 16px;border:1px solid #166534;">
+                    <span style="font-size:13px;color:#4ade80;font-weight:600;">&#9650; {{change_in_networth}} since last snapshot</span>
+                  </td>
+                  {% else %}
+                  <td bgcolor="#2d0a0a" style="border-radius:20px;padding:7px 16px;border:1px solid #7f1d1d;">
+                    <span style="font-size:13px;color:#f87171;font-weight:600;">&#9660; {{change_in_networth}} since last snapshot</span>
+                  </td>
+                  {% endif %}
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ── BODY ──────────────────────────────────────────────── -->
+          <tr>
+            <td bgcolor="#ffffff" style="padding:36px 40px;">
+
+              <!-- Asset Breakdown heading -->
+              <p style="margin:0 0 14px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#94a3b8;font-weight:700;">Asset Breakdown</p>
+
+              <!-- Assets table -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:10px;">
+
+                <!-- Savings -->
+                <tr>
+                  <td style="padding:14px 18px;border-bottom:1px solid #e2e8f0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="36" style="vertical-align:middle;">
+                          <table role="presentation" cellpadding="0" cellspacing="0">
+                            <tr><td bgcolor="#eff6ff" style="width:36px;height:36px;border-radius:9px;text-align:center;vertical-align:middle;font-size:18px;">&#127970;</td></tr>
+                          </table>
+                        </td>
+                        <td style="padding-left:12px;vertical-align:middle;">
+                          <p style="margin:0;font-size:13px;font-weight:600;color:#334155;">Savings</p>
+                          <p style="margin:2px 0 0;font-size:11px;color:#94a3b8;">Cash &amp; deposits</p>
+                        </td>
+                        <td align="right" style="vertical-align:middle;">
+                          <p style="margin:0;font-size:15px;font-weight:700;color:#0f172a;">{{savings}}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Investments -->
+                <tr>
+                  <td style="padding:14px 18px;border-bottom:1px solid #e2e8f0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="36" style="vertical-align:middle;">
+                          <table role="presentation" cellpadding="0" cellspacing="0">
+                            <tr><td bgcolor="#f0fdf4" style="width:36px;height:36px;border-radius:9px;text-align:center;vertical-align:middle;font-size:18px;">&#128200;</td></tr>
+                          </table>
+                        </td>
+                        <td style="padding-left:12px;vertical-align:middle;">
+                          <p style="margin:0;font-size:13px;font-weight:600;color:#334155;">Investments</p>
+                          <p style="margin:2px 0 0;font-size:11px;color:#94a3b8;">Active positions</p>
+                        </td>
+                        <td align="right" style="vertical-align:middle;">
+                          <p style="margin:0;font-size:15px;font-weight:700;color:#0f172a;">{{investments}}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Stocks -->
+                <tr>
+                  <td style="padding:14px 18px;border-bottom:1px solid #e2e8f0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="36" style="vertical-align:middle;">
+                          <table role="presentation" cellpadding="0" cellspacing="0">
+                            <tr><td bgcolor="#fefce8" style="width:36px;height:36px;border-radius:9px;text-align:center;vertical-align:middle;font-size:18px;">&#128185;</td></tr>
+                          </table>
+                        </td>
+                        <td style="padding-left:12px;vertical-align:middle;">
+                          <p style="margin:0;font-size:13px;font-weight:600;color:#334155;">Stocks</p>
+                          <p style="margin:2px 0 0;font-size:11px;color:#94a3b8;">Equity holdings</p>
+                        </td>
+                        <td align="right" style="vertical-align:middle;">
+                          <p style="margin:0;font-size:15px;font-weight:700;color:#0f172a;">{{stocks}}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Business -->
+                <tr>
+                  <td style="padding:14px 18px;border-bottom:1px solid #e2e8f0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="36" style="vertical-align:middle;">
+                          <table role="presentation" cellpadding="0" cellspacing="0">
+                            <tr><td bgcolor="#fdf4ff" style="width:36px;height:36px;border-radius:9px;text-align:center;vertical-align:middle;font-size:18px;">&#127970;</td></tr>
+                          </table>
+                        </td>
+                        <td style="padding-left:12px;vertical-align:middle;">
+                          <p style="margin:0;font-size:13px;font-weight:600;color:#334155;">Business</p>
+                          <p style="margin:2px 0 0;font-size:11px;color:#94a3b8;">Business equity</p>
+                        </td>
+                        <td align="right" style="vertical-align:middle;">
+                          <p style="margin:0;font-size:15px;font-weight:700;color:#0f172a;">{{business}}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Fixed Assets -->
+                <tr>
+                  <td style="padding:14px 18px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="36" style="vertical-align:middle;">
+                          <table role="presentation" cellpadding="0" cellspacing="0">
+                            <tr><td bgcolor="#fff7ed" style="width:36px;height:36px;border-radius:9px;text-align:center;vertical-align:middle;font-size:18px;">&#127968;</td></tr>
+                          </table>
+                        </td>
+                        <td style="padding-left:12px;vertical-align:middle;">
+                          <p style="margin:0;font-size:13px;font-weight:600;color:#334155;">Fixed Assets</p>
+                          <p style="margin:2px 0 0;font-size:11px;color:#94a3b8;">Real estate &amp; property</p>
+                        </td>
+                        <td align="right" style="vertical-align:middle;">
+                          <p style="margin:0;font-size:15px;font-weight:700;color:#0f172a;">{{fixed_asset}}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Liabilities -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;border:1px solid #fecaca;border-radius:10px;">
+                <tr>
+                  <td bgcolor="#fff5f5" style="padding:14px 18px;border-radius:10px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="36" style="vertical-align:middle;">
+                          <table role="presentation" cellpadding="0" cellspacing="0">
+                            <tr><td bgcolor="#fee2e2" style="width:36px;height:36px;border-radius:9px;text-align:center;vertical-align:middle;font-size:18px;">&#9888;</td></tr>
+                          </table>
+                        </td>
+                        <td style="padding-left:12px;vertical-align:middle;">
+                          <p style="margin:0;font-size:13px;font-weight:600;color:#334155;">Liabilities</p>
+                          <p style="margin:2px 0 0;font-size:11px;color:#94a3b8;">Outstanding obligations</p>
+                        </td>
+                        <td align="right" style="vertical-align:middle;">
+                          <p style="margin:0;font-size:15px;font-weight:700;color:#dc2626;">{{liability}}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- ── DIVIDER ── -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:30px 0;">
+                <tr><td style="height:1px;background-color:#e2e8f0;font-size:0;line-height:0;">&nbsp;</td></tr>
+              </table>
+
+              <!-- ROI heading -->
+              <p style="margin:0 0 14px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#94a3b8;font-weight:700;">Return on Investment</p>
+
+              <!-- ROI three-column cards -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <!-- Total ROI -->
+                  <td width="33%" style="padding-right:6px;vertical-align:top;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #bbf7d0;border-radius:10px;">
+                      <tr>
+                        <td bgcolor="#f0fdf4" style="padding:18px 16px;text-align:center;border-radius:10px;">
+                          <p style="margin:0 0 6px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#16a34a;font-weight:700;">Total ROI</p>
+                          <p style="margin:0;font-size:17px;font-weight:700;color:#15803d;">{{roi}}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <!-- Daily ROI -->
+                  <td width="33%" style="padding:0 3px;vertical-align:top;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #bfdbfe;border-radius:10px;">
+                      <tr>
+                        <td bgcolor="#eff6ff" style="padding:18px 16px;text-align:center;border-radius:10px;">
+                          <p style="margin:0 0 6px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#2563eb;font-weight:700;">Daily ROI</p>
+                          <p style="margin:0;font-size:17px;font-weight:700;color:#1d4ed8;">{{daily_roi}}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <!-- Present ROI -->
+                  <td width="33%" style="padding-left:6px;vertical-align:top;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e9d5ff;border-radius:10px;">
+                      <tr>
+                        <td bgcolor="#fdf4ff" style="padding:18px 16px;text-align:center;border-radius:10px;">
+                          <p style="margin:0 0 6px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#9333ea;font-weight:700;">Present ROI</p>
+                          <p style="margin:0;font-size:17px;font-weight:700;color:#7e22ce;">{{present_roi}}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- ── DIVIDER ── -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:30px 0;">
+                <tr><td style="height:1px;background-color:#e2e8f0;font-size:0;line-height:0;">&nbsp;</td></tr>
+              </table>
+
+              <!-- Period Comparison heading -->
+              <p style="margin:0 0 14px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#94a3b8;font-weight:700;">Period Comparison</p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:10px;">
+                <tr>
+                  <td style="padding:14px 18px;border-bottom:1px solid #e2e8f0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="font-size:13px;color:#64748b;font-weight:600;">Previous Net Worth</td>
+                        <td align="right" style="font-size:14px;font-weight:700;color:#0f172a;">{{prev_networth}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 18px;border-bottom:1px solid #e2e8f0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="font-size:13px;color:#64748b;font-weight:600;">Change</td>
+                        <td align="right" style="font-size:14px;font-weight:700;">
+                          {% if is_gain %}
+                          <span style="color:#16a34a;">&#9650; {{change_in_networth}}</span>
+                          {% else %}
+                          <span style="color:#dc2626;">&#9660; {{change_in_networth}}</span>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 18px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="font-size:13px;color:#64748b;font-weight:600;">NGN / CAD Exchange Rate</td>
+                        <td align="right" style="font-size:14px;font-weight:700;color:#d97706;">{{exchange_rate}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- ── FOOTER ─────────────────────────────────────────────── -->
+          <tr>
+            <td bgcolor="#f8fafc" style="border-top:1px solid #e2e8f0;border-radius:0 0 14px 14px;padding:28px 40px;text-align:center;">
+              <table role="presentation" cellpadding="0" cellspacing="0" align="center">
+                <tr>
+                  <td bgcolor="#0f172a" style="border-radius:8px;">
+                    <a href="https://uzonwokoro.com/networth" style="display:inline-block;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:13px 30px;letter-spacing:0.5px;">View Full Dashboard &#8594;</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:18px 0 0;font-size:11px;color:#94a3b8;line-height:1.6;">
+                This is an automated daily snapshot. Do not reply to this email.<br>
+                &copy; {% now "Y" %} Uzo Nwokoro &mdash; Personal Finance Tracker
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
 </body>
-
 </html>

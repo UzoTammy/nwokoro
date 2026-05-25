@@ -139,14 +139,17 @@ class FinancialReport:
         return networth
 
     def send_email(self):
-        from_email = "noreply@uzonwokoro.com"
+        from django.conf import settings
 
+        from_email = settings.DEFAULT_FROM_EMAIL
         subject = "Financial Data Saved to Database"
-        to_email = ['uzo.nwokoro@ozonefl.com' if self.get_owner().email=='nwokorouzo77@gmail.com' else self.get_owner().email]
+        to_email = [self.get_owner().email]
 
         fd = FinancialData.objects.order_by('-date')[1] # previous latest
 
+        change = self.getNetworth() - fd._FinancialData__networth()
         html_content = render_to_string('networth/mails/financial_report.html', {
+            'owner': self.get_owner(),
             'networth': self.getNetworth(),
             'savings': self.get_saving_total(),
             'investments': self.get_investment_total(),
@@ -157,15 +160,13 @@ class FinancialReport:
             'roi': self.get_roi(),
             'daily_roi': self.get_daily_roi(),
             'present_roi': self.get_present_roi(),
-            'prev_networth': fd.networth,
-            'change_in_networth': self.getNetworth() - fd.__networth(),
+            'prev_networth': fd._FinancialData__networth(),
+            'change_in_networth': change,
+            'is_gain': change.amount >= 0,
             'exchange_rate': f"{format_currency(fd.exchange_rate['NGN']/fd.exchange_rate['CAD'], currency='NGN', locale='en_US')}/CA$"
         })
 
-        # Create the email message
-        msg = EmailMultiAlternatives(subject, "plain text", from_email, to_email,
-                                     headers={"Reply-To": "nwokorouzo@gmail.com"},)
-        
+        msg = EmailMultiAlternatives(subject, "plain text", from_email, to_email)
         msg.attach_alternative(html_content, "text/html")
 
         try:
