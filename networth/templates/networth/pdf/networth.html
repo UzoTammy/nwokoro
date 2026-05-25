@@ -1,97 +1,305 @@
 {% extends 'networth/pdf/base_pdf.html' %}
 
 {% block content %}
-<h1 class="text-center">Networth Report</h1>
-<table>
+
+{% if no_data %}
+<h2 class="text-center">No financial records for {{ report_year }}.</h2>
+{% else %}
+
+<!-- ═══════════════════════════════ PAGE 1 ═══════════════════════════════ -->
+
+<!-- Letterhead -->
+<div class="letterhead">
+  <div class="letterhead-title">Networth Report &mdash; {{ report_year }}</div>
+  <div class="letterhead-meta">
+    <span>{{ user.get_full_name|default:user.username }}</span>
+    <span>Generated: {{ generated_on }}</span>
+  </div>
+  <div class="letterhead-sub">
+    Period: {{ fd_first.date }} &mdash; {{ fd.date|date:"d M, Y" }}
+  </div>
+</div>
+
+<!-- Section 1: Summary -->
+<div class="section">
+  <div class="section-title">Summary</div>
+  <table>
+    <thead>
+      <tr>
+        <th class="text-left">Item</th>
+        <th class="text-right">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="text-left">Opening Networth &nbsp;<small>({{ fd_first.date }})</small></td>
+        <td class="text-right">{{ fd_first.worth }}</td>
+      </tr>
+      <tr>
+        <td class="text-left">Closing Networth &nbsp;<small>({{ fd.date|date:"d M, Y" }})</small></td>
+        <td class="text-right">{{ fd.worth }}</td>
+      </tr>
+      <tr>
+        <td class="text-left">Growth</td>
+        <td class="text-right {% if fd_first.growth.amount >= 0 %}text-success{% else %}text-danger{% endif %}">
+          {{ fd_first.growth_percent }} &nbsp; {{ fd_first.growth }}
+        </td>
+      </tr>
+      <tr>
+        <td class="text-left">Unrealised Investment Earnings</td>
+        <td class="text-right">{{ fd.present_roi }}</td>
+      </tr>
+      <tr>
+        <td class="text-left">Current Liability</td>
+        <td class="text-right text-danger">{{ fd.liability }}</td>
+      </tr>
+      <tr>
+        <td class="text-left">Reward Withdrawn</td>
+        <td class="text-right text-danger">{{ reward_value }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Section 2: Asset Distribution -->
+<div class="section">
+  <div class="section-title">Asset Distribution</div>
+  <table>
+    <thead>
+      <tr>
+        <th class="text-left">Asset Class</th>
+        <th class="text-right">Opening</th>
+        <th class="text-right">Closing</th>
+        <th class="text-right">Change</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% with c=asset_changes.savings %}
+      <tr>
+        <td class="text-left">Savings</td>
+        <td class="text-right">{{ fd_first.record.savings }}</td>
+        <td class="text-right">{{ fd.savings }}</td>
+        <td class="text-right {% if c.amount >= 0 %}text-success{% else %}text-danger{% endif %}">{{ c }}</td>
+      </tr>
+      {% endwith %}
+      {% with c=asset_changes.investment %}
+      <tr>
+        <td class="text-left">Investment</td>
+        <td class="text-right">{{ fd_first.record.investment }}</td>
+        <td class="text-right">{{ fd.investment }}</td>
+        <td class="text-right {% if c.amount >= 0 %}text-success{% else %}text-danger{% endif %}">{{ c }}</td>
+      </tr>
+      {% endwith %}
+      {% with c=asset_changes.stock %}
+      <tr>
+        <td class="text-left">Stock</td>
+        <td class="text-right">{{ fd_first.record.stock }}</td>
+        <td class="text-right">{{ fd.stock }}</td>
+        <td class="text-right {% if c.amount >= 0 %}text-success{% else %}text-danger{% endif %}">{{ c }}</td>
+      </tr>
+      {% endwith %}
+      {% with c=asset_changes.business %}
+      <tr>
+        <td class="text-left">Business</td>
+        <td class="text-right">{{ fd_first.record.business }}</td>
+        <td class="text-right">{{ fd.business }}</td>
+        <td class="text-right {% if c.amount >= 0 %}text-success{% else %}text-danger{% endif %}">{{ c }}</td>
+      </tr>
+      {% endwith %}
+      {% with c=asset_changes.fixed_asset %}
+      <tr>
+        <td class="text-left">Fixed Asset</td>
+        <td class="text-right">{{ fd_first.record.fixed_asset }}</td>
+        <td class="text-right">{{ fd.fixed_asset }}</td>
+        <td class="text-right {% if c.amount >= 0 %}text-success{% else %}text-danger{% endif %}">{{ c }}</td>
+      </tr>
+      {% endwith %}
+      {% with c=asset_changes.liability %}
+      <tr class="total-row">
+        <td class="text-left">Liability</td>
+        <td class="text-right text-danger">{{ fd_first.record.liability }}</td>
+        <td class="text-right text-danger">{{ fd.liability }}</td>
+        <td class="text-right {% if c.amount >= 0 %}text-danger{% else %}text-success{% endif %}">{{ c }}</td>
+      </tr>
+      {% endwith %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Section 3: Networth by Country -->
+{% if networth_by_country %}
+<div class="section">
+  <div class="section-title">Networth by Country</div>
+  <table>
+    <thead>
+      <tr>
+        <th class="text-left">Country</th>
+        <th class="text-right">Value (USD)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for country, value in networth_by_country.items %}
+      <tr>
+        <td class="text-left">{{ country }}</td>
+        <td class="text-right">${{ value|floatformat:"2g" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<!-- Section 4: Charts (side by side via borderless table) -->
+<div class="section">
+  <div class="section-title">Visual Overview &mdash; Note: charts are rendered as static images</div>
+  <table class="chart-table">
     <tr>
-        <td class="text-left">{{user.username}}</td>
-        <td>{{fd.date}} </td>
+      <td class="text-center">
+        <div class="chart-label">Worth Distribution by Asset Class</div>
+        <img src="data:image/png;base64,{{ plot|safe }}" alt="Worth Distribution">
+      </td>
+      <td class="text-center">
+        <div class="chart-label">Networth by Country</div>
+        <img src="data:image/png;base64,{{ donot|safe }}" alt="Networth by Country">
+      </td>
     </tr>
-</table>
-<div class="section">
-
-    <table>
-        <h3>Summary</h3>
-        <tr>
-            <td class="text-left">Networth as at {{fd_first.date}}</td>
-            <td>{{fd_first.worth}}</td>
-        </tr>
-        <tr>
-            <td class="text-left">Current networth</td>
-            <td>{{fd.worth}}</td>
-        </tr>
-        <tr>
-            <td class="text-left">Growth</td>
-            <td class="{% if fd_first.growth.amount > 0 %}  text-success {% endif %}">
-                ({{fd_first.growth_percent}}) {{fd_first.growth}}
-            </td>
-        </tr>
-        <tr>
-            <td class="text-left">Current Earning (<small>not taking</small>)</td>
-            <td>{{fd.present_roi}}</td>
-        </tr>
-        <tr>
-            <td class="text-left">Current Liability</td>
-            <td>{{fd.liability}}</td>
-        </tr>
-    </table>
+  </table>
 </div>
 
+<!-- ═══════════════════════════════ PAGE 2 ═══════════════════════════════ -->
+<div class="page-break"></div>
+
+<!-- Targets & Performance -->
+{% if fd_first.target_roi %}
 <div class="section">
-    <img style="width: 350px; height: auto;" src="data:image/png;base64,{{ plot|safe }}" alt="">
-    <img style="width: 350px; height: auto;" src="data:image/png;base64,{{ donot|safe }}" alt="">
+  <div class="section-title">Targets &amp; Performance</div>
+  <table>
+    <thead>
+      <tr>
+        <th class="text-left">Metric</th>
+        <th class="text-right">Target</th>
+        <th class="text-right">Actual</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="text-left">Annual ROI Target</td>
+        <td class="text-right">({{ fd_first.expected_growth_rate }}) {{ fd_first.target_roi }}</td>
+        <td class="text-right {% if fd_first.growth.amount >= 0 %}text-success{% else %}text-danger{% endif %}">
+          ({{ fd_first.growth_percent }}) {{ fd_first.growth }}
+        </td>
+      </tr>
+      <tr>
+        <td class="text-left">Daily ROI Target</td>
+        <td class="text-right">{{ fd_first.base_daily_roi }}</td>
+        <td class="text-right">{{ fd.daily_roi }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<!-- Investment ROI by Currency -->
+<div class="section">
+  <div class="section-title">Investment ROI &mdash; {{ report_year }}</div>
+  <table>
+    <thead>
+      <tr>
+        <th class="text-left">Currency</th>
+        <th class="text-right">Principal</th>
+        <th class="text-right">ROI Earned</th>
+        <th class="text-right">Yield %</th>
+        <th class="text-right">ROI (USD)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for currency, data in ytd_roi.items %}
+      {% if data.principal.amount > 0 %}
+      <tr>
+        <td class="text-left">{{ currency }}</td>
+        <td class="text-right">{{ data.principal }}</td>
+        <td class="text-right text-success">{{ data.roi }}</td>
+        <td class="text-right">{{ data.percent }}%</td>
+        <td class="text-right text-success">{{ data.roi_usd }}</td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
+<!-- Networth by Currency -->
+{% if networth_by_currency %}
 <div class="section">
-    <table>
-        <h3>Expectation</h3>
-        <tr>
-            <td class="text-left">Daily ROI Target</td>
-            <td>{{fd_first.base_daily_roi}}</td>
-        </tr>
-        <tr>
-            <td class="text-left">ROI Target</td>
-            <td>({{fd_first.expected_growth_rate}}) {{fd_first.target_roi}}</td>
-        </tr>
-        <tr>
-            <td class="text-left">Current Daily ROI</td>
-            <td>{{fd.daily_roi}}</td>
-        </tr>
-    </table>
+  <div class="section-title">Networth by Currency</div>
+  <table>
+    <thead>
+      <tr>
+        <th class="text-left">Currency</th>
+        <th class="text-right">Value (USD equivalent)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in networth_by_currency %}
+      <tr>
+        <td class="text-left">{{ item.currency }}</td>
+        <td class="text-right">{{ item.value_usd }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
+{% endif %}
+
+<!-- Quarterly Networth Progression -->
+{% if quarterly_progression %}
 <div class="section">
-    <table>
-        <h3>Asset Distribution</h3>
-        <tr>
-            <td>Period</td>
-            <td>Fixed Asset</td>
-            <td>Business</td>
-            <td>Stock</td>
-            <td>Investment</td>
-            <td>Savings</td>
-        </tr>
-        <tr>
-            <td>Present</td>
-            <td>{{fd.fixed_asset}}</td>
-            <td>{{fd.business}}</td>
-            <td>{{fd.stock}}</td>
-            <td>{{fd.investment}}</td>
-            <td>{{fd.savings}}</td>
-        </tr>
-
-        <tr>
-            <td>Previous</td>
-            <td>{{fd_first.record.fixed_asset}}</td>
-            <td>{{fd_first.record.business}}</td>
-            <td>{{fd_first.record.stock}}</td>
-            <td>{{fd_first.record.investment}}</td>
-            <td>{{fd_first.record.savings}}</td>
-        </tr>
-    </table>
+  <div class="section-title">Quarterly Networth Progression</div>
+  <table>
+    <thead>
+      <tr>
+        <th class="text-left">Quarter</th>
+        <th class="text-right">As At</th>
+        <th class="text-right">Networth</th>
+        <th class="text-right">Investment</th>
+        <th class="text-right">Savings</th>
+        <th class="text-right">Liability</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in quarterly_progression %}
+      <tr>
+        <td class="text-left">{{ entry.label }}</td>
+        <td class="text-right">{{ entry.record.date|date:"d M Y" }}</td>
+        <td class="text-right">{{ entry.record.worth }}</td>
+        <td class="text-right">{{ entry.record.investment }}</td>
+        <td class="text-right">{{ entry.record.savings }}</td>
+        <td class="text-right text-danger">{{ entry.record.liability }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
+{% endif %}
 
+<!-- Footer -->
 <div class="footer">
-    <small>exchange rate: {{fd.exchange_rate}}</small>
+  <table class="footer-table">
+    <tr>
+      <td class="text-left">
+        {% if exchange_rates %}
+        <strong>Exchange Rates:</strong>
+        {% for er in exchange_rates %}
+          1 USD = {{ er.rate }} {{ er.currency }}{% if not forloop.last %} &nbsp;|&nbsp; {% endif %}
+        {% endfor %}
+        {% endif %}
+      </td>
+      <td class="text-right">
+        {{ generated_on }} &mdash; Confidential
+      </td>
+    </tr>
+  </table>
 </div>
 
+{% endif %}
 {% endblock %}

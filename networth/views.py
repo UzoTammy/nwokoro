@@ -121,15 +121,36 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         # Section 5: Investment Score
         year = timezone.now().year
         current_year_asset = AggregatedAsset(self.request.user, year)
-        # investments = Investment.objects.filter(owner=current_year_asset.owner).filter(is_active=False)     
         mature_investment_current_year = current_year_asset.investments()
-        context['mature_investment_current_year_roi'] = mature_investment_current_year[1] 
-        context['mature_investment_current_year_turnover'] = mature_investment_current_year[0]
+        ytd_turnover = mature_investment_current_year[0]
+        ytd_roi = mature_investment_current_year[1]
+        context['mature_investment_current_year_roi'] = ytd_roi
+        context['mature_investment_current_year_turnover'] = ytd_turnover
 
         all_asset = AggregatedAsset(self.request.user)
         mature_investment = all_asset.investments()
-        context['mature_investment_roi'] = mature_investment[1]
-        context['mature_investment_turnover'] = mature_investment[0]   
+        alltime_turnover = mature_investment[0]
+        alltime_roi = mature_investment[1]
+        context['mature_investment_roi'] = alltime_roi
+        context['mature_investment_turnover'] = alltime_turnover
+
+        # Yield percentages (roi / turnover * 100)
+        context['ytd_yield_pct'] = (
+            round(float(ytd_roi.amount) / float(ytd_turnover.amount) * 100, 1)
+            if ytd_turnover.amount else 0
+        )
+        context['alltime_yield_pct'] = (
+            round(float(alltime_roi.amount) / float(alltime_turnover.amount) * 100, 1)
+            if alltime_turnover.amount else 0
+        )
+
+        # Progress toward full maturity (present_roi / roi)
+        if financial_data.exists():
+            roi_at_maturity = fd.roi.amount
+            context['present_roi_pct'] = (
+                round(float(fd.present_roi.amount) / float(roi_at_maturity) * 100, 1)
+                if roi_at_maturity else 0
+            )
         # Section 6: Plot of investment ROI per month
         months = list(d['month'] for d in current_year_roi(self.request.user))
         values = list(d['amount'].amount for d in current_year_roi(self.request.user))
@@ -148,6 +169,15 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         
         # Section 8: Asset Ratio
         context['asset_ratio'] = networth_ratio(self.request.user, 'NG', 'NGN')
+        ar = context['asset_ratio']
+        if 'currency' in ar:
+            total_amount = ar['currency'].amount + ar['base_value'].amount
+            ngn_pct = round(float(ar['currency'].amount) / float(total_amount) * 100, 1) if total_amount else 0
+            context['asset_ratio_extra'] = {
+                'total': ar['currency'] + ar['base_value'],
+                'ngn_pct': ngn_pct,
+                'usd_pct': round(100 - ngn_pct, 1),
+            }
 
         # Section 9: Number of Instruments and YTD Reward
             # instruments
@@ -1141,40 +1171,120 @@ class PDFNetworthReport(WeasyTemplateResponseMixin, UserPassesTestMixin, Templat
     header_html = None
 
     def test_func(self):
-        if self.request.user.is_staff:
-            return True
-        return False
-    
-    
+        return self.request.user.is_staff
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        current_year = datetime.date.today().year-1
+
+        default_year = datetime.date.today().year - 1
+        current_year = int(self.request.GET.get('year', default_year))
+        context['report_year'] = str(current_year)
+        context['generated_on'] = datetime.date.today().strftime('%d %b, %Y')
+
         record = FinancialData.objects.filter(owner=self.request.user).filter(date__year=current_year)
-        if record.exists():
-            first_record = record.earliest('date') if current_year != 2025 else record.filter(date__date=datetime.date(2025, 2, 1)).first()
-            first_worth = first_record.worth
-            target_roi = get_target().get(2025)
-            base_daily_roi = set_roi(target_roi)  # 20% above the first roi of the year
-            first_date = datetime.date(year=current_year, month=1, day=1).strftime("%d %b, %Y")
-            
-            fd = record.latest('date')
-            growth_percent = format_percent(round((fd.worth - first_worth)/first_worth, 4), decimal_quantization=False, locale='en_US')
-            expected_growth_rate = format_percent(round((target_roi)/first_worth, 4), decimal_quantization=False, locale='en_US')
-            
-            context['fd_first'] = {'worth': first_worth, 'date': first_date, 'growth': fd.worth - first_worth,
-                                'base_daily_roi': base_daily_roi, 'target_roi': target_roi, 'record': first_record,
-                                'growth_percent': growth_percent, 'expected_growth_rate': expected_growth_rate}
-            context['fd'] = fd
-            context['plot'] = bar_chart(['Fixed Asset', 'Stock', 'Investment', 'Savings',  'Business'], 
-                                        [fd.fixed_asset.amount, fd.stock.amount, fd.investment.amount, fd.savings.amount, fd.business.amount],
-                                        "Worth", "Instrument Type", "Worth Distribution")
-            can = fd.networth_by_country.get('CA', 0)
-            ngn = fd.networth_by_country.get('NG', 0)
-            usa = fd.networth_by_country.get('US', 0)
-            
-            context['donot'] = donut_chart(["CAN", "NGN", "USA"], 
-                                        [can, ngn, usa])
-            
+        if not record.exists():
+            context['no_data'] = True
+            return context
+
+        if current_year == 2025:
+            first_record = record.filter(date__date=datetime.date(2025, 1, 29)).first() or record.earliest('date')
+        else:
+            first_record = record.earliest('date')
+        fd = record.latest('date')
+        first_worth = first_record.worth
+        growth = fd.worth - first_worth
+
+        growth_percent = format_percent(
+            round(growth / first_worth, 4), decimal_quantization=False, locale='en_US'
+        ) if first_worth.amount else '0%'
+
+        target_roi = get_target().get(current_year)
+        if target_roi:
+            base_daily_roi = set_roi(target_roi)
+            expected_growth_rate = format_percent(
+                round(target_roi / first_worth, 4), decimal_quantization=False, locale='en_US'
+            )
+        else:
+            base_daily_roi = None
+            expected_growth_rate = None
+
+        context['fd_first'] = {
+            'worth': first_worth,
+            'date': first_record.date.strftime('%d %b, %Y'),
+            'growth': growth,
+            'growth_percent': growth_percent,
+            'base_daily_roi': base_daily_roi,
+            'target_roi': target_roi,
+            'expected_growth_rate': expected_growth_rate,
+            'record': first_record,
+        }
+        context['fd'] = fd
+
+        # Charts
+        context['plot'] = bar_chart(
+            ['Fixed Asset', 'Stock', 'Investment', 'Savings', 'Business'],
+            [fd.fixed_asset.amount, fd.stock.amount, fd.investment.amount, fd.savings.amount, fd.business.amount],
+            'Worth', 'Instrument Type', 'Worth Distribution'
+        )
+        can = fd.networth_by_country.get('CA', 0)
+        ngn = fd.networth_by_country.get('NG', 0)
+        usa = fd.networth_by_country.get('US', 0)
+        context['donot'] = donut_chart(['CAN', 'NGN', 'USA'], [can, ngn, usa])
+
+        # Networth by country (readable)
+        context['networth_by_country'] = fd.networth_by_country
+
+        # Exchange rates (readable pairs)
+        if fd.exchange_rate:
+            context['exchange_rates'] = [
+                {'currency': k, 'rate': round(v, 4)}
+                for k, v in fd.exchange_rate.items()
+            ]
+
+        # Reward withdrawn this year
+        rewards = RewardFund.objects.filter(owner=self.request.user).filter(date__year=current_year)
+        reward_value = Money(0, 'USD')
+        if rewards.exists():
+            reward_value = sum(
+                Money(r.amount.amount / exchange_rate(r.amount.currency)[0].amount, 'USD')
+                for r in rewards
+            )
+        context['reward_value'] = reward_value
+
+        # Asset changes (closing minus opening per class)
+        context['asset_changes'] = {
+            'savings':     fd.savings     - first_record.savings,
+            'investment':  fd.investment  - first_record.investment,
+            'stock':       fd.stock       - first_record.stock,
+            'business':    fd.business    - first_record.business,
+            'fixed_asset': fd.fixed_asset - first_record.fixed_asset,
+            'liability':   fd.liability   - first_record.liability,
+        }
+
+        # Investment ROI by currency (page 2)
+        context['ytd_roi'] = ytd_roi(self.request.user, current_year)
+
+        # Networth by currency (page 2)
+        networth_currency = []
+        for cur in currency_list(self.request.user):
+            value = networth_by_currency(cur, self.request.user)
+            rate = exchange_rate(cur)[0]
+            networth_currency.append({
+                'currency': cur,
+                'value_usd': Money(value / rate.amount, 'USD'),
+            })
+        context['networth_by_currency'] = networth_currency
+
+        # Quarterly networth progression (page 2)
+        seen_q, quarterly = set(), []
+        for r in record.order_by('-date'):
+            q_num = (r.date.month - 1) // 3 + 1
+            key = (r.date.year, q_num)
+            if key not in seen_q:
+                seen_q.add(key)
+                quarterly.append({'label': f'Q{q_num} {r.date.year}', 'record': r})
+        context['quarterly_progression'] = quarterly
+
         return context
 
            

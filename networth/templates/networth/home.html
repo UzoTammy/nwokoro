@@ -49,7 +49,129 @@
     color: var(--secondary-accent);
   }
 
-  
+  .ratio-bar {
+    display: flex;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 12px 0 10px;
+    background-color: #e2e8f0;
+  }
+  .ratio-ngn {
+    background-color: #f59e0b;
+    height: 100%;
+    border-radius: 4px 0 0 4px;
+  }
+  .ratio-usd {
+    background-color: var(--secondary-accent);
+    height: 100%;
+    flex: 1;
+    border-radius: 0 4px 4px 0;
+  }
+  .ratio-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    margin: 4px 0;
+    color: var(--text-main);
+  }
+  .ratio-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+  .dot-ngn { background-color: #f59e0b; }
+  .dot-usd { background-color: var(--secondary-accent); }
+  .ratio-insight {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    font-style: italic;
+  }
+  .ratio-no-usd {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .ratio-footer {
+    margin-top: 14px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 10px;
+  }
+  .ratio-row-gap { margin-top: 6px; }
+  .ratio-no-reward {
+    margin-top: 6px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* Investment Score card */
+  .inv-score-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .inv-score-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--secondary-accent);
+    margin: 0 0 6px;
+  }
+  .inv-progress-track {
+    height: 7px;
+    background-color: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+  .inv-progress-fill {
+    height: 100%;
+    background-color: var(--secondary-accent);
+    border-radius: 4px;
+  }
+  .inv-progress-caption {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .inv-divider {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 10px 0 12px;
+  }
+  .inv-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+  }
+  .inv-col-header {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .inv-stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-main);
+    margin-bottom: 4px;
+  }
+  .inv-stat-val {
+    font-weight: 600;
+    color: var(--secondary-accent);
+  }
+  .inv-yield {
+    color: #16a34a;
+    font-weight: 700;
+  }
 </style>
 {% endblock %}
 {% block content %}
@@ -140,24 +262,51 @@
 
 <div class="cards">
   <div class="card">
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item list-group-item-light">Investment Score</li>
-      <li class="list-group-item">Current ROI
-        <a class="badge badge-light" data-toggle="tooltip" data-html="false"
-          title='Current ROI out of ROI at full maturity of all investments' href=""><i class="fa fa-info fa-sm"></i>
-        </a>
-        <div class="float-right text-wrap" style="width: 6rem;">
-          <span class="font-italic">{{fd.present_roi}} out of {{fd.roi}}</span>
-        </div>
-      </li>
+    <h3><i class="fa fa-chart-line text-primary"></i> Investment Score</h3>
 
-      <li class="list-group-item">Earned YTD <span class="float-right">{{mature_investment_current_year_roi}}</span>
-      </li>
-      <li class="list-group-item">Turnover YTD<span
-          class="float-right">{{mature_investment_current_year_turnover}}</span></li>
-      <li class="list-group-item">All Earnings <span class="float-right">{{mature_investment_roi}}</span></li>
-      <li class="list-group-item">Turnover<span class="float-right">{{mature_investment_turnover}}</span></li>
-    </ul>
+    <div class="inv-score-label">Unrealised Earnings</div>
+    <div class="inv-score-value">{{fd.present_roi}}</div>
+    <div class="inv-progress-track">
+      <div class="inv-progress-fill" data-pct="{{present_roi_pct}}"></div>
+    </div>
+    <div class="inv-progress-caption">
+      {{present_roi_pct}}% of {{fd.roi}} at full maturity
+    </div>
+
+    <hr class="inv-divider">
+
+    <div class="inv-cols">
+      <div>
+        <div class="inv-col-header">This Year</div>
+        <div class="inv-stat-row">
+          <span>Earned</span>
+          <span class="inv-stat-val">{{mature_investment_current_year_roi}}</span>
+        </div>
+        <div class="inv-stat-row">
+          <span>Turnover</span>
+          <span class="inv-stat-val">{{mature_investment_current_year_turnover}}</span>
+        </div>
+        <div class="inv-stat-row">
+          <span>Yield</span>
+          <span class="inv-yield">{{ytd_yield_pct}}%</span>
+        </div>
+      </div>
+      <div>
+        <div class="inv-col-header">All Time</div>
+        <div class="inv-stat-row">
+          <span>Earned</span>
+          <span class="inv-stat-val">{{mature_investment_roi}}</span>
+        </div>
+        <div class="inv-stat-row">
+          <span>Turnover</span>
+          <span class="inv-stat-val">{{mature_investment_turnover}}</span>
+        </div>
+        <div class="inv-stat-row">
+          <span>Yield</span>
+          <span class="inv-yield">{{alltime_yield_pct}}%</span>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="card">
     <h3>Monthly Earnings</h3>
@@ -183,33 +332,40 @@
 
 <div class="cards">
   <div class="card">
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item">
-        <span class="font-italic"><i class="fa fa-paperclip text-info"></i> {{ asset_ratio.country }} Asset
-          Ratio</span>
-      </li>
-      <li class="list-group-item">
-        {% if 'currency' in asset_ratio %}
-        AR in {{asset_ratio.country}} - {{asset_ratio.currency}} : {{asset_ratio.base_value}} x{{asset_ratio.ratio}}
-        {% else %}
-        No US dollar asset in {{asset_ratio.country}}
-        {% endif %}
-      </li>
-    </ul>
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item"><span>
-          {{number_of_instruments|first}} instruments out of
-          {{number_of_instruments|last}} Assets
-        </span>
-
-      </li>
+    {% if 'currency' in asset_ratio %}
+    <h3><i class="fa fa-globe-africa text-info"></i> {{ asset_ratio.country }} Portfolio</h3>
+    <p>{{asset_ratio_extra.total}}</p>
+    <div class="ratio-bar">
+      <div class="ratio-ngn" style="width: {{asset_ratio_extra.ngn_pct}}%"></div>
+      <div class="ratio-usd"></div>
+    </div>
+    <div class="ratio-row">
+      <span><span class="ratio-dot dot-ngn"></span>NGN &mdash; {{asset_ratio.currency}}</span>
+      <span>{{asset_ratio_extra.ngn_pct}}%</span>
+    </div>
+    <div class="ratio-row">
+      <span><span class="ratio-dot dot-usd"></span>USD &mdash; {{asset_ratio.base_value}}</span>
+      <span>{{asset_ratio_extra.usd_pct}}%</span>
+    </div>
+    <div class="ratio-insight">NGN holdings are {{asset_ratio_extra.ngn_pct}}% of the {{asset_ratio.country}} portfolio</div>
+    {% else %}
+    <h3><i class="fa fa-globe-africa text-info"></i> {{ asset_ratio.country }} Portfolio</h3>
+    <p class="ratio-no-usd">No USD asset in {{asset_ratio.country}}</p>
+    {% endif %}
+    <div class="ratio-footer">
+      <div class="ratio-row">
+        <span>{{number_of_instruments|first}} instruments</span>
+        <span>of {{number_of_instruments|last}} assets</span>
+      </div>
       {% if reward %}
-      <li class="list-group-item">YTD Reward <span class="float-right">{{reward}}</span></li>
+      <div class="ratio-row ratio-row-gap">
+        <span>YTD Reward</span>
+        <span class="text-danger">{{reward}}</span>
+      </div>
       {% else %}
-      <li class="list-group-item">No Reward Taken</li>
+      <div class="ratio-no-reward">No Reward Taken</div>
       {% endif %}
-    </ul>
-
+    </div>
   </div>
   <div class="card">
     <table data-toggle="table" class="table table-sm table-light table-striped table-bordered">
@@ -332,6 +488,11 @@
         }]
       }
     });
+</script>
+<script>
+  document.querySelectorAll('.inv-progress-fill').forEach(function(el) {
+    el.style.width = (el.dataset.pct || 0) + '%';
+  });
 </script>
 
 {% endblock %}
