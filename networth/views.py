@@ -448,29 +448,39 @@ class SavingListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         if financial_data.exists():
             fd = financial_data.latest('date')
             context['fd'] = fd
+            if fd.worth.amount > 0:
+                context['savings_pct'] = round((fd.savings.amount / fd.worth.amount) * 100, 1)
 
-        savings = get_assets_liabilities(owner=self.request.user)['savings']
-        
+        savings = get_assets_liabilities(owner=self.request.user)['savings'].annotate(
+            last_transaction=Max('savings_transactions__timestamp')
+        )
+
         context['savings'] = savings.order_by('value_currency')
-        context['savings_total'] = get_value(savings, 'saving')
         context['to_usd_total'] = sum(saving.to_usd() for saving in savings)
 
+        def _to_usd_amount(obj):
+            if obj.value.currency != 'USD':
+                return obj.value.amount / exchange_rate(obj.value.currency)[0].amount
+            return obj.value.amount
+
+        currencies = savings.values_list('value_currency', flat=True).distinct()
+        context['savings_by_currency'] = [
+            {'currency': cur, 'usd_value': Money(sum(_to_usd_amount(obj) for obj in savings.filter(value_currency=cur)), 'USD')}
+            for cur in currencies
+        ]
+
         holders = savings.values_list('holder', flat=True).distinct()
-        savings_summary = list()
+        savings_summary = []
         for holder in holders:
             qs = savings.filter(holder=holder)
-            value = decimal.Decimal('0')
-            for obj in qs:
-                if obj.value.currency != 'USD':
-                    value += obj.value.amount/exchange_rate(obj.value.currency)[0].amount 
-                else:
-                    value += obj.value.amount
-            savings_summary.append({
-                'holder': obj.holder,
-                'usd_value': Money(value, 'USD')
-            })
+            value = sum(_to_usd_amount(obj) for obj in qs)
+            if value > 0:
+                savings_summary.append({
+                    'holder': holder,
+                    'usd_value': Money(value, 'USD'),
+                })
         context['savings_summary'] = savings_summary
-        
+
         return context
    
 class StockListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -760,7 +770,6 @@ class SavingCreateView(LoginRequiredMixin, CreateView):
     
     def form_valid(self, form):
         form.instance.owner = self.request.user if self.request.user.is_staff else None
-        form.instance.holder = form.cleaned_data['holder_text'] if form.cleaned_data['holder_text'] != '' else form.cleaned_data['holder_select']
         return super().form_valid(form)
 
 class SavingDetailView(LoginRequiredMixin, DetailView):

@@ -30,7 +30,7 @@ class Saving(models.Model):
 
     def __str__(self):
         return f'Savings: {self.value}'
-    
+
     def to_usd(self):
         exchange_rate_qs = ExchangeRate.objects.all()
         value = self.value / exchange_rate_qs.get(target_currency=self.value_currency).rate

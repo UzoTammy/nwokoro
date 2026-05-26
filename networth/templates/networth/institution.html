@@ -2,65 +2,78 @@
 
 {% block content %}
 
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'networth-home' %}">Networth</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'investment-list' %}">Investment</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Holder's Details</li>
-  </ol>
+<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav mr-auto">
+            <a class="nav-link" href="{% url 'investment-list' %}" title="Back to investments">
+                <i class="fas fa-chevron-left text-muted"></i> Investment
+            </a>
+        </div>
+        <div class="navbar-nav">
+            <a class="nav-link" href="{% url 'networth-home' %}" title="Back to home">
+                <i class="fas fa-times-circle text-danger"></i>
+            </a>
+        </div>
+    </div>
 </nav>
 
-<div class="container mt-3 font-weight-lighter">
-    {% if institutions %}
-    <div class="row">
+<div class="container mt-5 font-weight-lighter">
+    <div class="row mt-1">
         <div class="col">
-            <h3>Investment Report by Institution <span class="float-right">{{total}}</span></h3>
+            <h1 class="font-weight-lighter">Holders</h1>
         </div>
     </div>
 
-    <div class="row">
+    {% if institutions %}
+    <div class="row mt-4">
         <div class="col">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Holder & Value</th>
-                        <th class="text-right">Value in USD</th>
-                        <th class="text-right">Maturity</th>
-                        <th class="text-right">ROI in USD</th>
-                    </tr>
-                </thead>
-                {% for holders_data in institutions %}
-                {% for key, value in holders_data.items %}
-                
-                <tbody>
-                    <tr>
-                        <th><h6 class="text-danger">{{key}}</h6></th>
-                    </tr>
-                    {% for record in value|first %}
-                    <tr>
-                        <td>{{record.value}}</td>
-                        <td class="text-right">{{record.value_in_usd}}</td>
-                        <td class="text-right">{{record.maturity}}</td>
-                        <td class="text-right">{{record.roi_in_usd}}</td>
-                    </tr>
-                    {% endfor %}
-                    <tr>
-                        <td>Total</td>
-                        <td class="text-right" colspan="1">{{value|last|first}}</td>
-                        <td class="text-right" colspan="2">{{value|last|last}}</td>
-                    </tr>
-                </tbody>
-                {% endfor %}
-                {% endfor %}
-            </table>
-            </td>
-            </tr>
+            {% for holders_data in institutions %}
+            {% for key, value in holders_data.items %}
+            <div class="card mb-4">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-danger">{{key}}</th>
+                            <th class="text-right text-danger" colspan="3">
+                                {% for total in value.native_totals %}{{total}} {% endfor %}
+                            </th>
+                        </tr>
+                        <tr class="text-muted small">
+                            <th>Principal</th>
+                            <th class="text-right">Value (USD)</th>
+                            <th class="text-right">Maturity</th>
+                            <th class="text-right">ROI (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in value.investments %}
+                        <tr>
+                            <td>{{record.value}}</td>
+                            <td class="text-right">{{record.value_in_usd}}</td>
+                            <td class="text-right">{{record.maturity}}</td>
+                            <td class="text-right">{{record.roi_in_usd}}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="bg-light">
+                            <td>Total (USD)</td>
+                            <td class="text-right">{{value.value_total}}</td>
+                            <td></td>
+                            <td class="text-right">{{value.roi_total}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+            {% endfor %}
         </div>
     </div>
     {% else %}
-    <h3>No institutional Report available</h3>
+    <div class="row mt-4">
+        <div class="col">
+            <p class="text-muted font-italic">No institutional report available.</p>
+        </div>
+    </div>
     {% endif %}
-
-    
 </div>
+
 {% endblock %}

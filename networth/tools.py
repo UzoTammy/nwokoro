@@ -334,7 +334,7 @@ def ytd_roi(owner, year:Optional[int]=None)->List[dict]:
     if year is None:
         year = datetime.datetime.now().year
 
-    investments = Investment.objects.filter(owner=owner)
+    investments = Investment.objects.filter(owner=owner, is_active=True, principal__gt=0)
     pks = [investment.pk for investment in investments if investment.maturity().year == year]
     investments = Investment.objects.filter(pk__in=pks)
     currencies = ExchangeRate.objects.values_list('target_currency', flat=True)
@@ -395,27 +395,39 @@ def investments_by_holder(owner):
     stack = list()
     active_investments = Investment.objects.filter(is_active=True).filter(owner=owner)
     holders = active_investments.values_list('holder', flat=True).distinct()
-    investments = list(active_investments.filter(holder=holder) for holder in holders)
 
-    for qs in investments:
+    for holder in holders:
+        qs = active_investments.filter(holder=holder)
         exch = ExchangeRate.objects.all()
-        holder = qs.first().holder
-        store = list()
-        # totals = list()
+        store = []
         value_total = roi_total = Money(0, 'USD')
+        native_totals = {}
+
         for obj in qs:
-            data = {"value": obj.principal, 'maturity': obj.maturity()}
             rate = exch.get(target_currency=obj.principal.currency).rate
-            value_in_usd = float(obj.principal.amount)/rate
-            roi_in_usd = float(obj.roi().amount)/rate
-            data['value_in_usd'] = Money(value_in_usd, 'USD')
-            data['roi_in_usd'] = Money(roi_in_usd, 'USD')
+            value_in_usd = float(obj.principal.amount) / rate
+            roi_in_usd = float(obj.roi().amount) / rate
+            store.append({
+                'value': obj.principal,
+                'value_in_usd': Money(value_in_usd, 'USD'),
+                'maturity': obj.maturity(),
+                'roi_in_usd': Money(roi_in_usd, 'USD'),
+            })
             value_total += Money(value_in_usd, 'USD')
             roi_total += Money(roi_in_usd, 'USD')
-            store.append(data)
-        holders_data = {holder: (store, (value_total, roi_total))}
-        # [{holder: ([], (value total, roi total))}]
-        stack.append(holders_data)
+
+            currency = str(obj.principal.currency)
+            if currency in native_totals:
+                native_totals[currency] += obj.principal
+            else:
+                native_totals[currency] = obj.principal
+
+        stack.append({holder: {
+            'investments': store,
+            'value_total': value_total,
+            'roi_total': roi_total,
+            'native_totals': list(native_totals.values()),
+        }})
     return stack
 
 def get_transactions(*transactions, period:Literal['recent','year','all']='recent'):

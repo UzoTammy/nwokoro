@@ -11,18 +11,18 @@
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav mr-auto">
             <a class="nav-link" href="{% url 'networth-saving-create' %}">
-                <i class="fa fa-plus text-success"></i> New Account
+                <i class="fas fa-plus-circle text-success"></i> New Account
             </a>
             <a class="nav-link" href="{% url 'networth-external-fund-home' %}">
-                <i class="fa fa-chevron-left text-danger"></i><i class="fa fa-chevron-right text-success"></i>
-                Cross Fund <span class="sr-only">(current)</span></a>
+                <i class="fas fa-exchange-alt text-primary"></i>
+                Fund Flow <span class="sr-only">(current)</span></a>
 
             <a class="nav-link" href="{% url 'saving-counter-transfer' %}">
-                <i class="fa fa-download text-info"></i>
+                <i class="fas fa-arrow-circle-right text-info"></i>
                 Transfer
             </a>
             <a class="nav-link" href="{% url 'saving-conversion' %}">
-                <i class="fa fa-retweet text-success"></i>
+                <i class="fas fa-coins text-success"></i>
                 Convert
             </a>
         </div>
@@ -35,61 +35,72 @@
 
 <div class="container mt-5">
 
-    <div class="row mt-5">
+    <div class="row mt-1">
         <div class="col">
             <h1 class="font-weight-lighter">Savings</h1>
         </div>
     </div>
 
-    <div class="row mb-3">
+    <div class="row mt-4">
         {% if savings %}
         <div class="col-sm-8 font-weight-lighter">
-            <table class="table" data-toggle="table">
-                <thead>
-                    <tr>
-                        <th>Holder</th>
-                        <th>Date</th>
-                        <th class="text-center">Host Country</th>
-                        <th class="text-center">Value</th>
-                        <th class="text-center">To USD</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for saving in savings %}
-                    <tr>
-                        <td><a href="{% url 'networth-saving-detail' saving.pk %}">{{saving.holder}}</a></td>
-                        <td>{{saving.date}}</td>
-                        <td class="text-center">{{saving.host_country}}</td>
-                        <td class="text-right">{{saving.value}}</td>
-                        <td class="text-right">{{saving.to_usd}}</td>
-                    </tr>
-                    {% endfor %}
-                    <tr>
-                        <td colspan="4">Total in USD</td>
-                        <td class="text-right">{{to_usd_total}}</td>
-                    </tr>
-                </tbody>
-            </table>
-
+            <div class="card">
+                <table class="table mb-0" data-toggle="table">
+                    <thead>
+                        <tr>
+                            <th>Holder</th>
+                            <th>Last Activity</th>
+                            <th class="text-center">Host Country</th>
+                            <th class="text-center">Value</th>
+                            <th class="text-center">To USD</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for saving in savings %}
+                        <tr>
+                            <td><a href="{% url 'networth-saving-detail' saving.pk %}">{{saving.holder}}</a></td>
+                            <td>{{saving.last_transaction|date:"d M Y"|default:"—"}}</td>
+                            <td class="text-center">{{saving.host_country}}</td>
+                            <td class="text-right">{{saving.value}}</td>
+                            <td class="text-right">{{saving.to_usd}}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="4">Total in USD</td>
+                            <td class="text-right">{{to_usd_total}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div class="col-sm-4">
-            <ul class="list-group list-group-flush font-weight-lighter">
-                <li class="list-group-item list-group-item-primary text-center">Summary</li>
-                <li class="list-group-item">Count <span class="float-right badge badge-info">{{savings.count}}</span>
-                </li>
-                {% for saving in savings_total %}
-                <li class="list-group-item"> {{saving.currency}}
-                    <span class="float-right">{{saving}}</span>
-                </li>
-                {% endfor %}
-                {% for savings in savings_summary %}
-                <li class="list-group-item">
-                    {{savings.holder}}
-                    <span class="float-right">{{savings.usd_value}}</span>
-                </li>
-                {% endfor %}
-            </ul>
-
+            <div class="card">
+                <ul class="list-group list-group-flush font-weight-lighter">
+                    <li class="list-group-item list-group-item-primary text-center">Summary</li>
+                    <li class="list-group-item">Count <span class="float-right badge badge-info">{{savings.count}}</span>
+                    </li>
+                    {% for item in savings_by_currency %}
+                    <li class="list-group-item">{{item.currency}}
+                        <span class="float-right">{{item.usd_value}}</span>
+                    </li>
+                    {% endfor %}
+                    <li class="list-group-item bg-light"> Total (USD)
+                        <span class="float-right">{{to_usd_total}}</span>
+                    </li>
+                    {% if savings_pct %}
+                    <li class="list-group-item">% of Networth
+                        <span class="float-right badge badge-secondary">{{savings_pct}}%</span>
+                    </li>
+                    {% endif %}
+                    <li class="list-group-item list-group-item-info mt-3">Holders</li>
+                    {% for s in savings_summary %}
+                    <li class="list-group-item">
+                        {{s.holder}}
+                        <span class="float-right">{{s.usd_value}}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
         {% else %}
         <div class="row">

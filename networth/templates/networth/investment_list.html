@@ -8,10 +8,9 @@
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        <div class="navbar-nav mr-auto">
-        </div>
+        <div class="navbar-nav mr-auto"></div>
         <div class="navbar-nav">
-            <a class="nav-link" href="{% url 'networth-home'%}"><i class="fa fa-times-circle text-danger"></i></a>
+            <a class="nav-link" href="{% url 'networth-home' %}" title="Back to home"><i class="fas fa-times-circle text-danger"></i></a>
         </div>
     </div>
 </nav>
@@ -26,114 +25,111 @@
     <div class="row mt-4">
         {% if investments %}
         <div class="col-sm-8 font-weight-lighter">
-            <table class="table" data-toggle="table">
-                <thead>
-                    <tr>
-                        <th>Holder</th>
-                        <th>Maturity</th>
-                        <th class="">Due</th>
-                        <th class="text-right">Principal</th>
-                        <th class="text-right">Principal($)</th>
-                        <th class="text-right">Accrued ROI</th>
-                        <th class="text-right">Accrued ROI($)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for investment in investments %}
-                    <tr>
-                        <td><a href="{% url 'networth-investment-detail' investment.pk %}">{{investment.holder}}</a>
-                        </td>
-                        <td>{{investment.maturity}}</td>
-                        <td class="">{% if investment.due_in_days == 0 %}
-                            <span class="text-success">Matured</span> {% elif investment.due_in_days < 0 %} <span
-                                class="text-success"> {{investment.due_in_days|scalar_value}} days ago {% else %}
-                                in {{investment.due_in_days}} days
-                                {% endif %}
-                        </td>
-                        <td class="text-right">{{investment.principal}}</td>
-                        <td class="text-right">{{investment.to_usd}}</td>
-                        <td class="text-right">{{investment.present_roi}}</td>
-                        <td class="text-right">{{investment.present_roi|to_usd}}</td>
-                    </tr>
-                    {% endfor %}
-                    <tr>
-                        <td></td>
-                    </tr>
-                </tbody>
-            </table>
 
-            <div class="row mt-5">
-                <div class="col">
-                    <h3 class="font-weight-lighter">Current Year Achievable</h3>
-                    <hr>
-                    <h5 class="font-weight-lighter">By Currency</h5>
-                    <table class="table mt-3" data-toggle="table">
+            <div class="card mb-4">
+                <table class="table mb-0" data-toggle="table">
+                    <thead>
+                        <tr>
+                            <th>Holder</th>
+                            <th>Maturity</th>
+                            <th>Due</th>
+                            <th class="text-right">Principal</th>
+                            <th class="text-right">Principal($)</th>
+                            <th class="text-right">Accrued ROI</th>
+                            <th class="text-right">Accrued ROI($)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for investment in investments %}
+                        <tr>
+                            <td><a href="{% url 'networth-investment-detail' investment.pk %}">{{investment.holder}}</a></td>
+                            <td>{{investment.maturity}}</td>
+                            <td>
+                                {% if investment.due_in_days == 0 %}
+                                <span class="badge badge-success">Matured</span>
+                                {% elif investment.due_in_days < 0 %}
+                                <span class="badge badge-success">{{investment.due_in_days|scalar_value}}d ago</span>
+                                {% elif investment.due_in_days <= 30 %}
+                                <span class="badge badge-warning">in {{investment.due_in_days}}d</span>
+                                {% else %}
+                                <span class="text-muted small">in {{investment.due_in_days}} days</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-right">{{investment.principal}}</td>
+                            <td class="text-right">{{investment.to_usd}}</td>
+                            <td class="text-right">{{investment.present_roi}}</td>
+                            <td class="text-right">{{investment.present_roi|to_usd}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="font-weight-lighter mb-3">Maturing This Year</h5>
+                    <table class="table mb-0" data-toggle="table">
                         <thead>
                             <tr>
                                 <th>Currency</th>
-                                <th>Principal</th>
-                                <th>ROI</th>
-                                <th>ROI($)</th>
+                                <th class="text-right">Principal</th>
+                                <th class="text-right">ROI</th>
+                                <th class="text-right">ROI($)</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% if year_roi %}
                             {% for key, investment in year_roi.items %}
-                            <tr class="font-weight-lighter">
+                            {% if investment.principal.amount > 0 %}
+                            <tr>
                                 <td>{{key}}</td>
-                                <td>{{investment.principal}}</td>
-                                <td>{{investment.roi}}</td>
-                                <td>{{investment.roi_usd}}</td>
+                                <td class="text-right">{{investment.principal}}</td>
+                                <td class="text-right">{{investment.roi}}</td>
+                                <td class="text-right">{{investment.roi_usd}}</td>
                             </tr>
-                            {% endfor %}
                             {% endif %}
+                            {% endfor %}
                         </tbody>
                     </table>
-
                 </div>
             </div>
 
         </div>
 
         <div class="col-sm-4">
-            <ul class="list-group list-group-flush font-weight-lighter">
-                <li class="list-group-item list-group-item-primary text-center">Summary</li>
-                <li class="list-group-item">Count <span
-                        class="float-right badge badge-info">{{investment_count}}</span>
-                </li>
-                {% for investment in investment_total %}
-                <li class="list-group-item"> {{investment.currency}}
-                    <span class="float-right">{{investment}}</span>
-                </li>
-                {% endfor %}
-                <li class="list-group-item bg-light"> Total (USD)
-                    <span class="float-right">{{to_usd_total}}</span>
-                </li>
-
-                <li class="list-group-item list-group-item-info">Holders <span class="float-right"><a
-                            href="{% url 'institution-report' %}">Click for details</a></span></li>
-                {% for investment in investments_summary %}
-                <li class="list-group-item">
-                    {{investment.holder}}
-                    <span class="float-right">{{investment.value}}</span>
-                </li>
-                {% endfor %}
-            </ul>
-
-        </div>
-        {% else %}
-        <div class="row">
-            <div class="col">
-                <p class="font-italic ml-3">No Savings</p>
-                <a class="btn btn-outline-primary ml-3" href="{% url 'networth-saving-create' %}">
-                    Add Savings
-                </a>
+            <div class="card">
+                <ul class="list-group list-group-flush font-weight-lighter">
+                    <li class="list-group-item list-group-item-primary text-center">Summary</li>
+                    <li class="list-group-item">Count
+                        <span class="float-right badge badge-info">{{investment_count}}</span>
+                    </li>
+                    {% for investment in investment_total %}
+                    <li class="list-group-item">{{investment.currency}}
+                        <span class="float-right">{{investment}}</span>
+                    </li>
+                    {% endfor %}
+                    <li class="list-group-item bg-light">Total (USD)
+                        <span class="float-right">{{to_usd_total}}</span>
+                    </li>
+                    <li class="list-group-item list-group-item-info mt-3">Holders
+                        <span class="float-right"><a href="{% url 'institution-report' %}">Details</a></span>
+                    </li>
+                    {% for investment in investments_summary %}
+                    <li class="list-group-item">
+                        {{investment.holder}}
+                        <span class="float-right">{{investment.value}}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
 
+        {% else %}
+        <div class="col">
+            <p class="font-italic text-muted">No investments found.</p>
+            <a class="btn btn-outline-primary" href="{% url 'networth-home' %}">Go to Home</a>
+        </div>
         {% endif %}
     </div>
-
 </div>
 
 {% endblock content %}

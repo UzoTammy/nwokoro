@@ -3,6 +3,7 @@ from decimal import Decimal
 from django import forms
 from django.forms import ValidationError
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from .models import (Investment, Stock, Saving, Business, FixedAsset, RewardFund, BorrowedFund, InjectFund, Rent)
 from account.models import User
 from account.models import Preference
@@ -21,69 +22,43 @@ class OptionChoices:
     
     PAYMENT_PERIOD = [('monthly', 'Monthly'), ('bi-weekly', 'Bi-weekly'), ('yearly', 'Yearly'), ('daily', 'Daily'), ('one-time', 'One-time')]
 
-class ChoiceOrInputWidget(forms.MultiWidget):
+class DatalistWidget(forms.TextInput):
     def __init__(self, choices=(), attrs=None):
-        widgets = [
-            forms.TextInput(attrs={'placeholder': 'Alternative to name not listed below', 'class': 'form-control'}),
-            forms.Select(choices=choices, attrs={'class': 'form-control'}),
-        ]
-        super().__init__(widgets, attrs)
+        self.choices = list(choices)
+        super().__init__(attrs)
 
-    def decompress(self, value):
-        if value:
-            return [None, value]  # Custom input case
-        return [None, '']  # Default case
+    def render(self, name, value, attrs=None, renderer=None):
+        list_id = f'datalist_{name}'
+        attrs = dict(attrs or {}, list=list_id)
+        input_html = super().render(name, value, attrs, renderer)
+        options = ''.join(f'<option value="{c[0]}">' for c in self.choices if c[0])
+        return mark_safe(f'{input_html}<datalist id="{list_id}">{options}</datalist>')
 
-class ComboField(forms.MultiValueField):
-
-    def __init__(self, choices=None, *args, **kwargs):
-        self.choices = choices
-        widget = ChoiceOrInputWidget(choices=choices)
-        fields = [
-            forms.ChoiceField(choices=choices, required=False),
-            forms.CharField(required=False),
-        ]
-        super().__init__(fields=fields, require_all_fields=False, widget=widget, *args, **kwargs)
-        self.widget = ChoiceOrInputWidget(choices=choices)
-
-    def compress(self, data_list):
-        
-        if data_list[0] == '':
-            return data_list[1]
-        return data_list[0] if data_list else None    
 
 class SavingForm(forms.ModelForm):
 
-    holder_select = forms.CharField(widget=forms.Select(choices=()), label='Select Holder', required=False)
-    holder_text = forms.CharField(label='Or Type Holder', required=False)
+    holder = forms.CharField(widget=DatalistWidget(), label='Holder')
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
-        widget=forms.Select(choices=OptionChoices.get_options()['countries'])) #
+        widget=forms.Select(choices=OptionChoices.get_options()['countries']))
     category = forms.CharField(widget=forms.Select(
-        choices=OptionChoices.get_options()['categories'])) #
-    
+        choices=OptionChoices.get_options()['categories']))
+
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
-        dynamic_choices = kwargs.pop('choices', [(None, 'List is empty')])  # Get dynamic choices from kwargs
+        kwargs.pop('choices', None)
         super().__init__(*args, **kwargs)
 
         if self.user:
             preference = Preference.objects.get(user=self.user)
             if preference.savings_holders:
-                dynamic_choices = [(None, 'List of Holders')] + [(holder, holder) for holder in preference.savings_holders]
-            
-            self.fields['holder_select'].widget.choices = dynamic_choices
-            self.fields['holder_select'].help_text = "If holder is not listed, type the holder below"
-    
+                choices = [(h, h) for h in preference.savings_holders]
+                self.fields['holder'].widget.choices = choices
+                self.fields['holder'].help_text = "Select from the list or type a new holder"
+
     class Meta:
         model = Saving
-        fields = ['holder_select', 'holder_text', 'value', 'date', 'host_country', 'category']
-
-    def clean(self):
-        if self.cleaned_data['holder_select'] == '' and self.cleaned_data['holder_text'] == '':
-            raise ValidationError(message='Select Holder or Text Holder must have a value')
-        if self.cleaned_data['holder_select'] != '' and self.cleaned_data['holder_text'] != '':
-            raise ValidationError(message='Both Select holder and Text holder cannot be filled')    
+        fields = ['holder', 'value', 'date', 'host_country', 'category']
         
 class SavingFormUpdate(forms.ModelForm):
     holder = forms.CharField(widget=forms.Select(choices=()), label='Select Holder', required=False)

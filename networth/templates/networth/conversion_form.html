@@ -2,25 +2,35 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<div class="container mt-3">
-    
-    <div class="row justify-content-center align-items-center vh-100">
-        <div class="col-sm-6">
-            <form class="mt-3" action="" method="post">
-                {% csrf_token %}
-                <legend>Convert from source currency to receiver currency</legend>
-                <hr>
-                {{form|crispy}}
-                <div class="m-2">
-                    <button class="btn btn-outline-dark" type="submit">Submit</button>
-                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>
-                </div>
-            </form>
-        </div>
-        
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav mr-auto"></div>
+    <div class="navbar-nav">
+      <a class="nav-link" href="{% url 'savings-list' %}" title="Back to savings">
+        <i class="fas fa-times-circle text-danger"></i>
+      </a>
     </div>
-    
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <div class="row justify-content-center align-items-center vh-100">
+    <div class="col-sm-6">
+      <h4 class="font-weight-lighter mb-3">Currency Conversion</h4>
+      <div class="card">
+        <div class="card-body">
+          <form action="" method="post">
+            {% csrf_token %}
+            {{form|crispy}}
+            <div class="text-right mt-3">
+              <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
- 
 {% endblock %}

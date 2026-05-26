@@ -2,99 +2,141 @@
 
 {% block head %}
 <style>
-  .jumbotron {
-    background-color: rgb(204, 220, 234);
-    border-radius: 3% 3% 10% 10%;
+  .action-card, .account-card {
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
-  
+  .action-card:hover, .account-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  }
+  .action-card.selected, .account-card.selected {
+    border-color: #33548a;
+    box-shadow: 0 0 0 2px rgba(51,84,138,0.2);
+  }
 </style>
 {% endblock %}
+
 {% block content %}
-<div class="container">
-  <div class="row justify-content-center align-items-center vh-100">
-    <div class="col-sm-10">
-      <div class="row">
-        <div class="col">
-          <div class="jumbotron">
-            <h1 class="display-4">External Funds</h1>
-            <p class="lead">External funding can happen in three ways. Reward will pull fund out of 
-              your networth, reducing it. Inject will do the opposite, which is to add fund into your
-              networth. Finally, borrow will add to your worth and to your liability resulting in no change
-              to your networth.  
-            </p>
-            <hr class="my-4">
-          </div>
-          <form action="" method="post">
-            {% csrf_token %}
-            <div class="row">
-              <div class="col">
-                <h4>Choose action to implement</h4>
-                <div class="form-check form-check-inline ml-3 mb-2">
-                  <input class="form-check-input" type="radio" name="radioAction" id="inlineRadio1" value="reward">
-                  <label class="form-check-label" for="inlineRadio1">
-                    <span class="dark-purple">Reward</span>: Take fund out of your networth.
-                  </label>
-                </div>
-                <div class="form-check form-check-inline ml-3 mb-2">
-                  <input class="form-check-input" type="radio" name="radioAction" id="inlineRadio2" value="inject">
-                  <label class="form-check-label" for="inlineRadio2">
-                    <span class="dark-purple">Inject</span>: Add fund to your networth. Like from salaries and wages
-                  </label>
-                </div>
-                <div class="form-check form-check-inline ml-3 mb-2">
-                  <input class="form-check-input" type="radio" name="radioAction" id="inlineRadio3" value="borrow">
-                  <label class="form-check-label" for="inlineRadio3">
-                    <span class="dark-purple">Borrow</span>: Accept fund as loan to help grow your networth.
-                  </label>
-                </div>
 
-              </div>
-            </div>
+<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav mr-auto"></div>
+    <div class="navbar-nav">
+      <a class="nav-link" href="{% url 'savings-list' %}" title="Back to savings"><i class="fas fa-times-circle text-danger"></i></a>
+    </div>
+  </div>
+</nav>
 
-            <div class="row mt-3">
-              <div class="col">
-                <table class="table" data-toggle="table">
-                  <h4>Which savings account will the fund drop or taken from?</h4>
-                  <thead>
-                    <tr>
-                      <th>Action</th>
-                      <th>Account</th>
-                      <th>Host Country</th>
-                      <th>Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for object in object_list %}
-                    <tr>
-                      <td>
-                        <div class="form-check">
-                          <input class="form-check-input" type="radio" name="radioSaving" id="inlineRadio{{object.pk}}"
-                            value="{{object.pk}}">
-                        </div>
-                      </td>
-                      <td>{{object.holder}}</td>
-                      <td>{{object.host_country}}</td>
-                      <td>{{object.value}}</td>
-                    </tr>
-                    {% endfor %}
+<div class="container mt-5">
 
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="row m-3">
-              <div class="col">
-                <button class="btn btn-outline-dark" type="submit">Proceed</button>
-                <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-
+  <div class="row mt-1">
+    <div class="col">
+      <h1 class="font-weight-lighter">Fund Flow</h1>
+      <p class="text-muted">Move capital between your portfolio and the outside world. Choose an action and the account it affects.</p>
     </div>
   </div>
 
+  <form action="" method="post">
+    {% csrf_token %}
+
+    <div class="row mt-3">
+      <div class="col-md-4 mb-3">
+        <div class="card action-card h-100" id="card-reward" onclick="selectAction('inlineRadio1', this)">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title mb-0"><i class="fas fa-arrow-circle-down text-danger mr-1"></i> Reward</h5>
+              <input type="radio" name="radioAction" id="inlineRadio1" value="reward" aria-label="Reward">
+            </div>
+            <p class="card-text text-muted small">Withdraw funds from your networth. Reduces your portfolio value.</p>
+            <span class="badge badge-danger">Reduces networth</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="card action-card h-100" id="card-inject" onclick="selectAction('inlineRadio2', this)">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title mb-0"><i class="fas fa-arrow-circle-up text-success mr-1"></i> Inject</h5>
+              <input type="radio" name="radioAction" id="inlineRadio2" value="inject" aria-label="Inject">
+            </div>
+            <p class="card-text text-muted small">Add external funds to your networth. E.g. salary or income.</p>
+            <span class="badge badge-success">Grows networth</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="card action-card h-100" id="card-borrow" onclick="selectAction('inlineRadio3', this)">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title mb-0"><i class="fas fa-hand-holding-usd text-info mr-1"></i> Borrow</h5>
+              <input type="radio" name="radioAction" id="inlineRadio3" value="borrow" aria-label="Borrow">
+            </div>
+            <p class="card-text text-muted small">Accept a loan. Adds to assets and liabilities equally — networth unchanged.</p>
+            <span class="badge badge-info">Networth neutral</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-2">
+      <div class="col">
+        <p class="font-weight-light text-muted small mb-2">Which savings account will receive or provide the funds?</p>
+        <div class="row">
+          {% for object in object_list %}
+          <div class="col-md-4 mb-2">
+            <div class="card account-card" onclick="selectAccount('radioSaving{{object.pk}}', this)">
+              <div class="card-body py-2">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <h6 class="mb-0">{{object.holder}}</h6>
+                    <small class="text-muted">{{object.host_country}}</small>
+                  </div>
+                  <div class="text-right">
+                    <div class="font-weight-light small">{{object.value}}</div>
+                    <input type="radio" name="radioSaving" id="radioSaving{{object.pk}}" value="{{object.pk}}" aria-label="{{object.holder}}" class="mt-1">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-3 mb-5">
+      <div class="col text-right">
+        <button class="btn btn-primary" type="submit" id="proceedBtn" disabled>Proceed</button>
+      </div>
+    </div>
+
+  </form>
 </div>
+
+<script>
+  function checkProceed() {
+    var actionPicked = document.querySelector('input[name="radioAction"]:checked');
+    var accountPicked = document.querySelector('input[name="radioSaving"]:checked');
+    document.getElementById('proceedBtn').disabled = !(actionPicked && accountPicked);
+  }
+
+  function selectAction(radioId, card) {
+    document.querySelectorAll('.action-card').forEach(function(c) { c.classList.remove('selected'); });
+    card.classList.add('selected');
+    document.getElementById(radioId).checked = true;
+    checkProceed();
+  }
+
+  function selectAccount(radioId, card) {
+    document.querySelectorAll('.account-card').forEach(function(c) { c.classList.remove('selected'); });
+    card.classList.add('selected');
+    document.getElementById(radioId).checked = true;
+    checkProceed();
+  }
+</script>
+
 {% endblock %}
