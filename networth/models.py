@@ -659,6 +659,7 @@ class FixedAsset(models.Model):
     description = models.CharField(max_length=250, default='')
     rent = models.ForeignKey(Rent, on_delete=models.CASCADE, default=None, blank=True, null=True)
     is_active = models.BooleanField(default=True)
+    growth_rate = models.FloatField(default=0)  # annual appreciation % for forecasting
 
     def __str__(self):
         return self.name

@@ -33,6 +33,7 @@
                             <th>Holder</th>
                             <th>Maturity</th>
                             <th>Due</th>
+                            <th class="text-right">Rate</th>
                             <th class="text-right">Principal</th>
                             <th class="text-right">Principal($)</th>
                             <th class="text-right">Accrued ROI</th>
@@ -52,9 +53,10 @@
                                 {% elif investment.due_in_days <= 30 %}
                                 <span class="badge badge-warning">in {{investment.due_in_days}}d</span>
                                 {% else %}
-                                <span class="text-muted small">in {{investment.due_in_days}} days</span>
+                                <span class="text-muted small">in {{investment.due_in_days}}d</span>
                                 {% endif %}
                             </td>
+                            <td class="text-right">{{investment.rate}}%</td>
                             <td class="text-right">{{investment.principal}}</td>
                             <td class="text-right">{{investment.to_usd}}</td>
                             <td class="text-right">{{investment.present_roi}}</td>

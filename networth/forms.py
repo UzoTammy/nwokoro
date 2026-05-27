@@ -354,7 +354,7 @@ class FixedAssetCreateForm(forms.ModelForm):
 
     class Meta:
         model = FixedAsset
-        fields = ['name', 'date', 'value', 'host_country']
+        fields = ['name', 'date', 'value', 'host_country', 'growth_rate']
 
     def __init__(self, *args, **kwargs):
         self.pk = kwargs.pop('pk', None)
@@ -380,7 +380,7 @@ class FixedAssetUpdateForm(forms.ModelForm):
 
     class Meta:
         model = FixedAsset
-        fields = ['name', 'host_country']
+        fields = ['name', 'host_country', 'growth_rate']
 
 class FixedAssetRentForm(forms.ModelForm):
 

@@ -11,6 +11,12 @@ from django.db.models import F, ExpressionWrapper, DateField
 from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView, RedirectView)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
+# ── DEV ONLY: email preview ──────────────────────────────────────────────────
+from django.conf import settings
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+
+
 from babel.numbers import format_percent
 from djmoney.models.fields import Money
 from django_weasyprint import WeasyTemplateResponseMixin
@@ -26,7 +32,8 @@ from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm,
 
 from .models import (Saving, Stock, Investment, Business, FinancialData, FixedAsset, Rent,
                      RewardFund, InjectFund, BorrowedFund, SavingsTransaction, InvestmentTransaction,
-                     BusinessTransaction, BorrowedFundTransaction, StockTransaction, FixedAssetTransaction)
+                     BusinessTransaction, BorrowedFundTransaction, StockTransaction, FixedAssetTransaction,
+                     ExchangeRate)
 
 from .plots import bar_chart, donut_chart, plot
 from .tools import (get_value, valuation, ytd_roi, investments_by_holder,networth_by_currency, currency_list,
@@ -1297,11 +1304,6 @@ class PDFNetworthReport(WeasyTemplateResponseMixin, UserPassesTestMixin, Templat
         return context
 
 
-# ── DEV ONLY: email preview ──────────────────────────────────────────────────
-from django.conf import settings
-from django.http import HttpResponse
-from django.template.loader import render_to_string
-
 def email_report_preview(request):
     if not settings.DEBUG:
         from django.http import Http404
@@ -1326,3 +1328,119 @@ def email_report_preview(request):
     }
     html = render_to_string('networth/mails/financial_report.html', ctx, request=request)
     return HttpResponse(html)
+
+
+class ForecastView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/forecast.html'
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        today = datetime.date.today()
+
+        latest_fd = FinancialData.objects.filter(owner=user).order_by('-date').first()
+        if not latest_fd:
+            context['no_data'] = True
+            return context
+
+        rates = {er.target_currency: er.rate for er in ExchangeRate.objects.all()}
+        def to_usd(money_obj):
+            rate = rates.get(str(money_obj.currency), 1)
+            return float(money_obj.amount) / float(rate)
+
+        # Historical chart: snapshots from Jan 1 of current year to today
+        year_start = datetime.date(today.year, 1, 1)
+        hist_fd = FinancialData.objects.filter(
+            owner=user, date__date__gte=year_start
+        ).order_by('date')
+        hist_labels = [fd.date.strftime('%b %d') for fd in hist_fd]
+        hist_values = [round(float(fd.worth.amount), 2) for fd in hist_fd]
+
+        # Forecast baseline: latest FinancialData snapshot — consistent with the chart's last point
+        current_savings_usd   = float(latest_fd.savings.amount)
+        current_inv_usd       = float(latest_fd.investment.amount)
+        current_stock_usd     = float(latest_fd.stock.amount)
+        current_business_usd  = float(latest_fd.business.amount)
+        current_fa_usd        = float(latest_fd.fixed_asset.amount)
+        current_liability_usd = float(latest_fd.liability.amount)
+        current_nw            = float(latest_fd.worth.amount)
+
+        # Live investment list for avg rate and inv_table only
+        investments = list(Investment.objects.filter(owner=user))
+
+        # Average rate from matured investments; fall back to active if none matured
+        matured = [inv for inv in investments if inv.due_in_days() <= 0]
+        if matured:
+            avg_inv_rate = round(sum(inv.rate for inv in matured) / len(matured), 2)
+        else:
+            active = [inv for inv in investments if inv.is_active]
+            avg_inv_rate = round(sum(inv.rate for inv in active) / len(active), 2) if active else 0.0
+
+        active_investments = [inv for inv in investments if inv.is_active]
+
+        current_snap = {
+            'savings':     round(current_savings_usd, 2),
+            'investment':  round(current_inv_usd, 2),
+            'stock':       round(current_stock_usd, 2),
+            'business':    round(current_business_usd, 2),
+            'fixed_asset': round(current_fa_usd, 2),
+            'liability':   round(current_liability_usd, 2),
+            'worth':       round(current_nw, 2),
+        }
+
+        def compound(principal, annual_rate_pct, months):
+            return principal * (1 + annual_rate_pct / 100) ** (months / 12)
+
+        default_months = 12
+        default_rate   = 20.0
+        proj_inv  = compound(current_inv_usd,      avg_inv_rate, default_months)
+        proj_stk  = compound(current_stock_usd,    default_rate, default_months)
+        proj_biz  = compound(current_business_usd, default_rate, default_months)
+        proj_fa   = compound(current_fa_usd,        default_rate, default_months)
+        proj_nw   = current_savings_usd + proj_inv + proj_stk + proj_biz + proj_fa - current_liability_usd
+        proj_gain = proj_nw - current_nw
+        proj_gain_pct = round(proj_gain / current_nw * 100, 1) if current_nw else 0
+
+        default_forecast = {
+            'networth':    round(proj_nw, 0),
+            'gain':        round(proj_gain, 0),
+            'gain_pct':    proj_gain_pct,
+            'investment':  round(proj_inv, 0),
+            'inv_gain':    round(proj_inv - current_inv_usd, 0),
+            'stock':       round(proj_stk, 0),
+            'business':    round(proj_biz, 0),
+            'fixed_asset': round(proj_fa, 0),
+            'savings':     round(current_savings_usd, 0),
+            'liability':   round(current_liability_usd, 0),
+        }
+
+        # Investment detail table (active only)
+        inv_table = []
+        for inv in active_investments:
+            principal_usd   = to_usd(inv.principal)
+            roi_total_usd   = to_usd(inv.roi())
+            roi_present_usd = to_usd(inv.present_roi())
+            inv_table.append({
+                'holder':                inv.holder,
+                'principal':             inv.principal,
+                'rate':                  inv.rate,
+                'maturity':              inv.maturity(),
+                'due_in_days':           inv.due_in_days(),
+                'roi_total_usd':         round(roi_total_usd, 2),
+                'roi_remaining_usd':     round(roi_total_usd - roi_present_usd, 2),
+                'total_at_maturity_usd': round(principal_usd + roi_total_usd, 2),
+            })
+
+        context.update({
+            'hist_labels':      hist_labels,
+            'hist_values':      hist_values,
+            'inv_table':        inv_table,
+            'avg_inv_rate':     avg_inv_rate,
+            'current_snap':     current_snap,
+            'default_forecast': default_forecast,
+            'today':            today,
+        })
+        return context
