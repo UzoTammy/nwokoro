@@ -1641,7 +1641,7 @@ class ForecastEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
         end_date = ctx['end_date']
         subject  = f'Net Worth Forecast Report — {today.strftime("%d %b %Y")}'
         body     = (
-            f'Dear {user.get_full_name() or user.username},\n\n'
+            f'Dear {user.username},\n\n'
             f'Please find attached your {months}-month net worth forecast report.\n\n'
             f'  • Report date : {today.strftime("%d %B %Y")}\n'
             f'  • Target date : {end_date.strftime("%d %B %Y")}\n'

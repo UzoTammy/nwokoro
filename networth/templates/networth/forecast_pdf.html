@@ -165,7 +165,7 @@
 <div class="report-header">
   <h1>Net Worth Forecast Report</h1>
   <div class="meta">
-    <span>Prepared for: <strong>{{ user.get_full_name|default:user.username }}</strong></span>
+    <span>Prepared for: <strong>{{ user.username }}</strong></span>
     <span>Report date: <strong>{{ report_date|date:"d M Y" }}</strong></span>
     <span>Forecast period: <strong>{{ months }} month{{ months|pluralize }}</strong></span>
     <span>Target date: <strong>{{ end_date|date:"d M Y" }}</strong></span>

@@ -12,7 +12,7 @@
 <div class="letterhead">
   <div class="letterhead-title">Networth Report &mdash; {{ report_year }}</div>
   <div class="letterhead-meta">
-    <span>{{ user.get_full_name|default:user.username }}</span>
+    <span>{{ user.username }}</span>
     <span>Generated: {{ generated_on }}</span>
   </div>
   <div class="letterhead-sub">
