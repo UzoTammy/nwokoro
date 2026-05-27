@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Net Worth Forecast Report</title>
+<style>
+  /* ── Base ───────────────────────────────────────────────────────────── */
+  @page {
+    size: A4;
+    margin: 20mm 18mm 22mm 18mm;
+    @bottom-center {
+      content: "Confidential — generated " attr(data-date);
+      font-size: 9px;
+      color: #94a3b8;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 10.5px;
+    color: #1e293b;
+    line-height: 1.5;
+  }
+
+  /* ── Header ─────────────────────────────────────────────────────────── */
+  .report-header {
+    background: #131b2e;
+    color: #fff;
+    padding: 18px 22px 14px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+  }
+  .report-header h1 {
+    font-size: 20px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .report-header .meta {
+    font-size: 9.5px;
+    color: #94a3b8;
+    display: flex;
+    gap: 28px;
+  }
+  .report-header .meta span { white-space: nowrap; }
+
+  /* ── Section titles ──────────────────────────────────────────────────── */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #33548a;
+    border-bottom: 1.5px solid #33548a;
+    padding-bottom: 3px;
+    margin: 18px 0 10px;
+  }
+
+  /* ── KPI cards row ───────────────────────────────────────────────────── */
+  .kpi-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .kpi {
+    flex: 1;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .kpi .kpi-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    margin-bottom: 4px;
+  }
+  .kpi .kpi-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #131b2e;
+  }
+  .kpi .kpi-sub {
+    font-size: 9px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+  .kpi.highlight .kpi-value { color: #16a34a; }
+  .kpi.period-kpi { background: #f0fdf4; border-color: #bbf7d0; }
+
+  /* ── Tables ──────────────────────────────────────────────────────────── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    margin-bottom: 14px;
+  }
+  thead tr {
+    background: #131b2e;
+    color: #fff;
+  }
+  thead th {
+    padding: 6px 8px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 9.5px;
+    letter-spacing: 0.3px;
+  }
+  thead th.r { text-align: right; }
+  tbody tr:nth-child(even) { background: #f8fafc; }
+  tbody td {
+    padding: 5px 8px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+  }
+  tbody td.r { text-align: right; }
+  tbody tr.total-row td {
+    border-top: 2px solid #131b2e;
+    font-weight: 700;
+    background: #f0f4ff;
+  }
+  .gain  { color: #16a34a; }
+  .loss  { color: #dc2626; }
+  .flat  { color: #94a3b8; font-style: italic; }
+  .badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 8.5px;
+    font-weight: 600;
+  }
+  .badge-green  { background: #dcfce7; color: #15803d; }
+  .badge-yellow { background: #fef9c3; color: #854d0e; }
+  .badge-red    { background: #fee2e2; color: #b91c1c; }
+
+  /* ── Assumptions box ─────────────────────────────────────────────────── */
+  .assumptions {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 10px;
+  }
+  .assumptions table { margin-bottom: 0; }
+  .assumptions thead tr { background: #33548a; }
+
+  /* ── Disclaimer ──────────────────────────────────────────────────────── */
+  .disclaimer {
+    border-top: 1px solid #e2e8f0;
+    margin-top: 20px;
+    padding-top: 8px;
+    font-size: 8.5px;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body data-date="{{ report_date|date:'d M Y' }}">
+
+<!-- ── HEADER ─────────────────────────────────────────────────────────── -->
+<div class="report-header">
+  <h1>Net Worth Forecast Report</h1>
+  <div class="meta">
+    <span>Prepared for: <strong>{{ user.get_full_name|default:user.username }}</strong></span>
+    <span>Report date: <strong>{{ report_date|date:"d M Y" }}</strong></span>
+    <span>Forecast period: <strong>{{ months }} month{{ months|pluralize }}</strong></span>
+    <span>Target date: <strong>{{ end_date|date:"d M Y" }}</strong></span>
+  </div>
+</div>
+
+{% if no_data %}
+<p>No financial data available to generate a forecast.</p>
+{% else %}
+
+<!-- ── KPI CARDS ──────────────────────────────────────────────────────── -->
+<div class="kpi-row">
+  <div class="kpi">
+    <div class="kpi-label">Current Net Worth</div>
+    <div class="kpi-value">${{ current.networth|floatformat:2 }}</div>
+    <div class="kpi-sub">as at {{ report_date|date:"d M Y" }}</div>
+  </div>
+  <div class="kpi highlight period-kpi">
+    <div class="kpi-label">Projected Net Worth</div>
+    <div class="kpi-value">${{ projected.networth|floatformat:2 }}</div>
+    <div class="kpi-sub">by {{ end_date|date:"d M Y" }}</div>
+  </div>
+  <div class="kpi highlight">
+    <div class="kpi-label">Net Growth</div>
+    <div class="kpi-value">+${{ projected.gain|floatformat:2 }}</div>
+    <div class="kpi-sub">{{ projected.gain_pct }}% over {{ months }} month{{ months|pluralize }}</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Avg Investment Rate</div>
+    <div class="kpi-value">{{ avg_inv_rate }}%</div>
+    <div class="kpi-sub">based on matured investments</div>
+  </div>
+</div>
+
+<!-- ── GROWTH ASSUMPTIONS ─────────────────────────────────────────────── -->
+<div class="section-title">Growth Assumptions</div>
+<div class="assumptions">
+  <table>
+    <thead>
+      <tr>
+        <th>Asset Class</th>
+        <th class="r">Annual Rate</th>
+        <th>Method</th>
+        <th>Treatment</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Investments</td>
+        <td class="r">{{ growth_rates.investment }}% p.a.</td>
+        <td>Compound — avg rate of matured investments</td>
+        <td><span class="badge badge-green">Growing</span></td>
+      </tr>
+      <tr>
+        <td>Stocks</td>
+        <td class="r">{{ growth_rates.stock }}% p.a.</td>
+        <td>Compound — user-defined annual growth rate</td>
+        <td><span class="badge badge-green">Growing</span></td>
+      </tr>
+      <tr>
+        <td>Business</td>
+        <td class="r">{{ growth_rates.business }}% p.a.</td>
+        <td>Compound — user-defined annual growth rate</td>
+        <td><span class="badge badge-green">Growing</span></td>
+      </tr>
+      <tr>
+        <td>Fixed Assets</td>
+        <td class="r">{{ growth_rates.fixed_asset }}% p.a.</td>
+        <td>Compound — user-defined annual growth rate</td>
+        <td><span class="badge badge-green">Growing</span></td>
+      </tr>
+      <tr>
+        <td>Savings</td>
+        <td class="r">—</td>
+        <td>Held flat (no interest applied)</td>
+        <td><span class="badge badge-yellow">Flat</span></td>
+      </tr>
+      <tr>
+        <td>Liabilities</td>
+        <td class="r">—</td>
+        <td>Held flat (no growth assumed)</td>
+        <td><span class="badge badge-yellow">Flat</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── ASSET BREAKDOWN ────────────────────────────────────────────────── -->
+<div class="section-title">Asset Breakdown — Current vs Projected</div>
+<table>
+  <thead>
+    <tr>
+      <th>Asset Class</th>
+      <th class="r">Current ($)</th>
+      <th class="r">Projected ($)</th>
+      <th class="r">Gain / Loss ($)</th>
+      <th class="r">Growth</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Savings</td>
+      <td class="r">{{ current.savings|floatformat:2 }}</td>
+      <td class="r">{{ projected.savings|floatformat:2 }}</td>
+      <td class="r flat">flat</td>
+      <td class="r flat">—</td>
+    </tr>
+    <tr>
+      <td>Investments</td>
+      <td class="r">{{ current.investment|floatformat:2 }}</td>
+      <td class="r">{{ projected.investment|floatformat:2 }}</td>
+      {% with gain=projected.investment|floatformat:2 %}
+      <td class="r gain">+${{ projected.investment|floatformat:2 }}</td>
+      {% endwith %}
+      <td class="r">{{ growth_rates.investment }}% p.a.</td>
+    </tr>
+    <tr>
+      <td>Stocks</td>
+      <td class="r">{{ current.stock|floatformat:2 }}</td>
+      <td class="r">{{ projected.stock|floatformat:2 }}</td>
+      <td class="r gain">+${{ projected.stock|floatformat:2 }}</td>
+      <td class="r">{{ growth_rates.stock }}% p.a.</td>
+    </tr>
+    <tr>
+      <td>Business</td>
+      <td class="r">{{ current.business|floatformat:2 }}</td>
+      <td class="r">{{ projected.business|floatformat:2 }}</td>
+      <td class="r gain">+${{ projected.business|floatformat:2 }}</td>
+      <td class="r">{{ growth_rates.business }}% p.a.</td>
+    </tr>
+    <tr>
+      <td>Fixed Assets</td>
+      <td class="r">{{ current.fixed_asset|floatformat:2 }}</td>
+      <td class="r">{{ projected.fixed_asset|floatformat:2 }}</td>
+      <td class="r gain">+${{ projected.fixed_asset|floatformat:2 }}</td>
+      <td class="r">{{ growth_rates.fixed_asset }}% p.a.</td>
+    </tr>
+    <tr>
+      <td class="loss">Liabilities</td>
+      <td class="r loss">{{ current.liability|floatformat:2 }}</td>
+      <td class="r loss">{{ projected.liability|floatformat:2 }}</td>
+      <td class="r flat">flat</td>
+      <td class="r flat">—</td>
+    </tr>
+    <tr class="total-row">
+      <td>Net Worth</td>
+      <td class="r">{{ current.networth|floatformat:2 }}</td>
+      <td class="r">{{ projected.networth|floatformat:2 }}</td>
+      <td class="r gain">+${{ projected.gain|floatformat:2 }}</td>
+      <td class="r gain">+{{ projected.gain_pct }}%</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ── MILESTONE TABLE ────────────────────────────────────────────────── -->
+{% if milestones %}
+<div class="section-title">Net Worth Milestones</div>
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th class="r">Month</th>
+      <th class="r">Projected Net Worth ($)</th>
+      <th class="r">Cumulative Gain ($)</th>
+      <th class="r">Gain %</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for m in milestones %}
+    <tr {% if forloop.last %}class="total-row"{% endif %}>
+      <td>{{ m.date }}</td>
+      <td class="r">{{ m.months }}</td>
+      <td class="r">{{ m.networth|floatformat:2 }}</td>
+      <td class="r gain">+${{ m.gain|floatformat:2 }}</td>
+      <td class="r gain">
+        {% if current.networth %}
+          +{% widthratio m.gain current.networth 100 %}%
+        {% else %}—{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<!-- ── ACTIVE INVESTMENTS ─────────────────────────────────────────────── -->
+{% if inv_table %}
+<div class="section-title">Active Investments</div>
+<table>
+  <thead>
+    <tr>
+      <th>Holder</th>
+      <th>Principal</th>
+      <th class="r">Rate</th>
+      <th>Maturity</th>
+      <th class="r">Due</th>
+      <th class="r">ROI at Maturity ($)</th>
+      <th class="r">Remaining ROI ($)</th>
+      <th class="r">Total at Maturity ($)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in inv_table %}
+    <tr>
+      <td>{{ row.holder }}</td>
+      <td>{{ row.principal }}</td>
+      <td class="r">{{ row.rate }}%</td>
+      <td>{{ row.maturity }}</td>
+      <td class="r">
+        {% if row.due_in_days <= 0 %}
+          <span class="badge badge-green">Matured</span>
+        {% elif row.due_in_days <= 30 %}
+          <span class="badge badge-yellow">{{ row.due_in_days }}d</span>
+        {% else %}
+          {{ row.due_in_days }}d
+        {% endif %}
+      </td>
+      <td class="r gain">{{ row.roi_total|floatformat:2 }}</td>
+      <td class="r gain">{{ row.roi_remaining|floatformat:2 }}</td>
+      <td class="r">{{ row.total_maturity|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% endif %}
+
+<!-- ── DISCLAIMER ─────────────────────────────────────────────────────── -->
+<div class="disclaimer">
+  <strong>Disclaimer:</strong> This report is a projection based on the growth rates and assumptions specified above.
+  Actual results will vary depending on market conditions, reinvestment decisions, and other factors.
+  Investment values use the average historical rate of matured instruments.
+  All amounts are expressed in USD. Savings and liabilities are held constant throughout the projection period.
+  This document is confidential and intended solely for the named recipient.
+</div>
+
+</body>
+</html>

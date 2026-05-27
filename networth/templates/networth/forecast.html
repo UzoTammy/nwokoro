@@ -108,6 +108,18 @@
   }
   .muted-label { color: #94a3b8; font-size: 13px; }
   .card small.muted-label { display: block; margin-top: -8px; }
+  .report-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .email-status-msg { font-size: 13px; margin-left: 4px; }
+  .email-status-msg.success { color: #16a34a; }
+  .email-status-msg.error   { color: #dc2626; }
+  .email-status-msg.loading { color: #64748b; }
 </style>
 {% endblock %}
 
@@ -221,6 +233,21 @@
                     </tr>
                 </tbody>
             </table>
+            <div class="report-actions">
+                <a id="pdf-link"
+                   href="{% url 'forecast-pdf' %}?months=12&rate_stock=20&rate_biz=20&rate_fa=20"
+                   class="btn btn-sm btn-outline-secondary"
+                   target="_blank">
+                    <i class="fa fa-file-pdf text-danger"></i> Download Forecast Report
+                </a>
+                <button id="btn-email-report"
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        title="Send PDF report to your registered email address">
+                    <i class="fa fa-envelope"></i> Send to Email
+                </button>
+                <span id="email-status" class="email-status-msg" hidden></span>
+            </div>
         </div>
 
         <!-- Controls card -->
@@ -461,8 +488,54 @@
         }
     }
 
-    document.getElementById('btn-forecast').addEventListener('click', runForecast);
-    runForecast();
+    function updatePdfLink() {
+        const periodVal  = Math.max(1, parseInt(document.getElementById('period-val').value) || 12);
+        const periodUnit = document.getElementById('period-unit').value;
+        const months     = periodUnit === 'years' ? periodVal * 12 : periodVal;
+        const { rateStock, rateBiz, rateFA } = getRates();
+        document.getElementById('pdf-link').href =
+            `{% url 'forecast-pdf' %}?months=${months}&rate_stock=${rateStock}&rate_biz=${rateBiz}&rate_fa=${rateFA}`;
+    }
+
+    function runAndSync() { runForecast(); updatePdfLink(); }
+
+    document.getElementById('btn-forecast').addEventListener('click', runAndSync);
+    runAndSync();
+
+    // ── Email delivery ──────────────────────────────────────────────────────
+    document.getElementById('btn-email-report').addEventListener('click', function () {
+        const btn    = this;
+        const status = document.getElementById('email-status');
+
+        // Build URL with current settings (same params as pdf-link)
+        const href     = document.getElementById('pdf-link').href;
+        const params   = href.split('?')[1] || '';
+        const emailUrl = `{% url 'forecast-email' %}?${params}`;
+
+        btn.disabled = true;
+        status.textContent = 'Sending…';
+        status.className   = 'email-status-msg loading';
+        status.hidden      = false;
+
+        fetch(emailUrl, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                status.textContent = '✓ ' + data.message;
+                status.className   = 'email-status-msg success';
+            } else {
+                status.textContent = '✗ ' + data.message;
+                status.className   = 'email-status-msg error';
+            }
+        })
+        .catch(() => {
+            status.textContent = '✗ Network error — please try again.';
+            status.className   = 'email-status-msg error';
+        })
+        .finally(() => { btn.disabled = false; });
+    });
     </script>
 
     {% endif %}
