@@ -147,10 +147,12 @@ class FinancialReport:
 
         fd = FinancialData.objects.order_by('-date')[1] # previous latest
 
-        change = self.getNetworth() - fd._FinancialData__networth()
+        current_networth = self.getNetworth()
+        prev_networth    = fd.worth  # fd.worth is already net worth (assets − liabilities)
+        change           = current_networth - prev_networth
         html_content = render_to_string('networth/mails/financial_report.html', {
             'owner': self.get_owner(),
-            'networth': self.getNetworth(),
+            'networth': current_networth,
             'savings': self.get_saving_total(),
             'investments': self.get_investment_total(),
             'stocks': self.get_stock_total(),
@@ -160,7 +162,7 @@ class FinancialReport:
             'roi': self.get_roi(),
             'daily_roi': self.get_daily_roi(),
             'present_roi': self.get_present_roi(),
-            'prev_networth': fd._FinancialData__networth(),
+            'prev_networth': prev_networth,
             'change_in_networth': change,
             'is_gain': change.amount >= 0,
             'exchange_rate': f"{format_currency(fd.exchange_rate['NGN']/fd.exchange_rate['CAD'], currency='NGN', locale='en_US')}/CA$"

@@ -938,7 +938,9 @@ class FinancialData(models.Model):
         }
     
     def __networth(self):
-        return self.worth - self.liability
+        # worth is already stored as net worth (total assets − liabilities);
+        # returning it directly avoids double-subtracting liabilities.
+        return self.worth
     
     def save(self, *args, **kwargs):
         exchanges = ExchangeRate.objects.exclude(target_currency='USD').values_list('target_currency', 'rate')
