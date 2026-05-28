@@ -667,3 +667,58 @@ class SavingsCounterTransferForm(forms.Form):
         if self.cleaned_data['donor_account'].value.amount < self.cleaned_data['amount']:
             raise ValidationError(message='Insufficient fund in Donor Account')
 
+
+class NetworthPreferenceForm(forms.ModelForm):
+    """Edit user-controlled preference fields for the networth module."""
+
+    class Meta:
+        model = Preference
+        fields = [
+            'forecast_period_months',
+            'forecast_rate_stock',
+            'forecast_rate_business',
+            'forecast_rate_fixed_asset',
+            'email_report_enabled',
+        ]
+        labels = {
+            'forecast_period_months':    'Default forecast period (months)',
+            'forecast_rate_stock':       'Stock annual growth rate (%)',
+            'forecast_rate_business':    'Business annual growth rate (%)',
+            'forecast_rate_fixed_asset': 'Fixed asset annual growth rate (%)',
+            'email_report_enabled':      'Receive daily financial email report',
+        }
+        widgets = {
+            'forecast_period_months': forms.NumberInput(
+                attrs={'class': 'form-control', 'min': 1, 'max': 360}),
+            'forecast_rate_stock': forms.NumberInput(
+                attrs={'class': 'form-control', 'min': 0, 'max': 200, 'step': '0.5'}),
+            'forecast_rate_business': forms.NumberInput(
+                attrs={'class': 'form-control', 'min': 0, 'max': 200, 'step': '0.5'}),
+            'forecast_rate_fixed_asset': forms.NumberInput(
+                attrs={'class': 'form-control', 'min': 0, 'max': 200, 'step': '0.5'}),
+        }
+
+    def clean_forecast_period_months(self):
+        v = self.cleaned_data['forecast_period_months']
+        if v < 1 or v > 360:
+            raise forms.ValidationError('Period must be between 1 and 360 months.')
+        return v
+
+    def clean_forecast_rate_stock(self):
+        v = self.cleaned_data['forecast_rate_stock']
+        if v < 0 or v > 200:
+            raise forms.ValidationError('Rate must be between 0 and 200%.')
+        return v
+
+    def clean_forecast_rate_business(self):
+        v = self.cleaned_data['forecast_rate_business']
+        if v < 0 or v > 200:
+            raise forms.ValidationError('Rate must be between 0 and 200%.')
+        return v
+
+    def clean_forecast_rate_fixed_asset(self):
+        v = self.cleaned_data['forecast_rate_fixed_asset']
+        if v < 0 or v > 200:
+            raise forms.ValidationError('Rate must be between 0 and 200%.')
+        return v
+

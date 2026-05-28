@@ -1,7 +1,8 @@
 
 from django.urls import path
 from .views import (
-    NetworthHomeView, NetworthHistoryView, DashboardView, AnnualReportView, TransactionListView, ForecastView, ForecastPDFView, ForecastEmailView,
+    NetworthHomeView, NetworthHistoryView, DashboardView, AnnualReportView, TransactionListView,
+    ForecastView, ForecastPDFView, ForecastEmailView, NetworthPreferenceView,
     InvestmentListView, InvestmentCreateView, InvestmentDetailView,
     InvestmentRolloverView, InvestmentUpdateView,
     InvestmentTerminationView, StockListView,StockCreateView, StockDetailView, StockUpdateView,
@@ -117,6 +118,7 @@ urlpatterns = [
     path('forecast/', ForecastView.as_view(), name='networth-forecast'),
     path('forecast/pdf/', ForecastPDFView.as_view(), name='forecast-pdf'),
     path('forecast/email/', ForecastEmailView.as_view(), name='forecast-email'),
+    path('preference/', NetworthPreferenceView.as_view(), name='networth-preference'),
 
     # dev preview — only accessible when DEBUG=True
     path('dev/email-preview/', email_report_preview, name='email-report-preview'),

@@ -256,7 +256,7 @@
 
             <div class="period-row card-inner">
                 <label>Period</label>
-                <input id="period-val" class="period-input" type="number" min="1" max="120" value="12" title="Projection period">
+                <input id="period-val" class="period-input" type="number" min="1" max="360" value="{{ pref_months }}" title="Projection period">
                 <select id="period-unit" class="period-unit" title="Period unit">
                     <option value="months">Months</option>
                     <option value="years">Years</option>
@@ -270,21 +270,21 @@
             <div class="rate-row">
                 <span>Stocks</span>
                 <div class="rate-input-wrap">
-                    <input id="rate-stock" class="rate-input" type="number" min="-100" max="500" value="20" title="Stocks annual growth rate %">
+                    <input id="rate-stock" class="rate-input" type="number" min="-100" max="500" value="{{ pref_rate_stock }}" title="Stocks annual growth rate %">
                     <span>% p.a.</span>
                 </div>
             </div>
             <div class="rate-row">
                 <span>Business</span>
                 <div class="rate-input-wrap">
-                    <input id="rate-biz" class="rate-input" type="number" min="-100" max="500" value="20" title="Business annual growth rate %">
+                    <input id="rate-biz" class="rate-input" type="number" min="-100" max="500" value="{{ pref_rate_biz }}" title="Business annual growth rate %">
                     <span>% p.a.</span>
                 </div>
             </div>
             <div class="rate-row">
                 <span>Fixed Assets</span>
                 <div class="rate-input-wrap">
-                    <input id="rate-fa" class="rate-input" type="number" min="-100" max="500" value="20" title="Fixed assets annual growth rate %">
+                    <input id="rate-fa" class="rate-input" type="number" min="-100" max="500" value="{{ pref_rate_fa }}" title="Fixed assets annual growth rate %">
                     <span>% p.a.</span>
                 </div>
             </div>
@@ -300,6 +300,11 @@
             <button id="btn-forecast" type="button" class="btn btn-success btn-block mt-3">
                 <i class="fa fa-calculator"></i> Calculate Forecast
             </button>
+            <div class="text-right mt-2">
+                <a href="{% url 'networth-preference' %}" class="small text-muted">
+                    <i class="fa fa-sliders-h"></i> Set as defaults in Preferences
+                </a>
+            </div>
         </div>
     </div>
 

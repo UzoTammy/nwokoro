@@ -8,7 +8,8 @@ from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.db.models.aggregates import Max
 from django.db.models import F, ExpressionWrapper, DateField
-from django.views.generic import (TemplateView, ListView,  CreateView, DetailView, UpdateView, FormView, RedirectView)
+from django.views.generic import (TemplateView, ListView, CreateView, DetailView, UpdateView, FormView, RedirectView)
+from account.models import Preference
 from django.views import View
 from django.http import JsonResponse
 from django.core.mail import EmailMessage
@@ -26,13 +27,14 @@ from djmoney.models.fields import Money
 from django_weasyprint import WeasyTemplateResponseMixin
 
 from .forms import (InvestmentCreateForm, InvestmentUpdateForm, StockCreateForm, StockUpdateForm, SavingForm, SavingFormUpdate,
-                    InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm, 
+                    InvestmentRolloverForm, InvestmentTerminationForm, BusinessCreateForm, BusinessUpdateForm,
                     FixedAssetCreateForm, FixedAssetUpdateForm, FixedAssetRentForm, FixedAssetCollectRentForm,
-                    SavingsCounterTransferForm, 
-                    #BusinessPlowBackForm, 
-                    BusinessLiquidateForm,BorrowedFundForm, 
+                    SavingsCounterTransferForm,
+                    #BusinessPlowBackForm,
+                    BusinessLiquidateForm,BorrowedFundForm,
                     ReCapitalizeForm,
-                    ConversionForm, RewardFundForm, InjectFundForm, LiabilityRepayForm)
+                    ConversionForm, RewardFundForm, InjectFundForm, LiabilityRepayForm,
+                    NetworthPreferenceForm)
 
 from .models import (Saving, Stock, Investment, Business, FinancialData, FixedAsset, Rent,
                      RewardFund, InjectFund, BorrowedFund, SavingsTransaction, InvestmentTransaction,
@@ -1398,12 +1400,15 @@ class ForecastView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         def compound(principal, annual_rate_pct, months):
             return principal * (1 + annual_rate_pct / 100) ** (months / 12)
 
-        default_months = 12
-        default_rate   = 20.0
-        proj_inv  = compound(current_inv_usd,      avg_inv_rate, default_months)
-        proj_stk  = compound(current_stock_usd,    default_rate, default_months)
-        proj_biz  = compound(current_business_usd, default_rate, default_months)
-        proj_fa   = compound(current_fa_usd,        default_rate, default_months)
+        pref, _ = Preference.objects.get_or_create(user=user)
+        default_months = pref.forecast_period_months
+        default_rate_stk = float(pref.forecast_rate_stock)
+        default_rate_biz = float(pref.forecast_rate_business)
+        default_rate_fa  = float(pref.forecast_rate_fixed_asset)
+        proj_inv  = compound(current_inv_usd,      avg_inv_rate,    default_months)
+        proj_stk  = compound(current_stock_usd,    default_rate_stk, default_months)
+        proj_biz  = compound(current_business_usd, default_rate_biz, default_months)
+        proj_fa   = compound(current_fa_usd,        default_rate_fa,  default_months)
         proj_nw   = current_savings_usd + proj_inv + proj_stk + proj_biz + proj_fa - current_liability_usd
         proj_gain = proj_nw - current_nw
         proj_gain_pct = round(proj_gain / current_nw * 100, 1) if current_nw else 0
@@ -1439,13 +1444,18 @@ class ForecastView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             })
 
         context.update({
-            'hist_labels':      hist_labels,
-            'hist_values':      hist_values,
-            'inv_table':        inv_table,
-            'avg_inv_rate':     avg_inv_rate,
-            'current_snap':     current_snap,
-            'default_forecast': default_forecast,
-            'today':            today,
+            'hist_labels':       hist_labels,
+            'hist_values':       hist_values,
+            'inv_table':         inv_table,
+            'avg_inv_rate':      avg_inv_rate,
+            'current_snap':      current_snap,
+            'default_forecast':  default_forecast,
+            'today':             today,
+            # Preference defaults — pre-fill the controls
+            'pref_months':       default_months,
+            'pref_rate_stock':   default_rate_stk,
+            'pref_rate_biz':     default_rate_biz,
+            'pref_rate_fa':      default_rate_fa,
         })
         return context
 
@@ -1467,15 +1477,18 @@ class ForecastPDFView(LoginRequiredMixin, UserPassesTestMixin, WeasyTemplateResp
         user    = self.request.user
         today   = datetime.date.today()
 
-        # ── Read GET parameters ───────────────────────────────────────────────
+        # ── Load user preferences as fallback defaults ────────────────────────
+        pref, _ = Preference.objects.get_or_create(user=user)
+
+        # ── Read GET parameters (fall back to saved preferences) ──────────────
         def safe_float(key, default):
             try:    return float(self.request.GET.get(key, default))
             except: return float(default)
 
-        months     = max(1, int(safe_float('months', 12)))
-        rate_stock = safe_float('rate_stock', 20)
-        rate_biz   = safe_float('rate_biz',   20)
-        rate_fa    = safe_float('rate_fa',    20)
+        months     = max(1, int(safe_float('months',     pref.forecast_period_months)))
+        rate_stock = safe_float('rate_stock', float(pref.forecast_rate_stock))
+        rate_biz   = safe_float('rate_biz',   float(pref.forecast_rate_business))
+        rate_fa    = safe_float('rate_fa',     float(pref.forecast_rate_fixed_asset))
 
         latest_fd = FinancialData.objects.filter(owner=user).order_by('-date').first()
         if not latest_fd:
@@ -1661,3 +1674,27 @@ class ForecastEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
             return JsonResponse({'status': 'error', 'message': f'Email delivery failed: {e}'}, status=500)
 
         return JsonResponse({'status': 'ok', 'message': f'Report sent to {user.email}'})
+
+
+class NetworthPreferenceView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """User-editable defaults for forecast rates, period, and email notifications."""
+    template_name = 'networth/preference.html'
+    form_class    = NetworthPreferenceForm
+    success_url   = reverse_lazy('networth-preference')
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_object(self, queryset=None):
+        pref, _ = Preference.objects.get_or_create(user=self.request.user)
+        return pref
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        pref = self.get_object()
+        context['pref'] = pref
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Preferences saved.')
+        return super().form_valid(form)

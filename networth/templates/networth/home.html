@@ -211,8 +211,8 @@
         </button>
         <div class="dropdown-menu dropdown-menu-right">
           <button class="dropdown-item" type="button">Profile</button>
-          <button class="dropdown-item" type="button">Preference</button>
-      
+          <a class="dropdown-item" href="{% url 'networth-preference' %}"><i class="fa fa-sliders-h fa-sm text-secondary"></i> Preferences</a>
+          <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="{% url 'logout' %}"><i class="fa fa-sign-out-alt fa-sm text-danger"></i> Sign Out</a>
         </div>
       </div>

@@ -6,7 +6,7 @@ from celery import shared_task
 
 from .tools import get_user_finances
 from .models import Investment, ExchangeRate
-from account.models import User
+from account.models import User, Preference
 
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -47,12 +47,14 @@ def fetch_exchange_rate():
 
 @shared_task
 def financial_report_email():
-    users = User.objects.filter(is_staff=True).values_list('username', flat=True)
-    for username in users:
-        fr = get_user_finances(username)
+    users = User.objects.filter(is_staff=True)
+    for user in users:
+        pref, _ = Preference.objects.get_or_create(user=user)
+        fr = get_user_finances(user.username)
         if fr is not None:
             fr.save_report()
-            fr.send_email()
+            if pref.email_report_enabled:
+                fr.send_email()
 
 # def save_financial_data():
 #     users = User.objects.filter(is_staff=True).values_list('username', flat=True)

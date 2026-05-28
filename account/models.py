@@ -83,11 +83,22 @@ class User(AbstractBaseUser, PermissionsMixin):
      
 class Preference(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='preference')
-    savings_holders = models.JSONField(default=list)
-    investment_holders = models.JSONField(default=list)
+
+    # ── Holder lists (auto-managed by model save signals) ─────────────────────
+    savings_holders     = models.JSONField(default=list)
+    investment_holders  = models.JSONField(default=list)
     fixed_asset_holders = models.JSONField(default=list)
-    stock_holders = models.JSONField(default=list)
-    business_holders = models.JSONField(default=list)
+    stock_holders       = models.JSONField(default=list)
+    business_holders    = models.JSONField(default=list)
+
+    # ── Forecast defaults ────────────────────────────────────────────────────
+    forecast_period_months   = models.PositiveIntegerField(default=12)
+    forecast_rate_stock      = models.DecimalField(max_digits=5, decimal_places=2, default=20.00)
+    forecast_rate_business   = models.DecimalField(max_digits=5, decimal_places=2, default=20.00)
+    forecast_rate_fixed_asset = models.DecimalField(max_digits=5, decimal_places=2, default=20.00)
+
+    # ── Notification preferences ─────────────────────────────────────────────
+    email_report_enabled = models.BooleanField(default=True)
 
     def __str__(self):
         return f'{self.user.username} preference'
