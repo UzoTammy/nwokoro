@@ -262,23 +262,26 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             context['growth_rate'] = round(100 * (year_end_networth - base_networth) / year_end_networth, 2)
 
             start_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=7)
-            financials = FinancialData.objects.filter(owner=self.request.user).filter(date__gte=start_date).order_by('date')
+            financials = FinancialData.objects.filter(owner=self.request.user, date__gte=start_date).order_by('date')
 
             if not financials.exists():
-                financials = FinancialData.objects.filter(owner=self.request.user)
+                financials = FinancialData.objects.filter(owner=self.request.user).order_by('date')
 
             if financials.exists():
-                recent_days = [date.strftime('%m/%d') for date in financials.values_list('date', flat=True)]
-                recent_networth = [financial.worth.amount for financial in financials]
-                context['networth_trend_for_chart'] = {'days': recent_days, 'networth': [float(val) for val in recent_networth]}
+                # cap chart data to the 7 most recent records
+                chart_records = list(financials.order_by('-date')[:7])[::-1]
+                recent_days = [f.date.strftime('%m/%d') for f in chart_records]
+                recent_networth = [float(f.worth.amount) for f in chart_records]
+                context['networth_trend_for_chart'] = {'days': recent_days, 'networth': recent_networth}
 
                 latest = financials.latest('date')
                 labels = latest.networth_by_country.keys()
                 sizes = latest.networth_by_country.values()
                 context['networth_by_country'] = {'labels': list(labels), 'values': list(sizes)}
 
-            qs = financials.exclude(exchange_rate=None)
-            dates = [date.strftime('%m/%d') for date in qs.values_list('date', flat=True)]
+            # cap exchange rate chart to 7 most recent records that have rate data
+            chart_qs = list(financials.exclude(exchange_rate=None).order_by('-date')[:7])[::-1]
+            dates = [f.date.strftime('%m/%d') for f in chart_qs]
             y_axes = list()
             currency_pair = list(currency_list(self.request.user))
             if 'USD' in currency_pair:
@@ -287,9 +290,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             factor = 1000
             for currency in currency_pair:
                 if currency == 'NGN':
-                    y_axes.append([round(f[currency] / factor, 3) for f in qs.values_list('exchange_rate', flat=True)])
+                    y_axes.append([round(f.exchange_rate[currency] / factor, 3) for f in chart_qs])
                 else:
-                    y_axes.append([round(f[currency], 3) for f in qs.values_list('exchange_rate', flat=True)])
+                    y_axes.append([round(f.exchange_rate[currency], 3) for f in chart_qs])
 
             context['exchange_rate_trend'] = {
                 'dates': dates,
