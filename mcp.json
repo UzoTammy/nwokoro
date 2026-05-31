@@ -1,0 +1,19 @@
+{
+  "name": "nwokoro",
+  "description": "MCP server for Nwokoro personal finance and portfolio management",
+  "version": "1.0.0",
+  "transport": {
+    "type": "sse",
+    "host": "127.0.0.1",
+    "port": 8001,
+    "path": "/sse"
+  },
+  "tools": [
+    { "name": "get_exchange_rates",    "description": "Get all current exchange rates" },
+    { "name": "get_savings",           "description": "List all savings accounts with balances" },
+    { "name": "get_investments",       "description": "List all investments (active and inactive)" },
+    { "name": "get_liabilities",       "description": "List all liabilities with outstanding balances" },
+    { "name": "get_borrowed_funds",    "description": "List all borrowed funds (short-term liabilities)" },
+    { "name": "get_net_worth_summary", "description": "Compute total net worth in USD across all asset classes" }
+  ]
+}

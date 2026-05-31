@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nwokoro — Financial Advisor</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --ink-900: #0f172a;
+      --ink-700: #334155;
+      --ink-500: #64748b;
+      --line:    #dbe3ee;
+      --paper:   #ffffff;
+      --mist:    #f3f6fb;
+      --brand:   #1d4ed8;
+      --brand-soft: #dbeafe;
+      --green:   #10b981;
+      --red:     #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background:
+        radial-gradient(circle at 8% -10%, #dbeafe 0%, transparent 36%),
+        radial-gradient(circle at 92% 0%,   #e2e8f0 0%, transparent 32%),
+        #f8fafc;
+      color: var(--ink-900);
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Nav ── */
+    nav {
+      background: linear-gradient(140deg, #0f172a 0%, #1e293b 56%, #334155 100%);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(15,23,42,0.18);
+    }
+    nav .logo      { font-weight: 700; font-size: 1.05rem; color: #f8fafc; letter-spacing: -0.3px; }
+    nav .slash     { color: #475569; }
+    nav .page      { color: #93c5fd; font-size: 0.9rem; }
+    nav .close-btn { margin-left: auto; color: #f87171; font-size: 1.1rem; text-decoration: none; transition: color 0.15s; }
+    nav .close-btn:hover { color: #ef4444; }
+
+    /* ── Layout ── */
+    .main {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Left panel ── */
+    .left-panel {
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 1.25rem;
+      gap: 1rem;
+      background: var(--mist);
+    }
+
+    .surface {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+    }
+
+    .hero-card {
+      background: linear-gradient(140deg, #0f172a 0%, #1e293b 56%, #334155 100%);
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 1.25rem;
+      box-shadow: 0 12px 28px rgba(15,23,42,0.18);
+      color: #f8fafc;
+    }
+    .hero-card .card-label { color: #94a3b8; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; }
+    .hero-card .card-value { font-size: 2rem; font-weight: 700; color: #93c5fd; }
+    .hero-card .card-sub   { color: #64748b; font-size: 0.75rem; margin-top: 0.2rem; }
+
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+    .card-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-500); margin-bottom: 0.3rem; }
+    .card-value { font-size: 1.35rem; font-weight: 700; color: var(--ink-900); }
+    .card-value.green { color: var(--green); }
+    .card-value.red   { color: var(--red); }
+
+    .section-title {
+      font-size: 0.74rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.09em; color: var(--ink-500); margin-bottom: 0.75rem;
+    }
+
+    .breakdown-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.83rem; padding: 0.35rem 0;
+      border-bottom: 1px solid var(--line); color: var(--ink-700);
+    }
+    .breakdown-row:last-child { border-bottom: none; }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; flex-shrink: 0; }
+    .breakdown-row .amount { font-weight: 600; color: var(--ink-900); }
+
+    /* ── Chat panel ── */
+    .chat-panel { display: flex; flex-direction: column; overflow: hidden; background: #f8fafc; }
+
+    /* ── Conversation tabs bar ── */
+    .conv-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1rem;
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+    .conv-bar::-webkit-scrollbar { height: 3px; }
+    .conv-bar::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+
+    .conv-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.65rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--mist);
+      color: var(--ink-700);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      max-width: 160px;
+    }
+    .conv-tab .tab-label { overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+    .conv-tab:hover { border-color: var(--brand); }
+    .conv-tab.active {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+    }
+    .conv-tab .del-btn {
+      display: flex; align-items: center;
+      color: inherit; opacity: 0.6;
+      font-size: 0.7rem;
+      background: none; border: none; cursor: pointer; padding: 0;
+      line-height: 1;
+    }
+    .conv-tab.active .del-btn { color: #fff; }
+    .conv-tab .del-btn:hover { opacity: 1; }
+
+    .conv-new {
+      flex-shrink: 0;
+      width: 26px; height: 26px;
+      border: 1px dashed var(--line);
+      border-radius: 50%;
+      background: none;
+      color: var(--ink-500);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .conv-new:hover:not(:disabled) { border-color: var(--brand); color: var(--brand); }
+    .conv-new:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* ── Chat header ── */
+    .chat-header {
+      padding: 0.7rem 1.25rem;
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+      display: flex; align-items: center; gap: 0.6rem;
+      flex-shrink: 0;
+    }
+    .chat-header .title { font-weight: 600; font-size: 0.9rem; color: var(--ink-900); flex: 1; }
+    .chat-header .badge {
+      background: var(--brand-soft); color: var(--brand);
+      font-size: 0.7rem; font-weight: 700;
+      padding: 0.18rem 0.5rem; border-radius: 999px; letter-spacing: 0.04em;
+    }
+
+    /* ── Messages ── */
+    .messages {
+      flex: 1; overflow-y: auto; padding: 1.25rem;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+
+    .msg {
+      max-width: 78%; padding: 0.75rem 1rem;
+      border-radius: 14px; font-size: 0.875rem; line-height: 1.65;
+    }
+    .msg.user {
+      align-self: flex-end; background: var(--brand); color: #fff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 12px rgba(29,78,216,0.25);
+    }
+    .msg.assistant {
+      align-self: flex-start; background: var(--paper);
+      border: 1px solid var(--line); color: var(--ink-700);
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 4px 12px rgba(15,23,42,0.06);
+    }
+    .msg.assistant p   { margin-bottom: 0.45rem; }
+    .msg.assistant p:last-child { margin-bottom: 0; }
+    .msg.assistant ul, .msg.assistant ol { padding-left: 1.3rem; margin-bottom: 0.4rem; }
+    .msg.assistant strong { color: var(--ink-900); }
+    .msg.assistant code {
+      background: var(--mist); border: 1px solid var(--line);
+      padding: 0.1em 0.35em; border-radius: 5px; font-size: 0.83em;
+    }
+    .msg.assistant pre {
+      background: var(--mist); border: 1px solid var(--line);
+      padding: 0.75rem; border-radius: 8px; overflow-x: auto; margin: 0.5rem 0;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 0.5rem; color: var(--ink-500); font-size: 0.9rem; text-align: center;
+    }
+    .empty-icon {
+      width: 48px; height: 48px; background: var(--brand-soft); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 0.25rem;
+    }
+    .empty-heading { font-weight: 600; color: var(--ink-700); }
+    .empty-sub     { font-size: 0.82rem; }
+
+    .suggestions { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-top: 0.75rem; }
+    .suggestion {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.42rem 0.75rem; border: 1px solid var(--line); border-radius: 999px;
+      background: var(--paper); color: var(--ink-900); font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; transition: border-color 0.15s, background 0.15s;
+      box-shadow: 0 2px 6px rgba(15,23,42,0.05);
+    }
+    .suggestion:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-soft); }
+
+    /* ── Input bar ── */
+    .input-bar {
+      padding: 0.9rem 1.25rem; border-top: 1px solid var(--line);
+      background: var(--paper); display: flex; gap: 0.75rem; flex-shrink: 0;
+    }
+    .input-bar textarea {
+      flex: 1; background: var(--mist); border: 1px solid var(--line);
+      border-radius: 10px; color: var(--ink-900); padding: 0.6rem 0.9rem;
+      font-size: 0.875rem; font-family: inherit; resize: none;
+      height: 42px; max-height: 120px; overflow-y: auto; line-height: 1.5;
+      transition: border-color 0.15s;
+    }
+    .input-bar textarea:focus { outline: none; border-color: var(--brand); background: var(--paper); }
+    .input-bar textarea::placeholder { color: var(--ink-500); }
+
+    .send-btn {
+      background: var(--brand); border: 1px solid var(--brand); border-radius: 10px;
+      color: #fff; width: 42px; height: 42px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; flex-shrink: 0; font-weight: 600;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .send-btn:hover:not(:disabled) { background: #1e40af; border-color: #1e40af; }
+    .send-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .send-btn svg { width: 17px; height: 17px; }
+
+    #assetChart  { max-height: 200px; }
+    .loading-text { color: var(--ink-500); font-size: 0.83rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">Nwokoro</span>
+  <span class="slash">/</span>
+  <span class="page">Financial Advisor</span>
+  <a class="close-btn" href="#" onclick="window.close(); return false;" title="Close">
+    <i class="fa fa-times-circle"></i>
+  </a>
+</nav>
+
+<div class="main">
+
+  <!-- ── Left panel ── -->
+  <div class="left-panel">
+    <div class="hero-card">
+      <div class="card-label">Net Worth</div>
+      <div class="card-value" id="netWorth">—</div>
+      <div class="card-sub" id="asOf">Loading…</div>
+    </div>
+    <div class="summary-grid">
+      <div class="surface">
+        <div class="card-label">Total Assets</div>
+        <div class="card-value green" id="totalAssets">—</div>
+      </div>
+      <div class="surface">
+        <div class="card-label">Total Liabilities</div>
+        <div class="card-value red" id="totalLiabilities">—</div>
+      </div>
+    </div>
+    <div class="surface">
+      <div class="section-title">Asset Breakdown</div>
+      <canvas id="assetChart"></canvas>
+    </div>
+    <div class="surface" id="breakdownList">
+      <div class="loading-text">Loading data…</div>
+    </div>
+  </div>
+
+  <!-- ── Chat panel ── -->
+  <div class="chat-panel">
+
+    <!-- Conversation tabs -->
+    <div class="conv-bar" id="convBar">
+      <!-- rendered by JS -->
+    </div>
+
+    <div class="chat-header">
+      <div class="title" id="chatTitle">Financial Advisor</div>
+      <div class="badge">AI</div>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="input-bar">
+      <textarea id="input" placeholder="Ask about your finances… (Enter to send, Shift+Enter for newline)"></textarea>
+      <button type="button" class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── Chart config ──────────────────────────────────────────────
+  const COLORS = ['#1d4ed8','#10b981','#f59e0b','#7c3aed','#0891b2'];
+  const LABELS = ['Savings','Investments','Stocks','Businesses','Fixed Assets'];
+  const KEYS   = ['savings_usd','investments_usd','stocks_usd','businesses_usd','fixed_assets_usd'];
+  let chart = null;
+  const fmt = n => '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  // ── Conversation store (localStorage) ─────────────────────────
+  const STORE_KEY   = 'nwokoro_advisor_v1';
+  const MAX_CONVS   = 5;
+
+  function loadStore() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || { convs: [], activeId: null }; }
+    catch { return { convs: [], activeId: null }; }
+  }
+
+  function saveStore(store) {
+    localStorage.setItem(STORE_KEY, JSON.stringify(store));
+  }
+
+  function makeConv() {
+    return { id: Date.now().toString(), title: 'New conversation', history: [] };
+  }
+
+  // ── Active conversation helpers ────────────────────────────────
+  let store = loadStore();
+
+  function activeConv() {
+    return store.convs.find(c => c.id === store.activeId) || null;
+  }
+
+  function setActive(id) {
+    store.activeId = id;
+    saveStore(store);
+    renderTabs();
+    renderMessages();
+  }
+
+  function newConversation() {
+    if (store.convs.length >= MAX_CONVS) return;
+    const conv = makeConv();
+    store.convs.push(conv);
+    store.activeId = conv.id;
+    saveStore(store);
+    renderTabs();
+    renderMessages();
+    document.getElementById('input').focus();
+  }
+
+  function deleteConversation(id, e) {
+    e.stopPropagation();
+    store.convs = store.convs.filter(c => c.id !== id);
+    if (store.activeId === id) {
+      store.activeId = store.convs.length ? store.convs[store.convs.length - 1].id : null;
+    }
+    saveStore(store);
+    renderTabs();
+    renderMessages();
+  }
+
+  // ── Render conversation tabs ───────────────────────────────────
+  function renderTabs() {
+    const bar = document.getElementById('convBar');
+    bar.innerHTML = '';
+
+    store.convs.forEach(conv => {
+      const tab = document.createElement('div');
+      tab.className = 'conv-tab' + (conv.id === store.activeId ? ' active' : '');
+      tab.onclick = () => setActive(conv.id);
+      tab.innerHTML = `
+        <span class="tab-label" title="${conv.title}">${conv.title}</span>
+        <button type="button" class="del-btn" title="Delete" onclick="deleteConversation('${conv.id}', event)">
+          <i class="fa fa-times"></i>
+        </button>`;
+      bar.appendChild(tab);
+    });
+
+    const newBtn = document.createElement('button');
+    newBtn.type = 'button';
+    newBtn.className = 'conv-new';
+    newBtn.title = store.convs.length >= MAX_CONVS ? 'Maximum 5 conversations' : 'New conversation';
+    newBtn.disabled = store.convs.length >= MAX_CONVS;
+    newBtn.innerHTML = '<i class="fa fa-plus"></i>';
+    newBtn.onclick = newConversation;
+    bar.appendChild(newBtn);
+  }
+
+  // ── Render messages for active conversation ────────────────────
+  function renderMessages() {
+    const conv = activeConv();
+    const container = document.getElementById('messages');
+    container.innerHTML = '';
+
+    if (!conv || conv.history.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">💬</div>
+          <div class="empty-heading">Ask anything about your finances</div>
+          <div class="empty-sub">Powered by your live financial data</div>
+          <div class="suggestions">
+            <span class="suggestion" onclick="ask(this)">What is my net worth?</span>
+            <span class="suggestion" onclick="ask(this)">Which investments are maturing soon?</span>
+            <span class="suggestion" onclick="ask(this)">How is my wealth distributed?</span>
+            <span class="suggestion" onclick="ask(this)">What are my biggest liabilities?</span>
+            <span class="suggestion" onclick="ask(this)">Give me a financial health assessment</span>
+          </div>
+        </div>`;
+      return;
+    }
+
+    conv.history.forEach(msg => {
+      const el = document.createElement('div');
+      el.className = `msg ${msg.role}`;
+      el.innerHTML = msg.role === 'assistant' ? marked.parse(msg.content) : '';
+      if (msg.role === 'user') el.textContent = msg.content;
+      container.appendChild(el);
+    });
+
+    container.lastChild?.scrollIntoView({ block: 'end' });
+  }
+
+  // ── Chat ───────────────────────────────────────────────────────
+  function ask(el) {
+    document.getElementById('input').value = el.textContent;
+    sendMessage();
+  }
+
+  function appendMessage(role, content) {
+    document.getElementById('emptyState')?.remove();
+    const el = document.createElement('div');
+    el.className = `msg ${role}`;
+    if (role === 'assistant') {
+      el.innerHTML = content ? marked.parse(content) : '<span style="color:var(--ink-500)">Thinking…</span>';
+    } else {
+      el.textContent = content;
+    }
+    document.getElementById('messages').appendChild(el);
+    el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    return el;
+  }
+
+  async function sendMessage() {
+    const conv = activeConv();
+    if (!conv) return;
+
+    const input   = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+    const question = input.value.trim();
+    if (!question) return;
+
+    sendBtn.disabled = true;
+    input.value = '';
+    input.style.height = '42px';
+
+    // Auto-title from first message
+    if (conv.history.length === 0) {
+      conv.title = question.length > 28 ? question.slice(0, 28) + '…' : question;
+      saveStore(store);
+      renderTabs();
+    }
+
+    conv.history.push({ role: 'user', content: question });
+    saveStore(store);
+    appendMessage('user', question);
+
+    const msgEl = appendMessage('assistant', '');
+    let text = '';
+
+    try {
+      const resp = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, history: conv.history.slice(0, -1) }),
+      });
+
+      if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+
+      const reader  = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let done   = false;
+
+      while (!done) {
+        const { done: streamDone, value } = await reader.read();
+        if (streamDone) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const payload = line.slice(6).trim();
+          if (payload === '[DONE]') { done = true; break; }
+          try {
+            text += JSON.parse(payload);
+            msgEl.innerHTML = marked.parse(text);
+            msgEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          } catch (_) {}
+        }
+      }
+
+      conv.history.push({ role: 'assistant', content: text });
+      saveStore(store);
+    } catch (e) {
+      msgEl.innerHTML = `<span style="color:var(--red)">Error: ${e.message}</span>`;
+      conv.history.pop(); // remove the user message that failed
+      saveStore(store);
+    }
+
+    sendBtn.disabled = false;
+    input.focus();
+  }
+
+  // ── Financial summary ──────────────────────────────────────────
+  async function loadSummary() {
+    try {
+      const data = await fetch('/tools/net-worth').then(r => r.json());
+      document.getElementById('netWorth').textContent = fmt(data.net_worth_usd);
+      document.getElementById('totalAssets').textContent = fmt(data.total_assets_usd);
+      document.getElementById('totalLiabilities').textContent = fmt(data.total_liabilities_usd);
+      const d = new Date(data.as_of);
+      document.getElementById('asOf').textContent =
+        'as of ' + d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit'});
+      renderChart(data);
+      renderBreakdown(data);
+    } catch {
+      document.getElementById('breakdownList').innerHTML =
+        '<div style="color:var(--red);font-size:0.82rem">Could not load data — is the server running?</div>';
+    }
+  }
+
+  function renderChart(data) {
+    const ctx = document.getElementById('assetChart').getContext('2d');
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: LABELS,
+        datasets: [{ data: KEYS.map(k => data[k]), backgroundColor: COLORS, borderColor: '#ffffff', borderWidth: 3, hoverOffset: 6 }]
+      },
+      options: {
+        responsive: true, cutout: '64%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fmt(ctx.raw)}  (${(ctx.raw / data.total_assets_usd * 100).toFixed(1)}%)` } }
+        }
+      }
+    });
+  }
+
+  function renderBreakdown(data) {
+    const rows = [
+      ...KEYS.map((k, i) => ({ label: LABELS[i], value: data[k], color: COLORS[i] })),
+      { label: 'Liabilities',    value: data.liabilities_usd,    color: '#ef4444' },
+      { label: 'Borrowed Funds', value: data.borrowed_funds_usd, color: '#f43f5e' },
+    ];
+    document.getElementById('breakdownList').innerHTML =
+      '<div class="section-title">Detailed Breakdown</div>' +
+      rows.map(r => `
+        <div class="breakdown-row">
+          <span><span class="dot" style="background:${r.color}"></span>${r.label}</span>
+          <span class="amount">${fmt(r.value)}</span>
+        </div>`).join('');
+  }
+
+  // ── Textarea behaviour ─────────────────────────────────────────
+  document.getElementById('input').addEventListener('input', function () {
+    this.style.height = '42px';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+  });
+  document.getElementById('input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+
+  // ── Boot ──────────────────────────────────────────────────────
+  if (!store.convs.length) newConversation();   // start with one conversation
+  else { renderTabs(); renderMessages(); }
+  loadSummary();
+</script>
+</body>
+</html>
