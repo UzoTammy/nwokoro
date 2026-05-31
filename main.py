@@ -324,7 +324,13 @@ def api_net_worth():
     return get_net_worth_summary()
 
 
-@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+@app.get("/", include_in_schema=False)
+def root():
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/advisor")
+
+
+@app.get("/advisor", response_class=HTMLResponse, include_in_schema=False)
 def dashboard():
     html_path = BASE_DIR / "ai" / "index.html"
     return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
