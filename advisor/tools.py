@@ -256,6 +256,98 @@ def get_net_worth_summary() -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Historical & analytical tools
+# ---------------------------------------------------------------------------
+
+def get_networth_history(months: int = 6) -> list[dict]:
+    """Return daily net worth snapshots for the past N months (default 6)."""
+    from datetime import datetime, timezone, timedelta
+    from networth.models import FinancialData
+    since = datetime.now(timezone.utc) - timedelta(days=months * 30)
+    snapshots = FinancialData.objects.filter(date__gte=since).order_by("date")
+    return [
+        {
+            "date":        s.date.date().isoformat(),
+            "net_worth":   str(s.worth.amount),
+            "currency":    s.worth_currency,
+            "savings":     str(s.savings.amount),
+            "investments": str(s.investment.amount),
+            "stocks":      str(s.stock.amount),
+            "businesses":  str(s.business.amount),
+            "fixed_assets":str(s.fixed_asset.amount),
+            "liabilities": str(s.liability.amount),
+            "roi":         str(s.roi.amount),
+            "daily_roi":   str(s.daily_roi.amount),
+        }
+        for s in snapshots
+    ]
+
+
+def get_recent_transactions(days: int = 30) -> list[dict]:
+    """Return all financial transactions across every asset class for the past N days (default 30)."""
+    from datetime import datetime, timezone, timedelta
+    from networth.models import (
+        SavingsTransaction, InvestmentTransaction, StockTransaction,
+        BusinessTransaction, FixedAssetTransaction, LiabilityTransaction,
+        BorrowedFundTransaction,
+    )
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+    results = []
+
+    sources = [
+        (SavingsTransaction,      "savings",       lambda t: t.savings.holder),
+        (InvestmentTransaction,   "investment",    lambda t: t.investment.holder),
+        (StockTransaction,        "stock",         lambda t: t.stock.holder),
+        (BusinessTransaction,     "business",      lambda t: t.business.name),
+        (FixedAssetTransaction,   "fixed_asset",   lambda t: t.fixed_asset.name),
+        (LiabilityTransaction,    "liability",     lambda t: t.liability.name),
+        (BorrowedFundTransaction, "borrowed_fund", lambda t: t.borrowed_fund.source),
+    ]
+
+    for model, category, name_fn in sources:
+        for t in model.objects.filter(timestamp__gte=since).order_by("-timestamp"):
+            results.append({
+                "date":             t.timestamp.date().isoformat(),
+                "category":         category,
+                "name":             name_fn(t),
+                "type":             t.transaction_type,
+                "amount":           str(t.amount.amount),
+                "currency":         t.amount_currency,
+                "description":      t.description,
+            })
+
+    results.sort(key=lambda x: x["date"], reverse=True)
+    return results
+
+
+def get_maturing_investments(days: int = 60) -> list[dict]:
+    """Return active investments maturing within the next N days (default 60)."""
+    from datetime import date, timedelta
+    from networth.models import Investment
+    today    = date.today()
+    deadline = today + timedelta(days=days)
+    results  = []
+    for inv in Investment.objects.filter(is_active=True).select_related("owner"):
+        maturity = inv.start_date + timedelta(days=inv.duration)
+        if today <= maturity <= deadline:
+            days_left = (maturity - today).days
+            results.append({
+                "owner":       inv.owner.email,
+                "holder":      inv.holder,
+                "principal":   str(inv.principal.amount),
+                "currency":    inv.principal_currency,
+                "rate":        inv.rate,
+                "start_date":  inv.start_date.isoformat(),
+                "maturity_date": maturity.isoformat(),
+                "days_until_maturity": days_left,
+                "category":    inv.category,
+                "host_country":inv.host_country,
+            })
+    results.sort(key=lambda x: x["days_until_maturity"])
+    return results
+
+
+# ---------------------------------------------------------------------------
 # MCP registration
 # ---------------------------------------------------------------------------
 
@@ -269,6 +361,9 @@ _FINANCIAL_TOOLS = (
     get_businesses,
     get_fixed_assets,
     get_net_worth_summary,
+    get_networth_history,
+    get_recent_transactions,
+    get_maturing_investments,
 )
 
 

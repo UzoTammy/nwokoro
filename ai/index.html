@@ -49,8 +49,21 @@
     nav .logo      { font-weight: 700; font-size: 1.05rem; color: #f8fafc; letter-spacing: -0.3px; }
     nav .slash     { color: #475569; }
     nav .page      { color: #93c5fd; font-size: 0.9rem; }
-    nav .close-btn { margin-left: auto; color: #f87171; font-size: 1.1rem; text-decoration: none; transition: color 0.15s; }
+    nav .close-btn { color: #f87171; font-size: 1.1rem; text-decoration: none; transition: color 0.15s; }
     nav .close-btn:hover { color: #ef4444; }
+    nav .cap-link {
+      margin-left: auto;
+      color: #93c5fd;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: color 0.15s;
+    }
+    nav .cap-link:hover { color: #fff; }
+    nav .close-btn-right { margin-left: 0.75rem; }
 
     /* ── Layout ── */
     .main {
@@ -322,7 +335,10 @@
   <span class="logo">Nwokoro</span>
   <span class="slash">/</span>
   <span class="page">Financial Advisor</span>
-  <a class="close-btn" href="#" onclick="window.close(); return false;" title="Close">
+  <a class="cap-link" href="/capabilities" title="View all capabilities">
+    <i class="fa fa-th-list"></i> Capabilities
+  </a>
+  <a class="close-btn close-btn-right" href="#" onclick="window.close(); return false;" title="Close">
     <i class="fa fa-times-circle"></i>
   </a>
 </nav>

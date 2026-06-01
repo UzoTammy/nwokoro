@@ -27,7 +27,10 @@ from advisor.tools import (
     get_fixed_assets,
     get_investments,
     get_liabilities,
+    get_maturing_investments,
     get_net_worth_summary,
+    get_networth_history,
+    get_recent_transactions,
     get_savings,
     get_stocks,
     register_tools,
@@ -124,6 +127,24 @@ def api_net_worth():
     return get_net_worth_summary()
 
 
+@app.get("/tools/networth-history", tags=["Insights"])
+def api_networth_history(months: int = 6):
+    """Daily net worth snapshots for the past N months."""
+    return get_networth_history(months)
+
+
+@app.get("/tools/recent-transactions", tags=["Insights"])
+def api_recent_transactions(days: int = 30):
+    """All transactions across every asset class for the past N days."""
+    return get_recent_transactions(days)
+
+
+@app.get("/tools/maturing-investments", tags=["Insights"])
+def api_maturing_investments(days: int = 60):
+    """Active investments maturing within the next N days."""
+    return get_maturing_investments(days)
+
+
 # ── Dashboard ────────────────────────────────────────────────────────────────
 
 @app.get("/", include_in_schema=False)
@@ -135,6 +156,12 @@ def root():
 @app.get("/advisor", response_class=HTMLResponse, include_in_schema=False)
 def dashboard():
     html_path = BASE_DIR / "ai" / "index.html"
+    return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
+
+
+@app.get("/capabilities", response_class=HTMLResponse, include_in_schema=False)
+def capabilities():
+    html_path = BASE_DIR / "ai" / "capabilities.html"
     return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
 
 

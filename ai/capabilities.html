@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nwokoro Advisor — Capabilities</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    :root {
+      --ink-900: #0f172a;
+      --ink-700: #334155;
+      --ink-500: #64748b;
+      --line:    #dbe3ee;
+      --paper:   #ffffff;
+      --mist:    #f3f6fb;
+      --brand:   #1d4ed8;
+      --brand-soft: #dbeafe;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background:
+        radial-gradient(circle at 8% -10%, #dbeafe 0%, transparent 36%),
+        radial-gradient(circle at 92% 0%,   #e2e8f0 0%, transparent 32%),
+        #f8fafc;
+      color: var(--ink-900);
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Nav ── */
+    nav {
+      background: linear-gradient(140deg, #0f172a 0%, #1e293b 56%, #334155 100%);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 4px 16px rgba(15,23,42,0.18);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav .logo  { font-weight: 700; font-size: 1.05rem; color: #f8fafc; letter-spacing: -0.3px; }
+    nav .slash { color: #475569; }
+    nav .page  { color: #93c5fd; font-size: 0.9rem; }
+    nav .back  {
+      margin-left: auto;
+      color: #93c5fd;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: color 0.15s;
+    }
+    nav .back:hover { color: #fff; }
+
+    /* ── Page shell ── */
+    .page-shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+
+    .page-header { margin-bottom: 1.75rem; }
+    .page-header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .page-header p  { color: var(--ink-500); font-size: 0.87rem; line-height: 1.6; }
+
+    /* ── Category section ── */
+    .category { margin-bottom: 2rem; }
+    .category-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--ink-500);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.45rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    /* ── Grid layouts ── */
+    .tools-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+    .tools-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+
+    /* ── Tool card ── */
+    .tool-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 4px 12px rgba(15,23,42,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .tool-header { display: flex; align-items: flex-start; gap: 0.75rem; }
+    .tool-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.88rem;
+      flex-shrink: 0;
+    }
+    .tool-card.search .tool-icon  { background: #fef3c7; color: #d97706; }
+    .tool-name { font-size: 0.9rem; font-weight: 700; color: var(--ink-900); margin-bottom: 0.15rem; }
+    .tool-desc { font-size: 0.79rem; color: var(--ink-500); line-height: 1.5; }
+
+    .questions-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--ink-500);
+    }
+    .questions { display: flex; flex-direction: column; gap: 0.3rem; }
+    .question {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.45rem;
+      font-size: 0.79rem;
+      color: var(--ink-700);
+      background: var(--mist);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 0.38rem 0.6rem;
+      line-height: 1.4;
+    }
+    .question i { color: var(--brand); margin-top: 2px; flex-shrink: 0; font-size: 0.65rem; }
+
+    /* ── Tip box ── */
+    .tip {
+      background: var(--brand-soft);
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 0.9rem 1.1rem;
+      font-size: 0.82rem;
+      color: var(--ink-700);
+      line-height: 1.6;
+      margin-top: 1.5rem;
+    }
+    .tip strong { color: var(--brand); }
+
+    /* ── Responsive ── */
+    @media (max-width: 700px) {
+      .tools-grid-2, .tools-grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">Nwokoro</span>
+  <span class="slash">/</span>
+  <span class="page">Advisor Capabilities</span>
+  <a class="back" href="/advisor"><i class="fa fa-arrow-left"></i> Back to Advisor</a>
+</nav>
+
+<div class="page-shell">
+
+  <div class="page-header">
+    <h1>What your Advisor can do</h1>
+    <p>Every tool below is called automatically when your question requires it. Just ask naturally — no need to name a tool.</p>
+  </div>
+
+  <!-- ── Current Snapshot (2-col grid) ── -->
+  <div class="category">
+    <div class="category-title">Current Snapshot — live data from your database</div>
+    <div class="tools-grid-2">
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon"><i class="fa fa-dollar-sign"></i></div>
+          <div>
+            <div class="tool-name">Net Worth Summary</div>
+            <div class="tool-desc">Total net worth in USD across all asset classes using live exchange rates, with as-of timestamp.</div>
+          </div>
+        </div>
+        <div class="questions-label">Trigger questions</div>
+        <div class="questions">
+          <div class="question"><i class="fa fa-chevron-right"></i> What is my current net worth?</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> How much am I worth in USD?</div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon"><i class="fa fa-piggy-bank"></i></div>
+          <div>
+            <div class="tool-name">Savings Accounts</div>
+            <div class="tool-desc">All savings accounts with current balances, currency, host country, and category (TFSA, etc.).</div>
+          </div>
+        </div>
+        <div class="questions-label">Trigger questions</div>
+        <div class="questions">
+          <div class="question"><i class="fa fa-chevron-right"></i> Show me my savings accounts.</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> Which savings account has the most money?</div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon"><i class="fa fa-chart-line"></i></div>
+          <div>
+            <div class="tool-name">Investments</div>
+            <div class="tool-desc">All investment positions with principal, interest rate, duration, start date, and category.</div>
+          </div>
+        </div>
+        <div class="questions-label">Trigger questions</div>
+        <div class="questions">
+          <div class="question"><i class="fa fa-chevron-right"></i> List my investments.</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> Which investment has the highest return?</div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon"><i class="fa fa-cubes"></i></div>
+          <div>
+            <div class="tool-name">Stocks</div>
+            <div class="tool-desc">All stock holdings with units, cost basis, current market value, and active/sold status.</div>
+          </div>
+        </div>
+        <div class="questions-label">Trigger questions</div>
+        <div class="questions">
+          <div class="question"><i class="fa fa-chevron-right"></i> What stocks do I hold?</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> What is my total stock portfolio value?</div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon"><i class="fa fa-briefcase"></i></div>
+          <div>
+            <div class="tool-name">Businesses</div>
+            <div class="tool-desc">All business equity positions with shares, unit cost, total capital, and active status.</div>
+          </div>
+        </div>
+        <div class="questions-label">Trigger questions</div>
+        <div class="questions">
+          <div class="question"><i class="fa fa-chevron-right"></i> What businesses do I have equity in?</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> What is my total business capital?</div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon"><i class="fa fa-home"></i></div>
+          <div>
+            <div class="tool-name">Fixed Assets</div>
+            <div class="tool-desc">All fixed assets (property, real estate) with current value, growth rate, and country.</div>
+          </div>
+        </div>
+        <div class="questions-label">Trigger questions</div>
+        <div class="questions">
+          <div class="question"><i class="fa fa-chevron-right"></i> What fixed assets do I own?</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> What is the value of my real estate?</div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon"><i class="fa fa-exclamation-triangle"></i></div>
+          <div>
+            <div class="tool-name">Liabilities &amp; Borrowed Funds</div>
+            <div class="tool-desc">Outstanding loans and borrowed funds with balances, interest rates, and settlement dates.</div>
+          </div>
+        </div>
+        <div class="questions-label">Trigger questions</div>
+        <div class="questions">
+          <div class="question"><i class="fa fa-chevron-right"></i> What are my liabilities?</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> How much do I owe in total?</div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon"><i class="fa fa-exchange-alt"></i></div>
+          <div>
+            <div class="tool-name">Exchange Rates</div>
+            <div class="tool-desc">All stored FX rates with base/target currencies, values, and last-updated timestamps.</div>
+          </div>
+        </div>
+        <div class="questions-label">Trigger questions</div>
+        <div class="questions">
+          <div class="question"><i class="fa fa-chevron-right"></i> What are the current exchange rates?</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> When were the rates last updated?</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Historical & Analytical (3-col grid) ── -->
+  <div class="category">
+    <div class="category-title">Historical &amp; Analytical — trends and patterns over time</div>
+    <div class="tools-grid-3">
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon"><i class="fa fa-history"></i></div>
+          <div>
+            <div class="tool-name">Net Worth History</div>
+            <div class="tool-desc">Daily financial snapshots for a given number of months (default 6). Shows net worth, asset breakdown, and ROI over time.</div>
+          </div>
+        </div>
+        <div class="questions-label">Trigger questions</div>
+        <div class="questions">
+          <div class="question"><i class="fa fa-chevron-right"></i> How has my net worth changed over 6 months?</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> Am I growing wealthier over time?</div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon"><i class="fa fa-list-alt"></i></div>
+          <div>
+            <div class="tool-name">Recent Transactions</div>
+            <div class="tool-desc">All DR/CR entries across every asset class for a given number of days (default 30). Expandable to any period.</div>
+          </div>
+        </div>
+        <div class="questions-label">Trigger questions</div>
+        <div class="questions">
+          <div class="question"><i class="fa fa-chevron-right"></i> What transactions happened in the last 30 days?</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> Show all activity from the past 3 months.</div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon"><i class="fa fa-clock"></i></div>
+          <div>
+            <div class="tool-name">Maturing Investments</div>
+            <div class="tool-desc">Active investments maturing within a specified window (default 60 days), sorted by nearest maturity date.</div>
+          </div>
+        </div>
+        <div class="questions-label">Trigger questions</div>
+        <div class="questions">
+          <div class="question"><i class="fa fa-chevron-right"></i> Which investments are maturing soon?</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> What matures in the next 30 days?</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Web Search (full width) ── -->
+  <div class="category">
+    <div class="category-title">Live Web Search — current events and market intelligence</div>
+    <div class="tool-card search">
+      <div class="tool-header">
+        <div class="tool-icon"><i class="fa fa-search"></i></div>
+        <div>
+          <div class="tool-name">Web Search (Tavily)</div>
+          <div class="tool-desc">
+            Searches finance-scoped domains covering Nigerian and Canadian markets plus global authorities —
+            CBN, SEC NG, NGX, Bank of Canada, OSC, TMX, Reuters, FT, Bloomberg, IMF, World Bank.
+            Called automatically when current information is needed. Results are cited with sources.
+          </div>
+        </div>
+      </div>
+      <div class="questions-label">Trigger questions</div>
+      <div class="questions">
+        <div class="question"><i class="fa fa-chevron-right"></i> What is the current investment climate in Nigeria?</div>
+        <div class="question"><i class="fa fa-chevron-right"></i> What is the latest CBN interest rate decision?</div>
+        <div class="question"><i class="fa fa-chevron-right"></i> How is the Canadian economy performing right now?</div>
+        <div class="question"><i class="fa fa-chevron-right"></i> Are GIC rates rising or falling in Canada?</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip">
+    <strong>Tip:</strong> The advisor combines tools automatically. Asking <em>"Given my maturing investments and current Nigerian rates, what should I reinvest in?"</em>
+    will call <strong>get_maturing_investments</strong>, <strong>get_exchange_rates</strong>, and <strong>web_search</strong> together in one response.
+  </div>
+
+</div>
+</body>
+</html>
