@@ -15,7 +15,7 @@ import uvicorn
 from anthropic import Anthropic
 from django.conf import settings as django_settings
 from django.core.mail import EmailMessage
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, Response, StreamingResponse
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel
@@ -59,6 +59,15 @@ class ChatRequest(BaseModel):
 class ShareRequest(BaseModel):
     content_html: str
     title: str = "Financial Advisor Note"
+
+
+class TitleRequest(BaseModel):
+    title: str
+
+
+class MessageRequest(BaseModel):
+    role: str
+    content: str
 
 
 # ---------------------------------------------------------------------------
@@ -384,6 +393,73 @@ def share_pdf(body: ShareRequest):
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+# ── Conversation store ───────────────────────────────────────────────────────
+
+@app.get("/convs/", tags=["Conversations"])
+def list_convs():
+    """List all conversations ordered by most recently updated."""
+    from advisor.models import Conversation
+    return [
+        {"id": c.id, "title": c.title, "updated_at": c.updated_at.isoformat()}
+        for c in Conversation.objects.all()
+    ]
+
+
+@app.post("/convs/", tags=["Conversations"])
+def create_conv():
+    """Create a new conversation and return its id and title."""
+    from advisor.models import Conversation
+    conv = Conversation.objects.create()
+    return {"id": conv.id, "title": conv.title}
+
+
+@app.delete("/convs/{conv_id}", tags=["Conversations"])
+def delete_conv(conv_id: int):
+    """Delete a conversation and all its messages."""
+    from advisor.models import Conversation
+    deleted, _ = Conversation.objects.filter(pk=conv_id).delete()
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return {"status": "deleted"}
+
+
+@app.patch("/convs/{conv_id}/title", tags=["Conversations"])
+def rename_conv(conv_id: int, body: TitleRequest):
+    """Set the title of a conversation (called after the first message)."""
+    from advisor.models import Conversation
+    updated = Conversation.objects.filter(pk=conv_id).update(title=body.title[:120])
+    if not updated:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return {"status": "ok"}
+
+
+@app.get("/convs/{conv_id}/messages/", tags=["Conversations"])
+def get_messages(conv_id: int):
+    """Return all messages for a conversation as a history array."""
+    from advisor.models import Conversation, Message
+    if not Conversation.objects.filter(pk=conv_id).exists():
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return [
+        {"role": m.role, "content": m.content}
+        for m in Message.objects.filter(conversation_id=conv_id)
+    ]
+
+
+@app.post("/convs/{conv_id}/messages/", tags=["Conversations"])
+def append_message(conv_id: int, body: MessageRequest):
+    """Append a message to a conversation and touch its updated_at timestamp."""
+    from advisor.models import Conversation, Message
+    from django.utils import timezone
+    try:
+        conv = Conversation.objects.get(pk=conv_id)
+    except Conversation.DoesNotExist:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    Message.objects.create(conversation=conv, role=body.role, content=body.content)
+    conv.updated_at = timezone.now()
+    conv.save(update_fields=["updated_at"])
+    return {"status": "ok"}
 
 
 # ── MCP SSE — mount last so FastAPI routes take precedence ───────────────────

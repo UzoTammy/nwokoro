@@ -518,55 +518,95 @@
   let chart = null;
   const fmt = n => '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
 
-  // ── Conversation store (localStorage) ─────────────────────────
-  const STORE_KEY   = 'nwokoro_advisor_v1';
-  const MAX_CONVS   = 5;
+  // ── Conversation store (server-side) ─────────────────────────
+  const MAX_CONVS = 20;
 
-  function loadStore() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || { convs: [], activeId: null }; }
-    catch { return { convs: [], activeId: null }; }
-  }
-
-  function saveStore(store) {
-    localStorage.setItem(STORE_KEY, JSON.stringify(store));
-  }
-
-  function makeConv() {
-    return { id: Date.now().toString(), title: 'New conversation', history: [] };
-  }
-
-  // ── Active conversation helpers ────────────────────────────────
-  let store = loadStore();
+  // In-memory state — source of truth is the server
+  let store = { convs: [], activeId: null };
 
   function activeConv() {
     return store.convs.find(c => c.id === store.activeId) || null;
   }
 
-  function setActive(id) {
-    store.activeId = id;
-    saveStore(store);
+  async function api(method, path, body) {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body !== undefined) opts.body = JSON.stringify(body);
+    const resp = await fetch(path, opts);
+    if (!resp.ok) throw new Error(`${method} ${path} → ${resp.status}`);
+    return resp.json();
+  }
+
+  // One-time import of any existing localStorage conversations
+  async function migrateLocalStorage() {
+    const raw = localStorage.getItem('nwokoro_advisor_v1');
+    if (!raw) return;
+    try {
+      const old = JSON.parse(raw);
+      for (const conv of (old.convs || [])) {
+        if (!conv.history?.length) continue;
+        const { id } = await api('POST', '/convs/');
+        await api('PATCH', `/convs/${id}/title`, { title: conv.title });
+        for (const msg of conv.history) {
+          await api('POST', `/convs/${id}/messages/`, { role: msg.role, content: msg.content });
+        }
+      }
+      localStorage.removeItem('nwokoro_advisor_v1');
+    } catch (e) {
+      console.warn('localStorage migration failed:', e);
+    }
+  }
+
+  async function loadHistory(id) {
+    const conv = store.convs.find(c => c.id === id);
+    if (!conv || conv.history !== null) return;
+    conv.history = await api('GET', `/convs/${id}/messages/`);
+  }
+
+  async function initStore() {
+    await migrateLocalStorage();
+    const convs = await api('GET', '/convs/');
+    store.convs = convs.map(c => ({ id: c.id, title: c.title, history: null }));
+    if (store.convs.length === 0) {
+      const c = await api('POST', '/convs/');
+      store.convs = [{ id: c.id, title: c.title, history: [] }];
+    }
+    store.activeId = store.convs[0].id;
+    await loadHistory(store.activeId);
     renderTabs();
     renderMessages();
   }
 
-  function newConversation() {
+  async function setActive(id) {
+    store.activeId = id;
+    await loadHistory(id);
+    renderTabs();
+    renderMessages();
+  }
+
+  async function newConversation() {
     if (store.convs.length >= MAX_CONVS) return;
-    const conv = makeConv();
-    store.convs.push(conv);
-    store.activeId = conv.id;
-    saveStore(store);
+    const c = await api('POST', '/convs/');
+    store.convs.unshift({ id: c.id, title: c.title, history: [] });
+    store.activeId = c.id;
     renderTabs();
     renderMessages();
     document.getElementById('input').focus();
   }
 
-  function deleteConversation(id, e) {
+  async function deleteConversation(id, e) {
     e.stopPropagation();
+    await api('DELETE', `/convs/${id}`);
     store.convs = store.convs.filter(c => c.id !== id);
     if (store.activeId === id) {
-      store.activeId = store.convs.length ? store.convs[store.convs.length - 1].id : null;
+      if (store.convs.length) {
+        store.activeId = store.convs[0].id;
+        await loadHistory(store.activeId);
+      } else {
+        const c = await api('POST', '/convs/');
+        store.convs = [{ id: c.id, title: c.title, history: [] }];
+        store.activeId = c.id;
+      }
     }
-    saveStore(store);
     renderTabs();
     renderMessages();
   }
@@ -582,7 +622,7 @@
       tab.onclick = () => setActive(conv.id);
       tab.innerHTML = `
         <span class="tab-label" title="${conv.title}">${conv.title}</span>
-        <button type="button" class="del-btn" title="Delete" onclick="deleteConversation('${conv.id}', event)">
+        <button type="button" class="del-btn" title="Delete" onclick="deleteConversation(${conv.id}, event)">
           <i class="fa fa-times"></i>
         </button>`;
       bar.appendChild(tab);
@@ -751,12 +791,12 @@
     // Auto-title from first message
     if (conv.history.length === 0) {
       conv.title = question.length > 28 ? question.slice(0, 28) + '…' : question;
-      saveStore(store);
+      api('PATCH', `/convs/${conv.id}/title`, { title: conv.title });
       renderTabs();
     }
 
     conv.history.push({ role: 'user', content: question });
-    saveStore(store);
+    api('POST', `/convs/${conv.id}/messages/`, { role: 'user', content: question });
     appendMessage('user', question);
 
     const msgEl = appendMessage('assistant', '');
@@ -797,11 +837,10 @@
       }
 
       conv.history.push({ role: 'assistant', content: text });
-      saveStore(store);
+      await api('POST', `/convs/${conv.id}/messages/`, { role: 'assistant', content: text });
     } catch (e) {
       msgEl.innerHTML = `<span style="color:var(--red)">Error: ${e.message}</span>`;
       conv.history.pop(); // remove the user message that failed
-      saveStore(store);
     }
 
     sendBtn.disabled = false;
@@ -870,8 +909,7 @@
   });
 
   // ── Boot ──────────────────────────────────────────────────────
-  if (!store.convs.length) newConversation();   // start with one conversation
-  else { renderTabs(); renderMessages(); }
+  initStore();
   loadSummary();
 
   function toggleStatsPanel() {

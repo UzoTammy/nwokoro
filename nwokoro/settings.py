@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'chore.apps.ChoreConfig',
     'achieve.apps.AchieveConfig',
     'networth.apps.NetworthConfig',
+    'advisor.apps.AdvisorConfig',
     
     "crispy_forms",
     "crispy_bootstrap4",
