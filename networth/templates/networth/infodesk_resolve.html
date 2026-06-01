@@ -1,0 +1,65 @@
+{% extends 'core/base.html' %}
+
+{% block head %}
+<style>
+  body { background-color: #131b2e; font-family: 'Inter', sans-serif; }
+  .form-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 640px;
+    margin: 90px auto 40px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.1);
+  }
+  .note-preview {
+    background: #f8fafc;
+    border-left: 4px solid #33548a;
+    padding: .75rem 1rem;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 1.5rem;
+    font-size: 13px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-dark bg-dark fixed-top">
+  <a class="navbar-brand" href="{% url 'networth-home' %}">Networth</a>
+  <a class="nav-link text-light ml-auto" href="{% url 'infodesk-list' %}"><i class="fa fa-arrow-left"></i> InfoDesk</a>
+</nav>
+
+<div class="form-card">
+  <h5 class="mb-3"><i class="fa fa-check-circle text-success mr-2"></i>Resolve Note</h5>
+
+  <div class="note-preview">
+    <strong>{{ object.title }}</strong>
+    <p class="mt-1 mb-0 text-muted">{{ object.content }}</p>
+    <small class="text-muted">Open for {{ object.age_display }}</small>
+  </div>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-group">
+      <label>What was actually done? <small class="text-muted">(vs. what was planned)</small></label>
+      {{ form.resolution_note }}
+    </div>
+    <div class="form-group">
+      <label>Attachment <small class="text-muted">(optional — add a screenshot or confirmation)</small></label>
+      {% if object.attachment %}
+      <div class="mb-2">
+        <a href="{{ object.attachment.url }}" target="_blank" class="small">
+          <i class="fa fa-paperclip mr-1"></i>{{ object.attachment.name|cut:"infodesk/" }}
+        </a>
+      </div>
+      {% endif %}
+      {{ form.attachment }}
+    </div>
+    <div class="d-flex justify-content-between mt-3">
+      <a href="{% url 'infodesk-list' %}" class="btn btn-outline-secondary">Cancel</a>
+      <button type="submit" class="btn btn-success">
+        <i class="fa fa-check mr-1"></i> Mark Resolved
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

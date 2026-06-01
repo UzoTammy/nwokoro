@@ -4,7 +4,7 @@ from django import forms
 from django.forms import ValidationError
 from django.utils import timezone
 from django.utils.safestring import mark_safe
-from .models import (Investment, Stock, Saving, Business, FixedAsset, RewardFund, BorrowedFund, InjectFund, Rent)
+from .models import (Investment, Stock, Saving, Business, FixedAsset, RewardFund, BorrowedFund, InjectFund, Rent, InfoNote)
 from account.models import User
 from account.models import Preference
 from djmoney.forms.fields import MoneyField, Money
@@ -721,4 +721,31 @@ class NetworthPreferenceForm(forms.ModelForm):
         if v < 0 or v > 200:
             raise forms.ValidationError('Rate must be between 0 and 200%.')
         return v
+
+
+class InfoNoteForm(forms.ModelForm):
+    class Meta:
+        model = InfoNote
+        fields = ['title', 'content', 'priority', 'category', 'status', 'attachment']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Brief title'}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Details of the discussion or issue'}),
+            'priority': forms.Select(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'attachment': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
+        }
+
+
+class InfoNoteResolveForm(forms.ModelForm):
+    class Meta:
+        model = InfoNote
+        fields = ['resolution_note', 'attachment']
+        widgets = {
+            'resolution_note': forms.Textarea(attrs={
+                'class': 'form-control', 'rows': 4,
+                'placeholder': 'Describe what was actually done vs. what was planned',
+            }),
+            'attachment': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
+        }
 

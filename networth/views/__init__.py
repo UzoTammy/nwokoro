@@ -34,3 +34,4 @@ from .forecast import (
     ForecastView, ForecastPDFView, ForecastEmailView,
 )
 from .preferences import NetworthPreferenceView
+from .infodesk import InfoDeskListView, InfoNoteCreateView, InfoNoteUpdateView, InfoNoteResolveView, InfoNoteDeleteView

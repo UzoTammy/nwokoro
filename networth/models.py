@@ -949,4 +949,53 @@ class FinancialData(models.Model):
             result[exchange[0]] = exchange[1]
         self.exchange_rate = result
         super().save(*args, **kwargs)
-        
+
+
+class InfoNote(models.Model):
+    PRIORITY_CHOICES = [('low', 'Low'), ('medium', 'Medium'), ('high', 'High')]
+    CATEGORY_CHOICES = [
+        ('investment', 'Investment'), ('savings', 'Savings'),
+        ('planning', 'Planning'), ('review', 'Review'), ('other', 'Other'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'Pending'), ('in_progress', 'In Progress'), ('resolved', 'Resolved'),
+    ]
+    PRIORITY_BADGE = {'low': 'secondary', 'medium': 'warning', 'high': 'danger'}
+
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='info_notes')
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
+    attachment = models.FileField(upload_to='infodesk/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolution_note = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def priority_badge(self):
+        return self.PRIORITY_BADGE.get(self.priority, 'secondary')
+
+    @property
+    def days_open(self):
+        end = self.resolved_at if (self.status == 'resolved' and self.resolved_at) else timezone.now()
+        return (end - self.created_at).days
+
+    @property
+    def age_display(self):
+        days = self.days_open
+        if days == 0:
+            return 'today'
+        if days < 7:
+            return f'{days}d'
+        if days < 30:
+            return f'{days // 7}w'
+        return f'{days // 30}mo'
+

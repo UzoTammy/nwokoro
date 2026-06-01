@@ -12,7 +12,7 @@ from babel.numbers import format_percent
 from djmoney.models.fields import Money
 
 from ..models import (
-    FinancialData, RewardFund,
+    FinancialData, RewardFund, InfoNote,
     SavingsTransaction, InvestmentTransaction, BusinessTransaction,
     BorrowedFundTransaction, StockTransaction, FixedAssetTransaction,
 )
@@ -182,6 +182,13 @@ class NetworthHomeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                 for reward in rewards
             )
             context['reward'] = reward_value
+
+        # Section 10: InfoDesk navbar data
+        open_notes = InfoNote.objects.filter(
+            owner=self.request.user, status__in=['pending', 'in_progress']
+        ).order_by('-priority', '-created_at')
+        context['infodesk_count'] = open_notes.count()
+        context['infodesk_preview'] = open_notes[:5]
 
         return context
 

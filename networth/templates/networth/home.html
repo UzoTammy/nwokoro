@@ -107,6 +107,12 @@
     font-style: italic;
   }
 
+  /* InfoDesk dropdown */
+  .infodesk-menu { min-width: 340px; }
+  .infodesk-item-text { font-size: 13px; }
+  .infodesk-age { font-size: 12px; }
+  .infodesk-footer-link { font-size: 13px; }
+
   /* Investment Score card */
   .inv-score-label {
     font-size: 11px;
@@ -199,12 +205,37 @@
         Advisor</a>
     </div>
     <div class="navbar-nav">
-      <a class="nav-link mr-2" href="">
-        <span class="badge badge-light">
-           <span class=" text-danger">{{pending_tasks_count}}</span>
-        </span>
-      </a>
-      
+
+      <!-- InfoDesk dropdown -->
+      <div class="btn-group mr-2">
+        <button type="button" class="btn dropdown-toggle text-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-inbox text-warning"></i> InfoDesk
+          {% if infodesk_count > 0 %}
+          <span class="badge badge-danger ml-1">{{ infodesk_count }}</span>
+          {% endif %}
+        </button>
+        <div class="dropdown-menu dropdown-menu-right infodesk-menu">
+          {% if infodesk_preview %}
+            {% for note in infodesk_preview %}
+            <a class="dropdown-item d-flex justify-content-between align-items-start py-2"
+               href="{% url 'infodesk-list' %}">
+              <span>
+                <span class="badge badge-{{ note.priority_badge }} mr-1">{{ note.get_priority_display }}</span>
+                <span class="infodesk-item-text">{{ note.title|truncatechars:38 }}</span>
+              </span>
+              <small class="text-muted ml-2 text-nowrap infodesk-age">{{ note.age_display }}</small>
+            </a>
+            {% endfor %}
+          {% else %}
+            <span class="dropdown-item text-muted infodesk-item-text">No open items</span>
+          {% endif %}
+          <div class="dropdown-divider"></div>
+          <div class="d-flex justify-content-between px-3 py-1">
+            <a href="{% url 'infodesk-create' %}" class="infodesk-footer-link"><i class="fa fa-plus-circle text-success"></i> New Note</a>
+            <a href="{% url 'infodesk-list' %}" class="infodesk-footer-link">View All &rarr;</a>
+          </div>
+        </div>
+      </div>
 
       <div class="btn-group">
         <button type="button" class="btn dropdown-toggle text-light" data-toggle="dropdown" aria-haspopup="true"

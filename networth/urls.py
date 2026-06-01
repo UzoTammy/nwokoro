@@ -13,7 +13,9 @@ from .views import (
     ExternalFundHome, RewardFundView, InjectFundView, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView,
                     PDFNetworthReport,
      LiabilityListView, LiabilityDetailView, LiabilityUpdateView, LiabilityRepayView,
-     email_report_preview)
+     email_report_preview,
+    InfoDeskListView, InfoNoteCreateView, InfoNoteUpdateView, InfoNoteResolveView, InfoNoteDeleteView,
+)
 
 
 urlpatterns = [
@@ -122,4 +124,11 @@ urlpatterns = [
 
     # dev preview — only accessible when DEBUG=True
     path('dev/email-preview/', email_report_preview, name='email-report-preview'),
+
+    # InfoDesk
+    path('infodesk/', InfoDeskListView.as_view(), name='infodesk-list'),
+    path('infodesk/create/', InfoNoteCreateView.as_view(), name='infodesk-create'),
+    path('infodesk/<int:pk>/edit/', InfoNoteUpdateView.as_view(), name='infodesk-edit'),
+    path('infodesk/<int:pk>/resolve/', InfoNoteResolveView.as_view(), name='infodesk-resolve'),
+    path('infodesk/<int:pk>/delete/', InfoNoteDeleteView.as_view(), name='infodesk-delete'),
 ]
