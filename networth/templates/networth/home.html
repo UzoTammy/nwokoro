@@ -195,7 +195,7 @@
         Dashboard </a>
       <a class="nav-link" href="{% url 'networth-forecast' %}"><i class="fa fa-chart-line text-success"></i>
         Forecast</a>
-      <a class="nav-link" href="https://ai.uzonwokoro.com/advisor" target="_blank" rel="noopener noreferrer"><i class="fa fa-robot text-warning"></i>
+      <a class="nav-link" href="{{ AI_ADVISOR_URL }}" target="_blank" rel="noopener noreferrer"><i class="fa fa-robot text-warning"></i>
         Advisor</a>
     </div>
     <div class="navbar-nav">
@@ -212,7 +212,7 @@
           <i class="fa fa-user text-primary"></i> {{user.username}}
         </button>
         <div class="dropdown-menu dropdown-menu-right">
-          <button class="dropdown-item" type="button">Profile</button>
+          <a class="dropdown-item" href="{% url 'profile' user.pk %}"><i class="fa fa-user-circle fa-sm text-secondary"></i> Profile</a>
           <a class="dropdown-item" href="{% url 'networth-preference' %}"><i class="fa fa-sliders-h fa-sm text-secondary"></i> Preferences</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="{% url 'logout' %}"><i class="fa fa-sign-out-alt fa-sm text-danger"></i> Sign Out</a>

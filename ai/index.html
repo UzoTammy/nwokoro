@@ -277,6 +277,43 @@
 
     #assetChart  { max-height: 200px; }
     .loading-text { color: var(--ink-500); font-size: 0.83rem; }
+
+    /* ── Message action buttons ── */
+    .msg-wrap { position: relative; align-self: flex-start; max-width: 78%; }
+    .msg-wrap .msg { max-width: 100%; align-self: unset; }
+    .msg-actions {
+      display: none;
+      position: absolute;
+      bottom: -26px;
+      right: 0;
+      gap: 4px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 3px 6px;
+      box-shadow: 0 2px 8px rgba(15,23,42,0.08);
+      z-index: 10;
+      white-space: nowrap;
+    }
+    .msg-wrap:hover .msg-actions { display: flex; align-items: center; }
+    .action-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 0.75rem; color: var(--ink-500); padding: 2px 5px;
+      border-radius: 4px; display: flex; align-items: center; gap: 3px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .action-btn:hover { color: var(--brand); background: var(--brand-soft); }
+
+    /* ── Toast notification ── */
+    .toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--ink-900); color: #f8fafc;
+      padding: 0.6rem 1.2rem; border-radius: 8px;
+      font-size: 0.82rem; pointer-events: none;
+      opacity: 0; transition: opacity 0.2s;
+      z-index: 100;
+    }
+    .toast.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -345,6 +382,8 @@
 
   </div>
 </div>
+
+<div class="toast" id="toast"></div>
 
 <script>
   // ── Chart config ──────────────────────────────────────────────
@@ -460,9 +499,26 @@
     conv.history.forEach(msg => {
       const el = document.createElement('div');
       el.className = `msg ${msg.role}`;
-      el.innerHTML = msg.role === 'assistant' ? marked.parse(msg.content) : '';
-      if (msg.role === 'user') el.textContent = msg.content;
-      container.appendChild(el);
+      if (msg.role === 'user') {
+        el.textContent = msg.content;
+        container.appendChild(el);
+      } else {
+        el.innerHTML = marked.parse(msg.content);
+        const wrap = document.createElement('div');
+        wrap.className = 'msg-wrap';
+        wrap.appendChild(el);
+        const actions = document.createElement('div');
+        actions.className = 'msg-actions';
+        actions.innerHTML = `
+          <button type="button" class="action-btn" onclick="shareContent(this.closest('.msg-wrap').querySelector('.msg').innerHTML,'email',this)">
+            <i class="fa fa-envelope"></i> Email
+          </button>
+          <button type="button" class="action-btn" onclick="shareContent(this.closest('.msg-wrap').querySelector('.msg').innerHTML,'pdf',this)">
+            <i class="fa fa-file-pdf"></i> PDF
+          </button>`;
+        wrap.appendChild(actions);
+        container.appendChild(wrap);
+      }
     });
 
     container.lastChild?.scrollIntoView({ block: 'end' });
@@ -474,15 +530,81 @@
     sendMessage();
   }
 
+  function showToast(msg, ms = 2800) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), ms);
+  }
+
+  async function shareContent(contentHtml, format, btn) {
+    const conv  = activeConv();
+    const title = conv ? conv.title : 'Advisor Note';
+    const endpoint = format === 'email' ? '/share/email' : '/share/pdf';
+
+    const origHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> ' + (format === 'pdf' ? 'Generating…' : 'Sending…');
+
+    try {
+      if (format === 'pdf') {
+        const resp = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content_html: contentHtml, title }),
+        });
+        if (!resp.ok) { showToast('PDF failed — server error'); return; }
+        const blob = await resp.blob();
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href = url; a.download = title.replace(/\s+/g, '_').slice(0, 40) + '.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('PDF downloaded');
+      } else {
+        const resp = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content_html: contentHtml, title }),
+        });
+        const data = await resp.json();
+        showToast(data.status === 'success' ? 'Emailed ✓' : `Email failed: ${data.message}`);
+      }
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = origHTML;
+    }
+  }
+
   function appendMessage(role, content) {
     document.getElementById('emptyState')?.remove();
     const el = document.createElement('div');
     el.className = `msg ${role}`;
+
     if (role === 'assistant') {
       el.innerHTML = content ? marked.parse(content) : '<span style="color:var(--ink-500)">Thinking…</span>';
-    } else {
-      el.textContent = content;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'msg-wrap';
+      wrap.appendChild(el);
+
+      const actions = document.createElement('div');
+      actions.className = 'msg-actions';
+      actions.innerHTML = `
+        <button type="button" class="action-btn" title="Email this response" onclick="shareContent(this.closest('.msg-wrap').querySelector('.msg').innerHTML,'email',this)">
+          <i class="fa fa-envelope"></i> Email
+        </button>
+        <button type="button" class="action-btn" title="Download as PDF" onclick="shareContent(this.closest('.msg-wrap').querySelector('.msg').innerHTML,'pdf',this)">
+          <i class="fa fa-file-pdf"></i> PDF
+        </button>`;
+      wrap.appendChild(actions);
+
+      document.getElementById('messages').appendChild(wrap);
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      return el;
     }
+
+    el.textContent = content;
     document.getElementById('messages').appendChild(el);
     el.scrollIntoView({ behavior: 'smooth', block: 'end' });
     return el;
