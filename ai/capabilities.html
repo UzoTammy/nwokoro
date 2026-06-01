@@ -158,8 +158,40 @@
     .tip strong { color: var(--brand); }
 
     /* ── Responsive ── */
-    @media (max-width: 700px) {
-      .tools-grid-2, .tools-grid-3 { grid-template-columns: 1fr; }
+
+    /* Tablet: 3-col → 2-col */
+    @media (max-width: 900px) {
+      .tools-grid-3 { grid-template-columns: repeat(2, 1fr); }
+      .page-shell   { padding: 1.5rem 1rem 2.5rem; }
+    }
+
+    /* Large phone: 2-col → 1-col, nav adjustments */
+    @media (max-width: 640px) {
+      .tools-grid-2,
+      .tools-grid-3  { grid-template-columns: 1fr; }
+
+      nav            { padding: 0.7rem 1rem; gap: 0.5rem; flex-wrap: wrap; }
+      nav .page      { display: none; }           /* hide subtitle, keep logo + back */
+      nav .back      { font-size: 0.78rem; }
+
+      .page-shell    { padding: 1.25rem 0.85rem 2rem; }
+      .page-header h1{ font-size: 1.25rem; }
+      .page-header p { font-size: 0.82rem; }
+
+      .tool-card     { padding: 0.9rem 1rem; }
+      .tool-icon     { width: 30px; height: 30px; font-size: 0.8rem; }
+      .tool-name     { font-size: 0.85rem; }
+      .tool-desc     { font-size: 0.77rem; }
+
+      .question      { padding: 0.45rem 0.6rem; font-size: 0.77rem; min-height: 44px; align-items: center; }
+      .tip           { font-size: 0.79rem; }
+    }
+
+    /* Small phone */
+    @media (max-width: 400px) {
+      .page-header h1{ font-size: 1.1rem; }
+      .tool-header   { gap: 0.55rem; }
+      .category-title{ font-size: 0.68rem; }
     }
   </style>
 </head>
