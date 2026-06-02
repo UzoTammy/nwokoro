@@ -177,9 +177,11 @@ class FinancialReport:
             return HttpResponse(f"Failed to send email: {e}")
 
     def save_report(self):
+        from django.utils import timezone
+        today = timezone.now().date()
+        owner = self.get_owner()
 
-        FinancialData.objects.create(
-            owner=self.get_owner(), # string
+        values = dict(
             worth=self.getNetworth(),
             savings=self.get_saving_total(),
             investment=self.get_investment_total(),
@@ -190,8 +192,16 @@ class FinancialReport:
             roi=self.get_roi(),
             daily_roi=self.get_daily_roi(),
             present_roi=self.get_present_roi(),
-            networth_by_country=self.country_networth()
+            networth_by_country=self.country_networth(),
         )
+
+        existing = FinancialData.objects.filter(owner=owner, date__date=today).first()
+        if existing:
+            for field, value in values.items():
+                setattr(existing, field, value)
+            existing.save()
+        else:
+            FinancialData.objects.create(owner=owner, **values)
     
 def exchange_rate(of:str, to:str=None):
     target = ExchangeRate.objects.filter(target_currency=of)
