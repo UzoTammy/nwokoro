@@ -6,14 +6,25 @@ from fastapi.responses import StreamingResponse
 
 from advisor.context import SYSTEM_PROMPT, build_financial_context
 from advisor.schemas import ChatRequest
-from advisor.tools import EXTRACT_TOOL, SEARCH_TOOL, tavily_extract, tavily_search
+from advisor.tools import (
+    EXTRACT_TOOL, MATURING_INVESTMENTS_TOOL, NETWORTH_HISTORY_TOOL,
+    RECENT_TRANSACTIONS_TOOL, SEARCH_TOOL,
+    get_maturing_investments, get_networth_history, get_recent_transactions,
+    tavily_extract, tavily_search,
+)
 
 router = APIRouter(tags=["AI"])
 
 _client = Anthropic()
 _MODEL = "claude-sonnet-4-6"
 _MAX_TOKENS = 2048
-_TOOLS = [SEARCH_TOOL, EXTRACT_TOOL]
+_TOOLS = [
+    NETWORTH_HISTORY_TOOL,
+    RECENT_TRANSACTIONS_TOOL,
+    MATURING_INVESTMENTS_TOOL,
+    SEARCH_TOOL,
+    EXTRACT_TOOL,
+]
 
 
 @router.post("/chat")
@@ -41,7 +52,31 @@ def chat(body: ChatRequest):
             for block in response.content:
                 if block.type != "tool_use":
                     continue
-                if block.name == "web_search":
+                if block.name == "get_networth_history":
+                    months = block.input.get("months", 6)
+                    yield f"data: {json.dumps(chr(10) + '📊 *Loading net worth history…*' + chr(10) + chr(10))}\n\n"
+                    tool_results.append({
+                        "type":        "tool_result",
+                        "tool_use_id": block.id,
+                        "content":     json.dumps(get_networth_history(months)),
+                    })
+                elif block.name == "get_recent_transactions":
+                    days = block.input.get("days", 30)
+                    yield f"data: {json.dumps(chr(10) + '📋 *Loading recent transactions…*' + chr(10) + chr(10))}\n\n"
+                    tool_results.append({
+                        "type":        "tool_result",
+                        "tool_use_id": block.id,
+                        "content":     json.dumps(get_recent_transactions(days)),
+                    })
+                elif block.name == "get_maturing_investments":
+                    days = block.input.get("days", 60)
+                    yield f"data: {json.dumps(chr(10) + '⏳ *Checking maturing investments…*' + chr(10) + chr(10))}\n\n"
+                    tool_results.append({
+                        "type":        "tool_result",
+                        "tool_use_id": block.id,
+                        "content":     json.dumps(get_maturing_investments(days)),
+                    })
+                elif block.name == "web_search":
                     query = block.input.get("query", "")
                     yield f"data: {json.dumps(chr(10) + '🔍 *Searching: ' + query + '…*' + chr(10) + chr(10))}\n\n"
                     tool_results.append({

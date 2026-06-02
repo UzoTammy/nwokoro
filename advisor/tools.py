@@ -35,6 +35,55 @@ SEARCH_TOOL = {
     },
 }
 
+NETWORTH_HISTORY_TOOL = {
+    "name": "get_networth_history",
+    "description": (
+        "Retrieve daily net worth snapshots from the database for the past N months. "
+        "Use this when the user asks about net worth trends, growth over time, net worth at a "
+        "specific point in the past, or comparisons between periods (e.g. 'beginning of this year', "
+        "'6 months ago', 'last quarter'). Default is 6 months."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "months": {"type": "integer", "description": "Number of months of history to retrieve (default 6)"}
+        },
+        "required": [],
+    },
+}
+
+RECENT_TRANSACTIONS_TOOL = {
+    "name": "get_recent_transactions",
+    "description": (
+        "Retrieve all financial transactions (DR/CR) across every asset class for the past N days. "
+        "Use this when the user asks about recent activity, cash flow, what happened recently, "
+        "money movement, or transaction history. Default is 30 days."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "days": {"type": "integer", "description": "Number of days to look back (default 30)"}
+        },
+        "required": [],
+    },
+}
+
+MATURING_INVESTMENTS_TOOL = {
+    "name": "get_maturing_investments",
+    "description": (
+        "Retrieve active investments maturing within the next N days, sorted by nearest maturity date. "
+        "Use this when the user asks which investments are maturing soon, what's due for renewal, "
+        "or rollover planning. Default is 60 days."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "days": {"type": "integer", "description": "Number of days ahead to check (default 60)"}
+        },
+        "required": [],
+    },
+}
+
 EXTRACT_TOOL = {
     "name": "read_url",
     "description": (

@@ -392,7 +392,7 @@
 
       .stats-toggle { display: inline-flex; }
 
-      nav .cap-link { font-size: 0.75rem; }
+      nav .cap-link .cap-text { display: none; }
 
       .summary-grid { grid-template-columns: 1fr 1fr; }
     }
@@ -401,7 +401,7 @@
     @media (max-width: 480px) {
       nav { padding: 0.65rem 0.9rem; gap: 0.4rem; }
       nav .page       { display: none; }
-      nav .cap-link   { font-size: 0.72rem; }
+      nav .cap-link   { font-size: 1rem; }
       nav .close-btn  { font-size: 1rem; }
 
       .conv-bar  { padding: 0.5rem 0.75rem; gap: 0.3rem; }
@@ -429,7 +429,9 @@
 
     /* Small phone */
     @media (max-width: 360px) {
-      nav .cap-link { display: none; }
+      nav .slash          { display: none; }
+      nav .page           { display: none; }
+      nav .close-btn-right { margin-left: 0.4rem; }
       .conv-tab     { max-width: 110px; }
       .conv-tab .tab-label { max-width: 65px; }
     }
@@ -442,7 +444,7 @@
   <span class="slash">/</span>
   <span class="page">Financial Advisor</span>
   <a class="cap-link" href="/capabilities" title="View all capabilities">
-    <i class="fa fa-th-list"></i> Capabilities
+    <i class="fa fa-th-list"></i><span class="cap-text"> Capabilities</span>
   </a>
   <a class="close-btn close-btn-right" href="#" onclick="window.close(); return false;" title="Close">
     <i class="fa fa-times-circle"></i>
