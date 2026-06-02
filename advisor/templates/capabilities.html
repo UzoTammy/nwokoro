@@ -392,34 +392,57 @@
     </div>
   </div>
 
-  <!-- ── Web Search (full width) ── -->
+  <!-- ── Web Intelligence (2-col grid) ── -->
   <div class="category">
-    <div class="category-title">Live Web Search — current events and market intelligence</div>
-    <div class="tool-card search">
-      <div class="tool-header">
-        <div class="tool-icon"><i class="fa fa-search"></i></div>
-        <div>
-          <div class="tool-name">Web Search (Tavily)</div>
-          <div class="tool-desc">
-            Searches finance-scoped domains covering Nigerian and Canadian markets plus global authorities —
-            CBN, SEC NG, NGX, Bank of Canada, OSC, TMX, Reuters, FT, Bloomberg, IMF, World Bank.
-            Called automatically when current information is needed. Results are cited with sources.
+    <div class="category-title">Live Web Intelligence — current events, market data, and full-page reading</div>
+    <div class="tools-grid-2">
+
+      <div class="tool-card search">
+        <div class="tool-header">
+          <div class="tool-icon"><i class="fa fa-search"></i></div>
+          <div>
+            <div class="tool-name">Web Search</div>
+            <div class="tool-desc">
+              Searches finance-scoped domains — CBN, SEC NG, NGX, Bank of Canada, OSC, TMX,
+              Reuters, FT, Bloomberg, IMF, World Bank. Called when current information is needed.
+              Results are cited with sources.
+            </div>
           </div>
         </div>
+        <div class="questions-label">Trigger questions</div>
+        <div class="questions">
+          <div class="question"><i class="fa fa-chevron-right"></i> What is the current investment climate in Nigeria?</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> What is the latest CBN interest rate decision?</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> Are GIC rates rising or falling in Canada?</div>
+        </div>
       </div>
-      <div class="questions-label">Trigger questions</div>
-      <div class="questions">
-        <div class="question"><i class="fa fa-chevron-right"></i> What is the current investment climate in Nigeria?</div>
-        <div class="question"><i class="fa fa-chevron-right"></i> What is the latest CBN interest rate decision?</div>
-        <div class="question"><i class="fa fa-chevron-right"></i> How is the Canadian economy performing right now?</div>
-        <div class="question"><i class="fa fa-chevron-right"></i> Are GIC rates rising or falling in Canada?</div>
+
+      <div class="tool-card search">
+        <div class="tool-header">
+          <div class="tool-icon"><i class="fa fa-file-alt"></i></div>
+          <div>
+            <div class="tool-name">Read URL</div>
+            <div class="tool-desc">
+              Fetches and reads the full text of any public web page — regulatory circulars,
+              NGX bulletins, news articles, or pages on this site (uzonwokoro.com).
+              Used automatically after a search when the full document is needed, not just a snippet.
+            </div>
+          </div>
+        </div>
+        <div class="questions-label">Trigger questions</div>
+        <div class="questions">
+          <div class="question"><i class="fa fa-chevron-right"></i> Read the full details of that CBN circular.</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> Get the complete article from that link.</div>
+          <div class="question"><i class="fa fa-chevron-right"></i> Read the latest NGX market bulletin in full.</div>
+        </div>
       </div>
+
     </div>
   </div>
 
   <div class="tip">
-    <strong>Tip:</strong> The advisor combines tools automatically. Asking <em>"Given my maturing investments and current Nigerian rates, what should I reinvest in?"</em>
-    will call <strong>get_maturing_investments</strong>, <strong>get_exchange_rates</strong>, and <strong>web_search</strong> together in one response.
+    <strong>Tip:</strong> The advisor chains tools automatically. Asking <em>"Given my maturing investments and current Nigerian rates, what should I reinvest in?"</em>
+    may call <strong>maturing investments</strong>, <strong>exchange rates</strong>, <strong>web search</strong>, and <strong>read URL</strong> together in one response.
   </div>
 
 </div>

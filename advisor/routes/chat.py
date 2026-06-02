@@ -6,13 +6,14 @@ from fastapi.responses import StreamingResponse
 
 from advisor.context import SYSTEM_PROMPT, build_financial_context
 from advisor.schemas import ChatRequest
-from advisor.tools import SEARCH_TOOL, tavily_search
+from advisor.tools import EXTRACT_TOOL, SEARCH_TOOL, tavily_extract, tavily_search
 
 router = APIRouter(tags=["AI"])
 
 _client = Anthropic()
 _MODEL = "claude-sonnet-4-6"
 _MAX_TOKENS = 2048
+_TOOLS = [SEARCH_TOOL, EXTRACT_TOOL]
 
 
 @router.post("/chat")
@@ -31,20 +32,30 @@ def chat(body: ChatRequest):
             max_tokens=_MAX_TOKENS,
             system=system,
             messages=current_messages,
-            tools=[SEARCH_TOOL],
+            tools=_TOOLS,
         )
 
         while response.stop_reason == "tool_use":
             tools_used = True
             tool_results = []
             for block in response.content:
-                if block.type == "tool_use" and block.name == "web_search":
+                if block.type != "tool_use":
+                    continue
+                if block.name == "web_search":
                     query = block.input.get("query", "")
                     yield f"data: {json.dumps(chr(10) + '🔍 *Searching: ' + query + '…*' + chr(10) + chr(10))}\n\n"
                     tool_results.append({
                         "type":        "tool_result",
                         "tool_use_id": block.id,
                         "content":     tavily_search(query),
+                    })
+                elif block.name == "read_url":
+                    url = block.input.get("url", "")
+                    yield f"data: {json.dumps(chr(10) + '📄 *Reading: ' + url + '…*' + chr(10) + chr(10))}\n\n"
+                    tool_results.append({
+                        "type":        "tool_result",
+                        "tool_use_id": block.id,
+                        "content":     tavily_extract(url),
                     })
 
             current_messages = current_messages + [
@@ -56,7 +67,7 @@ def chat(body: ChatRequest):
                 max_tokens=_MAX_TOKENS,
                 system=system,
                 messages=current_messages,
-                tools=[SEARCH_TOOL],
+                tools=_TOOLS,
             )
 
         if tools_used:

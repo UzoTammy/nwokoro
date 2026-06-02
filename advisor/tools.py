@@ -35,6 +35,23 @@ SEARCH_TOOL = {
     },
 }
 
+EXTRACT_TOOL = {
+    "name": "read_url",
+    "description": (
+        "Fetch and read the full text of any public web page — use when you have a specific URL "
+        "from a search result and need the complete article, regulatory document, CBN circular, "
+        "NGX bulletin, or any page on the host site (uzonwokoro.com, ai.uzonwokoro.com). "
+        "Prefer this over web_search when the exact URL is already known."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "url": {"type": "string", "description": "The full URL of the page to read"}
+        },
+        "required": ["url"],
+    },
+}
+
 
 def tavily_search(query: str) -> str:
     """Execute a finance-scoped web search via Tavily and return formatted results."""
@@ -50,6 +67,17 @@ def tavily_search(query: str) -> str:
     for r in data.get("results", []):
         results.append(f"**{r['title']}**\n{r['content']}\nSource: {r['url']}")
     return "\n\n---\n\n".join(results) if results else "No results found."
+
+
+def tavily_extract(url: str) -> str:
+    """Fetch the full text content of a specific URL via Tavily."""
+    from tavily import TavilyClient
+    client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY", ""))
+    data = client.extract(urls=[url])
+    results = data.get("results", [])
+    if not results:
+        return f"Could not extract content from {url}."
+    return results[0].get("raw_content", "No content returned.")
 
 
 # ---------------------------------------------------------------------------
