@@ -115,6 +115,25 @@
 
   .page-title { font-weight: 300; letter-spacing: .02em; }
   .note-title-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+
+  .resolved-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: .35rem .75rem;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    text-decoration: none;
+  }
+  .resolved-toggle:hover { background: #f1f5f9; color: var(--text-main); text-decoration: none; }
+  .resolved-toggle .chevron { transition: transform .2s; }
+  .resolved-toggle[aria-expanded="true"] .chevron { transform: rotate(180deg); }
 </style>
 {% endblock %}
 
@@ -138,7 +157,7 @@
       </h5>
       <small class="text-muted">{{ open_count }} open item{{ open_count|pluralize }}</small>
     </div>
-    <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#createModal">
+    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#createModal">
       <i class="fa fa-plus mr-1"></i>New Note
     </button>
   </div>
@@ -247,7 +266,19 @@
 
   <!-- Resolved section -->
   {% for group in grouped_notes %}{% if group.grouper == 'resolved' %}
-  <div class="section-label mt-4">Resolved</div>
+  {% if active_filters.status == 'resolved' %}
+    <div class="section-label mt-4">Resolved</div>
+  {% else %}
+  <div class="mt-4 mb-2">
+    <a class="resolved-toggle" data-toggle="collapse" href="#resolvedSection"
+       role="button" aria-expanded="false" aria-controls="resolvedSection">
+      <i class="fa fa-check-circle text-success"></i>
+      {{ group.list|length }} resolved item{{ group.list|length|pluralize }}
+      <i class="fa fa-chevron-down chevron"></i>
+    </a>
+  </div>
+  <div class="collapse" id="resolvedSection">
+  {% endif %}
   {% for note in group.list %}
   <div class="note-card resolved">
     <div class="d-flex justify-content-between align-items-start">
@@ -292,6 +323,7 @@
     </div>
   </div>
   {% endfor %}
+  {% if active_filters.status != 'resolved' %}</div>{% endif %}
   {% endif %}{% endfor %}
 
   {% if not notes %}
