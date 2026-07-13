@@ -281,6 +281,17 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 recent_networth = [float(f.worth.amount) for f in chart_records]
                 context['networth_trend_for_chart'] = {'days': recent_days, 'networth': recent_networth}
 
+                month_start_date = datetime.datetime.now(ZoneInfo('America/Halifax')) - datetime.timedelta(days=30)
+                month_financials = FinancialData.objects.filter(owner=self.request.user, date__gte=month_start_date).order_by('date')
+                if not month_financials.exists():
+                    month_financials = FinancialData.objects.filter(owner=self.request.user).order_by('date')
+
+                month_chart_records = list(month_financials.order_by('-date')[:30])[::-1]
+                context['networth_trend_for_chart_month'] = {
+                    'days': [f.date.strftime('%m/%d') for f in month_chart_records],
+                    'networth': [float(f.worth.amount) for f in month_chart_records],
+                }
+
                 latest = financials.latest('date')
                 labels = latest.networth_by_country.keys()
                 sizes = latest.networth_by_country.values()

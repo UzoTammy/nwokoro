@@ -105,7 +105,13 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="card">
-                    <h3 class="card-text">Networth Trend</h3>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-text mb-0">Networth Trend</h3>
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Networth trend range toggle">
+                            <button type="button" id="trendRangeWeek" class="btn btn-primary" onclick="toggleNetworthTrend('week')">7D</button>
+                            <button type="button" id="trendRangeMonth" class="btn btn-outline-primary" onclick="toggleNetworthTrend('month')">30D</button>
+                        </div>
+                    </div>
                     <div class=""><canvas id="networthTrendLine"></canvas></div>
                 </div>
             </div>
@@ -237,12 +243,23 @@
 <script>
     const ctxLine = document.getElementById('networthTrendLine');
 
+    const networthTrendRanges = {
+        week: {
+            labels: {{ networth_trend_for_chart.days | safe }},
+            data: {{ networth_trend_for_chart.networth | safe }}
+        },
+        month: {
+            labels: {{ networth_trend_for_chart_month.days | safe }},
+            data: {{ networth_trend_for_chart_month.networth | safe }}
+        }
+    };
+
     const dataNetworth = {
-        labels: {{ networth_trend_for_chart.days | safe }},
+        labels: networthTrendRanges.week.labels,
     datasets: [
         {
             label: 'Networth Trend',
-            data: {{ networth_trend_for_chart.networth | safe }},
+            data: networthTrendRanges.week.data,
         fill: true,
         borderColor: 'rgba(54, 162, 235, 0.6)',
         backgroundColor: 'rgba(54, 162, 235, 0.2)',
@@ -268,8 +285,19 @@
         }
     };
 
-    new Chart(ctxLine, LineConfig);
+    const networthTrendChart = new Chart(ctxLine, LineConfig);
 
+    function toggleNetworthTrend(range) {
+        const rangeData = networthTrendRanges[range];
+        networthTrendChart.data.labels = rangeData.labels;
+        networthTrendChart.data.datasets[0].data = rangeData.data;
+        networthTrendChart.update();
+
+        document.getElementById('trendRangeWeek').classList.toggle('btn-primary', range === 'week');
+        document.getElementById('trendRangeWeek').classList.toggle('btn-outline-primary', range !== 'week');
+        document.getElementById('trendRangeMonth').classList.toggle('btn-primary', range === 'month');
+        document.getElementById('trendRangeMonth').classList.toggle('btn-outline-primary', range !== 'month');
+    }
 </script>
 
 <!-- Chart 2: Networth by Country -->
