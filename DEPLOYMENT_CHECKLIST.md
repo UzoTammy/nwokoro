@@ -3,11 +3,13 @@
 ## Pre-Deployment (Local Machine)
 
 ### Step 1: Verify the fix works locally ✓ DONE
-- [x] Management command created: `fix_orphaned_investments.py`
-- [x] Tested locally: Successfully created 11 missing CR transactions
-- [x] Verified with `verify_business_logic`: All investments now have transactions
+
+- [X] Management command created: `fix_orphaned_investments.py`
+- [X] Tested locally: Successfully created 11 missing CR transactions
+- [X] Verified with `verify_business_logic`: All investments now have transactions
 
 ### Step 2: Ensure all files are committed to Git
+
 ```bash
 # Check git status
 git status
@@ -33,6 +35,7 @@ git log --oneline -5
 ## Deployment to Heroku
 
 ### Step 3: Prepare for deployment
+
 ```bash
 # Verify Heroku CLI is installed
 heroku --version
@@ -49,6 +52,7 @@ heroku apps:set --app=your-app-name
 ```
 
 ### Step 4: Create database backup (CRITICAL)
+
 ```bash
 # This creates a backup of your production database
 heroku pg:backups:capture --app=your-app-name
@@ -60,6 +64,7 @@ heroku pg:backups --app=your-app-name
 ```
 
 ### Step 5: Push code to Heroku
+
 ```bash
 # Push to Heroku (this automatically deploys)
 git push heroku main
@@ -71,6 +76,7 @@ git push heroku main
 ```
 
 ### Step 6: Run the management command on Heroku (DRY RUN first)
+
 ```bash
 # First, run WITHOUT --fix to see what will be changed (RECOMMENDED)
 heroku run "python manage.py fix_orphaned_investments" --app=your-app-name
@@ -85,6 +91,7 @@ heroku run "python manage.py fix_orphaned_investments" --app=your-app-name
 ```
 
 ### Step 7: Run the fix command (WITH --fix flag)
+
 ```bash
 # Now actually apply the fix
 heroku run "python manage.py fix_orphaned_investments --fix" --app=your-app-name
@@ -100,6 +107,7 @@ heroku run "python manage.py fix_orphaned_investments --fix" --app=your-app-name
 ## Post-Deployment Verification
 
 ### Step 8: Verify the fix worked on production
+
 ```bash
 # Run the business logic verification command
 heroku run "python manage.py verify_business_logic" --app=your-app-name
@@ -111,6 +119,7 @@ heroku run "python manage.py verify_business_logic" --app=your-app-name
 ```
 
 ### Step 9: Check application logs for errors
+
 ```bash
 # View recent logs (last 100 lines)
 heroku logs --tail --app=your-app-name
@@ -119,6 +128,7 @@ heroku logs --tail --app=your-app-name
 ```
 
 ### Step 10: Manual verification in application
+
 1. Open your deployed application: `https://your-app-name.herokuapp.com`
 2. Login as user "Nwokoro"
 3. Navigate to Networth dashboard
@@ -132,6 +142,7 @@ heroku logs --tail --app=your-app-name
 ## Rollback Procedures (If Issues Occur)
 
 ### Option 1: Rollback to Previous Release
+
 ```bash
 # View release history
 heroku releases --app=your-app-name
@@ -144,6 +155,7 @@ heroku logs --app=your-app-name | head -20
 ```
 
 ### Option 2: Restore from Database Backup
+
 ```bash
 # List available backups
 heroku pg:backups --app=your-app-name
@@ -161,13 +173,16 @@ heroku pg:backups:restore <BACKUP_ID> DATABASE --app=your-app-name --confirm you
 ## Troubleshooting
 
 ### Command timeout on Heroku
+
 If the command times out (rare - command runs in ~2 seconds):
+
 ```bash
 # Run with longer timeout
 heroku run "timeout 30 python manage.py fix_orphaned_investments --fix" --app=your-app-name
 ```
 
 ### Database connection errors
+
 ```bash
 # Check database status
 heroku pg:info --app=your-app-name
@@ -177,6 +192,7 @@ heroku restart --app=your-app-name
 ```
 
 ### View command output in detail
+
 ```bash
 # Redirect output to file if output is cut off
 heroku run "python manage.py fix_orphaned_investments --fix > /tmp/fix_output.txt 2>&1" --app=your-app-name
@@ -201,19 +217,19 @@ heroku run "cat /tmp/fix_output.txt" --app=your-app-name
 
 ## Command Reference
 
-| Command | Purpose |
-|---------|---------|
-| `heroku --version` | Check Heroku CLI version |
-| `heroku login` | Authenticate with Heroku |
-| `heroku apps` | List your Heroku apps |
-| `heroku pg:backups:capture` | Create database backup |
-| `heroku pg:backups` | List all backups |
-| `git push heroku main` | Deploy code to Heroku |
-| `heroku run "command"` | Run one-off command on Heroku |
-| `heroku logs --tail` | Stream live logs |
-| `heroku releases` | View deployment history |
-| `heroku releases:rollback` | Rollback to previous release |
-| `heroku pg:info` | Check database status |
+| Command                       | Purpose                       |
+| ----------------------------- | ----------------------------- |
+| `heroku --version`          | Check Heroku CLI version      |
+| `heroku login`              | Authenticate with Heroku      |
+| `heroku apps`               | List your Heroku apps         |
+| `heroku pg:backups:capture` | Create database backup        |
+| `heroku pg:backups`         | List all backups              |
+| `git push heroku main`      | Deploy code to Heroku         |
+| `heroku run "command"`      | Run one-off command on Heroku |
+| `heroku logs --tail`        | Stream live logs              |
+| `heroku releases`           | View deployment history       |
+| `heroku releases:rollback`  | Rollback to previous release  |
+| `heroku pg:info`            | Check database status         |
 
 ---
 
@@ -233,8 +249,8 @@ heroku run "cat /tmp/fix_output.txt" --app=your-app-name
 
 ## Success Criteria
 
-✅ All 11 missing CR transactions created  
-✅ No errors in application logs  
-✅ Investment Score metrics displaying correctly  
-✅ All investments have transaction records  
+✅ All 11 missing CR transactions created
+✅ No errors in application logs
+✅ Investment Score metrics displaying correctly
+✅ All investments have transaction records
 ✅ Yield calculations accurate and complete

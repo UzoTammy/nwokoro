@@ -5,11 +5,15 @@ from itertools import chain
 from typing import Optional, List, Literal
 from dateutil.relativedelta import relativedelta
 
+import numpy as np
+from scipy.stats import norm
+
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import F, QuerySet, Value, Avg
 from django.db.models.aggregates import Sum
 from django.http import HttpResponse
 from django.template.loader import render_to_string
+from django.utils import timezone
 
 from djmoney.money import Money
 from babel.numbers import format_currency
@@ -332,6 +336,187 @@ def valuation(currency):
     value = fd.earliest('date').exchange_rate[currency] - fd.latest('date').exchange_rate[currency]
     tag = 'lost' if value < 0 else 'gained'
     return Money(round(abs(value), 2), currency), tag, date.strftime('%d %b, %Y') #{'old_value': fd.earliest('date').exchange_rate['NGN'], 'new_value': fd.latest('date').exchange_rate['NGN']}
+
+def _fit_fx_process(owner, currency: str, window_days: int) -> Optional[dict]:
+    """
+    Fits a Brownian-motion-with-drift (mu, sigma, daily) to trailing daily
+    `currency`/USD rate snapshots stored on FinancialData. Returns None if
+    there isn't enough history in the window to fit reliably.
+
+    The window trails the latest available snapshot, not wall-clock time, so
+    a gap in snapshot collection shrinks the window rather than emptying it.
+    """
+    latest = (
+        FinancialData.objects
+        .filter(owner=owner)
+        .exclude(exchange_rate=None)
+        .order_by('-date')
+        .first()
+    )
+    if latest is None:
+        return None
+
+    cutoff = latest.date - datetime.timedelta(days=window_days)
+    records = (
+        FinancialData.objects
+        .filter(owner=owner, date__gte=cutoff, date__lte=latest.date)
+        .exclude(exchange_rate=None)
+        .order_by('date')
+    )
+
+    points = [
+        (r.date, r.exchange_rate[currency])
+        for r in records
+        if r.exchange_rate and r.exchange_rate.get(currency)
+    ]
+
+    if len(points) < 10:
+        return None
+
+    dates, rates = zip(*points)
+    t = np.array([(d - dates[0]).total_seconds() / 86400 for d in dates])
+    log_rate = np.log(np.array(rates, dtype=float))
+
+    total_days = t[-1] - t[0]
+    if total_days <= 0:
+        return None
+
+    # MLE drift for Brownian motion: total displacement over total elapsed time
+    mu = float((log_rate[-1] - log_rate[0]) / total_days)
+
+    # MLE volatility via quadratic-variation estimator (handles irregular spacing)
+    dt = np.diff(t)
+    dr = np.diff(log_rate)
+    mask = dt > 0
+    dt, dr = dt[mask], dr[mask]
+    residual = dr - mu * dt
+    sigma2 = np.sum(residual ** 2 / dt) / np.sum(dt)
+    sigma = float(np.sqrt(max(sigma2, 1e-12)))
+
+    return {
+        'current_rate': rates[-1],
+        'mu_daily': mu,
+        'sigma_daily': sigma,
+        'sample_points': len(points),
+        'window_days': window_days,
+    }
+
+
+def naira_breach_probability(owner, threshold: float = 1500.0, horizon_days: int = 30, window_days: int = 180) -> dict:
+    """
+    Estimates the probability that NGN/USD rises above `threshold` at some
+    point within `horizon_days`, by fitting a Brownian-motion-with-drift
+    (mu, sigma) to trailing daily rate snapshots and applying the closed-form
+    first-passage (barrier-touch) formula from that model.
+
+    This is a statistical extrapolation of recent historical volatility and
+    drift, not a forecast. NGN/USD is administratively managed (CBN
+    interventions, step-devaluations), so this model cannot anticipate
+    discrete policy actions, which is historically what has driven the
+    naira's largest moves. Treat the output as a rough, transparent estimate
+    conditioned on "recent patterns continue", not a prediction.
+    """
+    fx = _fit_fx_process(owner, 'NGN', window_days)
+    if fx is None:
+        return {'available': False, 'reason': 'insufficient_history'}
+
+    current_rate = fx['current_rate']
+    if current_rate >= threshold:
+        return {
+            'available': True, 'breached': True, 'probability': 1.0,
+            'current_rate': current_rate, 'threshold': threshold, 'horizon_days': horizon_days,
+        }
+
+    mu, sigma = fx['mu_daily'], fx['sigma_daily']
+    a = float(np.log(threshold / current_rate))
+    T = float(horizon_days)
+
+    d1 = (mu * T - a) / (sigma * np.sqrt(T))
+    d2 = (-mu * T - a) / (sigma * np.sqrt(T))
+    exponent = np.clip(2 * mu * a / sigma ** 2, -700, 700)
+    probability = float(np.clip(norm.cdf(d1) + np.exp(exponent) * norm.cdf(d2), 0.0, 1.0))
+
+    return {
+        'available': True,
+        'breached': False,
+        'probability': probability,
+        'current_rate': current_rate,
+        'threshold': threshold,
+        'horizon_days': horizon_days,
+        'window_days': window_days,
+        'sample_points': fx['sample_points'],
+        'daily_drift_pct': mu * 100,
+        'daily_vol_pct': sigma * 100,
+    }
+
+
+def investment_growth_comparison(owner, window_days: int = 90) -> dict:
+    """
+    Compares implied USD-denominated annual growth of active Nigerian vs
+    Canadian investments: each country's principal-weighted nominal rate,
+    adjusted by that currency's trailing drift vs USD (from _fit_fx_process).
+
+    Same caveat as naira_breach_probability: this extrapolates recent FX
+    drift and says nothing about the odds of a discrete policy-driven
+    devaluation, which is historically what has swung NGN-denominated
+    returns the most.
+    """
+    country_currency = {'NG': 'NGN', 'CA': 'CAD'}
+    result = {}
+
+    for country, currency in country_currency.items():
+        investments = Investment.objects.filter(owner=owner, is_active=True, host_country=country)
+        total_principal = sum(float(i.principal.amount) for i in investments)
+        if total_principal <= 0:
+            result[country] = {'available': False, 'reason': 'no_active_investments'}
+            continue
+
+        weighted_rate = sum(float(i.principal.amount) * i.rate for i in investments) / total_principal
+
+        fx = _fit_fx_process(owner, currency, window_days)
+        if fx is None:
+            result[country] = {'available': False, 'reason': 'insufficient_fx_history'}
+            continue
+
+        mu_annual = fx['mu_daily'] * 365.25
+        usd_adjusted_return = (1 + weighted_rate / 100) * np.exp(-mu_annual) - 1
+
+        result[country] = {
+            'available': True,
+            'currency': currency,
+            'nominal_rate_pct': weighted_rate,
+            'total_principal': total_principal,
+            'fx_drift_annual_pct': mu_annual * 100,
+            'usd_adjusted_return_pct': float(usd_adjusted_return * 100),
+            'window_days': window_days,
+        }
+
+    if result.get('NG', {}).get('available') and result.get('CA', {}).get('available'):
+        result['leader'] = 'NG' if result['NG']['usd_adjusted_return_pct'] > result['CA']['usd_adjusted_return_pct'] else 'CA'
+
+    return result
+
+
+def risk_adjusted_ng_edge(naira_breach: dict, growth_comparison: dict) -> Optional[float]:
+    """
+    Combines naira_breach_probability and investment_growth_comparison into
+    one number: NG's USD-adjusted return edge over CA, discounted by the
+    probability of a near-term breach. investment_growth_comparison assumes
+    smooth FX drift continues — a breach is exactly the event that would
+    invalidate that assumption, so a high breach probability pulls the
+    apparent edge toward zero. Returns None if either input isn't available.
+    """
+    if not naira_breach.get('available'):
+        return None
+
+    ng, ca = growth_comparison.get('NG', {}), growth_comparison.get('CA', {})
+    if not (ng.get('available') and ca.get('available')):
+        return None
+
+    probability = 1.0 if naira_breach.get('breached') else naira_breach['probability']
+    raw_edge = ng['usd_adjusted_return_pct'] - ca['usd_adjusted_return_pct']
+    return raw_edge * (1 - probability)
+
 
 def ytd_roi(owner, year:Optional[int]=None)->List[dict]:
     """

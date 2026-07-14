@@ -130,8 +130,30 @@
             <div class="col-md-2">
                 <div class="card">
                     <h3>Important Metrics</h3>
-                    <div class="card mt-1">Maturity</div>
-                    <div class="card mt-1">Risk</div>
+                    <div class="card mt-1" title="NG's USD-adjusted return edge over CA, discounted by near-term naira breach probability. Not a forecast.">
+                        NG Edge
+                        <span class="float-right">
+                            {% if risk_adjusted_ng_edge is not None %}
+                                {{risk_adjusted_ng_edge|floatformat:1}}%
+                            {% else %}
+                                n/a
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="card mt-1" title="Statistical estimate from trailing volatility, not a forecast — cannot anticipate CBN policy actions.">
+                        Risk
+                        <span class="float-right">
+                            {% if naira_breach.available %}
+                                {% if naira_breach.breached %}
+                                    &#8358;{{naira_breach.threshold|floatformat:0}} already reached
+                                {% else %}
+                                    {{naira_breach.probability|floatformat:1}}% &gt; &#8358;{{naira_breach.threshold|floatformat:0}} ({{naira_breach.horizon_days}}d)
+                                {% endif %}
+                            {% else %}
+                                n/a
+                            {% endif %}
+                        </span>
+                    </div>
                     <div class="card mt-1">Liquidity</div>
                 </div>
             </div>

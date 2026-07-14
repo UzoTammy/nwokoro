@@ -20,6 +20,7 @@ from ..tools import (
     valuation, ytd_roi, networth_by_currency, currency_list,
     get_transactions, networth_ratio, number_of_instruments, number_of_assets,
     exchange_rate, set_roi, get_year_financial, current_year_roi, AggregatedAsset,
+    naira_breach_probability, investment_growth_comparison, risk_adjusted_ng_edge,
 )
 
 
@@ -241,6 +242,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        context['naira_breach'] = naira_breach_probability(self.request.user, threshold=1500.0, horizon_days=30)
+        context['investment_growth_comparison'] = investment_growth_comparison(self.request.user, window_days=90)
+        context['risk_adjusted_ng_edge'] = risk_adjusted_ng_edge(context['naira_breach'], context['investment_growth_comparison'])
 
         current_year = timezone.now().year
         financial_data = get_year_financial(self.request.user, year=current_year)
