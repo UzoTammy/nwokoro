@@ -11,7 +11,7 @@
     --success:    #16a34a;
   }
 
-  .pref-page { max-width: 860px; margin: 32px auto; padding: 0 16px; }
+  .pref-page { max-width: 860px; margin: 90px auto 32px; padding: 0 16px; }
 
   .pref-header {
     background: var(--primary-bg);
@@ -137,6 +137,21 @@
 {% endblock %}
 
 {% block content %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav mr-auto">
+        </div>
+        <div class="navbar-nav">
+            <a class="nav-link" href="{% url 'networth-home'%}" title="Close" aria-label="Close"><i class="fa fa-times-circle text-danger"></i></a>
+        </div>
+    </div>
+</nav>
+
 <div class="pref-page">
 
   <!-- Header -->

@@ -2,7 +2,21 @@
 {% load custom_tag %}
 
 {% block content %}
-<div class="container">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav mr-auto">
+        </div>
+        <div class="navbar-nav">
+            <a class="nav-link" href="{% url 'investment-list' %}" title="Close" aria-label="Close"><i class="fa fa-times-circle text-danger"></i></a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
     <div class="row justify-content-center align-items-center vh-100">
         <div class="col-sm-8">
             <h3>{{object}}</h3>
@@ -15,20 +29,21 @@
                 <li class="list-group-item">Term<span class="float-right">{{object.duration}} days</span></li>
                 <li class="list-group-item">Host Country<span class="float-right">{{object.host_country}}</span></li>
                 <li class="list-group-item">Type<span class="float-right">{{object.category}}</span></li>
-                <li class="list-group-item">Current Status<span class="float-right"> 
+                <li class="list-group-item">Description<span class="float-right">{{object.description|default:"—"}}</span></li>
+                <li class="list-group-item">Current Status<span class="float-right">
                     {% if object.due_in_days == 0 %} Matured today
                     {% elif object.due_in_days < 0 %} Matured {{object.due_in_days|scalar_value }} day(s) ago {% else %} Due in {{object.due_in_days}} day(s) {% endif %}</span></li>
                 <li class="list-group-item">Expected ROI<span class="float-right">{{object.roi}}</span></li>
                 <li class="list-group-item">Daily ROI<span class="float-right">{{object.daily_roi}}</span></li>
                 <li class="list-group-item text-success font-weight-bold">Present ROI<span class="float-right">{{object.present_roi}}</span></li>
-                <hr>
               </ul>
+              <hr>
             <div class="row">
                 <div class="col">
                     <a class="btn btn-outline-dark" href="{% url 'networth-investment-update' object.pk %}">Update</a>
                     <a class="btn btn-outline-dark" href="{% url 'networth-investment-rollover' object.pk %}">Rollover</a>
                     <a class="btn btn-outline-dark" href="{% url 'networth-investment-terminate' object.pk %}">Terminate</a>
-                    <a class="btn btn-outline-dark float-right" href="{% url 'networth-home' %}">Back</a>
+                    <a class="btn btn-outline-dark float-right" href="{% url 'investment-list' %}">Back</a>
                     
                 </div>
             </div>
