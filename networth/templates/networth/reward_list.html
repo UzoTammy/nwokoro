@@ -1,0 +1,116 @@
+{% extends 'core/base.html' %}
+
+{% block head %}
+<style>
+  :root {
+    --primary-bg: #131b2e;
+    --secondary-accent: #33548a;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --white: #ffffff;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+  }
+
+  .page-wrap { padding: 80px 20px 48px; max-width: 920px; margin: 0 auto; }
+  .page-title { font-weight: 300; letter-spacing: .02em; color: var(--text-main); }
+
+  .table-card {
+    background-color: var(--white);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    overflow: hidden;
+  }
+  .table-card table { margin-bottom: 0; }
+  .table-card thead th {
+    background-color: var(--primary-bg);
+    color: var(--white);
+    font-weight: 500;
+    font-size: 13px;
+    border: none;
+    padding: .85rem 1rem;
+  }
+  .table-card tbody td {
+    color: var(--text-main);
+    font-size: 14px;
+    padding: .75rem 1rem;
+    vertical-align: middle;
+  }
+  .table-card tbody td.text-right {
+    color: var(--secondary-accent);
+    font-weight: 600;
+  }
+  .table-card tfoot td {
+    background-color: #f8fafc;
+    font-weight: 600;
+    padding: .85rem 1rem;
+    border-top: 2px solid #e2e8f0;
+  }
+  .table-card tfoot td.text-right { color: var(--secondary-accent); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="navbar-nav ml-auto">
+    <a class="nav-link" href="{% url 'networth-home' %}" title="Back to home">
+      <i class="fas fa-times-circle text-danger"></i>
+    </a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="mb-4">
+    <h5 class="mb-0 page-title">
+      <i class="fas fa-award text-warning mr-2"></i>Rewards
+    </h5>
+    <small class="text-muted">{{ rewards.count }} reward{{ rewards.count|pluralize }}</small>
+  </div>
+
+  {% if rewards %}
+  <div class="table-card">
+    <table class="table table-sm table-striped mb-0" data-toggle="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Savings Account</th>
+          <th>Description</th>
+          <th class="text-right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reward in rewards %}
+        <tr>
+          <td>{{ reward.date|date:'d M Y' }}</td>
+          <td>{{ reward.savings_account }}</td>
+          <td>{{ reward.description|default:"—" }}</td>
+          <td class="text-right">{{ reward.amount }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3">This Year (USD)</td>
+          <td class="text-right">{{ ytd_usd_total }}</td>
+        </tr>
+        <tr>
+          <td colspan="3">Total (USD)</td>
+          <td class="text-right">{{ to_usd_total }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted font-italic">No rewards taken yet.</p>
+  {% endif %}
+
+</div>
+
+{% endblock content %}

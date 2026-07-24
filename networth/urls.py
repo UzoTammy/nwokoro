@@ -10,7 +10,7 @@ from .views import (
     BusinessListView, BusinessCreateView, BusinessDetailView, BusinessUpdateView, BusinessLiquidateView, BusinessReCapitalizeView,
     FixedAssetListView, FixedAssetCreateView, FixedAssetDetailView, FixedAssetUpdateView,FixedAssetRentView,
     FixedAssetCollectRentView, FixedAssetStopRentView, FixedAssetRestoreRentView, FixedAssetUpdateRentView,
-    ExternalFundHome, RewardFundView, InjectFundView, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView,
+    ExternalFundHome, RewardFundView, RewardFundListView, InjectFundView, BorrowedFundView, SavingsCounterTransferView, InstitutionReportView,
                     PDFNetworthReport,
      LiabilityListView, LiabilityDetailView, LiabilityUpdateView, LiabilityRepayView,
      email_report_preview,
@@ -100,6 +100,9 @@ urlpatterns = [
 
     path('external-fund/home/', ExternalFundHome.as_view(),
          name='networth-external-fund-home'),
+
+    path('reward/list/', RewardFundListView.as_view(),
+         name='reward-list'),
 
     path('<int:pk>/reward-fund/', RewardFundView.as_view(),
          name='networth-reward-fund'),

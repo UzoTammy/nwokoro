@@ -25,7 +25,7 @@ from .liabilities import (
     LiabilityListView, LiabilityDetailView, LiabilityUpdateView, LiabilityRepayView,
 )
 from .external_funds import (
-    ExternalFundHome, RewardFundView, InjectFundView, BorrowedFundView,
+    ExternalFundHome, RewardFundView, InjectFundView, BorrowedFundView, RewardFundListView,
 )
 from .reports import (
     AnnualReportView, InstitutionReportView, PDFNetworthReport, email_report_preview,

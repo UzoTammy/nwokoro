@@ -395,7 +395,7 @@
       {% if reward %}
       <div class="ratio-row ratio-row-gap">
         <span>YTD Reward</span>
-        <span class="text-danger">{{reward}}</span>
+        <a href="{% url 'reward-list' %}"><i class="fas fa-award"></i> {{reward}}</a>
       </div>
       {% else %}
       <div class="ratio-no-reward">No Reward Taken</div>

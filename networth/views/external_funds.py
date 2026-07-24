@@ -1,11 +1,41 @@
+import datetime
+
 from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.views.generic import ListView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from djmoney.models.fields import Money
+
 from ..forms import BorrowedFundForm, RewardFundForm, InjectFundForm
 from ..models import Saving, RewardFund, InjectFund, BorrowedFund
+from ..tools import exchange_rate
+
+
+class RewardFundListView(LoginRequiredMixin, ListView):
+    model = RewardFund
+    template_name = 'networth/reward_list.html'
+    context_object_name = 'rewards'
+
+    def get_queryset(self):
+        return RewardFund.objects.filter(owner=self.request.user).order_by('-date')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        rewards = context['rewards']
+
+        def _to_usd_amount(reward):
+            if reward.amount.currency != 'USD':
+                return reward.amount.amount / exchange_rate(reward.amount.currency)[0].amount
+            return reward.amount.amount
+
+        context['to_usd_total'] = Money(sum(_to_usd_amount(r) for r in rewards), 'USD')
+
+        current_year = datetime.date.today().year
+        ytd_rewards = rewards.filter(date__year=current_year)
+        context['ytd_usd_total'] = Money(sum(_to_usd_amount(r) for r in ytd_rewards), 'USD')
+        return context
 
 
 class ExternalFundHome(LoginRequiredMixin, ListView):
