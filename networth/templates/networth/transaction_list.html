@@ -1,53 +1,134 @@
 {% extends 'core/base.html' %}
 {% load custom_tag %}
 
+{% block head %}
+<style>
+  :root {
+    --primary-bg: #131b2e;
+    --secondary-accent: #33548a;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --white: #ffffff;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+  }
+
+  .page-wrap { padding: 80px 20px 48px; max-width: 820px; margin: 0 auto; }
+  .page-title { font-weight: 300; letter-spacing: .02em; color: var(--text-main); }
+
+  .table-card {
+    background-color: var(--white);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    overflow: hidden;
+  }
+  .table-card table { margin-bottom: 0; }
+  .table-card thead th {
+    background-color: var(--primary-bg);
+    color: var(--white);
+    font-weight: 500;
+    font-size: 13px;
+    border: none;
+    padding: .85rem 1rem;
+  }
+  .table-card tbody td {
+    color: var(--text-main);
+    font-size: 14px;
+    padding: .75rem 1rem;
+    vertical-align: middle;
+    border-color: #eef1f5;
+  }
+  .table-card tbody td.text-right {
+    color: var(--secondary-accent);
+    font-weight: 600;
+  }
+
+  .type-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    padding: 3px 9px;
+    border-radius: 12px;
+    background: #eef2ff;
+    color: var(--secondary-accent);
+  }
+
+  .pagination { margin: 18px 0 0; justify-content: center; }
+  .page-link { color: var(--secondary-accent); border-color: #e2e8f0; }
+  .page-item.active .page-link {
+    background-color: var(--primary-bg);
+    border-color: var(--primary-bg);
+  }
+</style>
+{% endblock %}
+
 {% block content %}
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        <div class="navbar-nav mr-auto">
-        </div>
-        <div class="navbar-nav">
-            <a class="nav-link" href="{% url 'networth-home'%}"><i class="fa fa-times-circle text-danger"></i></a>
-        </div>
-
-    </div>
+  <div class="navbar-nav ml-auto">
+    <a class="nav-link" href="{% url 'networth-home' %}" title="Back to home">
+      <i class="fa fa-times-circle text-danger"></i>
+    </a>
+  </div>
 </nav>
 
-<div class="container mt-3">
-    
-    <div class="row justify-content-center align-items-center vh-100">
-        {% if transactions %}
-        <div class="col-sm-8">
-            <table class="table table-sm table-striped table-bordered" data-toggle="table">
-                <legend>Transactions</legend>
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Date</th>
-                        <th class="text-right">Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for transaction in transactions %}
-                    <tr>
-                        <td>{{transaction|get_item:0}}</td>
-                        <td>{{transaction|get_item:1}}</td>
-                        <td class=" text-right">{{transaction|get_item:2}}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+<div class="page-wrap">
 
-        {% else %}
-        <p class="font-italic ml-2">No Transactions Yet</p>
-        {% endif %}
-    </div>
+  <div class="mb-4">
+    <h5 class="mb-0 page-title">
+      <i class="fa fa-exchange-alt text-info mr-2"></i>Transactions
+    </h5>
+    <small class="text-muted">{{ page_obj.paginator.count }} transaction{{ page_obj.paginator.count|pluralize }} this year</small>
+  </div>
+
+  {% if transactions %}
+  <div class="table-card">
+    <table class="table table-sm mb-0" data-toggle="table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Date</th>
+          <th class="text-right">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for transaction in transactions %}
+        <tr>
+          <td><span class="type-badge">{{transaction|get_item:0}}</span></td>
+          <td>{{transaction|get_item:1}}</td>
+          <td class="text-right">{{transaction|get_item:2}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if is_paginated %}
+  <nav aria-label="Transaction page navigation">
+    <ul class="pagination">
+      <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+      {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{page_obj.previous_page_number}}" title="Previous page"><i class="fa fa-backward"></i></a></li>
+      {% endif %}
+      <li class="page-item active"><a class="page-link" href="#">{{page_obj.number}}</a></li>
+      {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{page_obj.next_page_number}}" title="Next page"><i class="fa fa-forward"></i></a></li>
+      {% endif %}
+      <li class="page-item"><a class="page-link" href="?page={{page_obj.paginator.num_pages}}">Last</a></li>
+    </ul>
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <p class="text-muted font-italic">No Transactions Yet</p>
+  {% endif %}
+
 </div>
 
 {% endblock content %}

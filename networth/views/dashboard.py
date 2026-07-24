@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 from django.utils import timezone
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
@@ -350,5 +351,10 @@ class TransactionListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
             SavingsTransaction, InvestmentTransaction, BusinessTransaction,
             StockTransaction, BorrowedFundTransaction, FixedAssetTransaction,
         ]
-        context['transactions'] = get_transactions(*transactions, period='year')
+        all_transactions = get_transactions(*transactions, period='year')
+        paginator = Paginator(all_transactions, 25)
+        page_obj = paginator.get_page(self.request.GET.get('page'))
+        context['transactions'] = page_obj.object_list
+        context['page_obj'] = page_obj
+        context['is_paginated'] = page_obj.has_other_pages()
         return context

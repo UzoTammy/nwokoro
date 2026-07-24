@@ -15,6 +15,7 @@ from .views import (
      LiabilityListView, LiabilityDetailView, LiabilityUpdateView, LiabilityRepayView,
      email_report_preview,
     InfoDeskListView, InfoNoteCreateView, InfoNoteUpdateView, InfoNoteResolveView, InfoNoteDeleteView,
+    TutorialListView, TutorialDetailView,
 )
 
 
@@ -134,4 +135,8 @@ urlpatterns = [
     path('infodesk/<int:pk>/edit/', InfoNoteUpdateView.as_view(), name='infodesk-edit'),
     path('infodesk/<int:pk>/resolve/', InfoNoteResolveView.as_view(), name='infodesk-resolve'),
     path('infodesk/<int:pk>/delete/', InfoNoteDeleteView.as_view(), name='infodesk-delete'),
+
+    # Learn — investment tutorials
+    path('learn/', TutorialListView.as_view(), name='tutorial-list'),
+    path('learn/<slug:slug>/', TutorialDetailView.as_view(), name='tutorial-detail'),
 ]

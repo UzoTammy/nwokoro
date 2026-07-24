@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from djmoney.models.fields import Money
 
 from ..forms import BorrowedFundForm, RewardFundForm, InjectFundForm
-from ..models import Saving, RewardFund, InjectFund, BorrowedFund
+from ..models import Saving, RewardFund, InjectFund, BorrowedFund, FinancialData
 from ..tools import exchange_rate
 
 
@@ -35,6 +35,22 @@ class RewardFundListView(LoginRequiredMixin, ListView):
         current_year = datetime.date.today().year
         ytd_rewards = rewards.filter(date__year=current_year)
         context['ytd_usd_total'] = Money(sum(_to_usd_amount(r) for r in ytd_rewards), 'USD')
+
+        fd_this_year = FinancialData.objects.filter(
+            owner=self.request.user, date__year=current_year
+        ).order_by('date')
+        growth_usd = 0
+        if fd_this_year.exists():
+            growth = fd_this_year.last().worth - fd_this_year.first().worth
+            if growth.currency != 'USD':
+                growth_usd = growth.amount / exchange_rate(growth.currency)[0].amount
+            else:
+                growth_usd = growth.amount
+        context['networth_growth_usd'] = Money(growth_usd, 'USD')
+        context['reward_growth_chart'] = {
+            'labels': ['Reward Taken', 'Networth Growth'],
+            'values': [float(context['ytd_usd_total'].amount), float(max(growth_usd, 0))],
+        }
         return context
 
 
