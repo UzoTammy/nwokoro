@@ -36,7 +36,7 @@ class InvestmentCreateView(LoginRequiredMixin, FormView):
         tz = ZoneInfo("UTC")
         aware_date = dt.replace(tzinfo=tz)
         savings_account.create_investment(
-            holder=form.cleaned_data['holder_select'] if form.cleaned_data['holder_select'] else form.cleaned_data['holder_text'],
+            holder=form.cleaned_data['holder'],
             principal=form.cleaned_data['principal'],
             rate=form.cleaned_data['rate'],
             start_date=aware_date,

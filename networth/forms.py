@@ -137,41 +137,36 @@ class ConversionForm(forms.Form):
             raise ValidationError("Insufficient fund in source account")
         
 class InvestmentCreateForm(forms.ModelForm):
-    
-    holder_select = forms.CharField(label="Select Holder", widget=forms.Select(choices=[(None, 'List is empty')]), required=False) #
-    holder_text = forms.CharField(label='Or Enter Holder', required=False, 
-                                  widget=forms.TextInput(attrs={'placeholder': 'Required if none is selected above'}))
+
+    holder = forms.CharField(widget=DatalistWidget(), label='Holder')
 
     start_date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'}))
-    
+
     host_country = forms.CharField(
         widget=forms.Select(choices=OptionChoices.get_options().get('countries'))) # OptionChoices.get_options().networth_options['countries']
-    
+
     category = forms.CharField(widget=forms.Select(
         choices=OptionChoices.get_options().get('categories'))) # OptionChoices.get_options().networth_options['categories']
 
     class Meta:
         model = Investment
-        fields = ['holder_select', 'holder_text', 'principal', 'rate', 'start_date',
+        fields = ['holder', 'principal', 'rate', 'start_date',
                   'duration', 'host_country', 'category', 'description']
 
     def __init__(self, *args, **kwargs):
         self.pk = kwargs.pop('pk', None)
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        
+
         if self.pk:
             self.savings_account = Saving.objects.get(pk=self.pk)
 
         if self.user:
             preference = Preference.objects.get(user=self.user)
+            self.fields['holder'].widget.choices = [(holder, holder) for holder in preference.investment_holders]
+            self.fields['holder'].help_text = "Select from the list or type a new holder"
 
-            dynamic_choices = [(None, 'List of Holders')] + [(holder, holder) for holder in preference.investment_holders]
-            
-            self.fields['holder_select'].widget.choices = dynamic_choices
-            self.fields['holder_select'].help_text = "If holder is not listed, fill it below"
-    
     def clean(self):
         if self.savings_account.value.currency != self.cleaned_data['principal'].currency:
             raise ValidationError("Currency cannot mismatch")
@@ -251,37 +246,35 @@ class InvestmentRolloverForm(forms.Form):
             self.fields['savings_account'].queryset = queryset
 
 class StockCreateForm(forms.ModelForm):
-    
-    holder_select = forms.CharField(widget=forms.Select(choices=[(None, 'List is empty')]),
-                                    label='Select Holder') #
-    holder_text = forms.CharField(label='Or Type Holder') #
-    
+
+    holder = forms.CharField(widget=DatalistWidget(), label='Holder')
+
     date_bought = forms.DateField(
         label='Purchase Date', widget=forms.DateInput(attrs={'type': 'date'}))
     host_country = forms.CharField(
         widget=forms.Select(choices=OptionChoices.get_options().get('countries'))) #
     stock_type = forms.CharField(
         widget=forms.Select(choices=OptionChoices.get_options().get('stock_type')))#
-    
-        
+
+
     class Meta:
         model = Stock
-        fields = ['holder_select', 'holder_text', 'units', 'unit_cost',
+        fields = ['holder', 'units', 'unit_cost',
                   'date_bought', 'host_country', 'stock_type']
 
     def __init__(self, *args, **kwargs):
         self.pk = kwargs.pop('pk', None)
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        
+
         if self.pk:
             self.savings_account = Saving.objects.get(pk=self.pk)
 
         if self.user:
             preference = Preference.objects.get(user=self.user)
-            self.fields['holder_select'].widget.choices = [(holder, holder) for holder in preference.stock_holders]
-            self.fields['holder_select'].help_text = "If holder is not listed, you must go to preference to add it"
-            
+            self.fields['holder'].widget.choices = [(holder, holder) for holder in preference.stock_holders]
+            self.fields['holder'].help_text = "Select from the list or type a new holder"
+
 
     def clean(self):
         if self.savings_account.value.currency != self.cleaned_data['unit_cost'].currency:
