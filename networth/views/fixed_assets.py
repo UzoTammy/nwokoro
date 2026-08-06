@@ -67,7 +67,7 @@ class FixedAssetUpdateView(LoginRequiredMixin, UpdateView):
     form_class = FixedAssetUpdateForm
 
     def get_success_url(self):
-        return reverse_lazy('networth-fixed-asset', kwargs={'pk': self.object.pk})
+        return reverse_lazy('networth-fixed-asset-detail', kwargs={'pk': self.object.pk})
 
 
 class FixedAssetRentView(LoginRequiredMixin, FormView):
