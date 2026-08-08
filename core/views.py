@@ -1,17 +1,22 @@
 from collections.abc import Sequence
 import json
 import datetime
+from pathlib import Path
 from typing import Any
+from django.conf import settings
 from django.db.models.query import QuerySet
+from django.http import Http404
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.http.response import HttpResponse as HttpResponse
+from django.utils.safestring import mark_safe
 from django.views.generic.base import View, TemplateView
 from django.views.generic.list import ListView
 from django.views.generic.edit import UpdateView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from .forms import NumberInputForm, ProfileForm, ActivateRegistrationForm, UpdateProfileForm, MyFormSet, PreferenceForm
+from .markdown_lite import render_markdown_lite
 from .tinyproject.numtoword import convert
 from .tinyproject.taxes import CanadaIncomeTaxCalculator as TaxCalc
 from .models import StudentProfile
@@ -173,6 +178,33 @@ class PortfolioFinuelView(TemplateView):
     
 class TextingView(TemplateView):
     template_name = 'core/texting.html'
+
+class PolicyPageView(TemplateView):
+    template_name = 'core/policy_page.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        policies_root = (Path(settings.BASE_DIR) / 'policies').resolve()
+        target = (policies_root / kwargs['page']).resolve()
+
+        if policies_root not in target.parents:
+            raise Http404()
+
+        md_file = None
+        if target.parent.is_dir():
+            for candidate in target.parent.iterdir():
+                if candidate.is_file() and candidate.suffix.lower() == '.md' \
+                        and candidate.stem.lower() == target.name.lower():
+                    md_file = candidate
+                    break
+
+        if md_file is None:
+            raise Http404()
+
+        context['title'] = md_file.stem.replace('_', ' ').title()
+        context['content'] = mark_safe(render_markdown_lite(md_file.read_text(encoding='utf-8')))
+        return context
 
 class NumberToWordView(TemplateView):
     template_name = 'core/portfolio/tinyprojects/numtoword.html'
