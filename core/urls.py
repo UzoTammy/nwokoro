@@ -1,11 +1,10 @@
 from django.urls import path
 from .views import (MainView, ErrorView, AboutMe, ResumeView, PortfolioScushView, PortfolioFinuelView,
                      TextingView, NumberToWordView, TinyProjectView, PreferenceView, NewHomeView, NewAboutMeView,
-                    ActivateRegistrationView, MeHome, PolicyPageView)
+                    ActivateRegistrationView, MeHome)
 
 urlpatterns = [
     path('', MainView.as_view(), name='index'),
-    path('policies/<path:page>/', PolicyPageView.as_view(), name='policy-page'),
     path('preference/', PreferenceView.as_view(), name='preference'),
     path('activate-registration', ActivateRegistrationView.as_view(), name='activate-registration'),
     path('oops/', ErrorView.as_view(), name='error-message'),
