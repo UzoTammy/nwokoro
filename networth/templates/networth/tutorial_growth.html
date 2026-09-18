@@ -39,64 +39,34 @@
   .article-summary { color: var(--text-muted); font-size: 14px; margin: 4px 0 20px; }
   .article-body p { color: var(--text-main); font-size: 15px; line-height: 1.7; margin-bottom: 1rem; }
 
-  .diagram {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    background: #f8fafc;
-    border-radius: 8px;
-    padding: 1.5rem 1rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-  }
-  .diagram-node {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 130px;
-    text-align: center;
-  }
-  .diagram-node-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: var(--white);
-    border: 2px solid var(--secondary-accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: var(--secondary-accent);
-    margin-bottom: 8px;
-  }
-  .diagram-node-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-main);
-    line-height: 1.3;
-  }
-  .diagram-arrow {
-    color: #cbd5e1;
-    font-size: 18px;
-    margin: 0 2px 22px;
-  }
-
-  .key-points {
+  .strategies {
     background: #f8fafc;
     border-radius: 8px;
     padding: 1rem 1.25rem;
     margin-top: 1.5rem;
   }
-  .key-points h4 {
+  .strategies h4 {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: .06em;
     color: var(--text-muted);
     margin-bottom: 10px;
   }
-  .key-points ul { margin: 0; padding-left: 1.1rem; }
-  .key-points li { font-size: 14px; color: var(--text-main); margin-bottom: 6px; }
+  .strategies ul { margin: 0; padding-left: 1.1rem; }
+  .strategies li { font-size: 14px; color: var(--text-main); margin-bottom: 6px; }
+
+  .caution-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-top: 1.5rem;
+  }
+  .caution-box i { color: #b45309; font-size: 16px; margin-top: 2px; }
+  .caution-box p { color: #92400e; font-size: 14px; margin: 0; line-height: 1.6; }
 
   .risk-badge {
     display: inline-block;
@@ -137,48 +107,43 @@
 
 <div class="page-wrap">
 
-  <a class="back-link" href="{% url 'tutorial-list' %}"><i class="fa fa-arrow-left mr-1"></i>All investment types</a>
+  <a class="back-link" href="{% url 'tutorial-detail' tutorial.slug %}"><i class="fa fa-arrow-left mr-1"></i>Back to {{ tutorial.title }} overview</a>
 
   <div class="article-card mt-3">
     <div class="article-head">
-      <h1 class="article-title"><i class="fa {{ tutorial.icon }}"></i>{{ tutorial.title }}</h1>
+      <h1 class="article-title"><i class="fa {{ tutorial.icon }}"></i>{{ tutorial.growth.title }}</h1>
       <span class="risk-badge risk-{{ tutorial.risk_class }}">{{ tutorial.risk }} risk</span>
     </div>
-    <p class="article-summary">{{ tutorial.summary }}</p>
-
-    <div class="diagram">
-      {% for node in tutorial.diagram %}
-      {% if not forloop.first %}<i class="fa fa-long-arrow-alt-right diagram-arrow"></i>{% endif %}
-      <div class="diagram-node">
-        <div class="diagram-node-icon"><i class="fa {{ node.icon }}"></i></div>
-        <div class="diagram-node-label">{{ node.label }}</div>
-      </div>
-      {% endfor %}
-    </div>
+    <p class="article-summary">A worked example of how {{ tutorial.title|lower }} can compound into net worth over time.</p>
 
     <div class="article-body">
-      {% for paragraph in tutorial.content %}
+      {% for paragraph in tutorial.growth.scenario %}
       <p>{{ paragraph }}</p>
       {% endfor %}
     </div>
 
-    <div class="key-points">
-      <h4>Key Points</h4>
+    <div class="strategies">
+      <h4>How to Grow It</h4>
       <ul>
-        {% for point in tutorial.key_points %}
-        <li>{{ point }}</li>
+        {% for strategy in tutorial.growth.strategies %}
+        <li>{{ strategy }}</li>
         {% endfor %}
       </ul>
+    </div>
+
+    <div class="caution-box">
+      <i class="fa fa-exclamation-triangle"></i>
+      <p>{{ tutorial.growth.caution }}</p>
     </div>
   </div>
 
   <div class="tutorial-nav">
-    {% if prev_tutorial %}
-    <a href="{% url 'tutorial-growth' prev_tutorial.slug %}"><i class="fa fa-chevron-left mr-1"></i>{{ prev_tutorial.title }}</a>
+    <a href="{% url 'tutorial-detail' tutorial.slug %}"><i class="fa fa-chevron-left mr-1"></i>{{ tutorial.title }} overview</a>
+    {% if next_tutorial %}
+    <a href="{% url 'tutorial-detail' next_tutorial.slug %}">{{ next_tutorial.title }}<i class="fa fa-chevron-right ml-1"></i></a>
     {% else %}
-    <span></span>
+    <a href="{% url 'tutorial-list' %}">All investment vehicles<i class="fa fa-chevron-right ml-1"></i></a>
     {% endif %}
-    <a href="{% url 'tutorial-growth' tutorial.slug %}">How to grow with {{ tutorial.title }}<i class="fa fa-chevron-right ml-1"></i></a>
   </div>
 
 </div>

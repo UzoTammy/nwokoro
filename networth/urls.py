@@ -15,7 +15,7 @@ from .views import (
      LiabilityListView, LiabilityDetailView, LiabilityUpdateView, LiabilityRepayView,
      email_report_preview,
     InfoDeskListView, InfoNoteCreateView, InfoNoteUpdateView, InfoNoteResolveView, InfoNoteDeleteView,
-    TutorialListView, TutorialDetailView,
+    TutorialListView, TutorialDetailView, TutorialGrowthView,
 )
 
 
@@ -139,4 +139,5 @@ urlpatterns = [
     # Learn — investment tutorials
     path('learn/', TutorialListView.as_view(), name='tutorial-list'),
     path('learn/<slug:slug>/', TutorialDetailView.as_view(), name='tutorial-detail'),
+    path('learn/<slug:slug>/grow/', TutorialGrowthView.as_view(), name='tutorial-growth'),
 ]

@@ -32,6 +32,23 @@ class TutorialDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         index = INVESTMENT_TUTORIALS.index(tutorial)
         context['prev_tutorial'] = INVESTMENT_TUTORIALS[index - 1] if index > 0 else None
+        return context
+
+
+class TutorialGrowthView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/tutorial_growth.html'
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tutorial = get_tutorial(self.kwargs['slug'])
+        if tutorial is None:
+            raise Http404('Tutorial not found')
+        context['tutorial'] = tutorial
+
+        index = INVESTMENT_TUTORIALS.index(tutorial)
         context['next_tutorial'] = (
             INVESTMENT_TUTORIALS[index + 1] if index < len(INVESTMENT_TUTORIALS) - 1 else None
         )
