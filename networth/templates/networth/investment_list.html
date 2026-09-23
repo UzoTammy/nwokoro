@@ -123,6 +123,32 @@
                     {% endfor %}
                 </ul>
             </div>
+
+            {% if holder_rates %}
+            <div class="card mt-4">
+                <ul class="list-group list-group-flush font-weight-lighter">
+                    <li class="list-group-item list-group-item-primary text-center">Multi-Investment Holders</li>
+                    {% for item in holder_rates %}
+                    <li class="list-group-item">
+                        {{item.holder}} <span class="badge badge-info">{{item.count}}</span>
+                        <span class="float-right">{{item.rate}}%</span>
+                        <div class="small text-muted">
+                            Next due {{item.maturity}}
+                            {% if item.due_in_days == 0 %}
+                            <span class="badge badge-success">Matured</span>
+                            {% elif item.due_in_days < 0 %}
+                            <span class="badge badge-success">{{item.due_in_days|scalar_value}}d ago</span>
+                            {% elif item.due_in_days <= 30 %}
+                            <span class="badge badge-warning">in {{item.due_in_days}}d</span>
+                            {% else %}
+                            (in {{item.due_in_days}}d)
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
         </div>
 
         {% else %}

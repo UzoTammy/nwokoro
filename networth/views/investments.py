@@ -86,6 +86,28 @@ class InvestmentListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             })
         context['investments_summary'] = investments_summary
 
+        # Holders with more than one investment: principal-weighted (USD) rate and nearest maturity
+        holder_rates = list()
+        for holder in holders:
+            qs = list(investments.filter(holder=holder))
+            if len(qs) < 2:
+                continue
+            weights = [obj.to_usd().amount for obj in qs]
+            total_weight = sum(weights)
+            if total_weight:
+                rate = sum(decimal.Decimal(str(obj.rate)) * w for obj, w in zip(qs, weights)) / total_weight
+            else:
+                rate = decimal.Decimal(str(sum(obj.rate for obj in qs) / len(qs)))
+            nearest = min(qs, key=lambda x: x.maturity())
+            holder_rates.append({
+                'holder': holder,
+                'count': len(qs),
+                'rate': round(rate, 2),
+                'maturity': nearest.maturity(),
+                'due_in_days': nearest.due_in_days(),
+            })
+        context['holder_rates'] = sorted(holder_rates, key=lambda x: x['maturity'])
+
         context['year_roi'] = ytd_roi(self.request.user, datetime.date.today().year)
 
         return context
