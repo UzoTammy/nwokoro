@@ -23,6 +23,7 @@ from ..tools import (
     exchange_rate, set_roi, get_year_financial, current_year_roi, AggregatedAsset,
     naira_breach_probability, investment_growth_comparison, risk_adjusted_ng_edge,
 )
+from ..risk import portfolio_risk
 
 
 def get_target():
@@ -247,6 +248,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['naira_breach'] = naira_breach_probability(self.request.user, threshold=1500.0, horizon_days=30)
         context['investment_growth_comparison'] = investment_growth_comparison(self.request.user, window_days=90)
         context['risk_adjusted_ng_edge'] = risk_adjusted_ng_edge(context['naira_breach'], context['investment_growth_comparison'])
+        context['portfolio_risk'] = portfolio_risk(self.request.user)
 
         current_year = timezone.now().year
         financial_data = get_year_financial(self.request.user, year=current_year)

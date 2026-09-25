@@ -140,15 +140,19 @@
                             {% endif %}
                         </span>
                     </div>
-                    <div class="card mt-1" title="Statistical estimate from trailing volatility, not a forecast — cannot anticipate CBN policy actions.">
-                        Risk
+                    <div class="card mt-1" title="Share of USD asset value that could be lost in a 1-in-20 bad year.{% if portfolio_risk.available %}
+By layer: Country {{portfolio_risk.layers_pct.country|floatformat:1}} · Institution {{portfolio_risk.layers_pct.institution|floatformat:1}} · Asset type {{portfolio_risk.layers_pct.asset_type|floatformat:1}} · World {{portfolio_risk.layers_pct.world|floatformat:1}}
+Top contributors:{% for item in portfolio_risk.top %} {{item.name}} ({{item.points|floatformat:1}} pts){% if not forloop.last %},{% endif %}{% endfor %}{% endif %}{% if naira_breach.available and not naira_breach.breached %}
+Naira: {{naira_breach.probability|floatformat:1}}% chance of passing ₦{{naira_breach.threshold|floatformat:0}} in {{naira_breach.horizon_days}}d{% endif %}">
+                        <span>Risk <a href="{% url 'risk-score-study' %}" title="How the risk score works"><i class="fa fa-info-circle small"></i></a>
+                            {% if portfolio_risk.unrated or portfolio_risk.stale_count %}
+                            <i class="fa fa-exclamation-triangle text-warning small" title="{% if portfolio_risk.unrated %}Unrated: {{ portfolio_risk.unrated|join:', ' }}. {% endif %}{% if portfolio_risk.stale_count %}{{ portfolio_risk.stale_count }} parameter{{ portfolio_risk.stale_count|pluralize }} not reviewed in 6 months.{% endif %}"></i>
+                            {% endif %}
+                        </span>
                         <span class="float-right">
-                            {% if naira_breach.available %}
-                                {% if naira_breach.breached %}
-                                    &#8358;{{naira_breach.threshold|floatformat:0}} already reached
-                                {% else %}
-                                    {{naira_breach.probability|floatformat:1}}% &gt; &#8358;{{naira_breach.threshold|floatformat:0}} ({{naira_breach.horizon_days}}d)
-                                {% endif %}
+                            {% if portfolio_risk.available %}
+                                {{portfolio_risk.score_pct|floatformat:1}}%
+                                <span class="badge badge-{{portfolio_risk.band_class}}">{{portfolio_risk.band}}</span>
                             {% else %}
                                 n/a
                             {% endif %}

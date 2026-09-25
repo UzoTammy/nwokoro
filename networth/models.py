@@ -999,3 +999,89 @@ class InfoNote(models.Model):
             return f'{days // 7}w'
         return f'{days // 30}mo'
 
+
+
+# --- Risk score parameters (see networth/risk.py and the Risk Score study page) ---
+# All stress values are the fraction of USD value lost in a 1-in-20 bad year (0-1).
+
+class RiskParameter(models.Model):
+    source = models.CharField(max_length=250, blank=True)
+    reviewed_on = models.DateField(default=date.today)
+
+    class Meta:
+        abstract = True
+
+    @property
+    def is_stale(self):
+        return (date.today() - self.reviewed_on).days > 180
+
+
+class CountryRisk(RiskParameter):
+    WORLD = 'WORLD'
+
+    code = models.CharField(max_length=5, unique=True, help_text="ISO country code, or WORLD for the global factor")
+    sovereign = models.FloatField(default=0, help_text="Sovereign/political stress loss (0-1)")
+    convertibility = models.FloatField(default=0, help_text="Stress loss from funds that can't be moved or converted out (0-1)")
+    at_war = models.BooleanField(default=False, help_text="War or total collapse: forces this layer to 1.0")
+
+    class Meta:
+        ordering = ['code']
+        verbose_name_plural = 'country risks'
+
+    def __str__(self):
+        return self.code
+
+    def stress(self):
+        if self.at_war:
+            return 1.0
+        return 1 - (1 - self.sovereign) * (1 - self.convertibility)
+
+
+class CurrencyRisk(RiskParameter):
+    currency = models.CharField(max_length=3, unique=True)
+    stress_floor = models.FloatField(default=0, help_text="Minimum 1-year stress loss vs USD from long-run history (0-1)")
+
+    class Meta:
+        ordering = ['currency']
+        verbose_name_plural = 'currency risks'
+
+    def __str__(self):
+        return self.currency
+
+
+class InstitutionRisk(RiskParameter):
+    name = models.CharField(max_length=50, unique=True)
+    aliases = models.CharField(max_length=250, blank=True, help_text="Other holder names for this institution, comma separated")
+    failure_probability = models.FloatField(help_text="Chance of failure in a bad year (0-1)")
+    loss_given_failure = models.FloatField(help_text="Share of uninsured value lost if it fails (0-1)")
+    insured_limit = MoneyField(max_digits=14, decimal_places=2, default_currency='CAD', null=True, blank=True,
+                               help_text="Deposit insurance cover per depositor; blank if none")
+
+    class Meta:
+        ordering = ['name']
+        verbose_name_plural = 'institution risks'
+
+    def __str__(self):
+        return self.name
+
+    def names(self):
+        return {self.name.lower()} | {a.strip().lower() for a in self.aliases.split(',') if a.strip()}
+
+
+class AssetTypeRisk(RiskParameter):
+    ASSET_CLASSES = [
+        ('saving', 'Saving'), ('investment', 'Investment'), ('stock', 'Stock'),
+        ('business', 'Business'), ('fixed_asset', 'Fixed Asset'),
+    ]
+
+    asset_class = models.CharField(max_length=20, choices=ASSET_CLASSES)
+    category = models.CharField(max_length=30, blank=True, help_text="Blank = default for the asset class")
+    stress = models.FloatField(help_text="Bad-year loss of the instrument itself (0-1)")
+
+    class Meta:
+        ordering = ['asset_class', 'category']
+        unique_together = ('asset_class', 'category')
+        verbose_name_plural = 'asset type risks'
+
+    def __str__(self):
+        return f'{self.asset_class}: {self.category or "default"}'

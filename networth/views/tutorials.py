@@ -2,6 +2,7 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
+from ..risk import portfolio_risk
 from ..tutorials import INVESTMENT_TUTORIALS, get_tutorial
 
 
@@ -52,4 +53,19 @@ class TutorialGrowthView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['next_tutorial'] = (
             INVESTMENT_TUTORIALS[index + 1] if index < len(INVESTMENT_TUTORIALS) - 1 else None
         )
+        return context
+
+
+class RiskScoreStudyView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'networth/risk_score_study.html'
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        risk = portfolio_risk(self.request.user)
+        if risk.get('available'):
+            risk['assets'] = sorted(risk['assets'], key=lambda a: a.value_usd * a.risk, reverse=True)
+        context['portfolio_risk'] = risk
         return context

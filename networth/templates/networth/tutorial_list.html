@@ -97,6 +97,16 @@
     <small class="text-muted">A quick primer on the major investment types, their risk, and how they work.</small>
   </div>
 
+  <div class="tutorial-grid mb-4">
+    <a class="tutorial-card" href="{% url 'risk-score-study' %}">
+      <div class="tutorial-card-head">
+        <h3 class="tutorial-card-title"><i class="fa fa-shield-alt"></i>Risk Score</h3>
+        <span class="risk-badge risk-medium">Methodology</span>
+      </div>
+      <p class="tutorial-card-summary">How the dashboard turns country, institution and asset-type risk into one portfolio score from 0 to 100%.</p>
+    </a>
+  </div>
+
   <div class="tutorial-grid">
     {% for tutorial in tutorials %}
     <a class="tutorial-card" href="{% url 'tutorial-detail' tutorial.slug %}">

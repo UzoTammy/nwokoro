@@ -28,3 +28,30 @@ admin.site.register(LiabilityTransaction)
 
 admin.site.register(FinancialData)
 
+
+
+from .models import CountryRisk, CurrencyRisk, InstitutionRisk, AssetTypeRisk
+
+
+@admin.register(CountryRisk)
+class CountryRiskAdmin(admin.ModelAdmin):
+    list_display = ('code', 'sovereign', 'convertibility', 'at_war', 'reviewed_on', 'source')
+    list_editable = ('sovereign', 'convertibility', 'at_war', 'reviewed_on')
+
+
+@admin.register(CurrencyRisk)
+class CurrencyRiskAdmin(admin.ModelAdmin):
+    list_display = ('currency', 'stress_floor', 'reviewed_on', 'source')
+    list_editable = ('stress_floor', 'reviewed_on')
+
+
+@admin.register(InstitutionRisk)
+class InstitutionRiskAdmin(admin.ModelAdmin):
+    list_display = ('name', 'aliases', 'failure_probability', 'loss_given_failure', 'insured_limit', 'reviewed_on')
+    list_editable = ('failure_probability', 'loss_given_failure', 'reviewed_on')
+
+
+@admin.register(AssetTypeRisk)
+class AssetTypeRiskAdmin(admin.ModelAdmin):
+    list_display = ('asset_class', 'category', 'stress', 'reviewed_on', 'source')
+    list_editable = ('stress', 'reviewed_on')

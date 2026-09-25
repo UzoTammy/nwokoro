@@ -1,0 +1,303 @@
+{% extends 'core/base.html' %}
+
+{% block head %}
+<style>
+    .formula { background: #f8f9fa; border-left: 4px solid #17a2b8; padding: .75rem 1rem; font-size: 14px; white-space: pre-wrap; }
+    .study section { scroll-margin-top: 70px; }
+    .study p, .study li { line-height: 1.7; }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav mr-auto">
+            <a class="nav-link" href="{% url 'tutorial-list' %}">Learn</a>
+            <a class="nav-link" href="{% url 'networth-dashboard' %}">Dashboard</a>
+        </div>
+        <div class="navbar-nav">
+            <a class="nav-link" href="{% url 'networth-home' %}" title="Back to home"><i class="fas fa-times-circle text-danger"></i></a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid mt-5 p-3">
+    <div class="row mt-1">
+        <div class="col">
+            <h1 class="font-weight-lighter">Risk Score</h1>
+            <p class="text-muted font-weight-lighter mb-0">How the dashboard measures the risk of all assets as one number from 0 to 1 (0–100%).</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-lg-8 study font-weight-lighter">
+
+            <section id="current" class="card mb-4">
+                <div class="card-body">
+                    <h4 class="font-weight-lighter">Your current score</h4>
+                    {% if portfolio_risk.available %}
+                    <p class="mb-2">
+                        <span class="h2 font-weight-lighter">{{ portfolio_risk.score_pct|floatformat:1 }}%</span>
+                        <span class="badge badge-{{ portfolio_risk.band_class }} align-top">{{ portfolio_risk.band }}</span>
+                        <span class="text-muted small ml-2">of ${{ portfolio_risk.total_usd|floatformat:0 }} in assets</span>
+                    </p>
+                    <p class="small text-muted">
+                        By layer: Country {{ portfolio_risk.layers_pct.country|floatformat:1 }} ·
+                        Institution {{ portfolio_risk.layers_pct.institution|floatformat:1 }} ·
+                        Asset type {{ portfolio_risk.layers_pct.asset_type|floatformat:1 }} ·
+                        World {{ portfolio_risk.layers_pct.world|floatformat:1 }} points.
+                        Currency stress applied:{% for code, pct in portfolio_risk.currency_stress_pct.items %} {{ code }} {{ pct|floatformat:0 }}%{% if not forloop.last %},{% endif %}{% endfor %}.
+                    </p>
+                    {% if portfolio_risk.unrated or portfolio_risk.stale_count %}
+                    <div class="alert alert-warning small">
+                        {% if portfolio_risk.unrated %}Using cautious defaults for: {{ portfolio_risk.unrated|join:", " }}. Add them in admin.<br>{% endif %}
+                        {% if portfolio_risk.stale_count %}{{ portfolio_risk.stale_count }} parameter{{ portfolio_risk.stale_count|pluralize }} not reviewed in the last 6 months.{% endif %}
+                    </div>
+                    {% endif %}
+                    <a class="small" data-toggle="collapse" href="#assetBreakdown" role="button" aria-expanded="false" aria-controls="assetBreakdown">
+                        Per-asset breakdown <i class="fa fa-chevron-down"></i>
+                    </a>
+                    <div class="collapse mt-2" id="assetBreakdown">
+                        <div class="table-responsive">
+                            <table class="table table-sm small mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Asset</th>
+                                        <th class="text-right">USD</th>
+                                        <th class="text-right">Country</th>
+                                        <th class="text-right">Institution</th>
+                                        <th class="text-right">Asset type</th>
+                                        <th class="text-right">Risk</th>
+                                        <th class="text-right">Points</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for a in portfolio_risk.assets %}
+                                    <tr>
+                                        <td>{{ a.name }} <span class="text-muted">{{ a.currency }}</span></td>
+                                        <td class="text-right">{{ a.value_usd|floatformat:0 }}</td>
+                                        <td class="text-right">{{ a.layers_pct.country|floatformat:1 }}%</td>
+                                        <td class="text-right">{{ a.layers_pct.institution|floatformat:1 }}%</td>
+                                        <td class="text-right">{{ a.layers_pct.asset_type|floatformat:1 }}%</td>
+                                        <td class="text-right">{{ a.risk|floatformat:3 }}</td>
+                                        <td class="text-right">{{ a.points|floatformat:1 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">No active assets to score.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section id="definition" class="card mb-4">
+                <div class="card-body">
+                    <h4 class="font-weight-lighter">1. What the score means</h4>
+                    <p>The risk score is the <strong>fraction of the USD value of your assets that could be lost in a bad year</strong>, meaning a year bad enough to happen about once in 20 years. It runs from 0 (nothing at risk) to 1 (everything lost).</p>
+                    <p class="mb-0">It reads as a plain sentence: <em>“In a 1-in-20 bad year, about X% of what I own could be gone.”</em></p>
+                </div>
+            </section>
+
+            <section id="why-loss" class="card mb-4">
+                <div class="card-body">
+                    <h4 class="font-weight-lighter">2. Why it measures loss, not probability</h4>
+                    <p>A pure probability, such as “the chance this institution fails”, has two problems:</p>
+                    <ul>
+                        <li><strong>It doesn't fit volatile assets.</strong> A Nigerian stock rarely “fails”, but it can lose 40% of its value. A Canadian GIC almost never loses anything. Both need to sit on the same scale.</li>
+                        <li><strong>Probabilities of different events can't be averaged into anything meaningful.</strong> Lost value can: if 10% of your money is 50% exposed, then 5% of the total is at risk.</li>
+                    </ul>
+                    <p class="mb-0">So every factor answers one question: <em>what fraction of this asset's USD value is lost in a bad year?</em></p>
+                </div>
+            </section>
+
+            <section id="per-asset" class="card mb-4">
+                <div class="card-body">
+                    <h4 class="font-weight-lighter">3. Scoring one asset</h4>
+                    <p>Each asset passes through layers. The layers combine by compounding: each one takes its share of whatever value is left after the layers above it.</p>
+                    <div class="formula mb-3">asset_risk = 1 − (1 − world) × (1 − country) × (1 − institution) × (1 − asset_type)</div>
+                    <ul class="mb-0">
+                        <li>If the country layer is <strong>1.0</strong> (war or total collapse), the asset's risk is <strong>1.0</strong> no matter what the other layers say.</li>
+                        <li>If the country is safe, the institution and asset-type layers decide the score.</li>
+                        <li><strong>World</strong> is one global value applied to every asset. It sits near 0 in normal times, and you raise it during a global crisis.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="country" class="card mb-4">
+                <div class="card-body">
+                    <h4 class="font-weight-lighter">4. Layer 1: country (and world)</h4>
+                    <p>The country layer has three parts, which compound the same way:</p>
+                    <div class="formula mb-3">country = 1 − (1 − sovereign) × (1 − currency) × (1 − convertibility)</div>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr><th>Part</th><th>What it captures</th><th>Where the number comes from</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Sovereign / political</td>
+                                <td>Government default, unrest, war</td>
+                                <td>Credit rating converted to a stress loss (AAA ≈ 0%, B ≈ 3–5%). A <strong>war/collapse switch forces the country to 1.0</strong>.</td>
+                            </tr>
+                            <tr>
+                                <td>Currency</td>
+                                <td>Depreciation against USD</td>
+                                <td>The <strong>higher</strong> of a long-run minimum set in admin (NGN 40%, CAD 10%) and the 95th-percentile one-year move <strong>calculated from the app's exchange-rate history</strong>. The app's history starts in Feb 2025, too short and calm to see a 1-in-20 year, so the minimum usually applies.</td>
+                            </tr>
+                            <tr>
+                                <td>Convertibility</td>
+                                <td>Money that can't be moved or converted out of the country</td>
+                                <td>Set by hand: NG a few %, CA ≈ 0.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="alert alert-info mb-0">
+                        <strong>Currency follows the asset's currency, not its country.</strong> A USD account held in Nigeria (e.g. Axa Mansard USD) takes Nigeria's sovereign and convertibility risk, but no naira depreciation.
+                    </div>
+                </div>
+            </section>
+
+            <section id="institution" class="card mb-4">
+                <div class="card-body">
+                    <h4 class="font-weight-lighter">5. Layer 2: institution</h4>
+                    <p>For each holder (Scotia, RBC, UBA, FirstBank, Axa Mansard, OminiPay, …):</p>
+                    <div class="formula mb-3">institution = chance of failure × share lost if it fails</div>
+                    <ul class="mb-0">
+                        <li><strong>Chance of failure</strong> depends on the institution's tier: systemically important bank &lt; ordinary bank &lt; asset manager &lt; fintech.</li>
+                        <li><strong>Share lost if it fails</strong> is reduced by deposit insurance. CDIC covers C$100k per category per member bank; NDIC has its own cap (check the current limit).</li>
+                        <li>The insured amount is worked out <strong>across all your accounts at the same holder</strong>, so putting too much with one institution raises the risk automatically. No separate concentration rule is needed.</li>
+                        <li>Fund managers keep client assets in separate custody, so less is lost if the manager itself fails.</li>
+                        <li>This layer applies only to <strong>savings and investments</strong>, where you are owed money by the holder. For stocks, businesses and property the “holder” is the thing you own, so its risk is already in the asset-type layer.</li>
+                        <li>Holders with no row in admin get a cautious default (5% failure × 70% lost) and are flagged as unrated.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="asset-type" class="card mb-4">
+                <div class="card-body">
+                    <h4 class="font-weight-lighter">6. Layer 3: asset type</h4>
+                    <p>This is the risk of the instrument itself, separate from where it's held:</p>
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr><th>Asset type</th><th class="text-right">Bad-year loss</th><th>Note</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Cash, savings, GIC / FD</td><td class="text-right">≈ 0%</td><td>Principal is guaranteed; the institution layer already covers failure</td></tr>
+                            <tr><td>Treasury bills</td><td class="text-right">≈ 0%</td><td>Sovereign debt; the country layer already covers it</td></tr>
+                            <tr><td>Commercial paper</td><td class="text-right">moderate</td><td>The issuer's credit risk</td></tr>
+                            <tr><td>Diversified funds (Scotia Essential / Selected)</td><td class="text-right">15–20%</td><td>Typical bad-year fall</td></tr>
+                            <tr><td>Single NG stocks</td><td class="text-right">40–50%</td><td>One company, thinly traded market</td></tr>
+                            <tr><td>Real estate</td><td class="text-right">≈ 15%</td><td>Price stress, plus title/legal risk in NG</td></tr>
+                            <tr><td>Business (Ozone)</td><td class="text-right">≈ 50%</td><td>Unlisted, concentrated</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="rollup" class="card mb-4">
+                <div class="card-body">
+                    <h4 class="font-weight-lighter">7. Rolling it up into one number</h4>
+                    <div class="formula mb-3">portfolio_risk = Σ (asset_USD_value × asset_risk) / Σ asset_USD_value</div>
+                    <p>This assumes all the bad things happen in the same year. That errs on the cautious side, which is realistic here because the Nigerian assets all move with the same naira shock.</p>
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>Score</th><th>Band</th></tr></thead>
+                        <tbody>
+                            <tr><td>below 10%</td><td><span class="badge badge-success">Low</span></td></tr>
+                            <tr><td>10–25%</td><td><span class="badge badge-info">Moderate</span></td></tr>
+                            <tr><td>25–50%</td><td><span class="badge badge-warning">High</span></td></tr>
+                            <tr><td>above 50%</td><td><span class="badge badge-danger">Severe</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="example" class="card mb-4">
+                <div class="card-body">
+                    <h4 class="font-weight-lighter">8. Worked example</h4>
+                    <p class="text-muted small">Illustrative numbers only. The real values come from the calibration table.</p>
+
+                    <h6 class="font-weight-normal">NGN fixed deposit at Axa Mansard</h6>
+                    <ul>
+                        <li>Country: sovereign 4%, currency 40%, convertibility 5% → 1 − 0.96 × 0.60 × 0.95 = <strong>45.3%</strong></li>
+                        <li>Institution: asset manager, 3% failure × 50% lost = <strong>1.5%</strong></li>
+                        <li>Asset type: FD = <strong>0%</strong></li>
+                        <li>Asset risk: 1 − 0.547 × 0.985 = <strong>46.1%</strong></li>
+                    </ul>
+
+                    <h6 class="font-weight-normal">CAD GIC at Scotia Bank</h6>
+                    <ul>
+                        <li>Country: sovereign 0%, currency (CAD vs USD) 10%, convertibility 0% → <strong>10%</strong></li>
+                        <li>Institution: systemically important bank, inside CDIC cover → <strong>≈ 0%</strong></li>
+                        <li>Asset type: GIC = <strong>0%</strong></li>
+                        <li>Asset risk: <strong>10%</strong></li>
+                    </ul>
+
+                    <h6 class="font-weight-normal">Portfolio: 60% in the GIC, 40% in the FD</h6>
+                    <div class="formula mb-0">0.60 × 10% + 0.40 × 46.1% = 24.4%  →  Moderate</div>
+                </div>
+            </section>
+
+            <section id="reliability" class="card mb-4">
+                <div class="card-body">
+                    <h4 class="font-weight-lighter">9. Keeping it reliable</h4>
+                    <ul class="mb-0">
+                        <li><strong>Calculate what can be calculated</strong> (currency stress, insurance coverage) from the app's own data, instead of guessing.</li>
+                        <li><strong>Keep the hand-set values in the Django admin</strong>, under Networth: <em>Country risks</em> (sovereign, convertibility, war switch; the <code>WORLD</code> row is the global factor), <em>Currency risks</em>, <em>Institution risks</em> and <em>Asset type risks</em>. Each row records a <strong>source and a last-reviewed date</strong>, and the dashboard shows a warning icon when a row is more than 6 months old.</li>
+                        <li><strong>Back-test it:</strong> the app's own exchange-rate history starts in Feb 2025, after the 2023–24 naira devaluation, so the NGN minimum was set from that event (roughly a 40%+ loss in USD terms). Check it again whenever the naira moves sharply.</li>
+                        <li><strong>Keep Liquidity separate.</strong> It has its own dashboard slot, and blending it into Risk would muddy both numbers.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="dashboard" class="card mb-4">
+                <div class="card-body">
+                    <h4 class="font-weight-lighter">10. On the dashboard</h4>
+                    <ul class="mb-0">
+                        <li>The <strong>Risk</strong> slot shows the portfolio score and its band.</li>
+                        <li>A tooltip breaks it down by layer (e.g. “Country 18 · Institution 3 · Asset type 6”) and lists the three assets contributing the most risk.</li>
+                        <li>The naira-breach probability that used to fill this slot now appears in the tooltip. The info icon links to this page, and a warning icon appears when values are unrated or overdue for review.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="open" class="card mb-4">
+                <div class="card-body">
+                    <h4 class="font-weight-lighter">11. Decisions</h4>
+                    <ul class="mb-0">
+                        <li><strong>Base currency: USD.</strong> Matches every other dashboard total, so a CAD fall against USD counts as risk.</li>
+                        <li><strong>Horizon: 1 year.</strong> The score reacts to current conditions.</li>
+                        <li><strong>Hand-set values: admin only.</strong> AI-suggested updates can be added later.</li>
+                    </ul>
+                </div>
+            </section>
+
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 70px;">
+                <ul class="list-group list-group-flush font-weight-lighter">
+                    <li class="list-group-item list-group-item-primary text-center">Contents</li>
+                    <a class="list-group-item list-group-item-action" href="#current">Your current score</a>
+                    <a class="list-group-item list-group-item-action" href="#definition">1. What the score means</a>
+                    <a class="list-group-item list-group-item-action" href="#why-loss">2. Why loss, not probability</a>
+                    <a class="list-group-item list-group-item-action" href="#per-asset">3. Scoring one asset</a>
+                    <a class="list-group-item list-group-item-action" href="#country">4. Country (and world)</a>
+                    <a class="list-group-item list-group-item-action" href="#institution">5. Institution</a>
+                    <a class="list-group-item list-group-item-action" href="#asset-type">6. Asset type</a>
+                    <a class="list-group-item list-group-item-action" href="#rollup">7. Rolling it up</a>
+                    <a class="list-group-item list-group-item-action" href="#example">8. Worked example</a>
+                    <a class="list-group-item list-group-item-action" href="#reliability">9. Keeping it reliable</a>
+                    <a class="list-group-item list-group-item-action" href="#dashboard">10. On the dashboard</a>
+                    <a class="list-group-item list-group-item-action" href="#open">11. Decisions</a>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

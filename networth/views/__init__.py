@@ -35,4 +35,4 @@ from .forecast import (
 )
 from .preferences import NetworthPreferenceView
 from .infodesk import InfoDeskListView, InfoNoteCreateView, InfoNoteUpdateView, InfoNoteResolveView, InfoNoteDeleteView
-from .tutorials import TutorialListView, TutorialDetailView, TutorialGrowthView
+from .tutorials import TutorialListView, TutorialDetailView, TutorialGrowthView, RiskScoreStudyView
