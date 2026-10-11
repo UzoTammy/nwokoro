@@ -1077,3 +1077,103 @@ h1, h2, h3 { margin: 0; }
     .sc-control-list { grid-template-columns: 1fr; }
     .sc-timeline li { grid-template-columns: 1fr; }
 }
+
+/* ================= CP Devotional case study ================= */
+.cp-actions { margin-top: 28px; }
+.cp-disclosure {
+    margin-top: 40px; padding: 18px 22px; border-radius: 16px;
+    background: var(--card); border: 1px solid var(--terra);
+}
+.cp-disclosure p { margin: 0; color: var(--ink-soft); font-size: 15.5px; }
+.cp-disclosure strong { color: var(--ink); }
+.cp-facts {
+    margin: 20px 0 0; display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.cp-facts div { padding: 18px 20px 18px 0; }
+.cp-facts div + div { padding-left: 20px; border-left: 1px solid var(--line); }
+.cp-facts dt { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); }
+.cp-facts dd { margin: 6px 0 0; font-family: var(--serif); font-size: 19px; line-height: 1.3; }
+.cp-toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.cp-toc a {
+    display: inline-flex; gap: 8px; align-items: center; text-decoration: none;
+    font-size: 14px; font-weight: 500; color: var(--ink);
+    border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 14px;
+}
+.cp-toc a span { font-family: var(--serif); font-weight: 600; color: var(--terra); }
+.cp-toc a:hover { border-color: var(--terra); }
+
+.cp-practices { grid-template-columns: repeat(3, 1fr); }
+.cp-prose { margin-top: 28px; max-width: 760px; }
+
+.cp-diagram {
+    margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+    padding: 24px 20px 18px; overflow-x: auto;
+}
+.cp-diagram svg { display: block; width: 100%; min-width: 560px; height: auto; font-family: var(--sans); }
+.cp-lines line { stroke: var(--line); stroke-width: 2; }
+.cp-node rect { fill: var(--paper); stroke: var(--line); stroke-width: 1.5; }
+.cp-server rect { fill: var(--terra-soft); stroke: var(--terra); stroke-width: 2; }
+.cp-dots circle { fill: var(--terra); }
+.cp-diagram text { text-anchor: middle; fill: var(--ink-soft); font-size: 12px; }
+.cp-diagram .cp-t1 { fill: var(--ink); font-size: 15px; font-weight: 600; font-family: var(--serif); }
+.cp-diagram .cp-t2 { fill: var(--ink-faint); font-size: 11.5px; }
+.cp-diagram figcaption { margin: 12px 4px 0; font-size: 14px; color: var(--ink-faint); }
+.cp-why { grid-template-columns: repeat(3, 1fr); }
+
+.cp-group {
+    display: flex; align-items: center; gap: 14px; margin: 8px 0 8px;
+    font-size: 13px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--terra-deep);
+}
+.cp-group::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.cp-note { color: var(--ink-soft); margin: 0 0 24px; max-width: 680px; }
+.cp-fork { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.cp-track { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 22px; }
+.cp-track-label { margin: 0 0 16px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--terra-deep); }
+.cp-steps { list-style: none; margin: 0; padding: 0; }
+.cp-steps li { position: relative; display: grid; grid-template-columns: 36px 1fr; gap: 14px; padding-bottom: 20px; }
+.cp-steps li:last-child { padding-bottom: 0; }
+.cp-steps li:not(:last-child)::after {
+    content: ""; position: absolute; left: 17px; top: 38px; bottom: 2px; width: 2px; background: var(--line);
+}
+.cp-steps li > span {
+    width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    background: var(--terra); color: #fff; font-family: var(--serif); font-weight: 600; font-size: 14px;
+}
+.cp-steps h4 { margin: 6px 0 4px; font-family: var(--serif); font-weight: 600; font-size: 18px; }
+.cp-steps p { margin: 0; color: var(--ink-soft); font-size: 15px; }
+.cp-steps em { display: block; margin-top: 6px; font-size: 14px; color: var(--ink-faint); }
+.cp-merge { display: flex; justify-content: center; height: 34px; }
+.cp-merge i { width: 2px; background: var(--terra); }
+.cp-joined, .cp-music { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 22px; }
+.cp-joined { border-color: var(--terra); margin-bottom: 48px; }
+.cp-music { columns: 2; column-gap: 32px; }
+.cp-music li { break-inside: avoid; }
+
+.cp-cost { align-items: start; }
+.cp-table td:nth-child(2), .cp-table .cp-amt { text-align: right; white-space: nowrap; font-family: var(--sans); font-weight: 600; color: var(--ink); }
+.cp-table th.cp-amt { text-align: right; }
+.cp-total td { border-top: 2px solid var(--ink); border-bottom: 0; font-family: var(--serif) !important; font-size: 17px; color: var(--ink) !important; }
+
+.cp-problems { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.cp-problems article { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 24px; }
+.cp-problems h3 { font-family: var(--serif); font-weight: 600; font-size: 21px; line-height: 1.25; margin: 14px 0 10px; }
+.cp-problems p { color: var(--ink-soft); font-size: 15px; margin: 0 0 10px; }
+.cp-attr { font-size: 13px !important; font-weight: 600; color: var(--terra-deep) !important; }
+.cp-shows { margin: 14px 0 0 !important; padding-top: 12px; border-top: 1px dashed var(--line); font-size: 14px !important; font-style: italic; }
+.cp-shows::before { content: "What this shows: "; font-style: normal; font-weight: 600; color: var(--terra-deep); }
+.cp-cta { margin-top: 48px; }
+
+@media (max-width: 960px) {
+    .cp-facts { grid-template-columns: 1fr 1fr; }
+    .cp-facts div:nth-child(3) { padding-left: 0; border-left: 0; }
+    .cp-facts div:nth-child(n+3) { border-top: 1px solid var(--line); }
+    .cp-why, .cp-practices { grid-template-columns: 1fr; }
+    .cp-fork, .cp-problems { grid-template-columns: 1fr; }
+    .cp-music { columns: 1; }
+}
+@media (max-width: 720px) {
+    .cp-facts dd { font-size: 16px; }
+    .cp-facts div, .cp-facts div + div { padding: 14px 10px 14px 0; }
+    .cp-facts div:nth-child(even) { padding-left: 14px; }
+}

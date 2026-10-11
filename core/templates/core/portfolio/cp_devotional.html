@@ -1,0 +1,310 @@
+{% extends 'core/site_base.html' %}
+
+{% block title %}CP Devotional — Case Study{% endblock %}
+{% block description %}CP Devotional: a daily devotional app on Google Play and the web, designed and shipped by directing an AI coding agent through every decision.{% endblock %}
+
+{% block content %}
+<section class="shell tool-page">
+    <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="{% url 'index' %}#work"><span aria-hidden="true">←</span> Selected work</a>
+    </nav>
+
+    <div class="sc-hero">
+        <div class="tool-head">
+            <p class="eyebrow">Case study · CP Devotional</p>
+            <h1 class="display">A daily devotional, <em>reviewed by people.</em></h1>
+            <p class="lede">A devotional app I designed and shipped by directing an AI coding agent through every decision, from the first idea to a live product people use every day.</p>
+            <div class="work-actions cp-actions">
+                <a class="btn btn-solid btn-store" href="https://play.google.com/store/apps/details?id=com.cpo.dailydevotion" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-google-play" aria-hidden="true"></i> Get it on Google Play
+                </a>
+                <a class="btn-link" href="https://cpdevotional.org" target="_blank" rel="noopener noreferrer">Visit cpdevotional.org <span aria-hidden="true">↗</span></a>
+            </div>
+        </div>
+        <div class="work-media mock mock-devotional reveal" role="group" aria-label="Sample content from CP Devotional">
+            <span class="live-ribbon"><i class="fab fa-google-play" aria-hidden="true"></i> Now on Google Play</span>
+            <div class="dev-grid">
+                <article class="dev-card dev-devotion">
+                    <span class="dev-kicker"><i class="fas fa-book-open" aria-hidden="true"></i> Devotion</span>
+                    <h4>Be a Giver!</h4>
+                    <blockquote>“It is more blessed to give than to receive.”</blockquote>
+                    <cite>Acts 20:35</cite>
+                    <p>Giving is bigger than money — time, a skill, a kind word, a prayer. Nobody is empty.</p>
+                    <span class="dev-actions" aria-hidden="true"><span>Read</span><span>Listen</span></span>
+                </article>
+                <article class="dev-card dev-testimony">
+                    <span class="dev-kicker"><i class="fas fa-comment-dots" aria-hidden="true"></i> Testimony</span>
+                    <h4>The Stranger Who Gave Away Everything</h4>
+                    <p>As a boy, Jimmy Darts handed a homeless man a hundred-dollar bill — and never forgot his face.</p>
+                </article>
+                <article class="dev-card dev-song">
+                    <span class="dev-kicker"><i class="fas fa-music" aria-hidden="true"></i> Gospel music · Praise</span>
+                    <div class="dev-player">
+                        <span class="dev-play" aria-hidden="true"><i class="fas fa-play"></i></span>
+                        <div><h4>The One in the Room</h4><span class="dev-meta">Uzo · 3:34</span></div>
+                    </div>
+                    <span class="dev-progress" aria-hidden="true"><i></i></span>
+                </article>
+            </div>
+        </div>
+    </div>
+
+    <div class="cp-disclosure reveal">
+        <p><strong>How this was built:</strong> I make the calls: what to build, which trade-offs to accept, what's broken and why it matters. An AI coding agent writes the code and implements each change, under my direction and review. Every decision on this page is mine; the implementation is the agent's.</p>
+    </div>
+
+    <dl class="cp-facts reveal">
+        <div><dt>Directed by</dt><dd>Uzo Nwokoro</dd></div>
+        <div><dt>Runs for</dt><dd>~$25–30 / month</dd></div>
+        <div><dt>Shipped</dt><dd>214 commits since July 2026</dd></div>
+        <div><dt>Live on</dt><dd>Google Play &amp; the web</dd></div>
+    </dl>
+
+    <nav class="cp-toc reveal" aria-label="On this page">
+        <a href="#overview"><span>01</span> What it does</a>
+        <a href="#architecture"><span>02</span> How it's built</a>
+        <a href="#how-it-works"><span>03</span> How the app works</a>
+        <a href="#ai"><span>04</span> Using AI responsibly</a>
+        <a href="#cost"><span>05</span> What it costs</a>
+        <a href="#problems"><span>06</span> Problems I solved</a>
+        <a href="#improve"><span>07</span> What I'd still improve</a>
+    </nav>
+</section>
+
+<!-- 01 -->
+<section id="overview" class="shell section">
+    <div class="section-head reveal">
+        <p class="eyebrow">01 · What it does</p>
+        <h2 class="headline">Three practices, <em>in any order.</em></h2>
+    </div>
+    <ul class="adv-data cp-practices">
+        <li class="reveal"><i class="fas fa-book-open" aria-hidden="true"></i><h3>Devotion</h3><p>A daily reading built around a Bible passage, to read or listen to.</p></li>
+        <li class="reveal"><i class="fas fa-comment-dots" aria-hidden="true"></i><h3>Testimonies</h3><p>Real, sourced stories that match the day's theme.</p></li>
+        <li class="reveal"><i class="fas fa-music" aria-hidden="true"></i><h3>Gospel music</h3><p>Three songs a day, with favourites members can keep.</p></li>
+    </ul>
+    <div class="adv-prose cp-prose reveal">
+        <p>Members reach each practice from a menu and open them in any order. An earlier version pushed everyone through one fixed sequence every time. Once it was clear people mostly wanted to jump straight to the one thing they came for, I rebuilt the app around letting them do that.</p>
+        <p>Everything a member sees, the devotion, its testimony and the day's three songs, passes through the same draft-then-approve process before it goes live.</p>
+    </div>
+</section>
+
+<!-- 02 -->
+<section id="architecture" class="shell section">
+    <div class="section-head reveal">
+        <p class="eyebrow">02 · How it's built</p>
+        <h2 class="headline">Two apps, <em>one server.</em></h2>
+        <p class="docs-intro">A website and a mobile app, both talking to the same server, which is the only piece that reaches the database and outside services.</p>
+    </div>
+    <figure class="cp-diagram reveal">
+        <svg viewBox="0 0 820 300" role="img" aria-labelledby="cp-diag-title cp-diag-desc">
+            <title id="cp-diag-title">How the pieces connect</title>
+            <desc id="cp-diag-desc">The website and the mobile app both send requests to one server, which is the only piece that talks to the database, file storage, the AI service, email and Bible verse lookups.</desc>
+            <g class="cp-lines">
+                <line x1="160" y1="74" x2="160" y2="108"/><line x1="660" y1="74" x2="660" y2="108"/>
+                <line x1="160" y1="108" x2="660" y2="108"/><line x1="410" y1="108" x2="410" y2="138"/>
+                <line x1="410" y1="200" x2="410" y2="226"/><line x1="100" y1="226" x2="720" y2="226"/>
+                <line x1="100" y1="226" x2="100" y2="252"/><line x1="255" y1="226" x2="255" y2="252"/>
+                <line x1="410" y1="226" x2="410" y2="252"/><line x1="565" y1="226" x2="565" y2="252"/>
+                <line x1="720" y1="226" x2="720" y2="252"/>
+            </g>
+            <g class="cp-node">
+                <rect x="50" y="20" width="220" height="54" rx="10"/>
+                <text x="160" y="44" class="cp-t1">Website</text><text x="160" y="61" class="cp-t2">React</text>
+                <rect x="550" y="20" width="220" height="54" rx="10"/>
+                <text x="660" y="44" class="cp-t1">Mobile app</text><text x="660" y="61" class="cp-t2">Expo · Google Play</text>
+            </g>
+            <g class="cp-server">
+                <rect x="250" y="138" width="320" height="62" rx="12"/>
+                <text x="410" y="164" class="cp-t1">One server</text><text x="410" y="182" class="cp-t2">FastAPI · also serves the website</text>
+            </g>
+            <g class="cp-node cp-small">
+                <rect x="30" y="252" width="140" height="44" rx="9"/><text x="100" y="279">PostgreSQL</text>
+                <rect x="185" y="252" width="140" height="44" rx="9"/><text x="255" y="279">File storage</text>
+                <rect x="340" y="252" width="140" height="44" rx="9"/><text x="410" y="279">Claude (AI)</text>
+                <rect x="495" y="252" width="140" height="44" rx="9"/><text x="565" y="279">Email</text>
+                <rect x="650" y="252" width="140" height="44" rx="9"/><text x="720" y="279">Bible verses</text>
+            </g>
+            <g class="cp-dots"><circle cx="410" cy="108" r="4"/><circle cx="410" cy="226" r="4"/></g>
+        </svg>
+        <figcaption>Nothing else (not the database, the AI or email) is reachable directly from a phone or a browser.</figcaption>
+    </figure>
+    <div class="tool-notes cp-why">
+        <div class="reveal"><h3>Why one server, not two</h3><p>Running the website and the server separately would cost more each month for no real benefit at this size, so they share one.</p></div>
+        <div class="reveal"><h3>Why two apps, not one shared codebase</h3><p>Building each screen twice is more work up front, but each app feels native to its platform instead of a compromise between the two.</p></div>
+        <div class="reveal"><h3>How it stays unbroken</h3><p>Automated checks run on every change before it can go live, with the closest attention on accounts, security and content review, where a bug would do real damage.</p></div>
+    </div>
+</section>
+
+<!-- 03 -->
+<section id="how-it-works" class="shell section">
+    <div class="section-head reveal">
+        <p class="eyebrow">03 · How the app works</p>
+        <h2 class="headline">Nothing goes live <em>without review.</em></h2>
+        <p class="docs-intro">The path each kind of content takes from a first idea to something a member sees.</p>
+    </div>
+
+    <h3 class="cp-group reveal">Devotion &amp; testimony</h3>
+    <p class="cp-note reveal">The devotion and its testimony are drafted and reviewed side by side, then approved and paired in a single action.</p>
+    <div class="cp-fork">
+        <div class="cp-track reveal">
+            <p class="cp-track-label">Devotion</p>
+            <ol class="cp-steps">
+                <li><span>1</span><div><h4>Idea</h4><p>An author picks a title, or asks the built-in assistant for one to start from.</p></div></li>
+                <li><span>2</span><div><h4>Draft</h4><p>The full devotion is written, often AI-assisted.</p><em>The Bible verse text is always fetched fresh from a trusted source, never taken from the AI's memory.</em></div></li>
+                <li><span>3</span><div><h4>Review</h4><p>A person reads every draft before it can move on. Nothing skips this step.</p></div></li>
+            </ol>
+        </div>
+        <div class="cp-track reveal">
+            <p class="cp-track-label">Testimony</p>
+            <ol class="cp-steps">
+                <li><span>4</span><div><h4>Search</h4><p>The app looks for a real, verifiable testimony matching the devotion's theme, or an author supplies one.</p></div></li>
+                <li><span>5</span><div><h4>Draft</h4><p>A short account is written, always linked to its source.</p><em>If nothing real and checkable turns up, it says so instead of inventing one.</em></div></li>
+                <li><span>6</span><div><h4>Review</h4><p>A person opens the source and checks it, the same standard as the devotion.</p></div></li>
+            </ol>
+        </div>
+    </div>
+    <div class="cp-merge" aria-hidden="true"><i></i></div>
+    <ol class="cp-steps cp-joined reveal">
+        <li><span>7a</span><div><h4>Approve &amp; pair</h4><p>The devotion is approved with the exact testimony reviewed alongside it.</p><em>Not whichever testimony is next in line, so the two can never drift apart later.</em></div></li>
+        <li><span>7b</span><div><h4>Schedule</h4><p>The approved pair takes the next open day.</p><em>Counting starts from tomorrow, because today's slot may already belong to something approved earlier.</em></div></li>
+        <li><span>7c</span><div><h4>Publish</h4><p>On its date, the devotion and testimony go live for every member.</p></div></li>
+    </ol>
+
+    <h3 class="cp-group reveal">Gospel music</h3>
+    <p class="cp-note reveal">Songs come from a standing catalogue, so the path is shorter, but it ends at the same review gate.</p>
+    <ol class="cp-steps cp-music reveal">
+        <li><span>1</span><div><h4>Add to the library</h4><p>Each track is catalogued with title, artist and category.</p></div></li>
+        <li><span>2</span><div><h4>Auto-pick three</h4><p>The app suggests the next set of three.</p><em>Favouring songs that haven't played in a while, so the rotation stays fresh without anyone tracking it.</em></div></li>
+        <li><span>3</span><div><h4>Adjust</h4><p>An author can swap any song before review.</p></div></li>
+        <li><span>4</span><div><h4>Review &amp; approve</h4><p>A person checks and approves the set.</p></div></li>
+        <li><span>5</span><div><h4>Schedule</h4><p>Approved sets queue up on their own, first approved, first played.</p></div></li>
+        <li><span>6</span><div><h4>Publish</h4><p>On its day the three songs go live, ready to play and favourite.</p></div></li>
+    </ol>
+</section>
+
+<!-- 04 -->
+<section id="ai" class="ai-band adv-band">
+    <div class="shell">
+        <div class="section-head reveal">
+            <p class="eyebrow eyebrow-light">04 · Using AI responsibly</p>
+            <h2 class="headline">AI drafts. <em>People decide.</em></h2>
+            <p class="ai-copy">AI drafts devotions, finds real testimonies and suggests writing prompts, but it never publishes anything by itself.</p>
+        </div>
+        <ul class="adv-beauty">
+            <li class="reveal"><h3>A person reviews everything</h3><p>AI-drafted content goes through exactly the same approve-before-publish step as anything written by hand.</p></li>
+            <li class="reveal"><h3>The AI doesn't own the facts</h3><p>Verse text is always looked up from a proper source rather than trusting the model to remember it correctly.</p></li>
+            <li class="reveal"><h3>The right model for the stakes</h3><p>Small suggestions use a faster, cheaper model; anything a member will read uses a stronger one.</p></li>
+        </ul>
+    </div>
+</section>
+
+<!-- 05 -->
+<section id="cost" class="shell section">
+    <div class="docs-grid cp-cost">
+        <div class="section-head reveal">
+            <p class="eyebrow">05 · What it costs to run</p>
+            <h2 class="headline">About $25–30 <em>a month.</em></h2>
+            <p class="docs-intro">File storage, email delivery and Bible verse lookups currently sit inside their providers' free tiers. The AI line is the only one that moves with usage; the rest are flat subscriptions. These are estimates, not months of billing history.</p>
+        </div>
+        <div class="docs-block reveal">
+            <table class="docs-table cp-table">
+                <thead><tr><th>Item</th><th class="cp-amt">Monthly</th></tr></thead>
+                <tbody>
+                    <tr><td>Hosting (server + database)</td><td class="cp-amt">$12.00</td></tr>
+                    <tr><td>Music subscription</td><td class="cp-amt">$10.00</td></tr>
+                    <tr><td>AI writing assistant</td><td class="cp-amt">~$1–6</td></tr>
+                    <tr><td>Domain name</td><td class="cp-amt">~$1–2</td></tr>
+                    <tr><td>App store registration</td><td class="cp-amt">$0.42</td></tr>
+                    <tr class="cp-total"><td>Total</td><td class="cp-amt">~$25–30</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- 06 -->
+<section id="problems" class="shell section">
+    <div class="section-head reveal">
+        <p class="eyebrow">06 · Problems I solved</p>
+        <h2 class="headline">Real problems, <em>and what each one shows.</em></h2>
+    </div>
+    <div class="cp-problems">
+        <article class="reveal">
+            <span class="sc-tag">Debugging</span>
+            <h3>A pairing that could quietly fall out of sync</h3>
+            <p>Each devotion is matched with a related, real testimony. Early on, both were picked independently, "the next devotion" and "the next testimony", which worked until someone removed one item from either list. Then a testimony could appear next to a devotion it was never reviewed with. Now the app remembers exactly which testimony was approved with which devotion, and discarding a devotion discards its testimony too.</p>
+            <p class="cp-shows">Catching bugs that only appear once something changes later, not just testing the obvious case.</p>
+        </article>
+        <article class="reveal">
+            <span class="sc-tag">Attention to detail</span>
+            <h3>A duplicate that only looked different</h3>
+            <p>"Trust God" and "trust god" passed as two different titles. The check now ignores capitalisation, and it runs <em>before</em> the AI generates anything, so a rejected duplicate never costs a paid AI request.</p>
+            <p class="cp-shows">Noticing the edge case a real person will hit, and fixing it in a way that also saves money.</p>
+        </article>
+        <article class="reveal">
+            <span class="sc-tag">Security</span>
+            <h3>Never revealing who has an account</h3>
+            <p class="cp-attr">Suggested by the AI coding agent · reviewed and approved by me</p>
+            <p>If "forgot password" answered differently, or even faster, when an address had no account, someone could test a list of emails and learn who is registered. The app now gives the same reply in the same time either way, sending any email in the background.</p>
+            <p class="cp-shows">Understanding an AI-suggested fix well enough to explain it and stand behind it.</p>
+        </article>
+        <article class="reveal">
+            <span class="sc-tag">Cost judgement</span>
+            <h3>A permission limited by what it could cost</h3>
+            <p>One admin tool could regenerate a batch of AI writing prompts as often as someone clicked, and every click was a paid request. That action is now owner-only, while a cheaper, capped version stays open to other admins.</p>
+            <p class="cp-shows">Some safeguards protect the budget, not just the data.</p>
+        </article>
+        <article class="reveal">
+            <span class="sc-tag">Changing my mind</span>
+            <h3>Reversing a decision once the evidence came in</h3>
+            <p>I moved one AI feature to a free-tier provider to cut costs. Under real use the free capacity ran out almost immediately, so I reverted the next day rather than keep complexity around a plan that wasn't working.</p>
+            <p class="cp-shows">Trusting the real result over the original plan, and changing course quickly.</p>
+        </article>
+        <article class="reveal">
+            <span class="sc-tag">Scope discipline</span>
+            <h3>Removing unfinished ideas instead of leaving them half-built</h3>
+            <p>Two early features got placeholder screens and some backend work, then didn't make the final plan. I removed them completely, so if either returns it starts clean.</p>
+            <p class="cp-shows">Knowing the difference between "not right now" and "sort of, halfway".</p>
+        </article>
+        <article class="reveal">
+            <span class="sc-tag">Learning from mistakes</span>
+            <h3>Two mistakes in two days changed how the database is managed</h3>
+            <p>Database changes were made by hand until two incidents in two days: one missed update, then one that broke part of the admin dashboard. I switched to <strong>Alembic</strong>, which applies every change automatically and in order, so the same mistake can't happen the same way again.</p>
+            <p class="cp-shows">Treating a repeated mistake as a reason to fix the process, not just the symptom.</p>
+        </article>
+    </div>
+</section>
+
+<!-- 07 -->
+<section id="improve" class="shell section">
+    <div class="docs-grid">
+        <div class="section-head reveal">
+            <p class="eyebrow">07 · What I'd still improve</p>
+            <h2 class="headline">Naming what <em>isn't finished.</em></h2>
+        </div>
+        <div class="docs-block reveal">
+            <ul class="docs-list">
+                <li><strong>Test coverage is thin outside accounts and content review.</strong> Most of what a member sees on the website and mobile app isn't automatically tested yet.</li>
+                <li><strong>The login-attempt limiter assumes one server.</strong> If the app ever ran on several at once, it would need an upgrade.</li>
+                <li><strong>The monthly cost is a projection, not a bill.</strong> It's based on expected usage until there's enough real traffic to measure.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="tp-idea cp-cta reveal">
+        <div>
+            <p class="eyebrow">Try it</p>
+            <h2 class="headline">Free on Google Play <em>and the web.</em></h2>
+        </div>
+        <div class="work-actions">
+            <a class="btn btn-solid btn-store" href="https://play.google.com/store/apps/details?id=com.cpo.dailydevotion" target="_blank" rel="noopener noreferrer"><i class="fab fa-google-play" aria-hidden="true"></i> Get it on Google Play</a>
+            <a class="btn-link" href="https://cpdevotional.org" target="_blank" rel="noopener noreferrer">cpdevotional.org <span aria-hidden="true">↗</span></a>
+        </div>
+    </div>
+
+    <div class="tool-more">
+        <a class="btn-link" href="{% url 'index' %}#work">Back to selected work <span aria-hidden="true">→</span></a>
+        <a class="btn-link" href="{% url 'portfolio-scush' %}">Next: SCusH <span aria-hidden="true">→</span></a>
+    </div>
+</section>
+{% endblock %}

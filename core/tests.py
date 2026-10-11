@@ -141,3 +141,24 @@ class NumberToWordsViewTest(SimpleTestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertContains(response, 'tool-error')
                 self.assertNotContains(response, '<script>alert(1)</script>')
+
+
+@override_settings(STORAGES={
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+})
+class CaseStudyPagesTest(SimpleTestCase):
+
+    def test_case_studies_render(self):
+        for url, text in [
+            ('/portfolio-scush/', 'distribution business'),
+            ('/portfolio/ai-advisor/', 'Ask your money'),
+            ('/portfolio/cp-devotional/', 'reviewed by people'),
+        ]:
+            with self.subTest(url=url):
+                self.assertContains(self.client.get(url), text)
+
+    def test_home_links_to_cp_devotional_page_not_artifact(self):
+        response = self.client.get('/')
+        self.assertContains(response, 'href="/portfolio/cp-devotional/"')
+        self.assertNotContains(response, 'claude.ai/code/artifact')

@@ -181,6 +181,9 @@ class TinyProjectView(TemplateView):
 class PortfolioScushView(TemplateView):
     template_name = 'core/portfolio/scush_v2.html'
 
+class CPDevotionalCaseStudyView(TemplateView):
+    template_name = 'core/portfolio/cp_devotional.html'
+
 class AdvisorCaseStudyView(TemplateView):
     template_name = 'core/portfolio/ai_advisor.html'
 
