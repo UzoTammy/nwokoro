@@ -179,7 +179,7 @@ class TinyProjectView(TemplateView):
         return context
 
 class PortfolioScushView(TemplateView):
-    template_name = 'core/portfolio/scush.html'
+    template_name = 'core/portfolio/scush_v2.html'
 
 class AdvisorCaseStudyView(TemplateView):
     template_name = 'core/portfolio/ai_advisor.html'

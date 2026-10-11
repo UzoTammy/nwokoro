@@ -1,0 +1,181 @@
+{% extends 'core/site_base.html' %}
+
+{% block title %}SCusH — Case Study{% endblock %}
+{% block description %}SCusH: the operations platform running a beverages distributor since 2021, covering stock, customers, people and money, with real financial controls.{% endblock %}
+
+{% block content %}
+<section class="shell tool-page">
+    <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="{% url 'index' %}#work"><span aria-hidden="true">←</span> Selected work</a>
+    </nav>
+
+    <div class="sc-hero">
+        <div class="tool-head">
+            <p class="eyebrow">Case study · SCusH</p>
+            <h1 class="display">One system for the whole <em>distribution business.</em></h1>
+            <p class="lede">SCusH, short for <strong>S</strong>tock, <strong>Cus</strong>tomer and <strong>H</strong>uman resource, runs the day-to-day operations of a beverages distributor: recruitment, payroll, warehousing, sales accounting and cash, in one place.</p>
+            <ul class="sc-facts">
+                <li><span class="live-dot" aria-hidden="true"></span><strong>In production</strong> since 2021</li>
+                <li><i class="fas fa-layer-group" aria-hidden="true"></i><strong>One app</strong> per business area</li>
+                <li><i class="fas fa-shield-alt" aria-hidden="true"></i><strong>Real controls:</strong> locks, audit, approvals</li>
+            </ul>
+        </div>
+        <div class="work-media work-shot sc-shot reveal" role="img" aria-label="Illustration of the SCusH dashboard with placeholder figures">
+            <div class="browser-bar" aria-hidden="true"><i></i><i></i><i></i><span>scush.com.ng</span></div>
+            {% include 'core/includes/scush_dashboard.html' %}
+        </div>
+    </div>
+</section>
+
+<!-- problem / solution / impact -->
+<section class="shell section">
+    <div class="section-head reveal">
+        <p class="eyebrow">Why it exists</p>
+        <h2 class="headline">From scattered tools <em>to one source of truth.</em></h2>
+    </div>
+    <ol class="sc-psi">
+        <li class="reveal">
+            <span class="sc-tag">Problem</span>
+            <h3>Work lived in disconnected places</h3>
+            <p>Stock, customer records, payroll and policies were handled across separate tools. That meant duplicate entry, slow reports and constant reconciliation errors.</p>
+        </li>
+        <li class="reveal">
+            <span class="sc-tag">Solution</span>
+            <h3>One platform, one app per business area</h3>
+            <p>Each part of the business got its own focused module on a shared database, with payroll, KPI tracking, documents, notifications and report emails automated.</p>
+        </li>
+        <li class="reveal">
+            <span class="sc-tag">Impact</span>
+            <h3>Faster work, numbers you can trust</h3>
+            <p>Fewer bottlenecks, reports on time, and month-end figures that can't change behind anyone's back, so leadership decides on reliable data.</p>
+        </li>
+    </ol>
+</section>
+
+<!-- modules -->
+<section class="shell section">
+    <div class="section-head reveal">
+        <p class="eyebrow">What's inside</p>
+        <h2 class="headline">Four areas, <em>one system.</em></h2>
+    </div>
+    <div class="sc-modules">
+        <article class="sc-area reveal">
+            <h3><i class="fas fa-users" aria-hidden="true"></i>People &amp; recruitment</h3>
+            <ul>
+                <li><strong>Staff &amp; payroll:</strong> employees, positions, payroll, permits, suspensions, welfare and statements</li>
+                <li><strong>Recruitment:</strong> job postings, applications, interviews and guarantor documents</li>
+                <li><strong>Users:</strong> profiles and invite-only registration</li>
+            </ul>
+        </article>
+        <article class="sc-area reveal">
+            <h3><i class="fas fa-boxes" aria-hidden="true"></i>Stock &amp; warehousing</h3>
+            <ul>
+                <li><strong>Inventory:</strong> products, stock movements, stock counts and price history</li>
+                <li><strong>Stores:</strong> warehouses, levies and renewals</li>
+                <li><strong>Materials:</strong> internal requests and issuing, with approval</li>
+            </ul>
+        </article>
+        <article class="sc-area reveal">
+            <h3><i class="fas fa-coins" aria-hidden="true"></i>Finance &amp; trade</h3>
+            <ul>
+                <li><strong>Trade:</strong> daily and monthly trade, balance sheets and budgets</li>
+                <li><strong>Cashflow:</strong> deposits, disbursements and bank transfers</li>
+                <li><strong>Targets:</strong> sales targets, KPI budgets and monthly goals</li>
+                <li><strong>Sales centres:</strong> the outlets sales are booked against</li>
+            </ul>
+        </article>
+        <article class="sc-area reveal">
+            <h3><i class="fas fa-comments" aria-hidden="true"></i>Customers &amp; comms</h3>
+            <ul>
+                <li><strong>Customers:</strong> records and approved credit</li>
+                <li><strong>Comms:</strong> internal posts, projects, tasks and polls</li>
+            </ul>
+        </article>
+    </div>
+</section>
+
+<!-- controls -->
+<section class="ai-band sc-band">
+    <div class="shell">
+        <div class="section-head reveal">
+            <p class="eyebrow eyebrow-light">The part I'm proudest of</p>
+            <h2 class="headline">Financial controls <em>built into the data.</em></h2>
+            <p class="ai-copy">Accounting software is only trusted if the numbers can't quietly change. SCusH enforces that in the system itself, not by policy.</p>
+        </div>
+        <div class="sc-controls">
+            <ul class="adv-beauty sc-control-list">
+                <li class="reveal"><h3><i class="fas fa-lock" aria-hidden="true"></i>Locked periods</h3><p>Once a month is closed, it's locked, and the record keeps who locked it and when.</p></li>
+                <li class="reveal"><h3><i class="fas fa-clipboard-list" aria-hidden="true"></i>Audit trail</h3><p>Changes to trade records are logged with the user, the time and exactly what changed.</p></li>
+                <li class="reveal"><h3><i class="fas fa-user-check" aria-hidden="true"></i>Separated approvals</h3><p>Cash disbursements, material requests, customer credit and document re-uploads each need someone to approve them.</p></li>
+                <li class="reveal"><h3><i class="fas fa-database" aria-hidden="true"></i>Guarantees in the database</h3><p>An employee can't be paid twice for the same period. The database itself refuses it.</p></li>
+                <li class="reveal"><h3><i class="fas fa-user-clock" aria-hidden="true"></i>Session timeout</h3><p>Idle sessions sign out after ten minutes, because shared office computers are a real risk.</p></li>
+            </ul>
+<pre class="walk-code sc-code reveal"><code class="language-python">{% verbatim %}class Payroll(models.Model):
+    staff = models.ForeignKey(Employee, ...)
+    period = models.CharField(...)
+    ...
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['staff', 'period'],
+                name='unique_payroll_staff_period',
+            )
+        ]
+
+# a second payroll run for the same person and
+# month is rejected by PostgreSQL, not just the form{% endverbatim %}</code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- under the hood -->
+<section class="shell section">
+    <div class="section-head reveal">
+        <p class="eyebrow">Under the hood</p>
+        <h2 class="headline">Built to be <em>maintained for years.</em></h2>
+    </div>
+    <div class="docs-grid">
+        <div class="docs-block reveal">
+            <h3>Architecture</h3>
+            <ul class="docs-list">
+                <li><strong>One Django app per business area,</strong> each with its own URLs, so changes stay contained.</li>
+                <li><strong>Money is stored with its currency</strong> (django-money), never as bare numbers.</li>
+                <li><strong>Background jobs</strong> handle notifications, emails and scheduled work through Celery.</li>
+                <li><strong>PDF generation</strong> for payslips and reports.</li>
+                <li><strong>Charts</strong> for trade, growth and monthly sales on the dashboard.</li>
+                <li><strong>Media in Amazon S3,</strong> static files through WhiteNoise.</li>
+                <li><strong>Documentation lives with the code</strong> and is published by the app itself.</li>
+            </ul>
+        </div>
+        <div class="docs-block reveal">
+            <h3>Timeline</h3>
+            <ol class="timeline sc-timeline">
+                <li><span class="t-year">2021</span><p>First version goes into production</p></li>
+                <li><span class="t-year">2026</span><p>Locked periods, audit log, the payroll guarantee and a new recruitment module</p></li>
+                <li class="t-now"><span class="t-year">Now</span><p>Still in daily use, still evolving</p></li>
+            </ol>
+            <h3>Built with</h3>
+            <ul class="tags adv-stack">
+                <li>Python</li><li>Django</li><li>PostgreSQL</li><li>Celery</li><li>RabbitMQ</li>
+                <li>django-money</li><li>Amazon S3</li><li>WhiteNoise</li><li>Bootstrap</li><li>Heroku</li>
+            </ul>
+        </div>
+    </div>
+    <p class="sc-disclaimer">The dashboard illustration uses placeholder figures. No real company data is shown.</p>
+
+    <div class="tool-more">
+        <a class="btn-link" href="{% url 'index' %}#work">Back to selected work <span aria-hidden="true">→</span></a>
+        <a class="btn-link" href="{% url 'portfolio-ai-advisor' %}">Next: the AI Financial Advisor <span aria-hidden="true">→</span></a>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+<script>
+    window.addEventListener('DOMContentLoaded', function () {
+        if (window.hljs) document.querySelectorAll('pre code[class^="language-"]').forEach(function (el) { hljs.highlightElement(el); });
+    });
+</script>
+{% endblock %}
