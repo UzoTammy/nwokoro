@@ -1,48 +1,24 @@
+"""Retired: the AI Advisor now lives on the main site, behind login.
+
+This tiny app only exists so the old address (ai.uzonwokoro.com, and the Heroku
+app URL) forwards to the new private page instead of exposing anything. Once the
+`nwokoro-ai` Heroku app and its DNS record are removed, this file can be deleted.
+"""
 import os
-import sys
-from pathlib import Path
 
-# Bootstrap Django before any app imports
-BASE_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(BASE_DIR))
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "nwokoro.settings")
-
-import django
-django.setup()
-
-import uvicorn
 from fastapi import FastAPI
-from mcp.server.fastmcp import FastMCP
+from fastapi.responses import RedirectResponse
 
-from advisor.routes import chat, conversations, finance, pages, share
-from advisor.tools import register_tools
+NEW_HOME = "https://uzonwokoro.com/networth/advisor/"
 
-# ---------------------------------------------------------------------------
-# FastAPI app
-# ---------------------------------------------------------------------------
+app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
-app = FastAPI(
-    title="AI Advisor",
-    description="Financial data API, AI advisor, and MCP server for Nwokoro personal finance.",
-    version="1.0.0",
-)
 
-app.include_router(pages.router)
-app.include_router(finance.router)
-app.include_router(chat.router)
-app.include_router(share.router)
-app.include_router(conversations.router)
+@app.api_route("/{path:path}", methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"], include_in_schema=False)
+def moved(path: str):
+    return RedirectResponse(NEW_HOME, status_code=301)
 
-# ---------------------------------------------------------------------------
-# MCP server — mounted last so FastAPI routes take precedence
-# ---------------------------------------------------------------------------
-
-mcp = FastMCP("nwokoro", host="0.0.0.0", port=int(os.getenv("PORT", "8001")))
-register_tools(mcp)
-app.mount("/mcp", mcp.sse_app(mount_path="/mcp"))
-
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", "8001"))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "8001")))

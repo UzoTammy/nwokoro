@@ -1,10 +1,10 @@
 from pathlib import Path
 
-from django.conf import settings
+from django.urls import reverse
 
 
 def ai_advisor_url(request):
-    return {'AI_ADVISOR_URL': settings.AI_ADVISOR_URL}
+    return {'AI_ADVISOR_URL': reverse('advisor-home')}
 
 
 def asset_version(request):

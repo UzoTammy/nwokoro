@@ -102,10 +102,15 @@ EXTRACT_TOOL = {
 }
 
 
+def _tavily_key() -> str:
+    # the Heroku config var was created as TRAVILY_API_KEY (typo); accept both names
+    return os.getenv("TAVILY_API_KEY") or os.getenv("TRAVILY_API_KEY", "")
+
+
 def tavily_search(query: str) -> str:
     """Execute a finance-scoped web search via Tavily and return formatted results."""
     from tavily import TavilyClient
-    client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY", ""))
+    client = TavilyClient(api_key=_tavily_key())
     data = client.search(
         query=query,
         max_results=5,
@@ -121,7 +126,7 @@ def tavily_search(query: str) -> str:
 def tavily_extract(url: str) -> str:
     """Fetch the full text content of a specific URL via Tavily."""
     from tavily import TavilyClient
-    client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY", ""))
+    client = TavilyClient(api_key=_tavily_key())
     data = client.extract(urls=[url])
     results = data.get("results", [])
     if not results:
@@ -422,29 +427,3 @@ def get_maturing_investments(days: int = 60) -> list[dict]:
             })
     results.sort(key=lambda x: x["days_until_maturity"])
     return results
-
-
-# ---------------------------------------------------------------------------
-# MCP registration
-# ---------------------------------------------------------------------------
-
-_FINANCIAL_TOOLS = (
-    get_exchange_rates,
-    get_savings,
-    get_investments,
-    get_liabilities,
-    get_borrowed_funds,
-    get_stocks,
-    get_businesses,
-    get_fixed_assets,
-    get_net_worth_summary,
-    get_networth_history,
-    get_recent_transactions,
-    get_maturing_investments,
-)
-
-
-def register_tools(mcp) -> None:
-    """Register all financial tools with the given FastMCP instance."""
-    for fn in _FINANCIAL_TOOLS:
-        mcp.tool()(fn)

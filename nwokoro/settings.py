@@ -28,7 +28,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY=os.getenv('SECRET_KEY')
 api_key = os.getenv('EXCHANGE_API_KEY')
-AI_ADVISOR_URL = os.getenv('AI_ADVISOR_URL', 'http://localhost:8001/advisor')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.getenv('DEBUG_VALUE') == 'True' else False
