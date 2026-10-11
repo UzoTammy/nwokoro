@@ -91,6 +91,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.ai_advisor_url',
+                'core.context_processors.asset_version',
             ],
         },
     },

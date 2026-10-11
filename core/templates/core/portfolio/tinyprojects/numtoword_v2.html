@@ -1,0 +1,338 @@
+{% extends 'core/site_base.html' %}
+
+{% block title %}Number to Words — Tiny Projects{% endblock %}
+{% block description %}Convert any whole number up to 999 trillion into words, built with a small recursive function in plain Python.{% endblock %}
+
+{% block content %}
+<section class="shell tool-page">
+    <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="{% url 'tinyproject-home' %}"><span aria-hidden="true">←</span> Tiny projects</a>
+    </nav>
+
+    <div class="tool-head">
+        <div>
+            <p class="eyebrow">Algorithms · <span class="tp-badge tp-badge-live"><span class="live-dot" aria-hidden="true"></span>Live</span></p>
+            <h1 class="display">Number to <em>Words.</em></h1>
+            <p class="lede">Type a whole number and get it back in plain English, all the way up to 999 trillion.</p>
+            <ul class="tags tags-sm"><li>Whole numbers</li><li>Up to 999 trillion</li><li>Commas welcome</li></ul>
+        </div>
+    </div>
+
+    <div class="tool-panel">
+        <form method="get" class="tool-form" action="{% url 'number-to-word' %}">
+            <label for="enter_number" class="tool-label">Enter a number</label>
+            <div class="tool-input-row">
+                <input id="enter_number" name="enter_number" type="text" inputmode="numeric" autocomplete="off"
+                       value="{{ raw }}" placeholder="e.g. 1,250,000" data-group-digits required maxlength="25">
+                <button class="btn btn-solid" type="submit">Convert</button>
+            </div>
+            <p class="tool-examples">Try:
+                <a href="?enter_number=21">21</a>
+                <a href="?enter_number=1,001">1,001</a>
+                <a href="?enter_number=123,456">123,456</a>
+                <a href="?enter_number=7,000,000,000">7 billion</a>
+            </p>
+        </form>
+
+        <div class="tool-result" aria-live="polite">
+            {% if error %}
+            <p class="tool-error"><i class="fas fa-exclamation-circle" aria-hidden="true"></i> {{ error }}</p>
+            {% elif word %}
+            <p class="tool-figure">{{ figure|floatformat:"g" }}</p>
+            <p class="tool-words">{{ word }}</p>
+            <div class="tool-actions">
+                <button type="button" class="copy-mini" data-copy="{{ word }}"><i class="far fa-copy" aria-hidden="true"></i> <span data-copy-label>Copy words</span></button>
+                <a class="btn-link" href="{% url 'number-to-word' %}">Start again</a>
+            </div>
+            {% else %}
+            <p class="tool-placeholder">Your number in words will appear here.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="shell section">
+    <div class="section-head reveal">
+        <p class="eyebrow">How it works</p>
+        <h2 class="headline">Three kinds of number, <em>one recursive idea.</em></h2>
+    </div>
+    <ol class="strengths">
+        <li class="reveal"><span class="work-num">01</span><h3>Unique words</h3><p>Numbers whose names can't be built from others, like one, eleven, twenty or ninety. They live in a lookup table.</p></li>
+        <li class="reveal"><span class="work-num">02</span><h3>Derived words</h3><p>Names built from unique ones. Twenty-one is "twenty" plus "one".</p></li>
+        <li class="reveal"><span class="work-num">03</span><h3>Mixed words</h3><p>Combinations with a scale word, like "one hundred", "four thousand" or "seven billion".</p></li>
+    </ol>
+
+    <div class="tool-notes reveal">
+        <div>
+            <h3>Recursion</h3>
+            <p>The number is split at its largest scale (trillion, billion, million, thousand, hundred), and each part is converted by the same function. The parts get smaller until every one is a word in the lookup table.</p>
+        </div>
+        <div>
+            <h3>A 28-word lookup table</h3>
+            <p>Zero to twenty and the tens (thirty to ninety) are the only words stored. Everything else, up to 999 trillion, is built from them, with no external libraries.</p>
+        </div>
+    </div>
+
+    <div class="tool-more">
+        <a class="btn-link" href="#documentation">Read the documentation <span aria-hidden="true">↓</span></a>
+        <a class="btn-link" href="{% url 'tinyproject-home' %}">More tiny projects <span aria-hidden="true">→</span></a>
+    </div>
+</section>
+
+<section id="documentation" class="shell section docs">
+    <div class="section-head reveal">
+        <p class="eyebrow">Documentation</p>
+        <h2 class="headline">How I solved it, <em>step by step.</em></h2>
+        <p class="docs-intro">The thinking behind the tool, from scribbled examples to tested code. Each step shows the question I asked, what I noticed, and the code that came out of it.</p>
+    </div>
+
+    <ol class="walk">
+        <!-- 1 -->
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">01</span>
+                <h3>Write numbers out by hand first</h3>
+                <p class="walk-q"><strong>Question:</strong> before writing any code, how do people actually say numbers?</p>
+                <p>I wrote a handful out longhand and looked for what repeats and what doesn't.</p>
+                <ul class="walk-points">
+                    <li>Some words are <strong>irregular</strong>: "Thirteen", not "Three-Teen"; "Twelve", not "Ten-Two".</li>
+                    <li>Above twenty, numbers are <strong>built</strong>: Forty-Five = Forty + Five.</li>
+                    <li>"Thousand", "Million" and "Billion" just <strong>repeat</strong> the 1–999 pattern with a label.</li>
+                </ul>
+            </div>
+<pre class="walk-code"><code class="language-plaintext">{% verbatim %}7            Seven                 irregular
+13           Thirteen              irregular
+45           Forty-Five            tens + units
+300          Three Hundred         digit + "Hundred"
+45,300       Forty-Five Thousand,  (45) Thousand
+             Three Hundred           + (300)
+2,045,300    Two Million, ...      (2) Million + (45,300){% endverbatim %}</code></pre>
+        </li>
+
+        <!-- 2 -->
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">02</span>
+                <h3>Find the smallest set of words</h3>
+                <p class="walk-q"><strong>Question:</strong> which words can't be built from others?</p>
+                <p>Only <strong>0–20</strong> and the <strong>tens</strong> (30, 40 … 90). That's 28 words. Every other number up to 999 trillion is assembled from these plus "Hundred" and the scale names.</p>
+                <p class="walk-decision"><strong>Decision:</strong> store just those 28 in a dictionary keyed by number.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}UNIQUE = {
+    0: 'Zero', 1: 'One', 2: 'Two', ... 19: 'Nineteen',
+    20: 'Twenty', 30: 'Thirty', 40: 'Forty', 50: 'Fifty',
+    60: 'Sixty', 70: 'Seventy', 80: 'Eighty', 90: 'Ninety',
+}
+
+def _words(n: int) -> str:
+    if n in UNIQUE:          # 0-20 and the tens
+        return UNIQUE[n]{% endverbatim %}</code></pre>
+        </li>
+
+        <!-- 3 -->
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">03</span>
+                <h3>Two digits: split tens and units</h3>
+                <p class="walk-q"><strong>Question:</strong> how do I get "Forty-Five" from 45?</p>
+                <p>Integer division does it in one step: <code>divmod(45, 10)</code> gives <code>(4, 5)</code>. Multiply the tens back by ten to look up "Forty", then look up "Five".</p>
+                <p class="walk-decision"><strong>Decision:</strong> join with a hyphen, as standard English does.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}    if n < 100:
+        tens, units = divmod(n, 10)
+        return f'{UNIQUE[tens * 10]}-{UNIQUE[units]}'
+
+# _words(45) -> 'Forty-Five'{% endverbatim %}</code></pre>
+        </li>
+
+        <!-- 4 -->
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">04</span>
+                <h3>Three digits: hundreds and the first recursion</h3>
+                <p class="walk-q"><strong>Question:</strong> 345 is "Three Hundred" plus something. What is that something?</p>
+                <p>It's 45, which step 3 already solves. So instead of new logic, the function <strong>calls itself</strong> on the remainder. That's the first use of recursion.</p>
+                <p class="walk-decision"><strong>Decision:</strong> British English puts "and" after Hundred, but only when something follows.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}    if n < 1000:
+        hundreds, rest = divmod(n, 100)
+        head = f'{UNIQUE[hundreds]} Hundred'
+        return f'{head} and {_words(rest)}' if rest else head
+
+# _words(345) -> 'Three Hundred and Forty-Five'
+# _words(300) -> 'Three Hundred'{% endverbatim %}</code></pre>
+        </li>
+
+        <!-- 5 -->
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">05</span>
+                <h3>Big numbers: the same problem, smaller</h3>
+                <p class="walk-q"><strong>Question:</strong> do I need separate code for thousands, millions and billions?</p>
+                <p>No. 2,045,300 is <strong>2 × Million + 45,300</strong>, and 45,300 is <strong>45 × Thousand + 300</strong>. Each piece is a smaller version of the same problem, so one rule handles every scale: split at the largest scale present and convert both halves with <code>_words</code>.</p>
+                <p class="walk-decision"><strong>Decision:</strong> list the scales largest first, so the first match is always the right split.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}SCALES = [
+    (10 ** 12, 'Trillion'),
+    (10 ** 9, 'Billion'),
+    (10 ** 6, 'Million'),
+    (10 ** 3, 'Thousand'),
+]
+
+    for size, name in SCALES:
+        if n >= size:
+            head, rest = divmod(n, size)
+            text = f'{_words(head)} {name}'   # recursion
+            ...
+
+# 2,045,300 -> _words(2) Million + _words(45,300)
+#           -> _words(45) Thousand + _words(300){% endverbatim %}</code></pre>
+        </li>
+
+        <!-- 6 -->
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">06</span>
+                <h3>Decide how the pieces join</h3>
+                <p class="walk-q"><strong>Question:</strong> "One Thousand, One" or "One Thousand and One"?</p>
+                <p>I checked how British English, as used in Nigeria and Canada, writes these:</p>
+                <ul class="walk-points">
+                    <li>1,100 → "One Thousand<strong>,</strong> One Hundred"</li>
+                    <li>1,001 → "One Thousand <strong>and</strong> One"</li>
+                    <li>1,000,099 → "One Million <strong>and</strong> Ninety-Nine"</li>
+                </ul>
+                <p class="walk-decision"><strong>Decision:</strong> use a comma between scale groups, or "and" when the final part is under 100. If nothing is left over, stop.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}            if not rest:
+                return text                    # 2,000,000 -> 'Two Million'
+            joiner = ' and ' if rest < 100 else ', '
+            return f'{text}{joiner}{_words(rest)}'{% endverbatim %}</code></pre>
+        </li>
+
+        <!-- 7 -->
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">07</span>
+                <h3>Guard the edges</h3>
+                <p class="walk-q"><strong>Question:</strong> what will real people type into the box?</p>
+                <p>I tried to break it: <code>1,000</code>, <code>007</code>, <code>-5</code>, <code>12.5</code>, <code>²</code>, an empty box, and a 5,000-digit number. The core function should only ever see a clean, valid integer.</p>
+                <p class="walk-decision"><strong>Decision:</strong> one <code>normalise()</code> function cleans the input or raises a clear error. Length is checked <em>before</em> converting, so huge inputs stay cheap.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}LIMIT = 10 ** 15   # up to 999,999,999,999,999
+
+def normalise(figure) -> int:
+    ...  # (excerpt: the string branch; int input is checked separately)
+    digits = figure.replace(',', '').replace(' ', '')
+    if not digits:
+        raise ValueError('Please enter a number.')
+    digits = digits.lstrip('0') or '0'
+    if not digits.isascii() or not digits.isdigit():
+        raise ValueError('Whole numbers only: use the digits 0-9, ...')
+    if len(digits) > len(str(LIMIT - 1)):
+        raise OverflowError('Limit exceeded: ... 999 trillion.')
+    return int(digits)
+
+# '1,000' -> 1000    '007' -> 7    '²' -> ValueError{% endverbatim %}</code></pre>
+        </li>
+
+        <!-- 8 -->
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">08</span>
+                <h3>Prove it, don't just eyeball it</h3>
+                <p class="walk-q"><strong>Question:</strong> a few examples look right, but are <em>all</em> of them right?</p>
+                <p>Checking a million outputs by eye is impossible. So I wrote a separate, simple <strong>parser</strong> that turns words back into numbers. If <code>parse(convert(n)) == n</code> for every number, the converter is right.</p>
+                <p class="walk-decision"><strong>Result:</strong> every number from 0 to 1,000,000, plus 18,000 random numbers up to the limit, round-trips perfectly.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}# simplified from core/tests.py
+def words_to_number(text):
+    total = group = 0
+    for token in re.split(r'[\s,-]+', text.lower()):
+        if token == 'and':
+            continue
+        if token in SMALL:   group += SMALL[token]
+        elif token == 'hundred': group *= 100
+        elif token in SCALE:
+            total += group * SCALE[token]
+            group = 0
+    return total + group
+
+def test_exhaustive_to_one_million(self):
+    for number in range(1_000_001):
+        words = convert(number)
+        self.assertEqual(words_to_number(words), number){% endverbatim %}</code></pre>
+        </li>
+
+        <!-- 9 -->
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">09</span>
+                <h3>Look back: what version 1 got wrong</h3>
+                <p class="walk-q"><strong>Question:</strong> what did the first attempt teach me?</p>
+                <ul class="walk-points">
+                    <li>It sliced <strong>strings</strong> (<code>figure[1:]</code>), so leading zeros like <code>007</code> crashed it. Version 2 works on integers with <code>divmod</code>.</li>
+                    <li>It had a separate branch for every range. Version 2 has one rule for all scales.</li>
+                    <li>It printed "Twenty One" and "One Thousand, and One". Version 2 follows one written style.</li>
+                    <li>It claimed memoization it didn't have. Version 2 only describes what it does.</li>
+                </ul>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}# version 1: one branch per range, string slicing
+elif int(figure) >= 1e6 and int(figure) < 1e15:
+    if int(figure) < 1e9:
+        X = (6, 'Million')
+    ...
+    last_digits = figure[-X[0]:]
+    front_digits = figure[:-X[0]]
+
+# version 2: one rule for every scale
+head, rest = divmod(n, size){% endverbatim %}</code></pre>
+        </li>
+    </ol>
+
+    <div class="docs-grid docs-reference">
+        <div class="docs-block">
+            <h3>Style rules at a glance</h3>
+            <table class="docs-table">
+                <thead><tr><th>Rule</th><th>Input</th><th>Output</th></tr></thead>
+                <tbody>
+                    <tr><td>Tens and units are hyphenated</td><td>21</td><td>Twenty-One</td></tr>
+                    <tr><td>"and" after Hundred</td><td>101</td><td>One Hundred and One</td></tr>
+                    <tr><td>Scale groups separated by commas</td><td>1,100</td><td>One Thousand, One Hundred</td></tr>
+                    <tr><td>"and" before a final group under 100</td><td>1,001</td><td>One Thousand and One</td></tr>
+                    <tr><td>Empty groups are skipped</td><td>2,000,050,000</td><td>Two Billion, Fifty Thousand</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="docs-block">
+            <h3>Input &amp; limits</h3>
+            <ul class="docs-list">
+                <li><strong>Accepted:</strong> whole numbers from 0 to 999,999,999,999,999.</li>
+                <li><strong>Allowed formatting:</strong> commas, spaces and leading zeros.</li>
+                <li><strong>Rejected:</strong> negatives, decimals, letters, <code>1e3</code> and non-ASCII digits, each with a clear message.</li>
+            </ul>
+            <h3>Using the function</h3>
+<pre class="docs-code"><code class="language-python">{% verbatim %}from core.tinyproject.numtoword import convert
+
+convert(1001)         # 'One Thousand and One'
+convert('1,000,099')  # 'One Million and Ninety-Nine'
+convert('-5')         # ValueError
+convert(10 ** 15)     # OverflowError{% endverbatim %}</code></pre>
+        </div>
+    </div>
+
+    <details class="docs-source reveal">
+        <summary><span><i class="fas fa-code" aria-hidden="true"></i> Full source: <code>numtoword.py</code></span><span class="docs-source-hint">Show</span></summary>
+<pre class="docs-code"><code class="language-python">{{ source }}</code></pre>
+    </details>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+<script>
+    window.addEventListener('DOMContentLoaded', function () {
+        if (window.hljs) document.querySelectorAll('pre code[class^="language-"]').forEach(function (el) { hljs.highlightElement(el); });
+    });
+</script>
+{% endblock %}

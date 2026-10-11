@@ -1,0 +1,172 @@
+{% extends 'core/site_base.html' %}
+{% load static %}
+
+{% block title %}About — Uzo Tammy Nwokoro{% endblock %}
+{% block description %}Chemical engineer, operations manager, two-time founder and now AI developer — the story behind Uzo Tammy Nwokoro's work.{% endblock %}
+
+{% block content %}
+
+    <!-- Hero -->
+    <section class="hero about-hero shell">
+        <div class="hero-copy">
+            <p class="eyebrow">About me</p>
+            <h1 class="display">Chemical engineer by training. <em>Builder by nature.</em></h1>
+            <p class="lede">
+                I'm Uzo Tammy Nwokoro. Over two decades I've moved from engineering to operations, from
+                operations to founding businesses, and from business into software — carrying the same
+                instinct the whole way: find the real problem, then build the thing that fixes it.
+            </p>
+            <div class="hero-actions">
+                <a class="btn btn-solid" href="{% url 'resume' %}">View my resume</a>
+                <a class="btn-link" href="#story">Read the story <span aria-hidden="true">↓</span></a>
+            </div>
+        </div>
+
+        <figure class="portrait-stack portrait-about" aria-label="Portrait of Uzo">
+            <span class="paper paper-sun" aria-hidden="true"></span>
+            <span class="paper paper-leaf" aria-hidden="true"></span>
+            <div class="print">
+                <img src="{% static 'home/portrait-blazer.webp' %}" width="800" height="1200"
+                     alt="Uzo smiling in a navy blazer and white shirt">
+            </div>
+            <figcaption class="note">Since 2002</figcaption>
+        </figure>
+    </section>
+
+    <!-- Numbers -->
+    <section class="shell stats reveal" aria-label="At a glance">
+        <div class="stat"><span class="stat-num">20<em>+</em></span><span class="stat-label">years in business and operations</span></div>
+        <div class="stat"><span class="stat-num">$100M<em>+</em></span><span class="stat-label">in sales coordinated and directed</span></div>
+        <div class="stat"><span class="stat-num">2</span><span class="stat-label">businesses founded and led</span></div>
+        <div class="stat"><span class="stat-num">2021</span><span class="stat-label">first system in production — still running</span></div>
+    </section>
+
+    <!-- Story -->
+    <section id="story" class="section shell">
+        <div class="section-head reveal">
+            <p class="eyebrow">The long way round</p>
+            <h2 class="headline">Four chapters, <em>one thread.</em></h2>
+        </div>
+
+        <ol class="chapters">
+            <li class="chapter reveal">
+                <span class="work-num">01</span>
+                <div>
+                    <h3>Engineering foundations</h3>
+                    <p>
+                        I studied Chemical Engineering at the Federal University of Technology in Nigeria, where I was
+                        elected President of the Chemical Engineering Society (Student Chapter) and first started
+                        writing code. After graduating I spent a year in project management at Shell Nigeria Gas Ltd —
+                        a short stint that set the tone for everything that followed.
+                    </p>
+                </div>
+            </li>
+            <li class="chapter reveal">
+                <span class="work-num">02</span>
+                <div>
+                    <h3>Operations, computerised</h3>
+                    <p>
+                        I moved into the distribution sector and led the company's move to computerised operations,
+                        run as a project from day one. Streamlining those processes earned me the role of Business
+                        Operations Manager, which I held for three years — blending technical skill with the day-to-day
+                        realities of running a business.
+                    </p>
+                </div>
+            </li>
+            <li class="chapter reveal">
+                <span class="work-num">03</span>
+                <div>
+                    <h3>Founder</h3>
+                    <p>
+                        In 2009 I founded my own company, investing in and redistributing alcoholic beverages through a
+                        demanding, regulated market. In 2015 I co-founded and led a second business. Those years taught
+                        me what software has to get right when real money, real stock and real people depend on it.
+                    </p>
+                </div>
+            </li>
+            <li class="chapter reveal">
+                <span class="work-num">04</span>
+                <div>
+                    <h3>Technology, full-time</h3>
+                    <p>
+                        Today I build the systems I once wished I had: SCusH, an operations platform in production since
+                        2021; Networth, a multi-currency financial tracker with an AI advisor; and CP Devotional, a
+                        public app on Google Play. I graduated with honours from Nova Scotia Community College's
+                        Advanced Certificate in IT Programming with AI, and I've deepened my project-management practice
+                        through Google's career certificate programme.
+                    </p>
+                </div>
+            </li>
+        </ol>
+    </section>
+
+    <!-- Pull quote -->
+    <section class="section shell">
+        <blockquote class="pullquote reveal">
+            <p>“I'm drawn to the business case — the place where technology and business sense meet to create
+                something people can actually use.”</p>
+        </blockquote>
+    </section>
+
+    <!-- Timeline -->
+    <section class="section shell timeline-wrap">
+        <div class="section-head reveal">
+            <p class="eyebrow">Milestones</p>
+            <h2 class="headline">Important <em>timelines.</em></h2>
+        </div>
+        <ol class="timeline">
+            <li class="reveal"><span class="t-year">2001</span><p>Elected President, Chemical Engineering Society (Student Chapter)</p></li>
+            <li class="reveal"><span class="t-year">2002</span><p>Graduated in Chemical Engineering</p></li>
+            <li class="reveal"><span class="t-year">2003</span><p>Project management at Shell Nigeria Gas Ltd</p></li>
+            <li class="reveal"><span class="t-year">2003</span><p>Computerised a distribution business, delivered as a project</p></li>
+            <li class="reveal"><span class="t-year">2005</span><p>Business Operations Manager</p></li>
+            <li class="reveal"><span class="t-year">2009</span><p>Founded and operated my first business</p></li>
+            <li class="reveal"><span class="t-year">2015</span><p>Co-founded and led a second business</p></li>
+            <li class="reveal"><span class="t-year">2021</span><p>SCusH goes into production</p></li>
+            <li class="reveal"><span class="t-year">2022</span><p>Migrated — a new country and a new chapter</p></li>
+            <li class="reveal"><span class="t-year">2023</span><p>Completed a professional Project Management course</p></li>
+            <li class="reveal"><span class="t-year">2025</span><p>Advanced Certificate in IT Programming with AI, Nova Scotia Community College — graduated with honours</p></li>
+            <li class="reveal t-now"><span class="t-year">Now</span><p>Building AI-powered tools — Networth, the AI Advisor and CP Devotional</p></li>
+        </ol>
+    </section>
+
+    <!-- Skills -->
+    <section class="section shell">
+        <div class="section-head reveal">
+            <p class="eyebrow">Beyond the code</p>
+            <h2 class="headline">What business <em>taught me.</em></h2>
+        </div>
+        <ol class="strengths">
+            <li class="reveal"><span class="work-num">01</span><h3>Sales</h3><p>More than a decade coordinating, supervising and directing sales worth over $100 million.</p></li>
+            <li class="reveal"><span class="work-num">02</span><h3>Customer relations</h3><p>Constant contact with customers and their problems — the best training in listening I've had.</p></li>
+            <li class="reveal"><span class="work-num">03</span><h3>Team collaboration</h3><p>Keeping teams positive with customers while holding the line on policy and process.</p></li>
+            <li class="reveal"><span class="work-num">04</span><h3>Leadership</h3><p>From student society president to leading teams across two businesses.</p></li>
+            <li class="reveal"><span class="work-num">05</span><h3>Problem solving</h3><p>Businesses, projects and software all succeed the same way: by solving the right problem.</p></li>
+            <li class="reveal"><span class="work-num">06</span><h3>Project management</h3><p>Planning and delivering work in phases — from Shell to shipping software today.</p></li>
+        </ol>
+    </section>
+
+    <!-- Next -->
+    <section class="section shell">
+        <div class="explore">
+            <a class="explore-card reveal" href="{% url 'index' %}#work">
+                <span class="eyebrow">Work</span>
+                <h3>See what I've built</h3>
+                <p>SCusH, Networth, the AI Advisor and CP Devotional.</p>
+                <span class="arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="explore-card reveal" href="{% url 'resume' %}">
+                <span class="eyebrow">Resume</span>
+                <h3>Experience at a glance</h3>
+                <p>Roles, education and skills in one page.</p>
+                <span class="arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="explore-card reveal" href="#contact">
+                <span class="eyebrow">Contact</span>
+                <h3>Let's talk</h3>
+                <p>Have a business problem worth solving? I'd like to hear it.</p>
+                <span class="arrow" aria-hidden="true">→</span>
+            </a>
+        </div>
+    </section>
+{% endblock %}

@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+import inspect
 import json
 import datetime
 from typing import Any
@@ -6,14 +7,16 @@ from django.db.models.query import QuerySet
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.http.response import HttpResponse as HttpResponse
-from django.views.generic.base import View, TemplateView
+from django.views.generic.base import View, TemplateView, RedirectView
 from django.views.generic.list import ListView
 from django.views.generic.edit import UpdateView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from .forms import NumberInputForm, ProfileForm, ActivateRegistrationForm, UpdateProfileForm, MyFormSet, PreferenceForm
-from .tinyproject.numtoword import convert
+from .tinyproject import numtoword
+from .tinyproject.numtoword import convert, normalise
 from .tinyproject.taxes import CanadaIncomeTaxCalculator as TaxCalc
+from .tinyproject.registry import get_projects
 from .models import StudentProfile
 from account.models import User, Preference
 
@@ -70,11 +73,8 @@ class PracticeView(View):
         
 # Create your views here.
 class MainView(TemplateView):
-    template_name = 'core/homepage.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+    template_name = 'core/home_v2.html'
+    extra_context = {'is_home': True}
 
 
 class PreferenceView(LoginRequiredMixin, FormView):
@@ -157,13 +157,26 @@ class AboutMe(TemplateView):
 
     def get_template_names(self) -> list[str]:
 
-        return ['core/new_about_mex.html', 'core/aboutme.html']
+        return ['core/about_v2.html']
 
 class ResumeView(TemplateView):
-    template_name = 'core/resume.html'
+    template_name = 'core/resume_v2.html'
 
 class TinyProjectView(TemplateView):
-    template_name = 'core/portfolio/root.html'
+    template_name = 'core/portfolio/tinyprojects_v2.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        projects = get_projects()
+        context['projects'] = projects
+        categories = sorted({p['category'] for p in projects})
+        for p in projects:
+            p['tone'] = categories.index(p['category']) % 6  # colour per category
+        context['categories'] = [
+            {'name': c, 'count': sum(p['category'] == c for p in projects)} for c in categories
+        ]
+        context['live_count'] = len(projects)
+        return context
 
 class PortfolioScushView(TemplateView):
     template_name = 'core/portfolio/scush.html'
@@ -175,21 +188,20 @@ class TextingView(TemplateView):
     template_name = 'core/texting.html'
 
 class NumberToWordView(TemplateView):
-    template_name = 'core/portfolio/tinyprojects/numtoword.html'
+    template_name = 'core/portfolio/tinyprojects/numtoword_v2.html'
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        form = NumberInputForm()
-        
-        if 'submit' in self.request.GET:
-            figure = self.request.GET['enter_number'].replace(',', '')
-            context['figure'] = figure
+        raw = self.request.GET.get('enter_number', '').strip()
+        context['raw'] = raw
+        context['source'] = inspect.getsource(numtoword)  # docs always show the real code
+
+        if raw:
             try:
-                context['word'] = convert(figure)
-            except OverflowError as err:
-                context['word'] = f'{err}: only number less than or equal to 999 Trillion allowed'
-            
-        context['form'] = form
+                context['figure'] = normalise(raw)
+                context['word'] = convert(raw)
+            except (ValueError, OverflowError) as err:
+                context['error'] = str(err)
         return context
     
 class DatabaseLearningView(TemplateView):
@@ -198,8 +210,9 @@ class DatabaseLearningView(TemplateView):
 class AutomaticEmailView(TemplateView):
     template_name = 'core/portfolio/tinyprojects/auto_email.html'
     
-class NewHomeView(TemplateView):
-    template_name = 'core/home.html'
+class NewHomeView(RedirectView):
+    # the redesign now lives at '/'; keep the old staging URL working
+    pattern_name = 'index'
 
 class NewAboutMeView(TemplateView):
     template_name = 'core/new_about_me.html'

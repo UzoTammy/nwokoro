@@ -1,0 +1,67 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Uzo Nwokoro — AI Developer & Builder{% endblock %}</title>
+    <meta name="description" content="{% block description %}Uzo Tammy Nwokoro — AI developer, chemical engineer and entrepreneur building practical software for real problems.{% endblock %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'home/home.css' %}?v={{ ASSET_VERSION }}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-nav">
+    <div class="shell nav-inner">
+        <a class="monogram" href="{% url 'index' %}" aria-label="Home">u<span>.</span></a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links">
+            <span class="sr-only">Menu</span><i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+        <nav id="nav-links" class="nav-links" aria-label="Primary">
+            <a href="{% if not is_home %}{% url 'index' %}{% endif %}#work">Work</a>
+            <a href="{% url 'about-me' %}">About</a>
+            <a href="{% url 'resume' %}">Resume</a>
+            <a href="{% url 'tinyproject-home' %}">Tools</a>
+            <a href="{% if not is_home %}{% url 'index' %}{% endif %}#advisor">AI Advisor</a>
+            <a class="nav-cta" href="#contact">Contact</a>
+        </nav>
+    </div>
+</header>
+
+<main id="main">
+{% block content %}{% endblock %}
+</main>
+
+<footer id="contact" class="site-footer">
+    <div class="shell footer-inner">
+        <div>
+            <p class="eyebrow eyebrow-light">Let's talk next steps</p>
+            <h2 class="headline">Let's build something <em>useful.</em></h2>
+            <div class="footer-cta">
+                <a class="btn btn-solid" href="mailto:me@uzonwokoro.com">Say hello <span aria-hidden="true">↗</span></a>
+                <button class="copy-email" type="button" data-copy="me@uzonwokoro.com" aria-label="Copy email address me@uzonwokoro.com">
+                    <i class="far fa-copy" aria-hidden="true"></i><span data-copy-label>me@uzonwokoro.com</span>
+                </button>
+            </div>
+        </div>
+        <div class="footer-meta">
+            <p class="footer-name">Uzo Tammy Nwokoro</p>
+            <p class="footer-tag">Curious. Practical. Steady.</p>
+            <div class="socials">
+                <a href="https://github.com/UzoTammy" target="_blank" rel="noopener" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/uzo-nwokoro-96013a55" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                <a href="mailto:me@uzonwokoro.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+            </div>
+            <p class="fine">© {% now "Y" %} Uzo Tammy Nwokoro</p>
+        </div>
+    </div>
+</footer>
+
+<script src="{% static 'home/home.js' %}?v={{ ASSET_VERSION }}" defer></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

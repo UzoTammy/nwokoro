@@ -1,0 +1,88 @@
+{% extends 'core/site_base.html' %}
+
+{% block title %}Tiny Projects — Uzo Tammy Nwokoro{% endblock %}
+{% block description %}Small tools and experiments by Uzo Tammy Nwokoro — each one solves a single problem well.{% endblock %}
+
+{% block content %}
+<section class="shell tp-hero">
+    <div>
+        <p class="eyebrow">Tiny projects</p>
+        <h1 class="display">Small builds. <em>Sharp ideas.</em></h1>
+        <p class="lede">Bite-sized tools, each solving one problem well. Every one is tested and documented, with the thinking behind it.</p>
+    </div>
+    <dl class="tp-stats">
+        <div class="tp-stat-live"><dd>{{ live_count }}</dd><dt><span class="live-dot" aria-hidden="true"></span>Live</dt></div>
+        <div><dd>{{ categories|length }}</dd><dt><i class="fas fa-layer-group" aria-hidden="true"></i>Categor{{ categories|length|pluralize:"y,ies" }}</dt></div>
+    </dl>
+</section>
+
+<section class="shell tp-browser" data-tp>
+    <div class="tp-toolbar">
+        <label class="tp-search">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="sr-only">Search tiny projects</span>
+            <input type="search" placeholder="Search by name, tag or idea…" data-tp-search autocomplete="off">
+        </label>
+    </div>
+
+    <div class="tp-chips" role="group" aria-label="Filter by category">
+        <button type="button" class="tp-chip is-active" data-tp-category="all" aria-pressed="true">All <span>{{ projects|length }}</span></button>
+        {% for c in categories %}
+        <button type="button" class="tp-chip" data-tp-category="{{ c.name }}" aria-pressed="false">{{ c.name }} <span>{{ c.count }}</span></button>
+        {% endfor %}
+    </div>
+
+    <p class="tp-count" aria-live="polite" data-tp-count>Showing {{ projects|length }} project{{ projects|length|pluralize }}</p>
+
+    <div class="tp-grid">
+        {% for p in projects %}
+        <article class="tp-card tone-{{ p.tone }}{% if p.status == 'live' %} is-live{% endif %}"
+                 data-tp-item data-category="{{ p.category }}" data-status="{{ p.status }}"
+                 data-search="{{ p.title|lower }} {{ p.summary|lower }} {{ p.category|lower }} {{ p.tags|join:' '|lower }}">
+            <div class="tp-card-top">
+                <span class="tp-icon" aria-hidden="true"><i class="{{ p.icon }}"></i></span>
+                {% if p.status == 'live' %}
+                <span class="tp-badge tp-badge-live"><span class="live-dot" aria-hidden="true"></span>Live</span>
+                {% else %}
+                <span class="tp-badge tp-badge-workshop"><i class="fas fa-tools" aria-hidden="true"></i>In the workshop</span>
+                {% endif %}
+            </div>
+
+            <p class="tp-category">{{ p.category }}</p>
+            <h2 class="tp-title">
+                {% if p.url %}<a href="{{ p.url }}" class="tp-link">{{ p.title }}</a>{% else %}{{ p.title }}{% endif %}
+            </h2>
+            <p class="tp-summary">{{ p.summary }}</p>
+
+            {% if p.tags %}
+            <ul class="tp-tags">{% for t in p.tags %}<li>{{ t }}</li>{% endfor %}</ul>
+            {% endif %}
+
+            <div class="tp-foot">
+                <span class="tp-date">{{ p.date_display }}</span>
+                {% if p.docs %}<a class="tp-docs" href="{{ p.docs }}"{% if p.docs|slice:":4" == "http" %} target="_blank" rel="noopener"{% endif %}>Docs <span aria-hidden="true">{% if p.docs|slice:":4" == "http" %}↗{% else %}→{% endif %}</span></a>{% endif %}
+                {% if p.url %}<span class="tp-go" aria-hidden="true">Try it →</span>{% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    <div class="tp-empty" data-tp-empty hidden>
+        <i class="fas fa-seedling" aria-hidden="true"></i>
+        <h2>Nothing here yet.</h2>
+        <p>No tiny project matches that search — but there's always another one being built.</p>
+        <button type="button" class="btn btn-solid" data-tp-reset>Clear filters</button>
+    </div>
+</section>
+
+<section class="shell section">
+    <div class="tp-idea reveal">
+        <div>
+            <p class="eyebrow">Got a small problem?</p>
+            <h2 class="headline">Suggest the next <em>tiny project.</em></h2>
+            <p>The best ones start as a single annoying task. Tell me yours.</p>
+        </div>
+        <a class="btn btn-solid" href="mailto:me@uzonwokoro.com?subject=Tiny%20project%20idea">Send an idea <span aria-hidden="true">↗</span></a>
+    </div>
+</section>
+{% endblock %}

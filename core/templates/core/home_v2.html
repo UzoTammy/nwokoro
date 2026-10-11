@@ -1,0 +1,265 @@
+{% extends 'core/site_base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <!-- Hero -->
+    <section class="hero shell">
+        <div class="hero-copy">
+            <p class="eyebrow">Uzo Tammy Nwokoro</p>
+            <h1 class="display">Real problems. Practical software. <em>Engineered thinking.</em></h1>
+            <p class="lede">AI development, full-stack systems &amp; financial tools — built by a chemical engineer who ships.</p>
+            <div class="hero-actions">
+                <a class="btn btn-solid" href="#work">Explore my work</a>
+                <a class="btn-link" href="#advisor">Meet the AI Advisor <span aria-hidden="true">↓</span></a>
+            </div>
+        </div>
+
+        <figure class="portrait-stack" aria-label="Portrait of Uzo">
+            <span class="paper paper-sun" aria-hidden="true"></span>
+            <span class="paper paper-leaf" aria-hidden="true"></span>
+            <svg class="paper-steps" viewBox="0 0 160 120" aria-hidden="true">
+                <path d="M0 120V96h40V72h40V48h40V24h40v96z" />
+            </svg>
+            <div class="print">
+                <img src="{% static 'home/portrait.webp' %}" width="800" height="1200"
+                     alt="Uzo smiling in a white t-shirt">
+            </div>
+            <figcaption class="note">Hi, I'm Uzo!</figcaption>
+        </figure>
+    </section>
+
+    <!-- Role ribbon -->
+    <section class="ribbon" aria-label="Roles">
+        <div class="ribbon-track">
+            <ul class="ribbon-list">
+                <li>AI Developer</li><li>Chemical Engineer</li><li>Entrepreneur</li><li>Builder</li><li>Problem Solver</li>
+            </ul>
+            <ul class="ribbon-list" aria-hidden="true">
+                <li>AI Developer</li><li>Chemical Engineer</li><li>Entrepreneur</li><li>Builder</li><li>Problem Solver</li>
+            </ul>
+        </div>
+        <button class="ribbon-pause" type="button" aria-pressed="false">Pause</button>
+    </section>
+
+    <!-- Person -->
+    <section class="section shell person reveal">
+        <div class="section-head">
+            <p class="eyebrow">The person behind the work</p>
+            <h2 class="headline">An engineer. A builder. <em>A problem-solver first.</em></h2>
+        </div>
+        <div class="person-body">
+            <p>
+                I trained as a chemical engineer, which taught me to think in processes, controls and
+                feedback loops. Today I apply that same discipline to software — building practical systems
+                that solve real business problems, from payroll and warehousing to personal finance.
+            </p>
+            <p>
+                I work across Python, Django, FastAPI and modern AI tooling to move ideas from concept to
+                production, and I care most about the things that make software trustworthy: clean data,
+                audited records and decisions you can explain.
+            </p>
+            <ul class="tags">
+                <li>Problem solving</li><li>Critical thinking</li><li>Analytical reasoning</li>
+                <li>Collaboration</li><li>Resilience</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Selected work -->
+    <section id="work" class="section shell">
+        <div class="section-head reveal">
+            <p class="eyebrow">Selected work</p>
+            <h2 class="headline">A closer look <em>at the work.</em></h2>
+        </div>
+
+        <article class="work-item reveal">
+            <div class="work-media work-shot">
+                <div class="browser-bar" aria-hidden="true"><i></i><i></i><i></i><span>scush.com.ng</span></div>
+                {% include 'core/includes/scush_dashboard.html' %}
+            </div>
+            <div class="work-body">
+                <span class="work-num">01</span>
+                <h3>SCusH — operations for a beverages distributor</h3>
+                <p>
+                    Recruitment, payroll, warehousing, sales accounting and cash operations in one system.
+                    In production since 2021, with locked and audited monthly records, segregated approval
+                    on edits, and one payroll run per employee per period enforced at the database level.
+                </p>
+                <ul class="tags tags-sm"><li>Django</li><li>PostgreSQL</li><li>Financial controls</li><li>In production</li></ul>
+                <a class="btn-link" href="{% url 'portfolio-scush' %}">View case study <span aria-hidden="true">↗</span></a>
+            </div>
+        </article>
+
+        <article class="work-item reveal">
+            <div class="work-media mock mock-ledger" aria-hidden="true">
+                <div class="mock-card">
+                    <span class="mock-label">Net worth</span>
+                    <span class="mock-figure">CAD •••,•••</span>
+                    <div class="mock-bars"><i style="--h:38%"></i><i style="--h:46%"></i><i style="--h:44%"></i><i style="--h:58%"></i><i style="--h:63%"></i><i style="--h:71%"></i><i style="--h:84%"></i></div>
+                    <div class="mock-legend"><span>Savings</span><span>Investments</span><span>Stocks</span><span>Business</span></div>
+                </div>
+            </div>
+            <div class="work-body">
+                <span class="work-num">02</span>
+                <h3>Networth — personal financial intelligence</h3>
+                <p>
+                    Tracks net worth across savings, investments, stocks, business equity and fixed assets with
+                    full multi-currency support (NGN, CAD, USD), a double-entry ledger per asset class, automated
+                    daily email reports, ROI analysis and annual PDF balance sheets.
+                </p>
+                <ul class="tags tags-sm"><li>Django</li><li>Celery</li><li>Multi-currency</li><li>WeasyPrint</li></ul>
+                <a class="btn-link" href="{% url 'networth-home' %}">Visit the site <span aria-hidden="true">↗</span></a>
+                {% if not user.is_authenticated %}<p class="fine">Requires an account.</p>{% endif %}
+            </div>
+        </article>
+
+        <article id="advisor" class="work-item reveal">
+            <div class="work-media mock mock-chat" aria-hidden="true">
+                <div class="bubble bubble-me">Which investments mature this quarter?</div>
+                <div class="bubble bubble-ai">Three holdings mature before December. The largest is a 12-month term deposit — here's how rolling it over compares with paying down your liability…</div>
+                <div class="bubble bubble-me short">Show me the numbers.</div>
+            </div>
+            <div class="work-body">
+                <span class="work-num">03</span>
+                <h3>AI Financial Advisor</h3>
+                <p>
+                    A FastAPI + MCP server that gives an AI model tool access to my live financial data —
+                    savings, investments, net-worth history and recent transactions — plus scoped web search
+                    for Nigerian and Canadian finance. Answers are grounded in real numbers, not guesses.
+                </p>
+                <ul class="tags tags-sm"><li>FastAPI</li><li>MCP</li><li>Tool calling</li><li>Django ORM</li></ul>
+                <a class="btn-link" href="{{ AI_ADVISOR_URL }}" target="_blank" rel="noopener">Open the advisor <span aria-hidden="true">↗</span></a>
+            </div>
+        </article>
+
+        <article class="work-item reveal">
+            <div class="work-media mock mock-devotional" role="group" aria-label="Sample content from CP Devotional">
+                <span class="live-ribbon"><i class="fab fa-google-play" aria-hidden="true"></i> Now on Google Play</span>
+                <div class="dev-grid">
+                    <article class="dev-card dev-devotion">
+                        <span class="dev-kicker"><i class="fas fa-book-open" aria-hidden="true"></i> Devotion · 10 Oct</span>
+                        <h4>Be a Giver!</h4>
+                        <blockquote>“It is more blessed to give than to receive.”</blockquote>
+                        <cite>Acts 20:35</cite>
+                        <p>Giving is bigger than money — time, a skill, a kind word, a prayer. Nobody is empty.</p>
+                        <span class="dev-actions" aria-hidden="true"><span>Read</span><span>Listen</span></span>
+                    </article>
+                    <article class="dev-card dev-testimony">
+                        <span class="dev-kicker"><i class="fas fa-comment-dots" aria-hidden="true"></i> Testimony</span>
+                        <h4>The Stranger Who Gave Away Everything</h4>
+                        <p>As a boy, Jimmy Darts handed a homeless man a hundred-dollar bill — and never forgot his face.</p>
+                    </article>
+                    <article class="dev-card dev-song">
+                        <span class="dev-kicker"><i class="fas fa-music" aria-hidden="true"></i> Gospel music · Praise</span>
+                        <div class="dev-player">
+                            <span class="dev-play" aria-hidden="true"><i class="fas fa-play"></i></span>
+                            <div>
+                                <h4>The One in the Room</h4>
+                                <span class="dev-meta">Uzo · 3:34</span>
+                            </div>
+                        </div>
+                        <span class="dev-progress" aria-hidden="true"><i></i></span>
+                    </article>
+                </div>
+            </div>
+            <div class="work-body">
+                <div class="work-badges">
+                    <span class="work-num">04</span>
+                    <span class="live-pill"><span class="live-dot" aria-hidden="true"></span>Live · Free for everyone</span>
+                </div>
+                <h3>CP Devotional</h3>
+                <p>
+                    A daily devotional app, <strong>published on Google Play and free for anyone to download</strong>.
+                    It offers three practices — Devotion, Testimonies and Gospel Music — that readers can open in
+                    any order, and every piece of content passes through a draft-then-approve workflow before it
+                    goes live.
+                </p>
+                <ul class="tags tags-sm"><li>React Native (Expo)</li><li>Android</li><li>Content workflow</li><li>Approvals</li></ul>
+                <div class="work-actions">
+                    <a class="btn btn-solid btn-store" href="https://play.google.com/store/apps/details?id=com.cpo.dailydevotion" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-google-play" aria-hidden="true"></i> Get it on Google Play
+                    </a>
+                    <a class="btn-link" href="https://claude.ai/code/artifact/b6c7aaaa-f760-4259-9d42-b9a59b59450e" target="_blank" rel="noopener noreferrer">View project <span aria-hidden="true">↗</span></a>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- AI call to action -->
+    <section class="ai-band">
+        <div class="shell ai-inner reveal">
+            <svg class="ai-star" viewBox="0 0 100 100" aria-hidden="true">
+                <path d="M50 0c4 30 16 42 50 50-34 8-46 20-50 50-4-30-16-42-50-50C34 42 46 30 50 0z"/>
+            </svg>
+            <div>
+                <p class="eyebrow eyebrow-light">Let's talk numbers</p>
+                <h2 class="headline">Your money. My code. <em>AI in the mix.</em></h2>
+                <p class="ai-copy">Ask the advisor about savings, investments or net-worth trends — it reads the same data the Networth app does.</p>
+            </div>
+            <a class="btn btn-solid" href="{{ AI_ADVISOR_URL }}" target="_blank" rel="noopener">Try the AI Advisor <span aria-hidden="true">↗</span></a>
+        </div>
+    </section>
+
+    <!-- Strengths -->
+    <section class="section shell">
+        <div class="section-head reveal">
+            <p class="eyebrow">My technical strengths</p>
+            <h2 class="headline">What I <em>bring.</em></h2>
+        </div>
+        <ol class="strengths">
+            <li class="reveal"><span class="work-num">01</span><h3>Production financial systems</h3><p>Ledgers, audit trails, approvals and period locks — software that accountants can trust.</p></li>
+            <li class="reveal"><span class="work-num">02</span><h3>AI agents &amp; MCP tooling</h3><p>Tool-calling assistants grounded in real data, with clear boundaries on what they can see and do.</p></li>
+            <li class="reveal"><span class="work-num">03</span><h3>Full-stack Python</h3><p>Django, FastAPI, Celery and PostgreSQL — from data model to deployed product.</p></li>
+            <li class="reveal"><span class="work-num">04</span><h3>Data &amp; machine learning</h3><p>PyTorch, Pandas and Scikit-learn, plus RAG pipelines over vector databases.</p></li>
+            <li class="reveal"><span class="work-num">05</span><h3>An engineer's mindset</h3><p>Chemical-engineering rigour applied to software: processes, controls and feedback loops.</p></li>
+            <li class="reveal"><span class="work-num">06</span><h3>Shipping &amp; operations</h3><p>Docker, GitHub Actions and continuous deploys — small, steady releases that stay up.</p></li>
+        </ol>
+    </section>
+
+    <!-- Tools -->
+    <section class="section shell tools reveal">
+        <div class="section-head">
+            <p class="eyebrow">Tools of the trade</p>
+            <h2 class="headline">Tools I <em>work with.</em></h2>
+        </div>
+        <div class="tool-groups">
+            <div>
+                <h3>Core development</h3>
+                <ul><li>Python</li><li>Django</li><li>FastAPI</li><li>PyTorch</li><li>NumPy</li><li>Pandas</li><li>Scikit-learn</li><li>RAG</li></ul>
+            </div>
+            <div>
+                <h3>Frontend</h3>
+                <ul><li>HTML / CSS</li><li>JavaScript</li><li>TypeScript</li><li>React</li><li>Bootstrap</li><li>Tailwind CSS</li></ul>
+            </div>
+            <div>
+                <h3>Tools &amp; workflow</h3>
+                <ul><li>Git / GitHub</li><li>GitHub Actions</li><li>SQL</li><li>Docker</li><li>Vector databases</li><li>MCP</li></ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Explore -->
+    <section class="section shell">
+        <div class="explore">
+            <a class="explore-card reveal" href="{% url 'about-me' %}">
+                <span class="eyebrow">About</span>
+                <h3>The longer story</h3>
+                <p>Background, values and what I'm working towards.</p>
+                <span class="arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="explore-card reveal" href="{% url 'resume' %}">
+                <span class="eyebrow">Resume</span>
+                <h3>Experience at a glance</h3>
+                <p>Roles, education and skills in one page.</p>
+                <span class="arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="explore-card reveal" href="{% url 'tinyproject-home' %}">
+                <span class="eyebrow">Playground</span>
+                <h3>Tiny projects</h3>
+                <p>Tax calculator, number-to-words and other small experiments.</p>
+                <span class="arrow" aria-hidden="true">→</span>
+            </a>
+        </div>
+    </section>
+{% endblock %}

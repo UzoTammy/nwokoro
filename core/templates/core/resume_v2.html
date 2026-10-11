@@ -1,0 +1,173 @@
+{% extends 'core/site_base.html' %}
+{% load static %}
+
+{% block title %}Resume — Uzo Tammy Nwokoro{% endblock %}
+{% block description %}Resume of Uzo Tammy Nwokoro — AI and full-stack Python developer with two decades of business operations, sales and entrepreneurship.{% endblock %}
+
+{% block content %}
+<section class="shell resume">
+
+    <header class="cv-head">
+        <div>
+            <p class="eyebrow">Resume</p>
+            <h1 class="display cv-name">Uzo Tammy Nwokoro</h1>
+            <p class="cv-role">AI &amp; Full-Stack Python Developer <span aria-hidden="true">·</span> Chemical Engineer <span aria-hidden="true">·</span> Entrepreneur</p>
+        </div>
+        <div class="cv-actions no-print">
+            <button class="btn btn-solid" type="button" data-print><i class="fas fa-download" aria-hidden="true"></i> Download PDF</button>
+        </div>
+    </header>
+
+    <ul class="cv-contact">
+        <li><i class="fas fa-envelope" aria-hidden="true"></i><a href="mailto:me@uzonwokoro.com">me@uzonwokoro.com</a><button class="copy-mini no-print" type="button" data-copy="me@uzonwokoro.com" aria-label="Copy email address"><i class="far fa-copy" aria-hidden="true"></i><span data-copy-label class="sr-only">Copy</span></button></li>
+        <li><i class="fas fa-globe" aria-hidden="true"></i><a href="https://uzonwokoro.com">uzonwokoro.com</a></li>
+        <li><i class="fab fa-github" aria-hidden="true"></i><a href="https://github.com/UzoTammy">github.com/UzoTammy</a></li>
+        <li><i class="fab fa-linkedin" aria-hidden="true"></i><a href="https://www.linkedin.com/in/uzo-nwokoro-96013a55">linkedin.com/in/uzo-nwokoro</a></li>
+    </ul>
+
+    <div class="cv-grid">
+        <div class="cv-main">
+
+            <section class="cv-section">
+                <h2 class="cv-h">Profile</h2>
+                <p class="cv-summary">
+                    Developer with a chemical-engineering foundation, an honours graduate of NSCC's Advanced Certificate in IT
+                    Programming with AI, and more than two decades in business operations, sales and entrepreneurship. I build practical software for real business problems — from an
+                    operations platform in production since 2021 to a multi-currency finance system with an AI advisor
+                    and a public app on Google Play. I bring an owner's view of the business case to every system I build.
+                </p>
+            </section>
+
+            <section class="cv-section">
+                <h2 class="cv-h">Experience</h2>
+
+                <article class="cv-item">
+                    <div class="cv-item-head">
+                        <h3>AI &amp; Full-Stack Developer</h3>
+                        <span class="cv-date">2021 – Present</span>
+                    </div>
+                    <p class="cv-org">Independent</p>
+                    <ul>
+                        <li>Built and run <strong>SCusH</strong>, an operations platform for a beverages distributor covering recruitment, payroll, warehousing, sales accounting and cash — in production since 2021, with locked and audited monthly records and segregated approvals.</li>
+                        <li>Built <strong>Networth</strong>, a multi-currency (NGN, CAD, USD) net-worth system with a per-asset transaction ledger, Celery-scheduled reports and PDF balance sheets.</li>
+                        <li>Built an <strong>AI financial advisor</strong> — a FastAPI + MCP server giving an AI model tool access to live financial data.</li>
+                        <li>Shipped <strong>CP Devotional</strong>, a React Native (Expo) app published on Google Play, with a draft-then-approve content workflow.</li>
+                    </ul>
+                </article>
+
+                <article class="cv-item">
+                    <div class="cv-item-head">
+                        <h3>Founder &amp; Operator</h3>
+                        <span class="cv-date">2009 – 2022</span>
+                    </div>
+                    <p class="cv-org">Beverage investment &amp; redistribution business</p>
+                    <ul>
+                        <li>Conceptualised, established, operated and grew the business through a demanding, regulated market.</li>
+                        <li>Co-founded and led a second business from 2015.</li>
+                        <li>Coordinated, supervised and directed sales worth more than $100 million over the period.</li>
+                    </ul>
+                </article>
+
+                <article class="cv-item">
+                    <div class="cv-item-head">
+                        <h3>Business Operations Manager</h3>
+                        <span class="cv-date">2004 – 2008</span>
+                    </div>
+                    <p class="cv-org">Distribution company</p>
+                    <ul>
+                        <li>Hired to computerise the company's operations, delivered as a project.</li>
+                        <li>Moved on to operate and manage the business — negotiation, sales and customer relations.</li>
+                    </ul>
+                </article>
+
+                <article class="cv-item">
+                    <div class="cv-item-head">
+                        <h3>Project Management</h3>
+                        <span class="cv-date">2003</span>
+                    </div>
+                    <p class="cv-org">Shell Nigeria Gas Ltd</p>
+                    <ul>
+                        <li>Organised project meetings, supervised work on site and wrote safety reports.</li>
+                        <li>Worked to deadlines within structured team reporting.</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="cv-section">
+                <h2 class="cv-h">Selected projects</h2>
+                <div class="cv-projects">
+                    <a class="cv-project" href="{% url 'portfolio-scush' %}">
+                        <h3>SCusH</h3><p>Operations &amp; financial controls · Django, PostgreSQL</p>
+                    </a>
+                    <a class="cv-project" href="{% url 'networth-home' %}">
+                        <h3>Networth</h3><p>Multi-currency finance · Django, Celery</p>
+                    </a>
+                    <a class="cv-project" href="{% url 'index' %}#advisor">
+                        <h3>AI Financial Advisor</h3><p>Tool-calling AI · FastAPI, MCP</p>
+                    </a>
+                    <a class="cv-project" href="https://play.google.com/store/apps/details?id=com.cpo.dailydevotion" target="_blank" rel="noopener noreferrer">
+                        <h3>CP Devotional</h3><p>Live on Google Play · React Native</p>
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <aside class="cv-side">
+            <section class="cv-section">
+                <h2 class="cv-h">Skills</h2>
+                <dl class="cv-skills">
+                    <div class="cv-skill">
+                        <dt><i class="fas fa-code" aria-hidden="true"></i>Development</dt>
+                        <dd><span class="sk">Python</span> <span class="sk">Django</span> <span class="sk">FastAPI</span> <span class="sk">Celery</span> <span class="sk">SQL / PostgreSQL</span> <span class="sk">REST APIs</span></dd>
+                    </div>
+                    <div class="cv-skill">
+                        <dt><i class="fas fa-brain" aria-hidden="true"></i>AI &amp; data</dt>
+                        <dd><span class="sk">MCP</span> <span class="sk">Tool calling</span> <span class="sk">RAG</span> <span class="sk">Vector databases</span> <span class="sk">PyTorch</span> <span class="sk">Pandas</span> <span class="sk">NumPy</span> <span class="sk">Scikit-learn</span></dd>
+                    </div>
+                    <div class="cv-skill">
+                        <dt><i class="fas fa-mobile-alt" aria-hidden="true"></i>Frontend &amp; mobile</dt>
+                        <dd><span class="sk">JavaScript</span> <span class="sk">TypeScript</span> <span class="sk">React</span> <span class="sk">React Native</span> <span class="sk">HTML / CSS</span></dd>
+                    </div>
+                    <div class="cv-skill">
+                        <dt><i class="fas fa-rocket" aria-hidden="true"></i>Delivery</dt>
+                        <dd><span class="sk">Git / GitHub</span> <span class="sk">GitHub Actions</span> <span class="sk">Docker</span> <span class="sk">Heroku</span></dd>
+                    </div>
+                    <div class="cv-skill">
+                        <dt><i class="fas fa-briefcase" aria-hidden="true"></i>Business</dt>
+                        <dd><span class="sk">Sales</span> <span class="sk">Operations</span> <span class="sk">Customer relations</span> <span class="sk">Leadership</span> <span class="sk">Project management</span></dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="cv-section">
+                <h2 class="cv-h">Education</h2>
+                <div class="cv-item cv-item-tight">
+                    <h3>Advanced Certificate, IT Programming with AI</h3>
+                    <p class="cv-org">Nova Scotia Community College (NSCC)</p>
+                    <span class="cv-date">Sep 2025 – Jun 2026</span>
+                    <ul>
+                        <li>Graduated with honours.</li>
+                    </ul>
+                </div>
+                <div class="cv-item cv-item-tight">
+                    <h3>Chemical Engineering</h3>
+                    <p class="cv-org">Federal University of Technology, Nigeria</p>
+                    <span class="cv-date">1998 – 2002</span>
+                    <ul>
+                        <li>President, Chemical Engineering Society (Student Chapter).</li>
+                        <li>Led a 15-person team delivering a pilot-plant design project.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="cv-section">
+                <h2 class="cv-h">Certification</h2>
+                <div class="cv-item cv-item-tight">
+                    <h3>Project Management career course</h3>
+                    <span class="cv-date">2023</span>
+                </div>
+            </section>
+        </aside>
+    </div>
+</section>
+{% endblock %}
