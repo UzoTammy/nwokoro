@@ -1,0 +1,127 @@
+{% extends 'core/site_base.html' %}
+
+{% block title %}AI Financial Advisor — Case Study{% endblock %}
+{% block description %}Why I put an AI advisor on top of years of personal financial records, and what intelligent analysis of a well-kept ledger makes possible.{% endblock %}
+
+{% block content %}
+<section class="shell tool-page adv-hero">
+    <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="{% url 'index' %}#advisor"><span aria-hidden="true">←</span> Selected work</a>
+    </nav>
+    <div class="tool-head">
+        <p class="eyebrow">Case study · AI Financial Advisor</p>
+        <h1 class="display">Ask your money <em>a question.</em></h1>
+        <p class="lede">For years, every naira, dollar and investment I hold has been recorded in a careful ledger. The AI Advisor turns that record into something I can talk to. It answers real questions with real numbers from my own data, not generic advice.</p>
+    </div>
+</section>
+
+<!-- the problem -->
+<section class="shell section adv-split">
+    <div class="section-head reveal">
+        <p class="eyebrow">The purpose</p>
+        <h2 class="headline">Data you can't question <em>is only half useful.</em></h2>
+    </div>
+    <div class="adv-prose reveal">
+        <p>The Networth app gathers everything: savings accounts, fixed deposits, stocks, business stakes, property, loans and what I owe, across Naira, Canadian dollars and US dollars. Every change is recorded as a transaction, so the history is complete.</p>
+        <p>A dashboard can only answer the questions it was designed for. Real financial questions are <strong>cross-cutting</strong>. They join several asset types, currencies and dates at once:</p>
+        <blockquote class="adv-quote">"Which investments mature this quarter, and would the proceeds be better used paying down a liability?"</blockquote>
+        <p>No single chart answers that. A person going through the records could, slowly. The advisor does it in seconds, and shows its working.</p>
+    </div>
+</section>
+
+<!-- what's in the database -->
+<section class="shell section">
+    <div class="section-head reveal">
+        <p class="eyebrow">The gathered database</p>
+        <h2 class="headline">Ten kinds of record, <em>one picture.</em></h2>
+    </div>
+    <ul class="adv-data">
+        <li class="reveal"><i class="fas fa-piggy-bank" aria-hidden="true"></i><h3>Savings</h3><p>Accounts and balances in each currency.</p></li>
+        <li class="reveal"><i class="fas fa-seedling" aria-hidden="true"></i><h3>Investments</h3><p>Fixed deposits and similar, with rates, start and maturity dates.</p></li>
+        <li class="reveal"><i class="fas fa-chart-line" aria-hidden="true"></i><h3>Stocks</h3><p>Holdings with cost and current value.</p></li>
+        <li class="reveal"><i class="fas fa-store" aria-hidden="true"></i><h3>Businesses</h3><p>Equity in businesses I own or co-own.</p></li>
+        <li class="reveal"><i class="fas fa-home" aria-hidden="true"></i><h3>Fixed assets</h3><p>Property and other long-term assets.</p></li>
+        <li class="reveal"><i class="fas fa-file-invoice-dollar" aria-hidden="true"></i><h3>Liabilities</h3><p>Obligations and their terms.</p></li>
+        <li class="reveal"><i class="fas fa-hand-holding-usd" aria-hidden="true"></i><h3>Borrowed funds</h3><p>What was borrowed, what settles it, and when.</p></li>
+        <li class="reveal"><i class="fas fa-exchange-alt" aria-hidden="true"></i><h3>Exchange rates</h3><p>NGN, CAD and USD, so everything can be compared.</p></li>
+        <li class="reveal"><i class="fas fa-stream" aria-hidden="true"></i><h3>Transactions</h3><p>A debit/credit ledger behind every asset class.</p></li>
+        <li class="reveal"><i class="fas fa-history" aria-hidden="true"></i><h3>Net-worth history</h3><p>Daily snapshots, so change over time is visible.</p></li>
+    </ul>
+</section>
+
+<!-- how it works -->
+<section class="shell section">
+    <div class="section-head reveal">
+        <p class="eyebrow">How it works</p>
+        <h2 class="headline">From ledger <em>to conversation.</em></h2>
+    </div>
+    <ol class="adv-flow">
+        <li class="reveal"><span class="work-num">01</span><h3>A question</h3><p>Asked in plain English, like you'd ask an accountant.</p></li>
+        <li class="reveal"><span class="work-num">02</span><h3>A full snapshot</h3><p>Every conversation starts with the current picture: every account, holding, liability and exchange rate, with totals converted to one currency.</p></li>
+        <li class="reveal"><span class="work-num">03</span><h3>Tools for depth</h3><p>When the snapshot isn't enough, the model calls tools: net-worth history, recent transactions, investments about to mature.</p></li>
+        <li class="reveal"><span class="work-num">04</span><h3>The outside world</h3><p>For rates, regulation or market news, it searches 21 trusted Nigerian, Canadian and global finance sources, and nothing else.</p></li>
+        <li class="reveal"><span class="work-num">05</span><h3>An answer with numbers</h3><p>Specific figures, risks and next steps. Short by default; detailed only when asked.</p></li>
+    </ol>
+</section>
+
+<!-- the beauty -->
+<section class="ai-band adv-band">
+    <div class="shell">
+        <div class="section-head reveal">
+            <p class="eyebrow eyebrow-light">The beauty of it</p>
+            <h2 class="headline">Intelligence on top of <em>a well-kept record.</em></h2>
+        </div>
+        <ul class="adv-beauty">
+            <li class="reveal"><h3>Grounded, not guessed</h3><p>Answers come from my actual records, fetched by tools, not from what a model thinks a typical person might have.</p></li>
+            <li class="reveal"><h3>Every currency, one view</h3><p>Naira savings, Canadian investments and US-dollar stocks are compared fairly, because the stored exchange rates do the converting.</p></li>
+            <li class="reveal"><h3>Aware of time</h3><p>It knows what's maturing, what moved last month and how net worth has trended. A spreadsheet only knows today.</p></li>
+            <li class="reveal"><h3>Connected to the world, carefully</h3><p>News and rates come from a short list of regulators and serious publications, like the CBN, the Bank of Canada and Reuters, not the open web.</p></li>
+            <li class="reveal"><h3>Concise by design</h3><p>Three to six sentences unless I ask for more. Useful advice is short.</p></li>
+            <li class="reveal"><h3>Open to other AI apps</h3><p>The same twelve data tools are published as an MCP server, so other AI clients can work with the same records the same way.</p></li>
+        </ul>
+    </div>
+</section>
+
+<!-- example questions -->
+<section class="shell section">
+    <div class="section-head reveal">
+        <p class="eyebrow">Questions it can answer</p>
+        <h2 class="headline">The kind of thing <em>I actually ask.</em></h2>
+        <p class="docs-intro">Illustrative questions, and the data each one draws on.</p>
+    </div>
+    <div class="adv-questions">
+        <article class="reveal"><p class="adv-q">"Which investments mature in the next 60 days, and what should I do with the proceeds?"</p><p class="adv-uses">Maturing investments · liabilities · savings</p></article>
+        <article class="reveal"><p class="adv-q">"How has my net worth moved over the last six months, and what drove it?"</p><p class="adv-uses">Net-worth history · recent transactions</p></article>
+        <article class="reveal"><p class="adv-q">"How exposed am I to the Naira compared with the Canadian dollar?"</p><p class="adv-uses">Every asset class · exchange rates</p></article>
+        <article class="reveal"><p class="adv-q">"What did the latest CBN rate decision mean for my fixed deposits?"</p><p class="adv-uses">Web search (CBN, BusinessDay, Nairametrics) · investments</p></article>
+    </div>
+</section>
+
+<!-- honest limits + stack -->
+<section class="shell section">
+    <div class="docs-grid">
+        <div class="docs-block reveal">
+            <h3>Honest limits</h3>
+            <ul class="docs-list">
+                <li><strong>Only as good as the ledger.</strong> If a record is missing or out of date, so is the answer.</li>
+                <li><strong>Exchange rates are as of their last update,</strong> not live to the second.</li>
+                <li><strong>An analyst, not a licensed advisor.</strong> It helps me think. It doesn't replace professional financial advice.</li>
+                <li><strong>Built for one person's records.</strong> It isn't a multi-user product.</li>
+            </ul>
+        </div>
+        <div class="docs-block reveal">
+            <h3>Built with</h3>
+            <ul class="tags adv-stack">
+                <li>Claude Sonnet (Anthropic)</li><li>Tool calling</li><li>MCP server</li>
+                <li>FastAPI</li><li>Django ORM</li><li>PostgreSQL</li><li>Tavily search</li><li>Heroku</li>
+            </ul>
+            <p class="adv-note">The advisor runs as its own service, reading the same database as the Networth app through Django's models, so both always see the same records.</p>
+        </div>
+    </div>
+
+    <div class="tool-more">
+        <a class="btn-link" href="{% url 'index' %}#work">Back to selected work <span aria-hidden="true">→</span></a>
+        <a class="btn-link" href="{% url 'tinyproject-home' %}">Tiny projects <span aria-hidden="true">→</span></a>
+    </div>
+</section>
+{% endblock %}
