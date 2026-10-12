@@ -180,7 +180,7 @@ class TinyProjectView(TemplateView):
         context['categories'] = [
             {'name': c, 'count': sum(p['category'] == c for p in projects)} for c in categories
         ]
-        context['live_count'] = len(projects)
+        context['live_count'] = sum(p['status'] == 'live' for p in projects)
         return context
 
 class PortfolioScushView(TemplateView):

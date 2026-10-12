@@ -6,6 +6,8 @@ To add a project, append a dict to PROJECTS. Only `slug`, `title`, `summary`,
     status    'live'      -> shown on the hub; card links to `url_name` (a Django URL name)
               'workshop'  -> hidden from the public hub until reviewed and approved;
                              approve a project by changing its status to 'live'
+    public    True on a workshop project -> shown on the hub with an "In the workshop"
+              badge (and linked, if it has `url_name`) before it is promoted to live
     date      'YYYY-MM'   -> display, and sorting (live first, then newest first)
     icon      a Font Awesome 5 class, e.g. 'fas fa-calculator'
     docs      optional external documentation link
@@ -22,7 +24,8 @@ PROJECTS = [
         'category': 'Scheduling',
         'tags': ['Python', 'Algorithms', 'Fairness'],
         'date': '2026-10',
-        'status': 'workshop',      # awaiting review before going public
+        'status': 'workshop',      # shown as a work in progress; promote to 'live' after review
+        'public': True,
         'url_name': 'rota',
         'docs': '/portfolio/miniproject/rota/#documentation',
         'icon': 'fas fa-calendar-check',
@@ -85,13 +88,13 @@ PROJECTS = [
 def get_projects(include_workshop=False):
     """Projects to show, live first then newest first, with resolved `url` and display date.
 
-    Workshop projects are excluded unless `include_workshop` is True.
+    Workshop projects are excluded unless they are marked `public` or `include_workshop` is True.
     """
     items = []
     for project in PROJECTS:
         item = {'tags': [], 'icon': 'fas fa-cube', **project}
         item['url'] = None
-        if item['status'] == 'live' and item.get('url_name'):
+        if (item['status'] == 'live' or item.get('public')) and item.get('url_name'):
             try:
                 item['url'] = reverse(item['url_name'])
             except NoReverseMatch:
@@ -100,7 +103,7 @@ def get_projects(include_workshop=False):
         item['date_display'] = stamp.strftime('%b %Y')
         items.append(item)
     if not include_workshop:
-        items = [p for p in items if p['status'] == 'live']
+        items = [p for p in items if p['status'] == 'live' or p.get('public')]
     # live projects first, then newest first within each group
     items.sort(key=lambda p: p.get('date', ''), reverse=True)
     return sorted(items, key=lambda p: p['status'] != 'live')

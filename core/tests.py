@@ -336,3 +336,11 @@ class RotaPageTest(SimpleTestCase):
         for body in bad:
             with self.subTest(body=body[:60]):
                 self.assertEqual(self.client.post(self.api, body, content_type='application/json').status_code, 400)
+
+    def test_hub_shows_public_workshop_project_only(self):
+        response = self.client.get('/tinyproject/')
+        self.assertContains(response, 'Fair Rota Scheduler')
+        self.assertContains(response, 'In the workshop')
+        self.assertContains(response, 'href="/portfolio/miniproject/rota/"')
+        self.assertNotContains(response, 'Canada Income Tax Estimator')   # private workshop stays hidden
+        self.assertEqual(response.context['live_count'], 1)
