@@ -2,6 +2,7 @@ from collections.abc import Sequence
 import inspect
 import json
 import datetime
+import re
 from typing import Any
 from django.db.models.query import QuerySet
 from django.shortcuts import render, redirect
@@ -12,8 +13,12 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import UpdateView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_POST
 from .forms import NumberInputForm, ProfileForm, ActivateRegistrationForm, UpdateProfileForm, MyFormSet, PreferenceForm
-from .tinyproject import numtoword
+from .tinyproject import numtoword, rota as rota_engine
 from .tinyproject.numtoword import convert, normalise
 from .tinyproject.taxes import CanadaIncomeTaxCalculator as TaxCalc
 from .tinyproject.registry import get_projects
@@ -210,6 +215,99 @@ class NumberToWordView(TemplateView):
                 context['error'] = str(err)
         return context
     
+SAMPLE_WRITERS = [
+    {'id': 'ada', 'name': 'Ada', 'capacity': 12, 'unavailable': []},
+    {'id': 'ben', 'name': 'Ben', 'capacity': 6, 'unavailable': []},
+    {'id': 'chi', 'name': 'Chi', 'capacity': 10, 'unavailable': []},
+    {'id': 'dayo', 'name': 'Dayo', 'capacity': 10, 'unavailable': []},
+]
+SAMPLE_REVIEWERS = [{'id': 'grace', 'name': 'Grace'}, {'id': 'femi', 'name': 'Femi'}]
+
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class RotaView(TemplateView):
+    """Fair Rota Scheduler tiny project: the page; the rota itself comes from rota_api."""
+    template_name = 'core/portfolio/tinyprojects/rota.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['setup'] = {'start': datetime.date.today().isoformat(), 'reserve': 5,
+                            'writers': SAMPLE_WRITERS, 'reviewers': SAMPLE_REVIEWERS}
+        context['source'] = inspect.getsource(rota_engine)
+        return context
+
+
+class RotaInputError(ValueError):
+    pass
+
+
+def _rota_people(items, kind, limit, with_capacity):
+    if not isinstance(items, list) or not 1 <= len(items) <= limit:
+        raise RotaInputError(f'Between 1 and {limit} {kind} are needed.')
+    people, seen = [], set()
+    for item in items:
+        if not isinstance(item, dict):
+            raise RotaInputError(f'Each of the {kind} must be an object.')
+        pid = str(item.get('id', ''))[:20]
+        name = str(item.get('name', '')).strip()[:30]
+        if not re.fullmatch(r'[a-z0-9-]{1,20}', pid) or pid in seen or not name:
+            raise RotaInputError(f'Every one of the {kind} needs a unique id and a name.')
+        seen.add(pid)
+        person = rota_engine.Person(pid, name)
+        if with_capacity:
+            try:
+                person.capacity = int(item.get('capacity', 8))
+            except (TypeError, ValueError):
+                raise RotaInputError('Capacity must be a whole number.')
+            if not 1 <= person.capacity <= 28:
+                raise RotaInputError('Capacity must be between 1 and 28 slots per 28 days.')
+            days = item.get('unavailable') or []
+            if not isinstance(days, list) or len(days) > 28:
+                raise RotaInputError('Up to 28 unavailable days per person.')
+            try:
+                person.unavailable = {datetime.date.fromisoformat(str(d)) for d in days}
+            except ValueError:
+                raise RotaInputError('Unavailable days must be dates (YYYY-MM-DD).')
+        people.append(person)
+    return people
+
+
+@require_POST
+def rota_api(request):
+    """Rebuild the rota from the posted setup and actions (stateless, deterministic)."""
+    try:
+        body = json.loads(request.body or b'{}')
+        if not isinstance(body, dict):
+            raise RotaInputError('Expected a JSON object.')
+        try:
+            start = datetime.date.fromisoformat(str(body.get('start', '')))
+        except ValueError:
+            raise RotaInputError('start must be a date (YYYY-MM-DD).')
+        if abs((start - datetime.date.today()).days) > 366:
+            raise RotaInputError('start must be within a year of today.')
+        writers = _rota_people(body.get('writers'), 'writers', 8, True)
+        reviewers = _rota_people(body.get('reviewers'), 'reviewers', 4, False)
+        if {w.id for w in writers} & {r.id for r in reviewers}:
+            raise RotaInputError('Writers and reviewers need different ids.')
+        try:
+            reserve = int(body.get('reserve', 5))
+        except (TypeError, ValueError):
+            raise RotaInputError('reserve must be a whole number.')
+        if not 0 <= reserve <= 20:
+            raise RotaInputError('reserve must be between 0 and 20.')
+        actions = body.get('actions') or []
+        if not isinstance(actions, list) or len(actions) > 150                 or sum(1 for a in actions if isinstance(a, dict) and a.get('type') == 'advance') > 60:
+            raise RotaInputError('Too many actions: up to 60 days of simulation.')
+        actions = [a for a in actions if isinstance(a, dict)]
+    except json.JSONDecodeError:
+        return JsonResponse({'detail': 'Invalid JSON.'}, status=400)
+    except RotaInputError as err:
+        return JsonResponse({'detail': str(err)}, status=400)
+
+    result = rota_engine.replay(writers, reviewers, start, actions, reserve=reserve)
+    return JsonResponse(result.to_dict())
+
+
 class DatabaseLearningView(TemplateView):
     template_name = 'core/portfolio/tinyprojects/databaselearning.html'
 

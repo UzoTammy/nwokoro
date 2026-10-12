@@ -16,6 +16,18 @@ from django.urls import NoReverseMatch, reverse
 
 PROJECTS = [
     {
+        'slug': 'fair-rota',
+        'title': 'Fair Rota Scheduler',
+        'summary': 'Assigns a writer and reviewer to every publishing day fairly, explains each decision, and simulates missed deadlines.',
+        'category': 'Scheduling',
+        'tags': ['Python', 'Algorithms', 'Fairness'],
+        'date': '2026-10',
+        'status': 'workshop',      # awaiting review before going public
+        'url_name': 'rota',
+        'docs': '/portfolio/miniproject/rota/#documentation',
+        'icon': 'fas fa-calendar-check',
+    },
+    {
         'slug': 'number-to-words',
         'title': 'Number to Words',
         'summary': 'Turns any whole number up to 999 trillion into words, using a recursive split by scale.',

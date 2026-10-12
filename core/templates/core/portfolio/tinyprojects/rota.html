@@ -1,0 +1,233 @@
+{% extends 'core/site_base.html' %}
+{% load static %}
+
+{% block title %}Fair Rota Scheduler — Tiny Projects{% endblock %}
+{% block description %}Assign writers and reviewers to every publishing day fairly, explain every decision, and simulate missed deadlines.{% endblock %}
+
+{% block content %}
+<section class="shell tool-page">
+    <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="{% url 'tinyproject-home' %}"><span aria-hidden="true">←</span> Tiny projects</a>
+    </nav>
+    <div class="tool-head">
+        <p class="eyebrow">Scheduling</p>
+        <h1 class="display">Fair Rota <em>Scheduler.</em></h1>
+        <p class="lede">Every publishing day needs a writer and a reviewer. This assigns them fairly, respects availability, explains every decision, and shows what happens when someone misses a deadline.</p>
+        <ul class="tags tags-sm"><li>Daily devotion</li><li>Music on Wednesdays</li><li>Real story on Saturdays</li><li>28-day window</li></ul>
+    </div>
+</section>
+
+<section class="shell rota-app" data-rota aria-label="Rota simulator">
+    <div class="rota-bar">
+        <div class="rota-today"><span>Today</span><strong data-rota-today>—</strong></div>
+        <div class="rota-today"><span>Reserve pieces</span><strong data-rota-reserve>—</strong></div>
+        <div class="rota-actions">
+            <button type="button" class="btn btn-solid" data-rota-advance><i class="fas fa-forward" aria-hidden="true"></i> Advance a day</button>
+            <button type="button" class="btn-link rota-reset" data-rota-reset>Reset</button>
+        </div>
+    </div>
+    <p class="rota-status" data-rota-status aria-live="polite"></p>
+
+    <div class="rota-layout">
+        <div class="rota-cal-wrap">
+            <div class="rota-legend" aria-hidden="true">
+                <span class="lg lg-devotion">Devotion</span><span class="lg lg-music">Music</span><span class="lg lg-story">Real story</span>
+                <span class="lg lg-reserve">Reserve</span><span class="lg lg-miss">Will miss</span>
+            </div>
+            <div class="rota-cal" data-rota-cal role="grid" aria-label="Rota calendar"></div>
+        </div>
+        <aside class="rota-detail" data-rota-detail aria-live="polite">
+            <p class="rota-hint">Select any slot in the calendar to see who got it, and why.</p>
+        </aside>
+    </div>
+
+    <div class="rota-lower">
+        <div class="docs-block rota-team">
+            <h3>Team</h3>
+            <p class="rota-small">Changing the team restarts the simulation.</p>
+            <div data-rota-team></div>
+            <button type="button" class="btn-link" data-rota-add>+ Add a writer</button>
+            <p class="rota-small rota-reviewers" data-rota-reviewers></p>
+        </div>
+        <div class="docs-block rota-work">
+            <h3>Workload</h3>
+            <p class="rota-small"><code>L = A / K + 0.5 × M</code> over the 28-day window. Lowest gets the next slot.</p>
+            <div data-rota-load></div>
+        </div>
+        <div class="docs-block rota-logbox">
+            <h3>What happened</h3>
+            <ol class="rota-log" data-rota-log></ol>
+        </div>
+    </div>
+    <p class="rota-small rota-note">Simulation: a draft is treated as submitted and approved on its deadline unless you mark the writer as missing it. Logins, the full review workflow and notifications belong to the production version.</p>
+</section>
+
+<section class="shell section docs" id="documentation">
+    <div class="section-head reveal">
+        <p class="eyebrow">Documentation</p>
+        <h2 class="headline">How I solved it, <em>step by step.</em></h2>
+        <p class="docs-intro">Designed for CP Devotional's publishing team, then built and proven here first. Each step shows the question, the decision and the code.</p>
+    </div>
+
+    <ol class="walk">
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">01</span>
+                <h3>Turn the calendar into slots</h3>
+                <p class="walk-q"><strong>Question:</strong> what exactly needs an owner?</p>
+                <p>Not "days" but <strong>slots</strong>: one piece of content due on one date. A daily devotion makes 28 slots in four weeks; music and stories add one a week each.</p>
+                <p class="walk-decision"><strong>Decision:</strong> describe each content type by the weekday it runs on, and generate slots oldest first, so earlier days are filled before later ones.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}CADENCE = {'devotion': None, 'music': 2, 'story': 5}  # Mon = 0
+
+for offset in range(self.window):            # 28 days
+    day = self.today + timedelta(days=offset)
+    for ctype, weekday in CADENCE.items():
+        if weekday is None or day.weekday() == weekday:
+            ...  # create the slot, then assign it{% endverbatim %}</code></pre>
+        </li>
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">02</span>
+                <h3>Rule people out before ranking them</h3>
+                <p class="walk-q"><strong>Question:</strong> who <em>can</em> take this slot at all?</p>
+                <p>Fairness only matters among people who are actually free. Five hard rules come first: not away, not already writing that day, not over three slots that week, not back-to-back, and not someone who already missed this slot.</p>
+                <p class="walk-decision"><strong>Decision:</strong> every rule returns a reason, so the page can say exactly why someone was skipped.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}def eligibility(self, pid, slot, strict=True):
+    if pid in slot.missed_by:
+        return False, 'already missed this slot'
+    if slot.day in person.unavailable:
+        return False, 'unavailable that day'
+    ...
+    if strict and any(abs((s.day - slot.day).days) == 1
+                      for s in mine):
+        return False, 'back-to-back with another slot'
+    return True, None{% endverbatim %}</code></pre>
+        </li>
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">03</span>
+                <h3>Measure fairness relative to capacity</h3>
+                <p class="walk-q"><strong>Question:</strong> is giving everyone the same number of slots fair?</p>
+                <p>No. Someone with time for ten pieces a month isn't overworked by four, but someone with time for five is nearly full at four. So load is <strong>slots held divided by capacity</strong>, plus a penalty for missed deadlines so reliability counts.</p>
+                <p class="walk-decision"><strong>Decision:</strong> <code>L = A/K + 0.5 × M</code>; the lowest wins.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}def load(self, pid):
+    """L = A / K + 0.5 * M"""
+    person = self.writers[pid]
+    return self.held(pid) / person.capacity + 0.5 * person.missed
+
+# Ada: 4 slots of 8  -> 0.50
+# Ben: 3 slots of 4  -> 0.75   => Ada gets the slot{% endverbatim %}</code></pre>
+        </li>
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">04</span>
+                <h3>Make ties predictable</h3>
+                <p class="walk-q"><strong>Question:</strong> two people have the same load. Who goes?</p>
+                <p>Random choice would make the rota impossible to test and hard to trust. The person who has gone longest without a slot goes first, and team order settles anything left.</p>
+                <p class="walk-decision"><strong>Decision:</strong> sort by (load, latest slot, team order). The same inputs always give the same rota.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}candidates.sort(key=lambda c: (
+    c['load'],              # fairest first
+    c['last'],              # longest since their last slot
+    self.order.index(c['id']),  # then team order
+)){% endverbatim %}</code></pre>
+        </li>
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">05</span>
+                <h3>Bend one rule rather than leave a gap</h3>
+                <p class="walk-q"><strong>Question:</strong> what if nobody passes every rule?</p>
+                <p>An empty publishing day is worse than one person writing two days in a row. So the search runs twice: strict first, then with only the back-to-back rule relaxed. The other rules never bend.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}for strict in (True, False):
+    candidates = [...]          # eligible under this pass
+    if candidates:
+        return {'winner': ..., 'relaxed': not strict, ...}{% endverbatim %}</code></pre>
+        </li>
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">06</span>
+                <h3>Pick a reviewer who isn't the writer</h3>
+                <p class="walk-q"><strong>Question:</strong> who checks the work?</p>
+                <p>The reviewer with the fewest unpublished reviews, and never the person who wrote it. Nobody approves their own work.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}options = [rid for rid in self.reviewers if rid != slot.writer]
+return min(options, key=lambda rid: (open_reviews(rid), ...)){% endverbatim %}</code></pre>
+        </li>
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">07</span>
+                <h3>Plan for missed deadlines</h3>
+                <p class="walk-q"><strong>Question:</strong> a writer misses the draft deadline. Now what?</p>
+                <ul class="walk-points">
+                    <li><strong>3 or more days left:</strong> reassign to the next fairest writer, with 24 hours to draft.</li>
+                    <li><strong>Less time:</strong> use a ready-made reserve piece.</li>
+                    <li><strong>Reserve empty:</strong> mark it missed so the reviewer steps in.</li>
+                </ul>
+                <p class="walk-decision"><strong>Decision:</strong> the missed writer's M goes up, so their load rises and they're never offered that slot again.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}writer.missed += 1
+slot.missed_by.append(writer.id)
+if (slot.day - self.today).days >= 3:
+    ...  # reassign, draft due tomorrow
+else:
+    self._use_reserve_or_miss(slot, reason){% endverbatim %}</code></pre>
+        </li>
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">08</span>
+                <h3>Keep the server stateless by replaying</h3>
+                <p class="walk-q"><strong>Question:</strong> how does "advance a day" work without storing anything?</p>
+                <p>Because the rota is deterministic, the browser only keeps the setup and a list of actions. Each click sends them, and the server rebuilds the whole rota from scratch. Same inputs, same result, every time.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}def replay(writers, reviewers, start, actions, reserve=5):
+    rota = Rota(writers, reviewers, start, reserve).generate()
+    for action in actions:
+        if action['type'] == 'advance':
+            rota.advance()
+        elif action['type'] == 'miss':
+            rota.mark_will_miss(action['slot'])
+    return rota{% endverbatim %}</code></pre>
+        </li>
+        <li class="walk-step reveal">
+            <div class="walk-text">
+                <span class="walk-num">09</span>
+                <h3>Prove it with the design's own cases</h3>
+                <p class="walk-q"><strong>Question:</strong> how do I know it behaves as designed?</p>
+                <p>The tests use the examples written into the design before any code existed, plus invariants checked over a whole generated month: everyone gets a writer, nobody writes twice in a day, the weekly limit holds and nobody reviews their own work.</p>
+            </div>
+<pre class="walk-code"><code class="language-python">{% verbatim %}def test_lowest_load_wins(self):
+    # Ada 4/8 -> 0.5, Ben 3/4 -> 0.75
+    self.assertEqual(rota.load('ada'), 0.5)
+    self.assertEqual(rota.load('ben'), 0.75)
+    self.assertEqual(rota.pick_writer(slot)['winner'], 'ada'){% endverbatim %}</code></pre>
+        </li>
+    </ol>
+
+    <details class="docs-source reveal">
+        <summary><span><i class="fas fa-code" aria-hidden="true"></i> Full source: <code>rota.py</code></span><span class="docs-source-hint">Show</span></summary>
+<pre class="docs-code"><code class="language-python">{{ source }}</code></pre>
+    </details>
+
+    <div class="tool-more">
+        <a class="btn-link" href="{% url 'tinyproject-home' %}">More tiny projects <span aria-hidden="true">→</span></a>
+        <a class="btn-link" href="{% url 'portfolio-cp-devotional' %}">The app it was designed for <span aria-hidden="true">→</span></a>
+    </div>
+</section>
+
+{{ setup|json_script:"rota-setup" }}
+{% endblock %}
+
+{% block scripts %}
+<script>window.ROTA_API = "{% url 'rota-api' %}";</script>
+<script src="{% static 'home/rota.js' %}?v={{ ASSET_VERSION }}" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+<script>
+    window.addEventListener('DOMContentLoaded', function () {
+        if (window.hljs) document.querySelectorAll('pre code[class^="language-"]').forEach(function (el) { hljs.highlightElement(el); });
+    });
+</script>
+{% endblock %}

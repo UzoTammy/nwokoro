@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (MainView, ErrorView, AboutMe, ResumeView, PortfolioScushView, PortfolioFinuelView,
-                     TextingView, NumberToWordView, TinyProjectView, PreferenceView, NewHomeView, NewAboutMeView, AdvisorCaseStudyView, CPDevotionalCaseStudyView,
+                     TextingView, NumberToWordView, TinyProjectView, PreferenceView, NewHomeView, NewAboutMeView, AdvisorCaseStudyView, CPDevotionalCaseStudyView, RotaView, rota_api,
                     ActivateRegistrationView, MeHome)
 
 urlpatterns = [
@@ -24,4 +24,6 @@ urlpatterns = [
 urlpatterns += [
     path('tinyproject/', TinyProjectView.as_view(), name='tinyproject-home'),
     path('portfolio/miniproject/number-to-word/', NumberToWordView.as_view(), name='number-to-word'),
+    path('portfolio/miniproject/rota/', RotaView.as_view(), name='rota'),
+    path('portfolio/miniproject/rota/api/', rota_api, name='rota-api'),
 ]

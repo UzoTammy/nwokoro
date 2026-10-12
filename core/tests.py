@@ -1,3 +1,4 @@
+import json
 import random
 import re
 
@@ -162,3 +163,176 @@ class CaseStudyPagesTest(SimpleTestCase):
         response = self.client.get('/')
         self.assertContains(response, 'href="/portfolio/cp-devotional/"')
         self.assertNotContains(response, 'claude.ai/code/artifact')
+
+
+
+# ------------------------------------------------------------------ Fair Rota Scheduler
+import datetime as _dt
+from collections import Counter
+
+from .tinyproject.rota import Person, Rota, Slot, replay
+
+MONDAY = _dt.date(2026, 10, 12)
+
+
+def _rota(writers, reviewers=None, today=MONDAY, **kw):
+    reviewers = reviewers or [Person('grace', 'Grace'), Person('femi', 'Femi')]
+    return Rota(writers, reviewers, today, **kw)
+
+
+def _held(rota, pid, *days):
+    for d in days:
+        rota.slots.append(Slot(day=MONDAY + _dt.timedelta(days=d), type='devotion', writer=pid, status='assigned'))
+
+
+class RotaRulesTest(SimpleTestCase):
+
+    def test_lowest_load_wins_design_example(self):
+        rota = _rota([Person('ada', 'Ada', capacity=8), Person('ben', 'Ben', capacity=4)])
+        _held(rota, 'ada', 0, 7, 14, 21)            # 4 of 8   -> 0.50
+        _held(rota, 'ben', 2, 9, 16)                # 3 of 4   -> 0.75
+        self.assertEqual(rota.load('ada'), 0.5)
+        self.assertEqual(rota.load('ben'), 0.75)
+        slot = Slot(day=MONDAY + _dt.timedelta(days=4), type='devotion')
+        self.assertEqual(rota.pick_writer(slot)['winner'], 'ada')
+
+    def test_missed_deadlines_raise_load(self):
+        rota = _rota([Person('ada', 'Ada', capacity=8, missed=1)])
+        self.assertEqual(rota.load('ada'), 0.5)
+
+    def test_tie_goes_to_earliest_latest_slot(self):
+        rota = _rota([Person('ada', 'Ada', 8), Person('ben', 'Ben', 8)])
+        _held(rota, 'ada', 10)
+        _held(rota, 'ben', 3)                       # same load; Ben's latest slot is earlier
+        decision = rota.pick_writer(Slot(day=MONDAY + _dt.timedelta(days=20), type='devotion'))
+        self.assertEqual(decision['winner'], 'ben')
+        self.assertTrue(decision['tie_break'])
+
+    def test_back_to_back_blocks_then_relaxed_pass_assigns(self):
+        rota = _rota([Person('ada', 'Ada', 8)])
+        _held(rota, 'ada', 4)
+        decision = rota.pick_writer(Slot(day=MONDAY + _dt.timedelta(days=5), type='devotion'))
+        self.assertEqual(decision['winner'], 'ada')
+        self.assertTrue(decision['relaxed'])
+
+    def test_max_per_week(self):
+        rota = _rota([Person('ada', 'Ada', 28)])
+        _held(rota, 'ada', 0, 2, 4)                 # Mon, Wed, Fri
+        ok, reason = rota.eligibility('ada', Slot(day=MONDAY + _dt.timedelta(days=6), type='devotion'), strict=False)
+        self.assertFalse(ok)
+        self.assertIn('3 slots that week', reason)
+
+    def test_unavailable_and_same_day(self):
+        rota = _rota([Person('ada', 'Ada', 8, unavailable={MONDAY})])
+        self.assertEqual(rota.eligibility('ada', Slot(day=MONDAY, type='devotion'))[1], 'unavailable that day')
+        rota = _rota([Person('ada', 'Ada', 8)])
+        _held(rota, 'ada', 2)
+        self.assertEqual(rota.eligibility('ada', Slot(day=MONDAY + _dt.timedelta(days=2), type='music'))[1],
+                         'already writing that day')
+
+    def test_reviewer_is_never_the_writer(self):
+        rota = _rota([Person('ada', 'Ada', 8)], reviewers=[Person('ada', 'Ada'), Person('femi', 'Femi')])
+        self.assertEqual(rota.pick_reviewer(Slot(day=MONDAY, type='devotion', writer='ada')), 'femi')
+
+
+class RotaGenerationTest(SimpleTestCase):
+
+    def team(self):
+        return [Person('ada', 'Ada', 12), Person('ben', 'Ben', 6), Person('chi', 'Chi', 10), Person('dayo', 'Dayo', 10)]
+
+    def test_month_invariants(self):
+        rota = _rota(self.team()).generate()
+        self.assertEqual(Counter(s.type for s in rota.slots), {'devotion': 28, 'music': 4, 'story': 4})
+        self.assertTrue(all(s.writer for s in rota.slots))
+        pairs = Counter((s.writer, s.day) for s in rota.slots)
+        self.assertEqual(max(pairs.values()), 1)                     # never two slots a day
+        weeks = Counter((s.writer, s.day.isocalendar()[:2]) for s in rota.slots)
+        self.assertLessEqual(max(weeks.values()), 3)                 # weekly limit
+        self.assertTrue(all(s.reviewer != s.writer for s in rota.slots))
+
+    def test_deterministic(self):
+        a = _rota(self.team()).generate().to_dict()
+        b = _rota(self.team()).generate().to_dict()
+        self.assertEqual(a['slots'], b['slots'])
+
+
+class RotaSweepTest(SimpleTestCase):
+
+    def team(self):
+        return [Person('ada', 'Ada', 12), Person('ben', 'Ben', 6), Person('chi', 'Chi', 10), Person('dayo', 'Dayo', 10)]
+
+    def slot_on(self, rota, day_offset):
+        return next(s for s in rota.slots if s.type == 'devotion' and s.day == MONDAY + _dt.timedelta(days=day_offset))
+
+    def test_miss_with_time_left_reassigns(self):
+        rota = _rota(self.team()).generate()
+        slot = self.slot_on(rota, 12)              # draft due day 7
+        first = slot.writer
+        rota.mark_will_miss(slot.key)
+        for _ in range(8):
+            rota.advance()                          # today = day 8, 4 days left
+        self.assertNotEqual(slot.writer, first)
+        self.assertIn(first, slot.missed_by)
+        self.assertEqual(rota.writers[first].missed, 1)
+        self.assertEqual(slot.draft_due, rota.today + _dt.timedelta(days=1))
+
+    def test_late_miss_uses_reserve_then_marks_missed(self):
+        rota = _rota(self.team(), reserve=1).generate()
+        for offset in (9, 10):
+            slot = self.slot_on(rota, offset)
+            rota.mark_will_miss(slot.key)
+            slot.draft_due = MONDAY + _dt.timedelta(days=offset - 2)   # deadline 2 days before publishing
+        for _ in range(9):
+            rota.advance()                          # both noticed with < 3 days left
+        self.assertEqual(self.slot_on(rota, 9).source, 'reserve')
+        self.assertEqual(self.slot_on(rota, 10).status, 'missed')
+        self.assertEqual(rota.reserve, 0)
+
+    def test_replay_is_repeatable(self):
+        key = self.slot_on(_rota(self.team()).generate(), 12).key
+        actions = [{'type': 'miss', 'slot': key}] + [{'type': 'advance'}] * 8
+        a = replay(self.team(), [Person('grace', 'Grace')], MONDAY, actions).to_dict()
+        b = replay(self.team(), [Person('grace', 'Grace')], MONDAY, actions).to_dict()
+        self.assertEqual(a['slots'], b['slots'])
+        self.assertEqual(a['log'], b['log'])
+
+
+@override_settings(STORAGES={
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+})
+class RotaPageTest(SimpleTestCase):
+    api = '/portfolio/miniproject/rota/api/'
+
+    def payload(self, **over):
+        body = {
+            'start': _dt.date.today().isoformat(), 'reserve': 5,
+            'writers': [{'id': 'ada', 'name': 'Ada', 'capacity': 12, 'unavailable': []},
+                        {'id': 'ben', 'name': 'Ben', 'capacity': 6, 'unavailable': []}],
+            'reviewers': [{'id': 'grace', 'name': 'Grace'}],
+            'actions': [],
+        }
+        body.update(over)
+        return json.dumps(body)
+
+    def test_page_renders(self):
+        response = self.client.get('/portfolio/miniproject/rota/')
+        self.assertContains(response, 'Fair Rota')
+        self.assertContains(response, 'def pick_writer')            # live source panel
+
+    def test_api_returns_a_rota(self):
+        response = self.client.post(self.api, self.payload(), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len([s for s in response.json()['slots'] if s['type'] == 'devotion']), 28)
+
+    def test_api_rejects_bad_input(self):
+        bad = [
+            self.payload(start='not-a-date'), self.payload(start='2000-01-01'),
+            self.payload(writers=[]), self.payload(writers=[{'id': 'A B', 'name': 'x', 'capacity': 3}]),
+            self.payload(writers=[{'id': 'ada', 'name': 'Ada', 'capacity': 0}]),
+            self.payload(reserve=99), self.payload(actions=[{'type': 'advance'}] * 61),
+            '[1, 2]', '{bad json',
+        ]
+        for body in bad:
+            with self.subTest(body=body[:60]):
+                self.assertEqual(self.client.post(self.api, body, content_type='application/json').status_code, 400)
